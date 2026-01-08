@@ -1,0 +1,264 @@
+/**
+ * WYSIWYG Document Renderer Styles
+ * 
+ * These styles ensure pixel-perfect rendering for both preview and export.
+ * All values are explicitly defined - no browser defaults, no auto values.
+ * 
+ * Core Principles:
+ * 1. Fixed physical dimensions (A4: 210mm × 297mm = 595px × 842px at 72 DPI)
+ * 2. Explicit typography (no system font fallbacks)
+ * 3. Locked box model (no collapsing margins)
+ * 4. Deterministic layout (no auto-anything)
+ */
+
+/* ========================================
+   DOCUMENT CONTAINER (A4 Paper)
+   ======================================== */
+
+.document-renderer {
+    /* Positioning */
+    position: relative;
+
+    /* Background */
+    background-color: #ffffff;
+
+    /* Box model lockdown */
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+
+    /* Prevent content overflow */
+    overflow: hidden;
+
+    /* Typography base */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    letter-spacing: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Reset text */
+    color: #2d3748;
+    text-rendering: geometricPrecision;
+
+    /* Prevent any transforms from affecting dimensions */
+    transform-origin: top left;
+
+    /* Flex shrink prevention */
+    flex-shrink: 0;
+
+    /* Shadow for preview context */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* ========================================
+   TEMPLATE BACKGROUND IMAGE
+   ======================================== */
+
+.document-renderer__background {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ========================================
+   FIELD CONTAINERS
+   ======================================== */
+
+.document-renderer__field {
+    position: absolute;
+    box-sizing: border-box;
+    overflow: hidden;
+    z-index: 1;
+
+    /* Prevent text selection during export */
+    user-select: none;
+
+    /* Ensure crisp rendering */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* ========================================
+   TABLE STYLES
+   ======================================== */
+
+.document-renderer__table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+
+    /* Reset table defaults */
+    margin: 0;
+    padding: 0;
+    border-spacing: 0;
+}
+
+.document-renderer__table-header {
+    /* Fixed height based on font size */
+    height: auto;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+.document-renderer__table-header-cell {
+    box-sizing: border-box;
+    padding: 0;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+.document-renderer__table-row {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.document-renderer__table-row:last-child {
+    border-bottom: none;
+}
+
+.document-renderer__table-cell {
+    box-sizing: border-box;
+    padding: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+/* ========================================
+   AUTOFIT TEXT CONTAINER
+   ======================================== */
+
+.autofit-container {
+    width: 100%;
+    height: 100%;
+    display: table;
+    table-layout: fixed;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.autofit-content {
+    display: table-cell;
+    vertical-align: middle;
+    overflow: hidden;
+    word-break: break-word;
+    box-sizing: border-box;
+}
+
+/* Single-line text */
+.autofit-content--single {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* Multi-line text */
+.autofit-content--multi {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* ========================================
+   ALIGNMENT UTILITIES
+   ======================================== */
+
+.text-align-left {
+    text-align: left;
+}
+
+.text-align-center {
+    text-align: center;
+}
+
+.text-align-right {
+    text-align: right;
+}
+
+/* ========================================
+   EXPORT-SAFE COLOR CLASSES
+   ======================================== */
+
+/* These use hex values that html2canvas can parse */
+.document-renderer .color-charcoal {
+    color: #2d3748;
+}
+
+.document-renderer .color-gray {
+    color: #718096;
+}
+
+.document-renderer .color-light-gray {
+    color: #a0aec0;
+}
+
+.document-renderer .color-white {
+    color: #ffffff;
+}
+
+.document-renderer .bg-white {
+    background-color: #ffffff;
+}
+
+.document-renderer .bg-transparent {
+    background-color: transparent;
+}
+
+/* ========================================
+   BORDER UTILITIES
+   ======================================== */
+
+.document-renderer .border-light {
+    border-color: #e2e8f0;
+}
+
+.document-renderer .border-gray {
+    border-color: #cbd5e0;
+}
+
+/* ========================================
+   PRINT & EXPORT OVERRIDES
+   ======================================== */
+
+/* These ensure consistent rendering during capture */
+@media print {
+    .document-renderer {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+}
+
+/* ========================================
+   CAPTURE STATE
+   Classes added during export capture
+   ======================================== */
+
+.document-renderer--capturing {
+    /* Remove any visual effects that might interfere */
+    box-shadow: none;
+    transform: none !important;
+}
+
+.document-renderer--capturing * {
+    /* Ensure no animations during capture */
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Elements to ignore during capture */
+.capture-ignore {
+    display: none !important;
+}
