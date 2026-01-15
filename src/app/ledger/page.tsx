@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useMemo } from 'react';
-import { useDocumentStore, useSettingsStore } from '@/lib/store';
+import { useDocumentStore, useSettingsStore, useTemplateStore } from '@/lib/store';
 import { DocumentType, DocumentStatus } from '@/lib/types';
 import LedgerTable from '@/components/ledger/LedgerTable';
 import LedgerFilters from '@/components/ledger/LedgerFilters';
 import ExportButtons from '@/components/ledger/ExportButtons';
 import { DateRangePicker } from '@/components/ui';
 import { Wallet } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getEffectiveGrandTotal, sumEffectiveGrandTotals } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -18,6 +18,7 @@ type SortOrder = 'asc' | 'desc';
 export default function LedgerPage() {
     const { documents } = useDocumentStore();
     const { company } = useSettingsStore();
+    const { getTemplateById } = useTemplateStore();
     const currency = company.currency;
 
     // State
@@ -33,14 +34,17 @@ export default function LedgerPage() {
     const filteredDocuments = useMemo(() => {
         let result = documents.filter((doc) => {
             const query = searchQuery.toLowerCase();
+            // Handle potentially undefined fields (encrypted documents may have partial data)
+            const docNumber = doc.documentNumber || '';
+            const customerName = doc.customerName || '';
             const matchesSearch =
-                doc.documentNumber.toLowerCase().includes(query) ||
-                doc.customerName.toLowerCase().includes(query);
+                docNumber.toLowerCase().includes(query) ||
+                customerName.toLowerCase().includes(query);
             const matchesType = typeFilter === 'all' || doc.type === typeFilter;
             const matchesStatus = statusFilter === 'all' || doc.status === statusFilter;
 
             // Date range filter
-            const docDate = doc.date.split('T')[0];
+            const docDate = (doc.date || '').split('T')[0];
             const matchesStartDate = !startDate || docDate >= startDate;
             const matchesEndDate = !endDate || docDate <= endDate;
 
@@ -51,9 +55,13 @@ export default function LedgerPage() {
             let aVal: any = a[sortField];
             let bVal: any = b[sortField];
 
+            // Handle undefined values for encrypted documents
+            if (aVal === undefined) aVal = '';
+            if (bVal === undefined) bVal = '';
+
             if (sortField === 'date') {
-                aVal = new Date(a.date).getTime();
-                bVal = new Date(b.date).getTime();
+                aVal = new Date(a.date || 0).getTime();
+                bVal = new Date(b.date || 0).getTime();
             }
 
             const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
@@ -66,10 +74,10 @@ export default function LedgerPage() {
     // Stats
     const stats = useMemo(() => {
         const activeDocs = filteredDocuments.filter(d => d.status !== 'cancelled');
-        const totalRevenue = activeDocs.reduce((sum, doc) => sum + doc.grandTotal, 0);
+        const totalRevenue = sumEffectiveGrandTotals(activeDocs, getTemplateById);
         const count = filteredDocuments.length;
         return { totalRevenue, count };
-    }, [filteredDocuments]);
+    }, [filteredDocuments, getTemplateById]);
 
     // Handlers
     const handleSort = (field: string) => {
@@ -84,12 +92,12 @@ export default function LedgerPage() {
 
     const handleExportExcel = () => {
         const data = filteredDocuments.map(doc => ({
-            Date: new Date(doc.date).toLocaleDateString(),
-            Type: doc.type.toUpperCase(),
-            Reference: doc.documentNumber,
-            Customer: doc.customerName,
-            Status: doc.status.toUpperCase(),
-            Amount: doc.grandTotal,
+            Date: doc.date ? new Date(doc.date).toLocaleDateString() : '-',
+            Type: (doc.type || '').toUpperCase(),
+            Reference: doc.documentNumber || '(encrypted)',
+            Customer: doc.customerName || '(encrypted)',
+            Status: (doc.status || '').toUpperCase(),
+            Amount: getEffectiveGrandTotal(doc, getTemplateById(doc.templateId)),
             Notes: doc.notes || ''
         }));
 
@@ -104,12 +112,12 @@ export default function LedgerPage() {
     const handleExportCSV = () => {
         const headers = ['Date', 'Type', 'Reference', 'Customer', 'Status', 'Amount', 'Notes'];
         const rows = filteredDocuments.map(doc => [
-            new Date(doc.date).toLocaleDateString(),
-            doc.type.toUpperCase(),
-            doc.documentNumber,
-            doc.customerName,
-            doc.status.toUpperCase(),
-            doc.grandTotal.toFixed(2),
+            doc.date ? new Date(doc.date).toLocaleDateString() : '-',
+            (doc.type || '').toUpperCase(),
+            doc.documentNumber || '(encrypted)',
+            doc.customerName || '(encrypted)',
+            (doc.status || '').toUpperCase(),
+            getEffectiveGrandTotal(doc, getTemplateById(doc.templateId)).toFixed(2),
             doc.notes || ''
         ]);
 
@@ -123,7 +131,7 @@ export default function LedgerPage() {
     };
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="w-full space-y-8">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>

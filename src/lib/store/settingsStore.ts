@@ -13,6 +13,8 @@ export interface NumberingSettings {
     invoice: DocumentTypeSettings;
     receipt: DocumentTypeSettings;
     deliveryNote: DocumentTypeSettings;
+    customer: DocumentTypeSettings;
+    product: DocumentTypeSettings;
 }
 
 interface CompanySettings {
@@ -25,6 +27,16 @@ interface CompanySettings {
     currency: string;
     logo: string; // Base64 or data URL
     defaultDueDateDays: number;
+    decimalPlaces: number;
+    defaultFont: string;
+    showFieldHelp: boolean; // Toggle for showing help tooltips on financial terms
+    encryptionConfig?: {
+        enabled: boolean;
+        salt: string;
+        verificationIv: string;
+        verificationCiphertext: string;
+        enabledAt: string;
+    };
 }
 
 interface SettingsState {
@@ -34,8 +46,11 @@ interface SettingsState {
     updateCompany: (settings: Partial<CompanySettings>) => void;
     setTheme: (theme: Theme) => void;
     updateNumbering: (settings: Partial<NumberingSettings>) => void;
-    getNextDocumentNumber: (type: 'invoice' | 'receipt' | 'delivery-note') => string;
-    incrementDocumentNumber: (type: 'invoice' | 'receipt' | 'delivery-note') => void;
+    customNumberingFormats: Record<string, string[]>;
+    addCustomNumberingFormat: (type: string, format: string) => void;
+    removeCustomNumberingFormat: (type: string, format: string) => void;
+    getNextDocumentNumber: (type: keyof NumberingSettings) => string;
+    incrementDocumentNumber: (type: keyof NumberingSettings) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -51,12 +66,24 @@ export const useSettingsStore = create<SettingsState>()(
                 currency: 'USD',
                 logo: '',
                 defaultDueDateDays: 30,
+                decimalPlaces: 2,
+                defaultFont: 'Inter',
+                showFieldHelp: true,
             },
             theme: 'light',
             numbering: {
                 invoice: { format: DEFAULT_FORMATS.invoice, nextNumber: 1 },
                 receipt: { format: DEFAULT_FORMATS.receipt, nextNumber: 1 },
                 deliveryNote: { format: DEFAULT_FORMATS.deliveryNote, nextNumber: 1 },
+                customer: { format: DEFAULT_FORMATS.customer, nextNumber: 1 },
+                product: { format: DEFAULT_FORMATS.product, nextNumber: 1 },
+            },
+            customNumberingFormats: {
+                invoice: [],
+                receipt: [],
+                deliveryNote: [],
+                customer: [],
+                product: []
             },
             updateCompany: (settings) =>
                 set((state) => ({
@@ -67,47 +94,34 @@ export const useSettingsStore = create<SettingsState>()(
                 set((state) => ({
                     numbering: { ...state.numbering, ...settings },
                 })),
+            addCustomNumberingFormat: (type: string, format: string) =>
+                set((state) => ({
+                    customNumberingFormats: {
+                        ...state.customNumberingFormats,
+                        [type]: [...(state.customNumberingFormats[type] || []), format]
+                    }
+                })),
+            removeCustomNumberingFormat: (type: string, format: string) =>
+                set((state) => ({
+                    customNumberingFormats: {
+                        ...state.customNumberingFormats,
+                        [type]: (state.customNumberingFormats[type] || []).filter(f => f !== format)
+                    }
+                })),
             getNextDocumentNumber: (type) => {
                 const { numbering } = get();
-                // Map the type strings to the keys in numbering settings
-                // 'invoice' -> 'invoice'
-                // 'receipt' -> 'receipt'
-                // 'delivery-note' -> 'deliveryNote'
-
-                let settings: DocumentTypeSettings;
-
-                switch (type) {
-                    case 'invoice': settings = numbering.invoice; break;
-                    case 'receipt': settings = numbering.receipt; break;
-                    case 'delivery-note': settings = numbering.deliveryNote; break;
-                    default: return '';
-                }
-
+                const settings = numbering[type];
+                if (!settings) return '';
                 return generateDocumentNumber(settings.format, settings.nextNumber);
             },
             incrementDocumentNumber: (type) =>
                 set((state) => {
                     const newNumbering = { ...state.numbering };
-
-                    switch (type) {
-                        case 'invoice':
-                            newNumbering.invoice = {
-                                ...newNumbering.invoice,
-                                nextNumber: newNumbering.invoice.nextNumber + 1
-                            };
-                            break;
-                        case 'receipt':
-                            newNumbering.receipt = {
-                                ...newNumbering.receipt,
-                                nextNumber: newNumbering.receipt.nextNumber + 1
-                            };
-                            break;
-                        case 'delivery-note':
-                            newNumbering.deliveryNote = {
-                                ...newNumbering.deliveryNote,
-                                nextNumber: newNumbering.deliveryNote.nextNumber + 1
-                            };
-                            break;
+                    if (newNumbering[type]) {
+                        newNumbering[type] = {
+                            ...newNumbering[type],
+                            nextNumber: newNumbering[type].nextNumber + 1
+                        };
                     }
                     return { numbering: newNumbering };
                 }),
@@ -116,14 +130,24 @@ export const useSettingsStore = create<SettingsState>()(
             name: 'inflow-settings-storage',
             // @ts-ignore - Simple migration to ensure existing users get defaults if shape mismatches
             onRehydrateStorage: () => (state) => {
-                if (state && (!state.numbering.invoice || !state.numbering.invoice.format)) {
-                    state.numbering = {
-                        invoice: { format: DEFAULT_FORMATS.invoice, nextNumber: 1 },
-                        receipt: { format: DEFAULT_FORMATS.receipt, nextNumber: 1 },
-                        deliveryNote: { format: DEFAULT_FORMATS.deliveryNote, nextNumber: 1 },
-                    };
+                if (state) {
+                    // Ensure new keys exist if loading from old state
+                    if (!state.numbering.customer) {
+                        state.numbering.customer = { format: DEFAULT_FORMATS.customer, nextNumber: 1 };
+                    }
+                    if (!state.numbering.product) {
+                        state.numbering.product = { format: DEFAULT_FORMATS.product, nextNumber: 1 };
+                    }
+                    // Ensure custom formats also exist
+                    if (!state.customNumberingFormats) {
+                        state.customNumberingFormats = { invoice: [], receipt: [], deliveryNote: [], customer: [], product: [] };
+                    } else {
+                        if (!state.customNumberingFormats.customer) state.customNumberingFormats.customer = [];
+                        if (!state.customNumberingFormats.product) state.customNumberingFormats.product = [];
+                    }
                 }
             }
         }
     )
 );
+

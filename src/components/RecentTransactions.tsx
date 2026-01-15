@@ -104,10 +104,12 @@ export default function RecentTransactions() {
                                 >
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(doc.customerName)} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0`}>
-                                                {doc.customerName ? doc.customerName.charAt(0) : '?'}
+                                            <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(doc.customerName || '')} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0`}>
+                                                {doc.customerName ? doc.customerName.charAt(0) : (doc as any)._isLocked ? '🔒' : '?'}
                                             </div>
-                                            <span className="font-medium text-[#2d3748] dark:text-white">{doc.customerName || 'Unknown'}</span>
+                                            <span className="font-medium text-[#2d3748] dark:text-white">
+                                                {doc.customerName || ((doc as any)._isLocked ? 'Encrypted' : 'Unknown')}
+                                            </span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -120,7 +122,9 @@ export default function RecentTransactions() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <span className="text-sm font-medium text-[#2d3748] dark:text-white">{formatCurrency(doc.grandTotal, currency)}</span>
+                                        <span className="text-sm font-medium text-[#2d3748] dark:text-white">
+                                            {doc.grandTotal !== undefined ? formatCurrency(doc.grandTotal, currency) : ((doc as any)._isLocked ? '🔒 Locked' : '-')}
+                                        </span>
                                     </td>
                                 </tr>
                             ))}
@@ -134,15 +138,19 @@ export default function RecentTransactions() {
                         <div key={doc.id} className="p-4 border-b border-neutral-50 dark:border-neutral-700/50 last:border-0 flex flex-col gap-3">
                             <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-3 min-w-0">
-                                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(doc.customerName)} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0 shadow-sm`}>
-                                        {doc.customerName ? doc.customerName.charAt(0) : '?'}
+                                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(doc.customerName || '')} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0 shadow-sm`}>
+                                        {doc.customerName ? doc.customerName.charAt(0) : (doc as any)._isLocked ? '🔒' : '?'}
                                     </div>
                                     <div className="flex flex-col min-w-0">
-                                        <span className="font-medium text-[#2d3748] dark:text-white text-sm truncate max-w-[150px] sm:max-w-[200px]">{doc.customerName || 'Unknown'}</span>
+                                        <span className="font-medium text-[#2d3748] dark:text-white text-sm truncate max-w-[150px] sm:max-w-[200px]">
+                                            {doc.customerName || ((doc as any)._isLocked ? 'Encrypted Document' : 'Unknown')}
+                                        </span>
                                         <span className="text-xs text-neutral-400">{formatDate(doc.date)}</span>
                                     </div>
                                 </div>
-                                <span className="text-sm font-semibold text-[#2d3748] dark:text-white flex-shrink-0">{formatCurrency(doc.grandTotal, currency)}</span>
+                                <span className="text-sm font-semibold text-[#2d3748] dark:text-white flex-shrink-0">
+                                    {doc.grandTotal !== undefined ? formatCurrency(doc.grandTotal, currency) : ((doc as any)._isLocked ? '🔒 Locked' : '-')}
+                                </span>
                             </div>
                             <div className="flex items-center justify-between pl-13">
                                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig[doc.status || 'draft'].bgClass} ${statusConfig[doc.status || 'draft'].textClass}`}>

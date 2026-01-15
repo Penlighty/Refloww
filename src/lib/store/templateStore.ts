@@ -19,7 +19,10 @@ interface TemplateState {
         width?: number;
         height?: number;
         mode?: 'single' | 'connected';
+        fields?: MappedField[];
+        variants?: any;
     }) => Template;
+    importTemplate: (template: Template) => void;
     updateTemplate: (id: string, data: Partial<Omit<Template, 'id' | 'createdAt'>>) => void;
     deleteTemplate: (id: string) => void;
     getTemplateById: (id: string) => Template | undefined;
@@ -52,25 +55,45 @@ export const useTemplateStore = create<TemplateState>()(
                     orientation: data.orientation,
                     width: data.width,
                     height: data.height,
-                    fields: [],
+                    fields: data.fields || [],
                     isDefault: false,
                     createdAt: now,
                     updatedAt: now,
                     mode: data.mode || 'single',
-                    variants: data.mode === 'connected' ? {
+                    variants: data.variants || (data.mode === 'connected' ? {
                         [data.type]: {
                             imageUrl: data.imageUrl,
-                            fields: [],
+                            fields: data.fields || [],
                             orientation: data.orientation,
                             width: data.width,
                             height: data.height
                         }
-                    } : undefined
+                    } : undefined)
                 };
                 set((state) => ({
                     templates: [...state.templates, newTemplate],
                 }));
                 return newTemplate;
+            },
+
+            importTemplate: (template) => {
+                // Check if template with same ID already exists
+                const existing = get().templates.find((t) => t.id === template.id);
+                if (existing) {
+                    // Update existing template instead
+                    set((state) => ({
+                        templates: state.templates.map((t) =>
+                            t.id === template.id
+                                ? { ...template, updatedAt: new Date().toISOString() }
+                                : t
+                        ),
+                    }));
+                } else {
+                    // Add new template
+                    set((state) => ({
+                        templates: [...state.templates, template],
+                    }));
+                }
             },
 
             updateTemplate: (id, data) => {

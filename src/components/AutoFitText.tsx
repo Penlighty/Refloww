@@ -26,6 +26,7 @@ interface AutoFitTextProps {
     className?: string;
     /** Minimum font size to shrink to */
     maxShrink?: number;
+    fontFamily?: string;
 }
 
 /**
@@ -52,7 +53,8 @@ export const AutoFitText = ({
     fontColor = '#2d3748',
     isMultiLine,
     className = '',
-    maxShrink = 6
+    maxShrink = 6,
+    fontFamily
 }: AutoFitTextProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -136,7 +138,7 @@ export const AutoFitText = ({
         width: '100%',
         fontSize: `${fontSize}px`,
         fontWeight: numericWeight,
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        fontFamily: fontFamily || "'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
         textAlign: alignment as React.CSSProperties['textAlign'],
         color: fontColor,
         lineHeight: isMultiLine ? '1.35' : '1.2',

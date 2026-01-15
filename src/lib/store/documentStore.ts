@@ -42,6 +42,10 @@ interface DocumentState {
 
     // Calculations
     recalculateTotals: (documentId: string) => void;
+
+    // Payment tracking helpers
+    getPaymentsForInvoice: (invoiceId: string) => Document[];
+    getTotalPaidForInvoice: (invoiceId: string) => number;
 }
 
 export const useDocumentStore = create<DocumentState>()(
@@ -246,11 +250,20 @@ export const useDocumentStore = create<DocumentState>()(
                 if (!sourceDoc) throw new Error('Document not found');
 
                 const now = new Date().toISOString();
+
+                // Determine the source document ID for linking
+                // If converting from an invoice, use the invoice as source
+                // If converting from a receipt/delivery-note, use their source (the invoice)
+                const sourceDocumentId = sourceDoc.type === 'invoice'
+                    ? sourceDoc.id
+                    : sourceDoc.sourceDocumentId;
+
                 const convertedDoc: Document = {
                     ...sourceDoc,
                     id: uuidv4(),
                     type: toType,
                     documentNumber: get().generateDocumentNumber(toType),
+                    sourceDocumentId, // Link back to source invoice
                     status: 'draft',
                     createdAt: now,
                     updatedAt: now,
@@ -272,6 +285,9 @@ export const useDocumentStore = create<DocumentState>()(
                     ...sourceDoc,
                     id: uuidv4(),
                     documentNumber: get().generateDocumentNumber(sourceDoc.type),
+                    sourceDocumentId: undefined, // Clear link - duplicate is standalone
+                    amountPaid: undefined,       // Clear payment info
+                    paidAt: undefined,           // Clear paid date
                     status: 'draft',
                     createdAt: now,
                     updatedAt: now,
@@ -305,6 +321,19 @@ export const useDocumentStore = create<DocumentState>()(
                         };
                     }),
                 }));
+            },
+
+            // Get all receipts that reference this invoice
+            getPaymentsForInvoice: (invoiceId) => {
+                return get().documents.filter(
+                    doc => doc.type === 'receipt' && doc.sourceDocumentId === invoiceId
+                );
+            },
+
+            // Get total amount paid against an invoice (sum of all linked receipts)
+            getTotalPaidForInvoice: (invoiceId) => {
+                const payments = get().getPaymentsForInvoice(invoiceId);
+                return payments.reduce((sum, receipt) => sum + (receipt.amountPaid || receipt.grandTotal), 0);
             },
         }),
         {

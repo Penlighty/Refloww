@@ -98,21 +98,24 @@ export default function LedgerTable({ documents, sortField, sortOrder, onSort }:
                     </thead>
                     <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700">
                         {documents.map((doc) => {
-                            const StatusIcon = statusConfig[doc.status];
-                            const TypeIcon = typeConfig[doc.type].icon;
+                            const StatusIcon = statusConfig[doc.status] || statusConfig['draft'];
+                            const TypeConfig = typeConfig[doc.type] || typeConfig['invoice'];
+                            const TypeIcon = TypeConfig.icon;
+                            const isLocked = (doc as any)._isLocked === true;
+                            const customerName = doc.customerName || (isLocked ? 'Encrypted' : '-');
 
                             return (
                                 <tr key={doc.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors group">
                                     <td className="px-6 py-4">
-                                        <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date)}</span>
+                                        <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date || '')}</span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <div className={`p-1.5 rounded-md ${typeConfig[doc.type].bg} ${typeConfig[doc.type].color}`}>
+                                            <div className={`p-1.5 rounded-md ${TypeConfig.bg} ${TypeConfig.color}`}>
                                                 <TypeIcon className="w-4 h-4" />
                                             </div>
                                             <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 capitalize">
-                                                {doc.type.replace('-', ' ')}
+                                                {(doc.type || '').replace('-', ' ')}
                                             </span>
                                         </div>
                                     </td>
@@ -121,15 +124,17 @@ export default function LedgerTable({ documents, sortField, sortOrder, onSort }:
                                             href={`/${doc.type}s/${doc.id}`}
                                             className="text-sm font-medium text-[#2d3748] dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                                         >
-                                            {doc.documentNumber}
+                                            {doc.documentNumber || (isLocked ? '🔒 Encrypted' : 'Untitled')}
                                         </Link>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
                                             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-600 flex items-center justify-center text-xs font-medium text-neutral-600 dark:text-neutral-300">
-                                                {doc.customerName.charAt(0)}
+                                                {doc.customerName ? doc.customerName.charAt(0) : '?'}
                                             </div>
-                                            <span className="text-sm text-neutral-600 dark:text-neutral-300">{doc.customerName}</span>
+                                            <span className="text-sm text-neutral-600 dark:text-neutral-300">
+                                                {doc.customerName || '-'}
+                                            </span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -140,7 +145,7 @@ export default function LedgerTable({ documents, sortField, sortOrder, onSort }:
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <span className={`text-sm font-medium ${doc.status === 'cancelled' ? 'text-neutral-400 dark:text-neutral-500 line-through' : 'text-[#2d3748] dark:text-white'}`}>
-                                            {formatCurrency(doc.grandTotal, currency)}
+                                            {formatCurrency(doc.grandTotal || 0, currency)}
                                         </span>
                                     </td>
                                 </tr>

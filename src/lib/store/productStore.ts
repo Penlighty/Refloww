@@ -5,6 +5,7 @@ import { Product, ProductFormData } from '@/lib/types';
 
 interface ProductState {
     products: Product[];
+    categories: string[];
     isLoading: boolean;
     searchQuery: string;
 
@@ -15,16 +16,32 @@ interface ProductState {
     deleteProduct: (id: string) => void;
     getProductById: (id: string) => Product | undefined;
     searchProducts: (query: string) => Product[];
+    addCategory: (category: string) => void;
+    removeCategory: (category: string) => void;
 }
 
 export const useProductStore = create<ProductState>()(
     persist(
         (set, get) => ({
             products: [],
+            categories: ['Electronics', 'Services', 'Software', 'Hardware', 'Design', 'Consulting'],
             isLoading: false,
             searchQuery: '',
 
             setSearchQuery: (query) => set({ searchQuery: query }),
+
+            addCategory: (category) => {
+                const state = get();
+                if (!state.categories.includes(category)) {
+                    set({ categories: [...state.categories, category] });
+                }
+            },
+
+            removeCategory: (category) => {
+                set((state) => ({
+                    categories: state.categories.filter((c) => c !== category),
+                }));
+            },
 
             addProduct: (data) => {
                 const now = new Date().toISOString();

@@ -19,7 +19,8 @@ import {
     ChevronLeft,
     ChevronRight,
     Sparkles,
-    Percent
+    Percent,
+    Store
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -87,6 +88,7 @@ export default function Sidebar() {
         { path: '/receipts', label: 'Receipts', icon: Receipt },
         { path: '/delivery-notes', label: 'Delivery Notes', icon: Truck },
         { path: '/templates', label: 'Templates', icon: FolderOpen },
+        { path: '/marketplace', label: 'Marketplace', icon: Store },
         { path: '/customers', label: 'Customers', icon: Users },
         { path: '/products', label: 'Products', icon: Package },
         { path: '/discounts', label: 'Discounts', icon: Percent },

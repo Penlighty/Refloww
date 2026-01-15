@@ -152,9 +152,10 @@ interface TableFieldProps {
     lineItems: LineItem[];
     currency: string;
     docHeight: number;
+    fontFamily: string;
 }
 
-const TableField = ({ field, lineItems, currency, docHeight }: TableFieldProps) => {
+const TableField = ({ field, lineItems, currency, docHeight, fontFamily }: TableFieldProps) => {
     // Default columns if not defined
     const tableColumns = field.columns || [
         { id: 'desc', header: 'Description', width: 45, type: 'text', key: 'description' },
@@ -182,7 +183,8 @@ const TableField = ({ field, lineItems, currency, docHeight }: TableFieldProps) 
         height: `${field.height}%`,
         color: field.fontColor || '#2d3748',
         boxSizing: 'border-box',
-        overflow: 'visible'
+        overflow: 'visible',
+        fontFamily
     };
 
     return (
@@ -202,7 +204,8 @@ const TableField = ({ field, lineItems, currency, docHeight }: TableFieldProps) 
                         // Let's use a standard light gray for consistency or allow config.
                         // For now we match the "clean" look.
                         borderBottom: `1px solid ${field.fontColor || '#e2e8f0'}`,
-                        boxSizing: 'border-box'
+                        boxSizing: 'border-box',
+                        fontFamily
                     }}
                 >
                     {tableColumns.map((col: any) => {
@@ -244,7 +247,8 @@ const TableField = ({ field, lineItems, currency, docHeight }: TableFieldProps) 
                     borderSpacing: 0, // Remove spacing
                     border: 'none', // Handle borders via cells
                     margin: 0,
-                    padding: 0
+                    padding: 0,
+                    fontFamily
                 }}
             >
                 <colgroup>
@@ -317,9 +321,10 @@ interface TextFieldProps {
     value: React.ReactNode;
     isMultiLine: boolean;
     docHeight: number;
+    fontFamily: string;
 }
 
-const TextField = ({ field, value, isMultiLine, docHeight }: TextFieldProps) => {
+const TextField = ({ field, value, isMultiLine, docHeight, fontFamily }: TextFieldProps) => {
     const fieldStyle: React.CSSProperties = {
         position: 'absolute',
         left: `${field.x}%`,
@@ -339,6 +344,7 @@ const TextField = ({ field, value, isMultiLine, docHeight }: TextFieldProps) => 
                 alignment={field.alignment}
                 fontColor={field.fontColor || '#2d3748'}
                 isMultiLine={isMultiLine || (field.height > (field.fontSize * 1.8 / docHeight) * 100)}
+                fontFamily={fontFamily}
             />
         </div>
     );
@@ -351,6 +357,16 @@ const TextField = ({ field, value, isMultiLine, docHeight }: TextFieldProps) => 
 export default function DocumentRenderer({ template, data, id }: DocumentRendererProps) {
     const { company } = useSettingsStore();
     const currency = company.currency;
+
+    // Font Configuration
+    const font = company.defaultFont || 'Inter';
+    const fontMap: Record<string, string> = {
+        'Inter': "'Inter', sans-serif",
+        'DM Sans': "'DM Sans', sans-serif",
+        'Playfair Display': "'Playfair Display', serif",
+        'Courier Prime': "'Courier Prime', monospace",
+    };
+    const fontFamily = fontMap[font] || "'Inter', sans-serif";
 
     /**
      * Get field value based on type
@@ -427,6 +443,7 @@ export default function DocumentRenderer({ template, data, id }: DocumentRendere
                 overflow: 'hidden',
                 flexShrink: 0,
                 boxSizing: 'border-box',
+                fontFamily // Apply to root
             }}
         >
             {/* Template Background Image */}
@@ -440,7 +457,7 @@ export default function DocumentRenderer({ template, data, id }: DocumentRendere
             )}
 
             {/* Render Fields */}
-            {template.fields.map((field) => {
+            {(template.fields || []).map((field) => {
                 // Special handling for line items table
                 if (field.type === 'line-items') {
                     return (
@@ -450,7 +467,70 @@ export default function DocumentRenderer({ template, data, id }: DocumentRendere
                             lineItems={data.lineItems || []}
                             currency={currency}
                             docHeight={height}
+                            fontFamily={fontFamily}
                         />
+                    );
+                }
+
+                // Special handling for link buttons
+                if (field.type === 'link-button') {
+                    // @ts-ignore - Prefer document-specific value, fallback to template default
+                    const url = data.customValues?.[field.id] || field.customValues?.url;
+                    // @ts-ignore
+                    const buttonColor = field.customValues?.buttonColor || '#3b82f6';
+                    // @ts-ignore
+                    const borderRadius = field.customValues?.borderRadius || 'rounded';
+                    // @ts-ignore
+                    const variant = field.customValues?.variant || 'filled';
+
+                    // Style Configuration
+                    const radiusMap: Record<string, string> = {
+                        'sharp': '0px',
+                        'rounded': '6px',
+                        'pill': '9999px' // Pill shape
+                    };
+
+                    const isOutline = variant === 'outline';
+                    const bgColor = isOutline ? 'transparent' : buttonColor;
+                    const borderColor = buttonColor;
+                    const textColor = field.fontColor || (isOutline ? buttonColor : '#ffffff');
+
+                    return (
+                        <div
+                            key={field.id}
+                            className="document-renderer__field"
+                            style={{
+                                position: 'absolute',
+                                left: `${field.x}%`,
+                                top: `${field.y}%`,
+                                width: `${field.width}%`,
+                                height: `${field.height}%`,
+                                boxSizing: 'border-box',
+                                fontFamily
+                            }}
+                            // Attach metadata for PDF Export
+                            data-pdf-link={url}
+                        >
+                            <div
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: bgColor,
+                                    border: isOutline ? `1.5px solid ${borderColor}` : 'none',
+                                    borderRadius: radiusMap[borderRadius] || '6px',
+                                    color: textColor,
+                                    fontSize: `${field.fontSize}px`,
+                                    fontWeight: field.fontWeight === 'bold' ? 700 : 500,
+                                    textDecoration: 'none',
+                                    boxSizing: 'border-box'
+                                }}
+                            >
+                                {field.label}
+                            </div>
+                        </div>
                     );
                 }
 
@@ -465,6 +545,7 @@ export default function DocumentRenderer({ template, data, id }: DocumentRendere
                         value={value}
                         isMultiLine={isMultiLine}
                         docHeight={height}
+                        fontFamily={fontFamily}
                     />
                 );
             })}

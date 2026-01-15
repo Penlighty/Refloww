@@ -134,7 +134,7 @@ export function Select({
     return (
         <div className={clsx('flex flex-col gap-1.5', className)} ref={containerRef}>
             {label && (
-                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
                     {label}
                 </label>
             )}
@@ -145,7 +145,7 @@ export function Select({
                     onKeyDown={handleKeyDown}
                     disabled={disabled}
                     className={clsx(
-                        'w-full h-10 px-4 text-sm text-left rounded-xl border transition-all duration-200 flex items-center justify-between',
+                        'w-full h-10 px-4 text-xs text-left rounded-xl border transition-all duration-200 flex items-center justify-between',
                         'bg-white dark:bg-neutral-800/50',
                         'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
                         error
@@ -178,14 +178,14 @@ export function Select({
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder="Search..."
-                                        className="w-full h-9 pl-9 pr-3 text-sm rounded-lg border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                        className="w-full h-9 pl-9 pr-3 text-xs rounded-lg border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                     />
                                 </div>
                             </div>
                         )}
                         <div className="max-h-60 overflow-y-auto py-1">
                             {filteredOptions.length === 0 ? (
-                                <div className="px-4 py-3 text-sm text-neutral-500 text-center">
+                                <div className="px-4 py-3 text-xs text-neutral-500 text-center">
                                     No options found
                                 </div>
                             ) : (
@@ -196,7 +196,7 @@ export function Select({
                                         type="button"
                                         onClick={() => handleSelect(option.value)}
                                         className={clsx(
-                                            'w-full px-4 py-2.5 text-left text-sm flex items-center justify-between transition-colors',
+                                            'w-full px-4 py-2.5 text-left text-xs flex items-center justify-between transition-colors',
                                             option.value === value
                                                 ? 'bg-[#A4F5A6]/30 dark:bg-[#A4F5A6]/20 text-neutral-900 dark:text-neutral-100 font-medium'
                                                 : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/50'

@@ -3,8 +3,8 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { useCustomerStore, useDocumentStore, useSettingsStore } from '@/lib/store';
-import { formatDate, formatPhone, formatCurrency } from '@/lib/utils';
+import { useCustomerStore, useDocumentStore, useSettingsStore, useTemplateStore } from '@/lib/store';
+import { formatDate, formatPhone, formatCurrency, getEffectiveGrandTotal } from '@/lib/utils';
 import { Button, Card, Modal, ModalFooter, Input, Textarea, EmptyState } from '@/components/ui';
 import { DocumentStatus } from '@/lib/types';
 import {
@@ -20,7 +20,10 @@ import {
     Truck,
     Calendar,
     DollarSign,
-    MoreVertical
+    MoreVertical,
+    Building,
+    ChevronDown,
+    Plus
 } from 'lucide-react';
 
 export default function CustomerDetailPage() {
@@ -31,6 +34,7 @@ export default function CustomerDetailPage() {
     const { customers, updateCustomer, deleteCustomer } = useCustomerStore();
     const { documents } = useDocumentStore();
     const { company } = useSettingsStore();
+    const { getTemplateById } = useTemplateStore();
     const currency = company.currency;
 
     const customer = customers.find(c => c.id === customerId);
@@ -38,8 +42,10 @@ export default function CustomerDetailPage() {
     // UI State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDocMenuOpen, setIsDocMenuOpen] = useState(false);
     const [formData, setFormData] = useState({
         name: customer?.name || '',
+        companyName: customer?.companyName || '',
         email: customer?.email || '',
         phone: customer?.phone || '',
         address: customer?.address || '',
@@ -56,15 +62,15 @@ export default function CustomerDetailPage() {
     const stats = useMemo(() => {
         const totalSpent = customerDocuments
             .filter(d => d.status === 'paid')
-            .reduce((sum, d) => sum + d.grandTotal, 0);
+            .reduce((sum, d) => sum + getEffectiveGrandTotal(d, getTemplateById(d.templateId)), 0);
         const pendingAmount = customerDocuments
             .filter(d => d.status === 'sent' || d.status === 'overdue')
-            .reduce((sum, d) => sum + d.grandTotal, 0);
+            .reduce((sum, d) => sum + getEffectiveGrandTotal(d, getTemplateById(d.templateId)), 0);
         const invoiceCount = customerDocuments.filter(d => d.type === 'invoice').length;
         const receiptCount = customerDocuments.filter(d => d.type === 'receipt').length;
 
         return { totalSpent, pendingAmount, invoiceCount, receiptCount };
-    }, [customerDocuments]);
+    }, [customerDocuments, getTemplateById]);
 
     // Document type config
     const docTypeConfig = {
@@ -84,7 +90,7 @@ export default function CustomerDetailPage() {
     if (!customer) {
         return (
             <div className="max-w-4xl mx-auto">
-                <div className="bg-white border border-neutral-100 rounded-2xl p-12">
+                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12">
                     <EmptyState
                         icon={<User className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
                         title="Customer not found"
@@ -123,6 +129,7 @@ export default function CustomerDetailPage() {
     const openEditModal = () => {
         setFormData({
             name: customer.name,
+            companyName: customer.companyName || '',
             email: customer.email,
             phone: customer.phone,
             address: customer.address,
@@ -137,7 +144,7 @@ export default function CustomerDetailPage() {
             {/* Back Link */}
             <Link
                 href="/customers"
-                className="inline-flex items-center gap-2 text-sm font-medium text-neutral-500 hover:text-[#2d3748] transition-colors mb-6"
+                className="inline-flex items-center gap-2 text-sm font-medium text-neutral-500 hover:text-[#2d3748] dark:hover:text-white transition-colors mb-6"
             >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Customers
@@ -150,8 +157,8 @@ export default function CustomerDetailPage() {
                         {customer.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-[#2d3748]">{customer.name}</h1>
-                        <p className="text-sm text-neutral-500 mt-1">
+                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">{customer.name}</h1>
+                        <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                             Customer since {formatDate(customer.createdAt)}
                         </p>
                     </div>
@@ -170,28 +177,40 @@ export default function CustomerDetailPage() {
                 {/* Left Column - Contact Info */}
                 <div className="lg:col-span-1 space-y-6">
                     {/* Contact Details Card */}
-                    <div className="bg-white border border-neutral-100 rounded-2xl p-6">
-                        <h3 className="text-sm font-semibold text-[#2d3748] mb-4">Contact Information</h3>
+                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
+                        <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white mb-4">Contact Information</h3>
                         <div className="space-y-4">
+                            {customer.companyName && (
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400">
+                                        <Building className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-0.5">Company</p>
+                                        <p className="text-sm text-[#2d3748] dark:text-white font-medium">{customer.companyName}</p>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="flex items-start gap-3">
-                                <div className="p-2 rounded-lg bg-neutral-100 text-neutral-500">
+                                <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400">
                                     <Mail className="w-4 h-4" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-neutral-400 mb-0.5">Email</p>
-                                    <a href={`mailto:${customer.email}`} className="text-sm text-[#2d3748] hover:text-blue-600 transition-colors">
+                                    <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-0.5">Email</p>
+                                    <a href={`mailto:${customer.email}`} className="text-sm text-[#2d3748] dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                         {customer.email}
                                     </a>
                                 </div>
                             </div>
                             {customer.phone && (
                                 <div className="flex items-start gap-3">
-                                    <div className="p-2 rounded-lg bg-neutral-100 text-neutral-500">
+                                    <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400">
                                         <Phone className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-neutral-400 mb-0.5">Phone</p>
-                                        <a href={`tel:${customer.phone}`} className="text-sm text-[#2d3748] hover:text-blue-600 transition-colors">
+                                        <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-0.5">Phone</p>
+                                        <a href={`tel:${customer.phone}`} className="text-sm text-[#2d3748] dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                             {formatPhone(customer.phone)}
                                         </a>
                                     </div>
@@ -199,110 +218,152 @@ export default function CustomerDetailPage() {
                             )}
                             {customer.address && (
                                 <div className="flex items-start gap-3">
-                                    <div className="p-2 rounded-lg bg-neutral-100 text-neutral-500">
+                                    <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400">
                                         <MapPin className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-neutral-400 mb-0.5">Address</p>
-                                        <p className="text-sm text-[#2d3748]">{customer.address}</p>
+                                        <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-0.5">Address</p>
+                                        <p className="text-sm text-[#2d3748] dark:text-white">{customer.address}</p>
                                     </div>
                                 </div>
                             )}
                         </div>
                         {customer.notes && (
-                            <div className="mt-6 pt-4 border-t border-neutral-100">
-                                <p className="text-xs text-neutral-400 mb-2">Notes</p>
-                                <p className="text-sm text-neutral-600">{customer.notes}</p>
+                            <div className="mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-700">
+                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-2">Notes</p>
+                                <p className="text-sm text-neutral-600 dark:text-neutral-300">{customer.notes}</p>
                             </div>
                         )}
                     </div>
 
                     {/* Stats Card */}
-                    <div className="bg-white border border-neutral-100 rounded-2xl p-6">
-                        <h3 className="text-sm font-semibold text-[#2d3748] mb-4">Statistics</h3>
+                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
+                        <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white mb-4">Statistics</h3>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-3 bg-neutral-50 rounded-xl">
-                                <p className="text-xs text-neutral-400 mb-1">Total Spent</p>
-                                <p className="text-lg font-bold text-[#2d3748]">{formatCurrency(stats.totalSpent, currency)}</p>
+                            <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
+                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-1">Total Spent</p>
+                                <p className="text-lg font-bold text-[#2d3748] dark:text-white">{formatCurrency(stats.totalSpent, currency)}</p>
                             </div>
-                            <div className="p-3 bg-neutral-50 rounded-xl">
-                                <p className="text-xs text-neutral-400 mb-1">Pending</p>
-                                <p className="text-lg font-bold text-amber-600">{formatCurrency(stats.pendingAmount, currency)}</p>
+                            <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
+                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-1">Pending</p>
+                                <p className="text-lg font-bold text-amber-600 dark:text-amber-500">{formatCurrency(stats.pendingAmount, currency)}</p>
                             </div>
-                            <div className="p-3 bg-neutral-50 rounded-xl">
-                                <p className="text-xs text-neutral-400 mb-1">Invoices</p>
-                                <p className="text-lg font-bold text-[#2d3748]">{stats.invoiceCount}</p>
+                            <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
+                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-1">Invoices</p>
+                                <p className="text-lg font-bold text-[#2d3748] dark:text-white">{stats.invoiceCount}</p>
                             </div>
-                            <div className="p-3 bg-neutral-50 rounded-xl">
-                                <p className="text-xs text-neutral-400 mb-1">Receipts</p>
-                                <p className="text-lg font-bold text-[#2d3748]">{stats.receiptCount}</p>
+                            <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
+                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-1">Receipts</p>
+                                <p className="text-lg font-bold text-[#2d3748] dark:text-white">{stats.receiptCount}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Right Column - Documents */}
-                <div className="lg:col-span-2">
-                    <div className="bg-white border border-neutral-100 rounded-2xl overflow-hidden">
-                        <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
-                            <h3 className="text-sm font-semibold text-[#2d3748]">Documents</h3>
-                            <Button size="sm" leftIcon={<FileText className="w-3.5 h-3.5" />}>
-                                New Document
-                            </Button>
+                <div className="lg:col-span-2 h-[calc(100vh-140px)] min-h-[500px]">
+                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden h-full flex flex-col">
+                        <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-between flex-shrink-0">
+                            <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white">Documents</h3>
+                            <div className="relative">
+                                <Button
+                                    size="sm"
+                                    leftIcon={<Plus className="w-3.5 h-3.5" />}
+                                    rightIcon={<ChevronDown className="w-3.5 h-3.5" />}
+                                    onClick={() => setIsDocMenuOpen(!isDocMenuOpen)}
+                                >
+                                    New Document
+                                </Button>
+
+                                {isDocMenuOpen && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-10"
+                                            onClick={() => setIsDocMenuOpen(false)}
+                                        />
+                                        <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-neutral-800 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-1 z-20">
+                                            <Link
+                                                href={`/invoices/new?customerId=${customerId}`}
+                                                className="flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+                                            >
+                                                <FileText className="w-4 h-4 text-blue-500" />
+                                                Invoice
+                                            </Link>
+                                            <Link
+                                                href={`/receipts/new?customerId=${customerId}`}
+                                                className="flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+                                            >
+                                                <Receipt className="w-4 h-4 text-emerald-500" />
+                                                Receipt
+                                            </Link>
+                                            <Link
+                                                href={`/delivery-notes/new?customerId=${customerId}`}
+                                                className="flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+                                            >
+                                                <Truck className="w-4 h-4 text-amber-500" />
+                                                Delivery Note
+                                            </Link>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
 
-                        {customerDocuments.length === 0 ? (
-                            <div className="p-12">
-                                <EmptyState
-                                    icon={<FileText className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
-                                    title="No documents yet"
-                                    description="Create your first document for this customer."
-                                />
-                            </div>
-                        ) : (
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b border-neutral-100">
-                                        <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">Document</th>
-                                        <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">Date</th>
-                                        <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">Status</th>
-                                        <th className="text-right px-6 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {customerDocuments.map((doc) => {
-                                        const TypeIcon = docTypeConfig[doc.type].icon;
-                                        return (
-                                            <tr key={doc.id} className="border-b border-neutral-50 last:border-b-0 hover:bg-neutral-50/50 transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`p-2 rounded-lg ${docTypeConfig[doc.type].bgClass} ${docTypeConfig[doc.type].textClass}`}>
-                                                            <TypeIcon className="w-4 h-4" strokeWidth={1.75} />
+                        <div className="flex-1 overflow-y-auto">
+
+                            {customerDocuments.length === 0 ? (
+                                <div className="p-12">
+                                    <EmptyState
+                                        icon={<FileText className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                                        title="No documents yet"
+                                        description="Create your first document for this customer."
+                                    />
+                                </div>
+                            ) : (
+                                <table className="w-full relative">
+                                    <thead className="sticky top-0 bg-white dark:bg-neutral-800 z-10 shadow-sm shadow-neutral-100 dark:shadow-neutral-900/50">
+                                        <tr className="border-b border-neutral-100 dark:border-neutral-700">
+                                            <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Document</th>
+                                            <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Date</th>
+                                            <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Status</th>
+                                            <th className="text-right px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {customerDocuments.map((doc) => {
+                                            const TypeIcon = docTypeConfig[doc.type].icon;
+                                            return (
+                                                <tr key={doc.id} className="border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`p-2 rounded-lg ${docTypeConfig[doc.type].bgClass} ${docTypeConfig[doc.type].textClass}`}>
+                                                                <TypeIcon className="w-4 h-4" strokeWidth={1.75} />
+                                                            </div>
+                                                            <div>
+                                                                <span className="font-medium text-[#2d3748] dark:text-white block">{doc.documentNumber}</span>
+                                                                <span className="text-xs text-neutral-500 dark:text-neutral-400">{docTypeConfig[doc.type].label}</span>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <span className="font-medium text-[#2d3748] block">{doc.documentNumber}</span>
-                                                            <span className="text-xs text-neutral-500">{docTypeConfig[doc.type].label}</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className="text-sm text-neutral-500">{formatDate(doc.date)}</span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig[doc.status].bgClass} ${statusConfig[doc.status].textClass}`}>
-                                                        <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[doc.status].dotClass}`}></span>
-                                                        {statusConfig[doc.status].label}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <span className="font-semibold text-[#2d3748]">{formatCurrency(doc.grandTotal, currency)}</span>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date)}</span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig[doc.status].bgClass} ${statusConfig[doc.status].textClass}`}>
+                                                            <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[doc.status].dotClass}`}></span>
+                                                            {statusConfig[doc.status].label}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <span className="font-semibold text-[#2d3748] dark:text-white">{formatCurrency(doc.grandTotal, currency)}</span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -331,6 +392,13 @@ export default function CustomerDetailPage() {
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         error={formErrors.email}
                         leftIcon={<Mail className="w-4 h-4" />}
+                    />
+                    <Input
+                        label="Company Name"
+                        placeholder="e.g. Acme Corp"
+                        value={formData.companyName}
+                        onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                        leftIcon={<Building className="w-4 h-4" />}
                     />
                     <Input
                         label="Phone Number"
@@ -370,8 +438,8 @@ export default function CustomerDetailPage() {
                 title="Delete Customer"
                 size="sm"
             >
-                <p className="text-neutral-600">
-                    Are you sure you want to delete <strong className="text-[#2d3748]">{customer.name}</strong>?
+                <p className="text-neutral-600 dark:text-neutral-400">
+                    Are you sure you want to delete <strong className="text-[#2d3748] dark:text-white">{customer.name}</strong>?
                     This will also affect any associated documents. This action cannot be undone.
                 </p>
                 <ModalFooter>

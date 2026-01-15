@@ -6,16 +6,18 @@ import { useSettingsStore } from '@/lib/store';
 import { Button, Input, Select } from '@/components/ui';
 import { currencies } from '@/lib/constants/currencies';
 import DocumentNumbering from '@/components/settings/DocumentNumbering';
-import { Save, Building, Globe, Mail, Phone, Palette, Upload, X, Image, Sun, Moon, Monitor, DollarSign, Percent, Hash, Layout, Calendar } from 'lucide-react';
+import EncryptionSettings from '@/components/settings/EncryptionSettings';
+import { Save, Building, Globe, Mail, Phone, Palette, Upload, X, Image, Sun, Moon, DollarSign, Percent, Hash, Calendar, HelpCircle, Shield } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-type TabId = 'general' | 'financial' | 'documents' | 'appearance';
+type TabId = 'general' | 'financial' | 'documents' | 'appearance' | 'security';
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
     { id: 'general', label: 'General', icon: Building },
     { id: 'financial', label: 'Financial', icon: DollarSign },
-    { id: 'documents', label: 'Documents', icon: Hash },
+    { id: 'documents', label: 'ID and Numbering', icon: Hash },
     { id: 'appearance', label: 'Appearance', icon: Palette },
+    { id: 'security', label: 'Security', icon: Shield },
 ];
 
 export default function SettingsPage() {
@@ -289,6 +291,21 @@ export default function SettingsPage() {
                                     </div>
 
                                     <div>
+                                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Decimal Places</label>
+                                        <Select
+                                            options={[0, 1, 2, 3, 4].map(places => ({
+                                                value: String(places),
+                                                label: `${new Intl.NumberFormat('en-US', { minimumFractionDigits: places, maximumFractionDigits: places }).format(1000)} (${places} decimals)`
+                                            }))}
+                                            value={String(formData.decimalPlaces ?? 2)}
+                                            onChange={(v) => handleChange('decimalPlaces', parseInt(v, 10))}
+                                        />
+                                        <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5">
+                                            Control the precision of currency figures displayed throughout the app.
+                                        </p>
+                                    </div>
+
+                                    <div>
                                         <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Default Due Date (Days)</label>
                                         <div className="relative">
                                             <Input
@@ -333,12 +350,50 @@ export default function SettingsPage() {
 
                                 <div className="space-y-4">
                                     <div>
+                                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">Document Font</label>
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                {[
+                                                    { value: 'Inter', label: 'Inter', description: 'Clean & Modern (Sans)', style: { fontFamily: "'Inter', sans-serif" } },
+                                                    { value: 'DM Sans', label: 'DM Sans', description: 'Friendly & Readable (Sans)', style: { fontFamily: "'DM Sans', sans-serif" } },
+                                                    { value: 'Playfair Display', label: 'Playfair Display', description: 'Elegant & Classic (Serif)', style: { fontFamily: "'Playfair Display', serif" } },
+                                                    { value: 'Courier Prime', label: 'Courier Prime', description: 'Technical & Precise (Mono)', style: { fontFamily: "'Courier Prime', monospace" } },
+                                                ].map((font) => (
+                                                    <button
+                                                        key={font.value}
+                                                        onClick={() => handleChange('defaultFont', font.value)}
+                                                        className={`flex flex-col items-start p-4 rounded-xl border-2 transition-all text-left ${formData.defaultFont === font.value
+                                                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-1 ring-blue-500/20'
+                                                            : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-center justify-between w-full mb-1">
+                                                            <span className="font-semibold text-sm text-[#2d3748] dark:text-white" style={font.style}>{font.label}</span>
+                                                            {formData.defaultFont === font.value && (
+                                                                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                                                            )}
+                                                        </div>
+                                                        <span className="text-xs text-neutral-500 dark:text-neutral-400 mb-3">{font.description}</span>
+                                                        <div className="w-full p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-100 dark:border-neutral-700">
+                                                            <p className="text-xl" style={font.style}>
+                                                                $1,234.56
+                                                            </p>
+                                                            <p className="text-[10px] text-neutral-400 mt-1 uppercase tracking-wider" style={font.style}>
+                                                                Invoice #001
+                                                            </p>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-6 border-t border-neutral-100 dark:border-neutral-700">
                                         <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">Interface Theme</label>
-                                        <div className="grid grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-2 gap-4">
                                             {[
                                                 { value: 'light', label: 'Light', icon: Sun },
                                                 { value: 'dark', label: 'Dark', icon: Moon },
-                                                { value: 'system', label: 'System', icon: Monitor },
                                             ].map(({ value, label, icon: Icon }) => (
                                                 <button
                                                     key={value}
@@ -355,9 +410,44 @@ export default function SettingsPage() {
                                                 </button>
                                             ))}
                                         </div>
+                                        <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-3">
+                                            Your theme preference is saved and applied across all sessions.
+                                        </p>
+                                    </div>
+
+                                    {/* Field Help Toggle */}
+                                    <div className="pt-6 border-t border-neutral-100 dark:border-neutral-700">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <HelpCircle className="w-4 h-4 text-blue-500" />
+                                                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Show Field Help</label>
+                                                </div>
+                                                <p className="text-xs text-neutral-500 dark:text-neutral-400 pr-4">
+                                                    Display help tooltips next to financial terms (Subtotal, Tax, Amount Due, etc.) to explain their meaning and calculation. Great for learning!
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => handleChange('showFieldHelp', !formData.showFieldHelp)}
+                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.showFieldHelp
+                                                    ? 'bg-blue-500'
+                                                    : 'bg-neutral-300 dark:bg-neutral-600'
+                                                    }`}
+                                            >
+                                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formData.showFieldHelp ? 'translate-x-6' : 'translate-x-1'
+                                                    }`} />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </section>
+                        </div>
+                    )}
+
+                    {/* Security Tab */}
+                    {activeTab === 'security' && (
+                        <div className="space-y-6 max-w-3xl animate-in fade-in slide-in-from-right-4 duration-300">
+                            <EncryptionSettings />
                         </div>
                     )}
                 </div>

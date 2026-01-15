@@ -2,10 +2,11 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { useDocumentStore, useCustomerStore, useSettingsStore } from '@/lib/store';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { useDocumentStore, useCustomerStore, useSettingsStore, useTemplateStore } from '@/lib/store';
+import { formatCurrency, formatDate, sumEffectiveGrandTotals } from '@/lib/utils';
 import { Button, EmptyState, SearchInput, Select, Modal, ModalFooter } from '@/components/ui';
 import { DocumentType } from '@/lib/types';
+import { toast } from 'react-hot-toast';
 import {
     Plus,
     FileText,
@@ -44,8 +45,9 @@ type SortField = 'documentNumber' | 'date' | 'grandTotal' | 'status';
 type SortOrder = 'asc' | 'desc';
 
 export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDescription }: DocumentListProps) {
-    const { documents, updateDocument, deleteDocument, duplicateDocument, convertDocument } = useDocumentStore();
+    const { documents, updateDocument, deleteDocument, duplicateDocument } = useDocumentStore();
     const { company } = useSettingsStore();
+    const { getTemplateById } = useTemplateStore();
     const currency = company.currency;
 
     // Filter by type
@@ -68,9 +70,12 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
     const filteredDocuments = useMemo(() => {
         let result = typedDocuments.filter((doc) => {
             const query = searchQuery.toLowerCase();
+            // Handle potentially undefined fields (encrypted documents may have partial data)
+            const docNumber = doc.documentNumber || '';
+            const customerName = doc.customerName || '';
             const matchesSearch =
-                doc.documentNumber.toLowerCase().includes(query) ||
-                doc.customerName.toLowerCase().includes(query);
+                docNumber.toLowerCase().includes(query) ||
+                customerName.toLowerCase().includes(query);
             const matchesStatus = statusFilter === 'all' || doc.status === statusFilter;
             return matchesSearch && matchesStatus;
         });
@@ -79,9 +84,13 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
             let aVal: any = a[sortField];
             let bVal: any = b[sortField];
 
+            // Handle undefined values for encrypted documents
+            if (aVal === undefined) aVal = '';
+            if (bVal === undefined) bVal = '';
+
             if (sortField === 'date') {
-                aVal = new Date(a.date).getTime();
-                bVal = new Date(b.date).getTime();
+                aVal = new Date(a.date || 0).getTime();
+                bVal = new Date(b.date || 0).getTime();
             }
 
             const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
@@ -95,13 +104,17 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
     const stats = useMemo(() => {
         // Exclude cancelled documents from the total amount
         const activeDocs = typedDocuments.filter(doc => doc.status !== 'cancelled');
-        const total = activeDocs.reduce((sum, doc) => sum + doc.grandTotal, 0);
+        const total = sumEffectiveGrandTotals(activeDocs, getTemplateById);
 
-        const paid = typedDocuments.filter(doc => doc.status === 'paid').reduce((sum, doc) => sum + doc.grandTotal, 0);
-        const pending = typedDocuments.filter(doc => doc.status === 'sent' || doc.status === 'draft').reduce((sum, doc) => sum + doc.grandTotal, 0);
+        const paidDocs = typedDocuments.filter(doc => doc.status === 'paid');
+        const paid = sumEffectiveGrandTotals(paidDocs, getTemplateById);
+
+        const pendingDocs = typedDocuments.filter(doc => doc.status === 'sent' || doc.status === 'draft');
+        const pending = sumEffectiveGrandTotals(pendingDocs, getTemplateById);
+
         const count = typedDocuments.length;
         return { total, paid, pending, count };
-    }, [typedDocuments]);
+    }, [typedDocuments, getTemplateById]);
 
     // Handlers
     const handleSort = (field: SortField) => {
@@ -114,22 +127,28 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
     };
 
     const handleMarkAsPaid = (id: string) => {
+        const doc = documents.find(d => d.id === id);
         updateDocument(id, { status: 'paid', paidAt: new Date().toISOString() });
         setOpenMenuId(null);
+        toast.success(`${doc?.documentNumber || title.slice(0, -1)} marked as paid`);
     };
 
     const handleSend = (id: string) => {
+        const doc = documents.find(d => d.id === id);
         updateDocument(id, { status: 'sent' });
         setOpenMenuId(null);
+        toast.success(`${doc?.documentNumber || title.slice(0, -1)} marked as sent`);
     };
 
     const handleStatusChange = (id: string, newStatus: string) => {
+        const doc = documents.find(d => d.id === id);
         updateDocument(id, { status: newStatus as any });
         // If changing to paid, set paidAt
         if (newStatus === 'paid') {
             updateDocument(id, { paidAt: new Date().toISOString() });
         }
         setOpenStatusMenuId(null);
+        toast.success(`Status changed to ${statusConfig[newStatus as keyof typeof statusConfig]?.label || newStatus}`);
     };
 
     const openDeleteModal = (id: string) => {
@@ -140,14 +159,16 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
 
     const handleDelete = () => {
         if (documentToDelete) {
+            const doc = documents.find(d => d.id === documentToDelete);
             deleteDocument(documentToDelete);
             setIsDeleteModalOpen(false);
             setDocumentToDelete(null);
+            toast.success(`${doc?.documentNumber || title.slice(0, -1)} deleted`);
         }
     };
 
     return (
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
@@ -200,13 +221,23 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                     />
                     <div className="flex items-center gap-3">
                         <Select
-                            options={[
-                                { value: 'all', label: 'All Status' },
-                                { value: 'draft', label: 'Draft' },
-                                { value: 'sent', label: 'Sent' },
-                                { value: 'paid', label: 'Paid' },
-                                { value: 'cancelled', label: 'Cancelled' },
-                            ]}
+                            options={
+                                type === 'invoice'
+                                    ? [
+                                        { value: 'all', label: 'All Status' },
+                                        { value: 'draft', label: 'Draft' },
+                                        { value: 'sent', label: 'Sent' },
+                                        { value: 'paid', label: 'Paid' },
+                                        { value: 'overdue', label: 'Overdue' },
+                                        { value: 'cancelled', label: 'Cancelled' },
+                                    ]
+                                    : [
+                                        { value: 'all', label: 'All Status' },
+                                        { value: 'draft', label: 'Draft' },
+                                        { value: 'sent', label: 'Sent' },
+                                        { value: 'cancelled', label: 'Cancelled' },
+                                    ]
+                            }
                             value={statusFilter}
                             onChange={setStatusFilter}
                             className="w-36"
@@ -255,6 +286,9 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                 <th className="text-left px-6 py-4">
                                     <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Customer</span>
                                 </th>
+                                <th className="text-left px-6 py-4">
+                                    <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Links</span>
+                                </th>
                                 <th className="text-left px-6 py-4 hidden md:table-cell">
                                     <button
                                         onClick={() => handleSort('date')}
@@ -289,21 +323,63 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                         </thead>
                         <tbody>
                             {filteredDocuments.map((doc) => {
-                                const config = statusConfig[doc.status];
+                                const config = statusConfig[doc.status] || statusConfig['draft'];
+                                const isLocked = (doc as any)._isLocked === true;
                                 return (
                                     <tr key={doc.id} className="border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors">
                                         <td className="px-6 py-4">
                                             <Link href={`/${type}s/${doc.id}`} className="flex items-center gap-3 group">
-                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white">
+                                                <div className={`w-10 h-10 rounded-xl ${isLocked ? 'bg-gradient-to-br from-amber-400 to-amber-600' : 'bg-gradient-to-br from-blue-400 to-blue-600'} flex items-center justify-center text-white flex-shrink-0`}>
                                                     <TypeIcon className="w-5 h-5" strokeWidth={1.75} />
                                                 </div>
                                                 <span className="font-semibold text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                                    {doc.documentNumber}
+                                                    {doc.documentNumber || (isLocked ? '🔒 Encrypted' : 'Untitled')}
                                                 </span>
                                             </Link>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-sm text-neutral-600 dark:text-neutral-300">{doc.customerName}</span>
+                                            <span className="text-sm text-neutral-600 dark:text-neutral-300">
+                                                {doc.customerName || (isLocked ? '🔒 Unlock to view' : '-')}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {/* Linked Document Indicators */}
+                                            {(() => {
+                                                // Always include self
+                                                const linkedTypes = new Set<string>([doc.type]);
+
+                                                if (doc.type === 'invoice') {
+                                                    documents.forEach(d => {
+                                                        if (d.sourceDocumentId === doc.id) linkedTypes.add(d.type);
+                                                    });
+                                                } else if (doc.sourceDocumentId) {
+                                                    const parent = documents.find(d => d.id === doc.sourceDocumentId);
+                                                    if (parent) linkedTypes.add(parent.type);
+                                                    documents.forEach(d => {
+                                                        if (d.sourceDocumentId === doc.sourceDocumentId && d.id !== doc.id) linkedTypes.add(d.type);
+                                                    });
+                                                }
+
+                                                return (
+                                                    <div className="flex items-center gap-1.5">
+                                                        {linkedTypes.has('invoice') && (
+                                                            <div title="Invoice" className={`p-1 rounded-md ${doc.type === 'invoice' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 ring-1 ring-blue-500/20' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500'}`}>
+                                                                <FileText className="w-3.5 h-3.5" />
+                                                            </div>
+                                                        )}
+                                                        {linkedTypes.has('receipt') && (
+                                                            <div title="Receipt" className={`p-1 rounded-md ${doc.type === 'receipt' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/20' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500'}`}>
+                                                                <Receipt className="w-3.5 h-3.5" />
+                                                            </div>
+                                                        )}
+                                                        {linkedTypes.has('delivery-note') && (
+                                                            <div title="Delivery Note" className={`p-1 rounded-md ${doc.type === 'delivery-note' ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 ring-1 ring-orange-500/20' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500'}`}>
+                                                                <Truck className="w-3.5 h-3.5" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="px-6 py-4 hidden md:table-cell">
                                             <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date)}</span>
@@ -323,25 +399,38 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
 
                                                 {openStatusMenuId === doc.id && (
                                                     <div className="absolute left-0 top-full mt-1 w-36 bg-white dark:bg-neutral-800 rounded-lg shadow-xl border border-neutral-200 dark:border-neutral-700 py-1 z-50">
-                                                        {Object.entries(statusConfig).map(([statusKey, status]) => (
-                                                            <button
-                                                                key={statusKey}
-                                                                onClick={(e) => {
-                                                                    e.preventDefault();
-                                                                    handleStatusChange(doc.id, statusKey);
-                                                                }}
-                                                                className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${doc.status === statusKey ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium' : 'text-neutral-600 dark:text-neutral-300'}`}
-                                                            >
-                                                                <span className={`w-1.5 h-1.5 rounded-full ${status.dotClass}`}></span>
-                                                                {status.label}
-                                                            </button>
-                                                        ))}
+                                                        {Object.entries(statusConfig)
+                                                            .filter(([statusKey]) => {
+                                                                // Filter statuses based on document type
+                                                                if (type === 'receipt' || type === 'delivery-note') {
+                                                                    // Receipts and Delivery Notes don't have Paid or Overdue
+                                                                    return !['paid', 'overdue'].includes(statusKey);
+                                                                }
+                                                                return true; // Invoices get all statuses
+                                                            })
+                                                            .map(([statusKey, status]) => (
+                                                                <button
+                                                                    key={statusKey}
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        handleStatusChange(doc.id, statusKey);
+                                                                    }}
+                                                                    className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${doc.status === statusKey ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium' : 'text-neutral-600 dark:text-neutral-300'}`}
+                                                                >
+                                                                    <span className={`w-1.5 h-1.5 rounded-full ${status.dotClass}`}></span>
+                                                                    {status.label}
+                                                                </button>
+                                                            ))}
                                                     </div>
                                                 )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <span className="font-semibold text-[#2d3748] dark:text-white">{formatCurrency(doc.grandTotal, currency)}</span>
+                                            <span className="font-semibold text-[#2d3748] dark:text-white">
+                                                {doc.grandTotal !== undefined
+                                                    ? formatCurrency(doc.grandTotal, currency)
+                                                    : (isLocked ? '🔒 Locked' : '-')}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="relative inline-block">
@@ -371,6 +460,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                             onClick={() => {
                                                                 duplicateDocument(doc.id);
                                                                 setOpenMenuId(null);
+                                                                toast.success(`${doc.documentNumber || title.slice(0, -1)} duplicated`);
                                                             }}
                                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                         >
@@ -381,26 +471,22 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                         {/* Conversion Options */}
                                                         {type === 'invoice' && (
                                                             <>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        convertDocument(doc.id, 'receipt');
-                                                                        setOpenMenuId(null);
-                                                                    }}
+                                                                <Link
+                                                                    href={`/receipts/new?sourceId=${doc.id}&fromType=invoice`}
+                                                                    onClick={() => setOpenMenuId(null)}
                                                                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors whitespace-nowrap text-left"
                                                                 >
                                                                     <Receipt className="w-4 h-4 flex-shrink-0" />
-                                                                    Convert to Receipt
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        convertDocument(doc.id, 'delivery-note');
-                                                                        setOpenMenuId(null);
-                                                                    }}
+                                                                    Create Receipt
+                                                                </Link>
+                                                                <Link
+                                                                    href={`/delivery-notes/new?sourceId=${doc.id}&fromType=invoice`}
+                                                                    onClick={() => setOpenMenuId(null)}
                                                                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors whitespace-nowrap text-left"
                                                                 >
                                                                     <Truck className="w-4 h-4 flex-shrink-0" />
-                                                                    Convert to Delivery Note
-                                                                </button>
+                                                                    Create Delivery Note
+                                                                </Link>
                                                             </>
                                                         )}
 

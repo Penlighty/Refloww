@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useTemplateStore, useSettingsStore } from '@/lib/store';
 import { MappedField, FieldType, TextAlignment, DocumentType } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
+import { compressImage } from '@/lib/utils/image-utils';
 import { Button, Modal, ModalFooter, Input, Select, EmptyState } from '@/components/ui';
 import { AutoFitText } from '@/components/AutoFitText';
 import {
@@ -35,7 +36,10 @@ import {
     ChevronDown,
     ChevronUp,
     Settings2,
-    Maximize2
+    Maximize2,
+    Copy,
+    Clipboard,
+    ClipboardPaste
 } from 'lucide-react';
 
 // Helper component for properties panel sections
@@ -82,27 +86,28 @@ const PropertySection = ({
     );
 };
 
-// Field type options
+// Field type options - Custom Field first, then alphabetically sorted
 const fieldTypeOptions = [
-    { value: 'text', label: 'Static Text' },
-    { value: 'date', label: 'Document Date' },
-    { value: 'due-date', label: 'Due Date' },
-    { value: 'document-number', label: 'Document Number' },
-    { value: 'customer-name', label: 'Customer Name' },
-    { value: 'customer-email', label: 'Customer Email' },
-    { value: 'customer-phone', label: 'Customer Phone' },
-    { value: 'customer-address', label: 'Customer Address' },
-    { value: 'line-items', label: 'Line Items Table' },
-    { value: 'subtotal', label: 'Subtotal' },
-    { value: 'discount', label: 'Discount Amount' },
-    { value: 'discount-name', label: 'Discount Name' },
-    { value: 'tax', label: 'Tax' },
-    { value: 'grand-total', label: 'Grand Total' },
+    { value: 'custom', label: 'Custom Field' },
+    { value: 'amount-due', label: 'Amount Due' },
     { value: 'amount-in-words', label: 'Amount in Words' },
     { value: 'amount-paid', label: 'Amount Paid' },
-    { value: 'amount-due', label: 'Amount Due' },
+    { value: 'customer-address', label: 'Customer Address' },
+    { value: 'customer-email', label: 'Customer Email' },
+    { value: 'customer-name', label: 'Customer Name' },
+    { value: 'customer-phone', label: 'Customer Phone' },
+    { value: 'discount', label: 'Discount Amount' },
+    { value: 'discount-name', label: 'Discount Name' },
+    { value: 'document-number', label: 'Document Number' },
+    { value: 'date', label: 'Document Date' },
+    { value: 'due-date', label: 'Due Date' },
+    { value: 'grand-total', label: 'Grand Total' },
+    { value: 'line-items', label: 'Line Items Table' },
+    { value: 'link-button', label: 'Link Button' },
     { value: 'notes', label: 'Notes' },
-    { value: 'custom', label: 'Custom Field' },
+    { value: 'text', label: 'Static Text' },
+    { value: 'subtotal', label: 'Subtotal' },
+    { value: 'tax', label: 'Tax' },
 ];
 
 // Sample data for preview
@@ -123,8 +128,11 @@ const initialSampleData: Record<string, string> = {
     'grand-total': '$1,045.00',
     'amount-paid': '$45.00',
     'amount-due': '$1,000.00',
+    'amount-in-words': 'One Thousand Forty-Five Only',
     'notes': 'Thank you for your business!',
+
     'custom': 'Custom Value',
+    'link-button': 'Pay Now',
 };
 
 // Layout Constants
@@ -156,6 +164,7 @@ const fieldTypeColors: Record<string, string> = {
     'amount-due': 'border-rose-500 bg-rose-100/40 dark:bg-rose-900/30',
     'notes': 'border-neutral-400 bg-neutral-50/40 dark:bg-neutral-800/40',
     'custom': 'border-cyan-400 bg-cyan-50/40 dark:bg-cyan-900/20',
+    'link-button': 'border-purple-400 bg-purple-50/40 dark:bg-purple-900/20',
 };
 
 // Smart Suggestions for Auto-Complete
@@ -280,12 +289,30 @@ export default function TemplateEditorPage() {
     const [variantUploadFile, setVariantUploadFile] = useState<File | null>(null);
     const [variantUploadPreview, setVariantUploadPreview] = useState<string | null>(null);
 
-    // Initialize active variant from template type on load
+    // Initialize active variant from template type on load, but detect if it was left in a different state
+    const isInitialLoad = useRef(true);
     useEffect(() => {
-        if (template) {
-            setActiveVariant(template.type);
+        if (template && isInitialLoad.current) {
+            isInitialLoad.current = false;
+
+            // Detect which variant it represents by checking images
+            // If the root image doesn't match the primary variant's image (if variants exist)
+            // Or if another variant has this same image, use that variant's type.
+            const primaryType = template.type;
+            const variants = template.variants || {};
+            const detectedVariant = (Object.keys(variants) as DocumentType[]).find(v =>
+                variants[v]?.imageUrl === template.imageUrl
+            );
+
+            if (detectedVariant && detectedVariant !== primaryType) {
+                // UI was left on a sub-variant, update active tab to match
+                setActiveVariant(detectedVariant);
+            } else {
+                // Normal startup or primary variant
+                setActiveVariant(primaryType);
+            }
         }
-    }, [template?.id]); // Only when ID changes (new template loaded)
+    }, [template?.id]);
 
     // Dynamic Preview Data
     const [previewData, setPreviewData] = useState(initialSampleData);
@@ -299,31 +326,36 @@ export default function TemplateEditorPage() {
         let docType: 'invoice' | 'receipt' | 'delivery-note';
 
         // Use activeVariant instead of template.type for preview data
+        let numberingKey: 'invoice' | 'receipt' | 'deliveryNote';
         switch (activeVariant) {
             case 'receipt':
-                docType = 'receipt';
+                numberingKey = 'receipt';
                 break;
             case 'delivery-note':
-                docType = 'delivery-note';
+                numberingKey = 'deliveryNote';
                 break;
             case 'invoice':
             default:
-                docType = 'invoice';
+                numberingKey = 'invoice';
                 break;
         }
 
         // Get the next number based on settings
-        const nextNum = getNextDocumentNumber(docType);
+        const nextNum = getNextDocumentNumber(numberingKey);
 
-        setPreviewData(prev => {
-            // Only update if the value is different to avoid unnecessary re-renders
-            if (prev['document-number'] === nextNum) return prev;
-            return {
-                ...prev,
-                'document-number': nextNum
-            };
-        });
-    }, [template, getNextDocumentNumber, numbering, activeVariant]);
+        // Update preview data with dynamic currency values
+        setPreviewData(prev => ({
+            ...prev,
+            'document-number': nextNum,
+            'subtotal': formatCurrency(1000, company.currency),
+            'discount': `-${formatCurrency(50, company.currency)}`,
+            'tax': formatCurrency(95, company.currency),
+            'grand-total': formatCurrency(1045, company.currency),
+            'amount-paid': formatCurrency(45, company.currency),
+            'amount-due': formatCurrency(1000, company.currency),
+            'amount-in-words': 'One Thousand Forty-Five Only',
+        }));
+    }, [template, getNextDocumentNumber, numbering, activeVariant, company.currency]);
 
     // Handle Variant Switching
     const handleSwitchVariant = (newVariant: DocumentType) => {
@@ -371,7 +403,7 @@ export default function TemplateEditorPage() {
             };
         } else {
             // It was the root. But we receive "currentFields" from template.fields, so they are already "there" in the object,
-            // EXCEPT if we are about to overwrite `template.fields` with the new variant's fields.
+            // EXCEPT if we are about to overwrite `template.fields` with the new data.
             // So we don't need to "save" them elsewhere, they are already in `fields`.
         }
 
@@ -398,7 +430,6 @@ export default function TemplateEditorPage() {
             // We need to retrieve the ROOT data.
             // PROBLEM: We overwrote `template.fields` when we switched TO the variant previously.
             // We need a place to store "Root Fields" when they are swapped out.
-            // Solution: When `activeVariant` is NOT `template.type`, the Root Fields must be stored somewhere.
             // Let's store them in `variants[template.type]` cleanly? No, duplicates.
 
             // BETTER ARCHITECTURE for this page:
@@ -430,10 +461,10 @@ export default function TemplateEditorPage() {
         // 1. SAVE Current State to Storage
         updatedVariants[currentVariant] = {
             fields: currentFields,
-            imageUrl: getCurrentImageUrl(template, currentVariant),
-            orientation: getCurrentOrientation(template, currentVariant),
-            width: getCurrentWidth(template, currentVariant),
-            height: getCurrentHeight(template, currentVariant),
+            imageUrl: template.imageUrl,
+            orientation: template.orientation,
+            width: template.width,
+            height: template.height,
         };
 
         // 2. LOAD Next State from Storage (or default/root if missing)
@@ -451,7 +482,15 @@ export default function TemplateEditorPage() {
                 variants: updatedVariants
             });
             setActiveVariant(newVariant);
+        } else {
+            // If next data missing, we don't switch (or we could prompt to add)
+            // But since we filter for existingItem in tabs, it should be there.
+            // Just in case, update variants to save what we have.
+            updateTemplate(templateId, { variants: updatedVariants });
+            setActiveVariant(newVariant);
         }
+        // Note: Switching variants doesn't mark as "unsaved" since it's just UI navigation.
+        // The actual field edits within a variant trigger hasUnsavedChanges.
     };
 
     // Helper to get current (pre-swap) values based on what we see
@@ -515,6 +554,7 @@ export default function TemplateEditorPage() {
                 mode: 'connected' // Ensure we upgrade to connected mode
             });
 
+            setHasUnsavedChanges(true);
             setActiveVariant(variantUploadType);
             setIsVariantUploadModalOpen(false);
             setVariantUploadFile(null);
@@ -525,36 +565,65 @@ export default function TemplateEditorPage() {
 
     // Tabs UI Component
     const ConnectedTabs = () => {
-        // We now allow ANY template to see these tabs to enable "upgrading" to connected mode
-        // if (template?.mode !== 'connected') return null;
-
         if (!template) return null;
 
-        const tabs: DocumentType[] = ['invoice', 'receipt', 'delivery-note'];
+        const tabs: { type: DocumentType, label: string }[] = [
+            { type: 'invoice', label: 'Invoice' },
+            { type: 'receipt', label: 'Receipt' },
+            { type: 'delivery-note', label: 'Delivery Note' }
+        ];
+
+        const existingItems = tabs.filter(t => t.type === template.type || template.variants?.[t.type]);
+        const missingItems = tabs.filter(t => !existingItems.includes(t));
 
         return (
             <div className="flex items-center gap-2 border-r border-neutral-200 dark:border-neutral-700 pr-4 mr-4">
-                {tabs.map(type => {
-                    // Check if this variant exists (either as root type or in variants)
-                    // The "Root" type always exists. Others check variants.
-                    const exists = type === template.type || template.variants?.[type];
-                    const isActive = activeVariant === type;
-
-                    if (!exists) return null;
-
+                {/* Existing Tabs */}
+                {existingItems.map(item => {
+                    const isActive = activeVariant === item.type;
                     return (
                         <button
-                            key={type}
-                            onClick={() => handleSwitchVariant(type)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isActive
-                                ? 'bg-neutral-800 text-white dark:bg-white dark:text-neutral-900 shadow-sm'
-                                : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                            key={item.type}
+                            onClick={() => handleSwitchVariant(item.type)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isActive
+                                ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-sm'
+                                : 'bg-white dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700'
                                 }`}
                         >
-                            {type === 'delivery-note' ? 'Delivery Note' : type.charAt(0).toUpperCase() + type.slice(1)}
+                            {item.label}
                         </button>
                     );
                 })}
+
+                {/* Plus Button for Missing */}
+                {missingItems.length > 0 && (
+                    <div className="relative group">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all shadow-sm">
+                            <Plus className="w-4 h-4" />
+                        </button>
+
+                        <div className="absolute left-0 top-full mt-2 w-48 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-100 dark:border-neutral-700 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left z-50 overflow-hidden">
+                            <div className="p-1">
+                                <div className="px-3 py-2 text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                                    Add Layout
+                                </div>
+                                {missingItems.map((item) => (
+                                    <button
+                                        key={item.type}
+                                        onClick={() => {
+                                            setVariantUploadType(item.type);
+                                            setIsVariantUploadModalOpen(true);
+                                        }}
+                                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors text-left text-neutral-700 dark:text-neutral-200"
+                                    >
+                                        <Plus className="w-3 h-3 text-neutral-400" />
+                                        {item.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     };
@@ -665,11 +734,81 @@ export default function TemplateEditorPage() {
     const [activeTool, setActiveTool] = useState<Tool>('select');
     const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
     const [zoom, setZoom] = useState(1);
-    const [showPreview, setShowPreview] = useState(false);
+    const [showPreview, setShowPreview] = useState(true);
     const [showFieldPanel, setShowFieldPanel] = useState(true);
     const [activeSection, setActiveSection] = useState<string | null>('general');
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [showSavedToast, setShowSavedToast] = useState(false);
+    const [showCopiedToast, setShowCopiedToast] = useState(false);
+    const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Track the "snapshot" of template to detect real changes
+    const savedSnapshotRef = useRef<string>('');
+
+    // Initialize snapshot on mount
+    useEffect(() => {
+        if (template && !savedSnapshotRef.current) {
+            savedSnapshotRef.current = JSON.stringify({
+                fields: template.fields,
+                variants: template.variants
+            });
+            setLastSavedTime(new Date());
+        }
+    }, [template?.id]);
+
+    // Smart change detection - compare current state against snapshot
+    const checkForRealChanges = useCallback(() => {
+        if (!template) return false;
+        const currentState = JSON.stringify({
+            fields: template.fields,
+            variants: template.variants
+        });
+        return currentState !== savedSnapshotRef.current;
+    }, [template]);
+
+    // Auto-save effect with debounce
+    useEffect(() => {
+        if (!template || !hasUnsavedChanges) return;
+
+        const saveTimer = setTimeout(() => {
+            // Perform the actual save (already synced to store, just update tracking)
+            setIsSaving(true);
+
+            // Update snapshot
+            savedSnapshotRef.current = JSON.stringify({
+                fields: template.fields,
+                variants: template.variants
+            });
+
+            setTimeout(() => {
+                setLastSavedTime(new Date());
+                setHasUnsavedChanges(false);
+                setIsSaving(false);
+            }, 300); // Brief delay for visual feedback
+        }, 1500); // 1.5s debounce
+
+        return () => clearTimeout(saveTimer);
+    }, [template?.fields, template?.variants, hasUnsavedChanges]);
+
+    // Format the last saved time for display
+    const formatLastSaved = useCallback(() => {
+        if (!lastSavedTime) return null;
+        const now = new Date();
+        const diff = Math.floor((now.getTime() - lastSavedTime.getTime()) / 1000);
+
+        if (diff < 5) return 'Just now';
+        if (diff < 60) return `${diff}s ago`;
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        return lastSavedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }, [lastSavedTime]);
+
+    // Update formatLastSaved every 10 seconds for "time ago" updates
+    const [, forceUpdate] = useState(0);
+    useEffect(() => {
+        const interval = setInterval(() => forceUpdate(p => p + 1), 10000);
+        return () => clearInterval(interval);
+    }, []);
 
     // Drawing state
     const [isDrawing, setIsDrawing] = useState(false);
@@ -947,7 +1086,7 @@ export default function TemplateEditorPage() {
             y: newFieldRect.y,
             width: newFieldRect.width,
             height: newFieldRect.height,
-            fontSize: 14,
+            fontSize: 12,
             fontColor: '#2d3748',
             fontWeight: 'normal',
             alignment: 'left',
@@ -984,6 +1123,109 @@ export default function TemplateEditorPage() {
         setHasUnsavedChanges(true);
     };
 
+    // Clipboard state for copy/paste
+    const [clipboardField, setClipboardField] = useState<MappedField | null>(null);
+
+    // Nudge amount (percentage)
+    const NUDGE_STEP = 0.5; // Normal step
+    const NUDGE_STEP_FINE = 0.1; // Fine step with Shift
+
+    // Handle nudging selected field with arrow keys
+    const handleNudge = useCallback((direction: 'up' | 'down' | 'left' | 'right', fine: boolean) => {
+        if (!selectedFieldId || !template) return;
+
+        const field = template.fields.find(f => f.id === selectedFieldId);
+        if (!field) return;
+
+        const step = fine ? NUDGE_STEP_FINE : NUDGE_STEP;
+        let { x, y } = field;
+
+        switch (direction) {
+            case 'up':
+                y = Math.max(0, y - step);
+                break;
+            case 'down':
+                y = Math.min(100 - field.height, y + step);
+                break;
+            case 'left':
+                x = Math.max(0, x - step);
+                break;
+            case 'right':
+                x = Math.min(100 - field.width, x + step);
+                break;
+        }
+
+        updateField(templateId, selectedFieldId, { x, y });
+        setHasUnsavedChanges(true);
+    }, [selectedFieldId, template, templateId, updateField]);
+
+    // Handle copy field
+    const handleCopyField = useCallback(() => {
+        if (!selectedFieldId || !template) return;
+
+        const field = template.fields.find(f => f.id === selectedFieldId);
+        if (field) {
+            setClipboardField({ ...field });
+            setShowCopiedToast(true);
+            setTimeout(() => setShowCopiedToast(false), 1500);
+        }
+    }, [selectedFieldId, template]);
+
+    // Handle paste field
+    const handlePasteField = useCallback(() => {
+        if (!clipboardField || !template) return;
+
+        // Create new field with offset position and new ID
+        const newField: MappedField = {
+            ...clipboardField,
+            id: uuidv4(),
+            x: Math.min(100 - clipboardField.width, clipboardField.x + 2),
+            y: Math.min(100 - clipboardField.height, clipboardField.y + 2),
+            label: `${clipboardField.label} (Copy)`,
+        };
+
+        // For line-items, also regenerate column IDs
+        if (newField.columns) {
+            newField.columns = newField.columns.map(col => ({
+                ...col,
+                id: uuidv4()
+            }));
+        }
+
+        addField(templateId, newField);
+        setSelectedFieldId(newField.id);
+        setHasUnsavedChanges(true);
+    }, [clipboardField, template, templateId, addField]);
+
+    // Handle duplicate field (copy + paste in one action)
+    const handleDuplicateField = useCallback(() => {
+        if (!selectedFieldId || !template) return;
+
+        const field = template.fields.find(f => f.id === selectedFieldId);
+        if (!field) return;
+
+        // Create duplicated field with offset
+        const newField: MappedField = {
+            ...field,
+            id: uuidv4(),
+            x: Math.min(100 - field.width, field.x + 2),
+            y: Math.min(100 - field.height, field.y + 2),
+            label: `${field.label} (Copy)`,
+        };
+
+        // For line-items, also regenerate column IDs
+        if (newField.columns) {
+            newField.columns = newField.columns.map(col => ({
+                ...col,
+                id: uuidv4()
+            }));
+        }
+
+        addField(templateId, newField);
+        setSelectedFieldId(newField.id);
+        setHasUnsavedChanges(true);
+    }, [selectedFieldId, template, templateId, addField]);
+
     // Keyboard shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -993,20 +1235,84 @@ export default function TemplateEditorPage() {
                 return;
             }
 
+            // Delete / Backspace - Delete selected field
             if (e.key === 'Delete' || e.key === 'Backspace') {
                 if (selectedFieldId && !isNewFieldModalOpen) {
+                    e.preventDefault();
                     handleDeleteField();
                 }
             }
+
+            // Escape - Deselect
             if (e.key === 'Escape') {
                 setSelectedFieldId(null);
                 setActiveTool('select');
+            }
+
+            // Arrow keys - Nudge selected field
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                if (selectedFieldId && !isNewFieldModalOpen) {
+                    e.preventDefault();
+                    const direction = e.key.replace('Arrow', '').toLowerCase() as 'up' | 'down' | 'left' | 'right';
+                    handleNudge(direction, e.shiftKey);
+                }
+            }
+
+            // Ctrl+C - Copy
+            if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+                if (selectedFieldId) {
+                    e.preventDefault();
+                    handleCopyField();
+                }
+            }
+
+            // Ctrl+V - Paste
+            if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+                if (clipboardField) {
+                    e.preventDefault();
+                    handlePasteField();
+                }
+            }
+
+            // Ctrl+D - Duplicate
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                if (selectedFieldId) {
+                    e.preventDefault();
+                    handleDuplicateField();
+                }
+            }
+
+            // Ctrl+Z - Undo
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                handleUndo();
+            }
+
+            // Ctrl+Y or Ctrl+Shift+Z - Redo
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+                e.preventDefault();
+                handleRedo();
+            }
+
+            // V - Select tool
+            if (e.key === 'v' && !e.ctrlKey && !e.metaKey) {
+                setActiveTool('select');
+            }
+
+            // D - Draw tool
+            if (e.key === 'd' && !e.ctrlKey && !e.metaKey) {
+                setActiveTool('draw');
+            }
+
+            // P - Toggle preview
+            if (e.key === 'p' && !e.ctrlKey && !e.metaKey) {
+                setShowPreview(prev => !prev);
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedFieldId, isNewFieldModalOpen]);
+    }, [selectedFieldId, isNewFieldModalOpen, clipboardField, handleNudge, handleCopyField, handlePasteField, handleDuplicateField, handleUndo, handleRedo]);
 
     if (!template) {
         return (
@@ -1040,10 +1346,26 @@ export default function TemplateEditorPage() {
                     </Link>
                     <div>
                         <h1 className="text-lg font-bold text-[#2d3748] dark:text-white">{template.name}</h1>
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                            {template.fields.length} field{template.fields.length !== 1 ? 's' : ''} mapped
-                            <span className="text-emerald-500 dark:text-emerald-400 ml-2">• Auto-saving enabled</span>
-                        </p>
+                        <div className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+                            <span>{template.fields.length} field{template.fields.length !== 1 ? 's' : ''} mapped</span>
+                            <span className="text-neutral-300 dark:text-neutral-600">•</span>
+                            {isSaving ? (
+                                <span className="flex items-center gap-1.5 text-blue-500 dark:text-blue-400">
+                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
+                                    Saving...
+                                </span>
+                            ) : hasUnsavedChanges ? (
+                                <span className="flex items-center gap-1.5 text-amber-500 dark:text-amber-400">
+                                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                                    Unsaved changes
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-1.5 text-emerald-500 dark:text-emerald-400">
+                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                                    {formatLastSaved() ? `Saved ${formatLastSaved()}` : 'All changes saved'}
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -1110,14 +1432,38 @@ export default function TemplateEditorPage() {
 
                     <Button
                         size="sm"
+                        variant={hasUnsavedChanges ? 'danger' : 'primary'}
                         leftIcon={<Save className="w-4 h-4" />}
                         onClick={() => {
+                            // ENSURE DATA SANITY:
+                            // Sync current visual fields to the correct variant storage slot
+                            if (template && template.mode === 'connected') {
+                                const currentVariant = activeVariant;
+                                const updatedVariants = { ...(template.variants || {}) };
+
+                                updatedVariants[currentVariant] = {
+                                    fields: template.fields,
+                                    imageUrl: template.imageUrl,
+                                    orientation: template.orientation,
+                                    width: template.width,
+                                    height: template.height,
+                                };
+
+                                updateTemplate(templateId, { variants: updatedVariants });
+                            }
+
+                            // Update snapshot to mark current state as "saved"
+                            savedSnapshotRef.current = JSON.stringify({
+                                fields: template?.fields,
+                                variants: template?.variants
+                            });
+                            setLastSavedTime(new Date());
                             setHasUnsavedChanges(false);
                             setShowSavedToast(true);
                             setTimeout(() => setShowSavedToast(false), 2000);
                         }}
                     >
-                        Save
+                        {hasUnsavedChanges ? 'Save Changes' : 'Saved'}
                     </Button>
                 </div>
             </header >
@@ -1128,6 +1474,16 @@ export default function TemplateEditorPage() {
                     <div className="fixed top-20 right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 animate-in slide-in-from-top-2 fade-in duration-200">
                         <Check className="w-4 h-4" />
                         <span className="text-sm font-medium">Saved to local storage!</span>
+                    </div>
+                )
+            }
+
+            {/* Copied Toast */}
+            {
+                showCopiedToast && (
+                    <div className="fixed top-20 right-6 z-50 bg-blue-500 text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 animate-in slide-in-from-top-2 fade-in duration-200">
+                        <Copy className="w-4 h-4" />
+                        <span className="text-sm font-medium">Field copied!</span>
                     </div>
                 )
             }
@@ -1180,7 +1536,7 @@ export default function TemplateEditorPage() {
                     >
                         <div
                             ref={canvasRef}
-                            className={`relative bg-white dark:bg-neutral-900 shadow-2xl rounded-lg overflow-hidden shrink-0 ${activeTool === 'draw' ? 'cursor-crosshair' : ''}`}
+                            className={`relative bg-white shadow-2xl rounded-lg overflow-hidden shrink-0 ${activeTool === 'draw' ? 'cursor-crosshair' : ''}`}
                             style={{
                                 width: `${(template.width || (template.orientation === 'landscape' ? 842 : 595)) * zoom}px`,
                                 height: `${(template.height || (template.orientation === 'landscape' ? 595 : 842)) * zoom}px`,
@@ -1240,14 +1596,14 @@ export default function TemplateEditorPage() {
                                                 {/* Header Outside - Absolute Top */}
                                                 {(field.showTableHeaders !== false || !showPreview) && (
                                                     <div
-                                                        className={`absolute bottom-full left-0 w-full flex bg-neutral-300 dark:bg-neutral-600 text-neutral-900 dark:text-gray-100 border-b border-neutral-300 dark:border-neutral-700 font-semibold items-center ${field.showTableHeaders === false ? 'opacity-50' : ''}`}
+                                                        className={`absolute bottom-full left-0 w-full flex bg-neutral-300 text-neutral-900 border-b border-neutral-300 font-semibold items-center ${field.showTableHeaders === false ? 'opacity-50' : ''}`}
                                                         style={{ fontSize: '0.8em', height: '1.5em' }}
                                                     >
                                                         {field.columns.map((col, index) => (
                                                             <div
                                                                 key={col.id}
                                                                 style={{ width: `${col.width}%` }}
-                                                                className="px-1 border-r border-neutral-300 dark:border-neutral-700 last:border-0 truncate h-full flex items-center relative group/col"
+                                                                className="px-1 border-r border-neutral-300 last:border-0 truncate h-full flex items-center relative group/col"
                                                             >
                                                                 {col.header}
                                                             </div>
@@ -1256,14 +1612,14 @@ export default function TemplateEditorPage() {
                                                 )}
 
                                                 {/* Body - Fills the Box */}
-                                                <div className="w-full h-full relative border-x border-b border-blue-300 dark:border-blue-700 bg-white/50 dark:bg-neutral-900/50 overflow-hidden">
+                                                <div className="w-full h-full relative border-x border-b border-blue-300 bg-white/50 overflow-hidden">
 
                                                     {/* Row Grid (Horizontal Lines) */}
                                                     <div className="absolute inset-0 flex flex-col">
                                                         {field.type === 'line-items' && Array.from({ length: Math.min(50, field.maxRows || 1) }).map((_, i, arr) => (
                                                             <div
                                                                 key={`row-${i}`}
-                                                                className={`${i !== arr.length - 1 ? 'border-b border-blue-200 dark:border-blue-800' : ''} w-full flex-1`}
+                                                                className={`${i !== arr.length - 1 ? 'border-b border-blue-200' : ''} w-full flex-1`}
                                                             />
                                                         ))}
                                                     </div>
@@ -1274,7 +1630,7 @@ export default function TemplateEditorPage() {
                                                             <div
                                                                 key={`vline-${col.id}`}
                                                                 style={{ width: `${col.width}%` }}
-                                                                className={`h-full border-r border-blue-200 dark:border-blue-800 ${index === field.columns!.length - 1 ? 'border-r-0' : ''}`}
+                                                                className={`h-full border-r border-blue-200 ${index === field.columns!.length - 1 ? 'border-r-0' : ''}`}
                                                             />
                                                         ))}
                                                     </div>
@@ -1306,6 +1662,42 @@ export default function TemplateEditorPage() {
                                                     </div>
                                                 )}
                                             </>
+                                        ) : field.type === 'link-button' ? (
+                                            (() => {
+                                                // @ts-ignore
+                                                const buttonColor = field.customValues?.buttonColor || '#3b82f6';
+                                                // @ts-ignore
+                                                const borderRadius = field.customValues?.borderRadius || 'rounded';
+                                                // @ts-ignore
+                                                const variant = field.customValues?.variant || 'filled';
+
+                                                const radiusMap: Record<string, string> = {
+                                                    'sharp': '0px',
+                                                    'rounded': '6px',
+                                                    'pill': '999px'
+                                                };
+
+                                                const isOutline = variant === 'outline';
+                                                const bgColor = isOutline ? 'transparent' : buttonColor;
+                                                const borderColor = buttonColor;
+                                                const textColor = field.fontColor || (isOutline ? buttonColor : '#ffffff');
+
+                                                return (
+                                                    <div
+                                                        className="w-full h-full flex items-center justify-center transition-all box-border"
+                                                        style={{
+                                                            backgroundColor: bgColor,
+                                                            border: isOutline ? `1.5px solid ${borderColor}` : 'none',
+                                                            borderRadius: radiusMap[borderRadius] || '6px',
+                                                            color: textColor,
+                                                            fontSize: `${field.fontSize * zoom}px`,
+                                                            fontWeight: field.fontWeight === 'bold' ? 700 : 500
+                                                        }}
+                                                    >
+                                                        {field.label}
+                                                    </div>
+                                                );
+                                            })()
                                         ) : (
                                             <AutoFitText
                                                 value={(() => {
@@ -1320,6 +1712,7 @@ export default function TemplateEditorPage() {
                                                 alignment={field.alignment}
                                                 fontColor={field.fontColor}
                                                 isMultiLine={(field.type === 'notes' || field.type === 'customer-address') || (field.height > (field.fontSize * 1.8 / 842) * 100)}
+                                                className={!showPreview ? "opacity-40" : ""}
                                             />
                                         )}
                                     </div>
@@ -1385,7 +1778,15 @@ export default function TemplateEditorPage() {
                                         <Select
                                             options={fieldTypeOptions}
                                             value={selectedField.type}
-                                            onChange={(v) => handleFieldUpdate('type', v as FieldType)}
+                                            onChange={(v) => {
+                                                const newType = v as FieldType;
+                                                handleFieldUpdate('type', newType);
+                                                // Auto-fill label with the type's display name
+                                                const typeLabel = fieldTypeOptions.find(opt => opt.value === newType)?.label;
+                                                if (typeLabel) {
+                                                    handleFieldUpdate('label', typeLabel);
+                                                }
+                                            }}
                                             className="w-full bg-neutral-50/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-neutral-700/50"
                                         />
                                         {/* Value Preview for variable fields */}
@@ -1432,6 +1833,113 @@ export default function TemplateEditorPage() {
                                                         : 'Plain text.'}
                                             </p>
                                         </div>
+                                    )}
+
+                                    {/* Link Button Properties */}
+                                    {selectedField.type === 'link-button' && (
+                                        <>
+                                            <div className="space-y-1.5">
+                                                <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Target URL</label>
+                                                <Input
+                                                    placeholder="https://example.com"
+                                                    // @ts-ignore
+                                                    value={selectedField.customValues?.url || ''}
+                                                    // @ts-ignore
+                                                    onChange={(e) => handleFieldUpdate('customValues', { ...selectedField.customValues, url: e.target.value })}
+                                                    className="bg-neutral-50/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-neutral-700/50"
+                                                />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Button Color</label>
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="color"
+                                                        // @ts-ignore
+                                                        value={selectedField.customValues?.buttonColor || '#3b82f6'}
+                                                        // @ts-ignore
+                                                        onChange={(e) => handleFieldUpdate('customValues', { ...selectedField.customValues, buttonColor: e.target.value })}
+                                                        className="h-8 w-8 rounded cursor-pointer border-0 p-0"
+                                                    />
+                                                    <Input
+                                                        placeholder="#3b82f6"
+                                                        // @ts-ignore
+                                                        value={selectedField.customValues?.buttonColor || '#3b82f6'}
+                                                        // @ts-ignore
+                                                        onChange={(e) => handleFieldUpdate('customValues', { ...selectedField.customValues, buttonColor: e.target.value })}
+                                                        className="flex-1 bg-neutral-50/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-neutral-700/50"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Button Style (Border Radius) */}
+                                            <div className="space-y-1.5">
+                                                <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Button Style</label>
+                                                <div className="grid grid-cols-3 gap-1 bg-neutral-100/50 dark:bg-neutral-900/50 p-1 rounded-lg border border-neutral-200/50 dark:border-neutral-700/50">
+                                                    {[
+                                                        { value: 'sharp', label: 'Sharp' },
+                                                        { value: 'rounded', label: 'Rounded' },
+                                                        { value: 'pill', label: 'Pill' }
+                                                    ].map((opt) => {
+                                                        const current = selectedField.customValues?.borderRadius || 'rounded'; // Default to rounded
+                                                        const isActive = current === opt.value;
+                                                        return (
+                                                            <button
+                                                                type="button"
+                                                                key={opt.value}
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    handleFieldUpdate('customValues', {
+                                                                        ...selectedField.customValues,
+                                                                        borderRadius: opt.value
+                                                                    });
+                                                                }}
+                                                                className={`h-7 text-[10px] font-medium rounded transition-all flex items-center justify-center ${isActive
+                                                                    ? 'bg-white dark:bg-neutral-800 text-blue-600 dark:text-blue-400 shadow-sm border border-neutral-200 dark:border-neutral-700'
+                                                                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                                                                    }`}
+                                                            >
+                                                                {opt.label}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+
+                                            {/* Button Variant (Fill/Outline) */}
+                                            <div className="space-y-1.5">
+                                                <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Fill Style</label>
+                                                <div className="grid grid-cols-2 gap-1 bg-neutral-100/50 dark:bg-neutral-900/50 p-1 rounded-lg border border-neutral-200/50 dark:border-neutral-700/50">
+                                                    {[
+                                                        { value: 'filled', label: 'Filled' },
+                                                        { value: 'outline', label: 'Outline' }
+                                                    ].map((opt) => {
+                                                        const current = selectedField.customValues?.variant || 'filled';
+                                                        const isActive = current === opt.value;
+                                                        return (
+                                                            <button
+                                                                type="button"
+                                                                key={opt.value}
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    handleFieldUpdate('customValues', {
+                                                                        ...selectedField.customValues,
+                                                                        variant: opt.value
+                                                                    });
+                                                                }}
+                                                                className={`h-7 text-[10px] font-medium rounded transition-all flex items-center justify-center ${isActive
+                                                                    ? 'bg-white dark:bg-neutral-800 text-blue-600 dark:text-blue-400 shadow-sm border border-neutral-200 dark:border-neutral-700'
+                                                                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                                                                    }`}
+                                                            >
+                                                                {opt.label}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </>
                                     )}
                                 </PropertySection>
 
@@ -1783,29 +2291,56 @@ export default function TemplateEditorPage() {
                                         </div>
 
                                         <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700">
-                                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Page Orientation</label>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <button
-                                                    onClick={() => updateTemplate(template.id, { orientation: 'portrait' })}
-                                                    className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${template.orientation === 'portrait'
-                                                        ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300'
-                                                        : 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700'
-                                                        }`}
+                                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Cover Image (Optional)</label>
+                                            <div className="relative group">
+                                                <div
+                                                    onClick={() => document.getElementById('template-cover-upload')?.click()}
+                                                    className="w-full aspect-video bg-neutral-100 dark:bg-neutral-900 rounded-lg border-2 border-dashed border-neutral-200 dark:border-neutral-700 hover:border-blue-400 dark:hover:border-blue-600 cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
                                                 >
-                                                    <span className="w-3 h-4 border-2 border-current rounded-sm"></span>
-                                                    Portrait
-                                                </button>
-                                                <button
-                                                    onClick={() => updateTemplate(template.id, { orientation: 'landscape' })}
-                                                    className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${template.orientation === 'landscape'
-                                                        ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300'
-                                                        : 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700'
-                                                        }`}
-                                                >
-                                                    <span className="w-4 h-3 border-2 border-current rounded-sm"></span>
-                                                    Landscape
-                                                </button>
+                                                    {template.coverImage ? (
+                                                        <img src={template.coverImage} alt="Cover" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="text-center p-4">
+                                                            <Plus className="w-6 h-6 mx-auto text-neutral-400 mb-2" />
+                                                            <span className="text-xs text-neutral-500">Add Cover Image</span>
+                                                        </div>
+                                                    )}
+
+                                                    {template.coverImage && (
+                                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                            <span className="text-white text-xs font-medium bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                                                                Change
+                                                            </span>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    updateTemplate(template.id, { coverImage: undefined });
+                                                                }}
+                                                                className="text-white text-xs font-medium bg-red-500/80 px-3 py-1.5 rounded-full backdrop-blur-sm hover:bg-red-600"
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <input
+                                                    id="template-cover-upload"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) {
+                                                            compressImage(file, 800, 0.7).then((result) => {
+                                                                updateTemplate(template.id, { coverImage: result });
+                                                            });
+                                                        }
+                                                    }}
+                                                />
                                             </div>
+                                            <p className="text-xs text-neutral-500 mt-1.5 px-1">
+                                                Used as thumbnail in template lists. Defaults to the first uploaded image.
+                                            </p>
                                         </div>
 
 
@@ -1839,9 +2374,7 @@ export default function TemplateEditorPage() {
                                                     onChange={(e) => {
                                                         const file = e.target.files?.[0];
                                                         if (file) {
-                                                            const reader = new FileReader();
-                                                            reader.onload = (ev) => {
-                                                                const result = ev.target?.result as string;
+                                                            compressImage(file, 1920, 0.7).then((result) => {
                                                                 // Load image to get dimensions
                                                                 const img = new window.Image();
                                                                 img.onload = () => {
@@ -1855,8 +2388,7 @@ export default function TemplateEditorPage() {
                                                                     });
                                                                 };
                                                                 img.src = result;
-                                                            };
-                                                            reader.readAsDataURL(file);
+                                                            });
                                                         }
                                                     }}
                                                 />
@@ -1925,7 +2457,15 @@ export default function TemplateEditorPage() {
                         label="Field Type"
                         options={fieldTypeOptions}
                         value={newFieldType}
-                        onChange={(v) => setNewFieldType(v as FieldType)}
+                        onChange={(v) => {
+                            const type = v as FieldType;
+                            setNewFieldType(type);
+                            // Auto-fill label with the type's display name
+                            const typeLabel = fieldTypeOptions.find(opt => opt.value === type)?.label;
+                            if (typeLabel) {
+                                setNewFieldLabel(typeLabel);
+                            }
+                        }}
                     />
                     {newFieldType !== 'line-items' && (
                         <div className="space-y-1.5">
@@ -1996,11 +2536,9 @@ export default function TemplateEditorPage() {
                             const file = e.target.files?.[0];
                             if (file) {
                                 setVariantUploadFile(file);
-                                const reader = new FileReader();
-                                reader.onload = (ev) => {
-                                    setVariantUploadPreview(ev.target?.result as string);
-                                };
-                                reader.readAsDataURL(file);
+                                compressImage(file, 1920, 0.7).then((result) => {
+                                    setVariantUploadPreview(result);
+                                });
                             }
                         }}
                     />

@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      // Check if user document has admin role
+      // This requires the user document to have role: 'admin' or isAdmin: true
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true);
+    }
+
+    // ============================================
+    // USERS COLLECTION
+    // ============================================
+    match /users/{userId} {
+      // Users can create their own profile
+      allow create: if isAuthenticated() && isOwner(userId);
+      
+      // Users can read their own profile, admins can read all
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Users can update their own profile (but not role/isAdmin fields)
+      allow update: if isOwner(userId) && 
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin']));
+      
+      // Admins can update any user (including role changes)
+      allow update: if isAdmin();
+      
+      // SUBCOLLECTIONS (documents, customers, templates, products, discounts)
+      // These remain strictly private to the user
+      match /{collection}/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ============================================
+    // ANNOUNCEMENTS (Admin-controlled)
+    // ============================================
+    match /announcements/{announcementId} {
+      // Anyone can read active announcements (for live app display)
+      allow read: if true;
+      
+      // Only admins can create/update/delete announcements
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ============================================
+    // FEEDBACK (User-submitted, Admin-managed)
+    // ============================================
+    match /feedback/{feedbackId} {
+      // Anyone can submit feedback (even anonymous)
+      allow create: if true;
+      
+      // Users can read their own feedback
+      allow read: if isAuthenticated() && 
+        (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Only admins can update or delete feedback
+      allow update, delete: if isAdmin();
+    }
+
+    // ============================================
+    // MARKETPLACE TEMPLATES (Admin-published, User-readable)
+    // ============================================
+    match /marketplace_templates/{templateId} {
+      // Anyone can read published templates
+      allow read: if resource.data.published == true || isAdmin();
+      
+      // Only admins can manage templates
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ============================================
+    // USER NOTIFICATIONS (Per-user read tracking)
+    // ============================================
+    match /user_notifications/{userId}/notifications/{notificationId} {
+      // Users can read/write their own notification status
+      allow read, write: if isOwner(userId);
+    }
+  }
+}

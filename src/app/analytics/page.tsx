@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from 'react';
-import { useDocumentStore, useSettingsStore } from '@/lib/store';
-import { formatCurrency } from '@/lib/utils';
+import { useDocumentStore, useSettingsStore, useTemplateStore } from '@/lib/store';
+import { formatCurrency, getEffectiveGrandTotal } from '@/lib/utils';
 import { X, Lightbulb } from 'lucide-react';
 import { DocumentStatus } from '@/lib/types';
 import RevenueChart from "@/components/dashboard/RevenueChart";
@@ -141,6 +141,7 @@ function HintCard({ title, description, badge, onClose }: { title: string, descr
 export default function AnalyticsPage() {
     const { documents } = useDocumentStore();
     const { company } = useSettingsStore();
+    const { getTemplateById } = useTemplateStore();
     const [hiddenHints, setHiddenHints] = useState<string[]>([]);
 
     // ------------------------------------------
@@ -156,12 +157,12 @@ export default function AnalyticsPage() {
             d.status === 'paid' &&
             d.paidAt &&
             new Date(d.paidAt) >= startOfMonth
-        ).reduce((acc, d) => acc + d.grandTotal, 0);
+        ).reduce((acc, d) => acc + getEffectiveGrandTotal(d, getTemplateById(d.templateId)), 0);
 
         // 2. Money Waiting
         const waiting = invoices.filter(d =>
             ['sent', 'overdue'].includes(d.status)
-        ).reduce((acc, d) => acc + d.grandTotal, 0);
+        ).reduce((acc, d) => acc + getEffectiveGrandTotal(d, getTemplateById(d.templateId)), 0);
 
         // 3. Invoices Sent (Active, not draft)
         const sentCount = invoices.filter(d => d.status !== 'draft').length;
@@ -184,7 +185,7 @@ export default function AnalyticsPage() {
             sentCount,
             avgDays: updatedAvgDays
         };
-    }, [documents]);
+    }, [documents, getTemplateById]);
 
     const statusCounts = useMemo(() => {
         const invoices = documents.filter(d => d.type === 'invoice');
@@ -203,7 +204,7 @@ export default function AnalyticsPage() {
                 if (!customerMap[d.customerId]) {
                     customerMap[d.customerId] = { name: d.customerName, total: 0, count: 0 };
                 }
-                customerMap[d.customerId].total += d.grandTotal;
+                customerMap[d.customerId].total += getEffectiveGrandTotal(d, getTemplateById(d.templateId));
                 customerMap[d.customerId].count += 1;
             }
         });
@@ -218,7 +219,7 @@ export default function AnalyticsPage() {
         ).size;
 
         return { top: sorted, lateCount: latePayersCount };
-    }, [documents]);
+    }, [documents, getTemplateById]);
 
     const productInsights = useMemo(() => {
         const invoices = documents.filter(d => d.type === 'invoice');

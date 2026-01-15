@@ -11,7 +11,7 @@ export default function EditInvoicePage() {
         <DocumentForm
             type="invoice"
             title="Edit Invoice"
-            backUrl="/invoices"
+            backUrl={`/invoices/${id}`}
             documentId={id}
         />
     );

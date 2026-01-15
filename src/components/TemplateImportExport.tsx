@@ -120,6 +120,7 @@ export const downloadTemplate = (template: Template) => {
         orientation: template.orientation,
         width: template.width,
         height: template.height,
+        coverImage: template.coverImage,
         mode: template.mode,
         variants: template.variants,
         meta: {

@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { TrendingUp, Clock, FileText, DollarSign, ArrowUpRight, ArrowDownRight, BarChart2 } from 'lucide-react';
-import { useDocumentStore, useSettingsStore } from '@/lib/store';
+import { useDocumentStore, useSettingsStore, useTemplateStore } from '@/lib/store';
 import { useMemo, useState, useEffect } from 'react';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, sumEffectiveGrandTotals } from '@/lib/utils';
 
 interface StatCardProps {
     title: string;
@@ -80,6 +80,7 @@ export default function StatsGrid() {
     const [mounted, setMounted] = useState(false);
     const { documents } = useDocumentStore();
     const { company } = useSettingsStore();
+    const { getTemplateById } = useTemplateStore();
 
     useEffect(() => {
         setMounted(true);
@@ -91,11 +92,11 @@ export default function StatsGrid() {
         if (!mounted) return [];
         // Total Revenue (Paid Invoices)
         const paidInvoices = documents.filter(d => d.type === 'invoice' && d.status === 'paid');
-        const totalRevenue = paidInvoices.reduce((sum, doc) => sum + doc.grandTotal, 0);
+        const totalRevenue = sumEffectiveGrandTotals(paidInvoices, getTemplateById);
 
         // Outstanding Invoices (Sent or Overdue)
         const outstandingInvoices = documents.filter(d => d.type === 'invoice' && (d.status === 'sent' || d.status === 'overdue'));
-        const outstandingAmount = outstandingInvoices.reduce((sum, doc) => sum + doc.grandTotal, 0);
+        const outstandingAmount = sumEffectiveGrandTotals(outstandingInvoices, getTemplateById);
         const overdueCount = outstandingInvoices.filter(d => d.status === 'overdue').length;
 
         // Total Documents

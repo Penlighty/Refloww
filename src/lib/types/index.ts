@@ -27,6 +27,7 @@ export type FieldType =
     | 'amount-in-words'
     | 'amount-paid'
     | 'amount-due'
+    | 'link-button'
     | 'custom';
 
 export type TextAlignment = 'left' | 'center' | 'right';
@@ -56,6 +57,7 @@ export interface MappedField {
     showTableHeaders?: boolean; // Toggle header visibility
     maxRows?: number; // Maximum number of rows allowed for line-items
     dataType?: 'text' | 'number' | 'currency'; // Data type for custom fields
+    customValues?: Record<string, any>; // For extra properties like link buttons
 }
 
 export interface Template {
@@ -76,6 +78,7 @@ export interface Template {
     }>>;
     width?: number;
     height?: number;
+    coverImage?: string;       // Optional cover image for template thumbnail
     isDefault: boolean;
     createdAt: string;         // ISO date string
     updatedAt: string;         // ISO date string
@@ -86,6 +89,7 @@ export interface Template {
 export interface Customer {
     id: string;
     name: string;
+    companyName?: string;
     email: string;
     phone: string;
     address: string;
@@ -93,6 +97,8 @@ export interface Customer {
     createdAt: string;
     updatedAt: string;
 }
+
+
 
 // -------------------- Product Types --------------------
 
@@ -223,6 +229,7 @@ export interface FilterOption {
 
 export interface CustomerFormData {
     name: string;
+    companyName?: string;
     email: string;
     phone: string;
     address: string;

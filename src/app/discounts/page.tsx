@@ -5,6 +5,7 @@ import { useDiscountStore } from '@/lib/store';
 import { Discount, DiscountFormData } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
 import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Select } from '@/components/ui';
+import { toast } from 'react-hot-toast';
 import {
     Plus,
     Percent,
@@ -120,8 +121,10 @@ export default function DiscountsPage() {
 
         if (editingDiscount) {
             updateDiscount(editingDiscount.id, formData);
+            toast.success(`Discount "${formData.name}" updated`);
         } else {
             addDiscount(formData);
+            toast.success(`Discount "${formData.name}" created successfully!`);
         }
 
         setIsModalOpen(false);
@@ -129,14 +132,16 @@ export default function DiscountsPage() {
 
     const handleDelete = () => {
         if (discountToDelete) {
+            const name = discountToDelete.name;
             deleteDiscount(discountToDelete.id);
             setIsDeleteModalOpen(false);
             setDiscountToDelete(null);
+            toast.success(`Discount "${name}" deleted`);
         }
     };
 
     return (
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
@@ -246,8 +251,8 @@ export default function DiscountsPage() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${discount.isActive
-                                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                                : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
+                                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                            : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
                                             }`}>
                                             {discount.isActive ? (
                                                 <>
@@ -274,6 +279,7 @@ export default function DiscountsPage() {
                                                         onClick={() => {
                                                             updateDiscount(discount.id, { isActive: !discount.isActive });
                                                             setOpenMenuId(null);
+                                                            toast.success(`"${discount.name}" ${!discount.isActive ? 'activated' : 'deactivated'}`);
                                                         }}
                                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                     >

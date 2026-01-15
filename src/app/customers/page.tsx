@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useCustomerStore } from '@/lib/store';
 import { Customer, CustomerFormData } from '@/lib/types';
 import { formatDate, formatPhone, parseCSV, generateCSV, downloadCSV, readFileAsText } from '@/lib/utils';
 import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea } from '@/components/ui';
+import { toast } from 'react-hot-toast';
 import {
     Plus,
     Users,
@@ -22,7 +24,8 @@ import {
     Download,
     AlertCircle,
     Check,
-    Eye
+    Eye,
+    Building
 } from 'lucide-react';
 
 type SortField = 'name' | 'email' | 'createdAt';
@@ -58,6 +61,7 @@ const customerCSVMapping = {
 
 export default function CustomersPage() {
     const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomerStore();
+    const searchParams = useSearchParams();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // UI State
@@ -71,6 +75,16 @@ export default function CustomersPage() {
     const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
+    // Auto-open modal if 'add' query param is present
+    useEffect(() => {
+        if (searchParams.get('add') === 'true') {
+            setEditingCustomer(null);
+            setFormData({ name: '', email: '', phone: '', address: '', notes: '' });
+            setFormErrors({});
+            setIsModalOpen(true);
+        }
+    }, [searchParams]);
+
     // Import state
     const [importData, setImportData] = useState<CustomerFormData[]>([]);
     const [importErrors, setImportErrors] = useState<string[]>([]);
@@ -79,6 +93,7 @@ export default function CustomersPage() {
     // Form State
     const [formData, setFormData] = useState<CustomerFormData>({
         name: '',
+        companyName: '',
         email: '',
         phone: '',
         address: '',
@@ -120,7 +135,7 @@ export default function CustomersPage() {
 
     const openCreateModal = () => {
         setEditingCustomer(null);
-        setFormData({ name: '', email: '', phone: '', address: '', notes: '' });
+        setFormData({ name: '', companyName: '', email: '', phone: '', address: '', notes: '' });
         setFormErrors({});
         setIsModalOpen(true);
     };
@@ -129,6 +144,7 @@ export default function CustomersPage() {
         setEditingCustomer(customer);
         setFormData({
             name: customer.name,
+            companyName: customer.companyName || '',
             email: customer.email,
             phone: customer.phone,
             address: customer.address,
@@ -166,8 +182,10 @@ export default function CustomersPage() {
 
         if (editingCustomer) {
             updateCustomer(editingCustomer.id, formData);
+            toast.success(`Customer "${formData.name}" updated`);
         } else {
             addCustomer(formData);
+            toast.success(`Customer "${formData.name}" added successfully!`);
         }
 
         setIsModalOpen(false);
@@ -175,9 +193,11 @@ export default function CustomersPage() {
 
     const handleDelete = () => {
         if (customerToDelete) {
+            const name = customerToDelete.name;
             deleteCustomer(customerToDelete.id);
             setIsDeleteModalOpen(false);
             setCustomerToDelete(null);
+            toast.success(`Customer "${name}" deleted`);
         }
     };
 
@@ -231,6 +251,7 @@ export default function CustomersPage() {
     const handleImportConfirm = () => {
         importData.forEach(customer => addCustomer(customer));
         setImportSuccess(true);
+        toast.success(`${importData.length} customer${importData.length !== 1 ? 's' : ''} imported successfully!`);
     };
 
     const handleExportCSV = () => {
@@ -242,10 +263,11 @@ export default function CustomersPage() {
             { key: 'notes', header: 'Notes' },
         ]);
         downloadCSV(csv, `customers-${new Date().toISOString().split('T')[0]}.csv`);
+        toast.success(`Exported ${customers.length} customers to CSV`);
     };
 
     return (
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
             {/* Hidden file input */}
             <input
                 type="file"
@@ -465,6 +487,13 @@ export default function CustomersPage() {
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         error={formErrors.email}
                         leftIcon={<Mail className="w-4 h-4" />}
+                    />
+                    <Input
+                        label="Company Name"
+                        placeholder="e.g. Acme Corp"
+                        value={formData.companyName}
+                        onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                        leftIcon={<Building className="w-4 h-4" />}
                     />
                     <Input
                         label="Phone Number"

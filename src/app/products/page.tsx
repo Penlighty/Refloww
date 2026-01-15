@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useProductStore } from '@/lib/store';
+import { useSearchParams } from 'next/navigation';
+import { useProductStore, useSettingsStore } from '@/lib/store';
 import { Product, ProductFormData } from '@/lib/types';
 import { formatCurrency, formatDate, parseCSV, generateCSV, downloadCSV, readFileAsText } from '@/lib/utils';
 import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea } from '@/components/ui';
+import { toast } from 'react-hot-toast';
+import { generateSkuFromCategory } from '@/lib/utils/productUtils';
 import {
     Plus,
     Package,
@@ -21,7 +24,9 @@ import {
     Download,
     AlertCircle,
     Check,
-    Eye
+    Eye,
+    Minus,
+    X
 } from 'lucide-react';
 
 type SortField = 'name' | 'unitPrice' | 'sku' | 'createdAt';
@@ -43,7 +48,9 @@ const productCSVMapping = {
 };
 
 export default function ProductsPage() {
-    const { products, addProduct, updateProduct, deleteProduct } = useProductStore();
+    const { products, categories, addProduct, updateProduct, deleteProduct, addCategory, removeCategory } = useProductStore();
+    const { numbering, company } = useSettingsStore();
+    const searchParams = useSearchParams();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // UI State
@@ -56,6 +63,34 @@ export default function ProductsPage() {
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+    // Auto-open modal if 'add' query param is present
+    useEffect(() => {
+        if (searchParams.get('add') === 'true') {
+            setEditingProduct(null);
+            setFormData({ name: '', sku: '', description: '', unitPrice: 0, category: '' });
+            setFormErrors({});
+            setIsModalOpen(true);
+        }
+    }, [searchParams]);
+
+    // Category Dropdown State
+    const [isCategoryListOpen, setIsCategoryListOpen] = useState(false);
+    const categoryContainerRef = useRef<HTMLDivElement>(null);
+
+    // Close category list when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (categoryContainerRef.current && !categoryContainerRef.current.contains(event.target as Node)) {
+                setIsCategoryListOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // Import state
     const [importData, setImportData] = useState<ProductFormData[]>([]);
@@ -157,6 +192,7 @@ export default function ProductsPage() {
             category: product.category,
         });
         setOpenMenuId(null);
+        toast.success(`Product duplicated as "${product.name} (Copy)"`);
     };
 
     const validateForm = (): boolean => {
@@ -181,8 +217,10 @@ export default function ProductsPage() {
 
         if (editingProduct) {
             updateProduct(editingProduct.id, formData);
+            toast.success(`Product "${formData.name}" updated`);
         } else {
             addProduct(formData);
+            toast.success(`Product "${formData.name}" added successfully!`);
         }
 
         setIsModalOpen(false);
@@ -190,9 +228,11 @@ export default function ProductsPage() {
 
     const handleDelete = () => {
         if (productToDelete) {
+            const name = productToDelete.name;
             deleteProduct(productToDelete.id);
             setIsDeleteModalOpen(false);
             setProductToDelete(null);
+            toast.success(`Product "${name}" deleted`);
         }
     };
 
@@ -246,6 +286,7 @@ export default function ProductsPage() {
     const handleImportConfirm = () => {
         importData.forEach(product => addProduct(product));
         setImportSuccess(true);
+        toast.success(`${importData.length} product${importData.length !== 1 ? 's' : ''} imported successfully!`);
     };
 
     const handleExportCSV = () => {
@@ -257,10 +298,11 @@ export default function ProductsPage() {
             { key: 'category', header: 'Category' },
         ]);
         downloadCSV(csv, `products-${new Date().toISOString().split('T')[0]}.csv`);
+        toast.success(`Exported ${products.length} products to CSV`);
     };
 
     return (
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
             {/* Hidden file input */}
             <input
                 type="file"
@@ -420,7 +462,7 @@ export default function ProductsPage() {
                                         )}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="font-semibold text-[#2d3748] dark:text-white">{formatCurrency(product.unitPrice)}</span>
+                                        <span className="font-semibold text-[#2d3748] dark:text-white">{formatCurrency(product.unitPrice, company.currency)}</span>
                                     </td>
                                     <td className="px-6 py-4 hidden md:table-cell">
                                         <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(product.createdAt)}</span>
@@ -500,6 +542,71 @@ export default function ProductsPage() {
                         error={formErrors.sku}
                         leftIcon={<Hash className="w-4 h-4" />}
                     />
+                    <div className="relative" ref={categoryContainerRef}>
+                        <Input
+                            label="Category"
+                            placeholder="e.g. Electronics"
+                            value={formData.category}
+                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                            onFocus={() => setIsCategoryListOpen(true)}
+                            onBlur={() => {
+                                // Add new category if it doesn't exist (on blur)
+                                if ((formData.category || '').trim() && !categories.includes((formData.category || '').trim())) {
+                                    const cat = (formData.category || '').trim();
+                                    addCategory(cat);
+
+                                    // Generate SKU if empty
+                                    if (!formData.sku) {
+                                        const generatedSku = generateSkuFromCategory(cat, products, numbering.product.format);
+                                        setFormData(prev => ({ ...prev, category: cat, sku: generatedSku }));
+                                    }
+                                }
+                            }}
+                            leftIcon={<Tag className="w-4 h-4" />}
+                        />
+
+                        {isCategoryListOpen && (
+                            <div className="absolute z-50 w-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                {categories.filter(c => c.toLowerCase().includes((formData.category || '').toLowerCase())).length === 0 ? (
+                                    <div className="px-4 py-2 text-sm text-neutral-500 dark:text-neutral-400">
+                                        Type to create "{formData.category}"
+                                    </div>
+                                ) : (
+                                    categories
+                                        .filter(c => c.toLowerCase().includes((formData.category || '').toLowerCase()))
+                                        .map((category) => (
+                                            <div
+                                                key={category}
+                                                className="flex items-center justify-between px-3 py-2 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700/50 cursor-pointer group"
+                                                onClick={() => {
+                                                    const generatedSku = (!formData.sku)
+                                                        ? generateSkuFromCategory(category, products, numbering.product.format)
+                                                        : formData.sku;
+
+                                                    setFormData({ ...formData, category, sku: generatedSku });
+                                                    setIsCategoryListOpen(false);
+                                                }}
+                                            >
+                                                <span className="text-neutral-700 dark:text-neutral-200">{category}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (confirm(`Remove "${category}" from options?`)) {
+                                                            removeCategory(category);
+                                                        }
+                                                    }}
+                                                    className="p-1 text-neutral-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                                    title="Remove from list"
+                                                >
+                                                    <Minus className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        ))
+                                )}
+                            </div>
+                        )}
+                    </div>
                     <Input
                         label="Unit Price"
                         type="number"
@@ -510,13 +617,6 @@ export default function ProductsPage() {
                         onChange={(e) => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) || 0 })}
                         error={formErrors.unitPrice}
                         leftIcon={<DollarSign className="w-4 h-4" />}
-                    />
-                    <Input
-                        label="Category"
-                        placeholder="e.g. Electronics"
-                        value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        leftIcon={<Tag className="w-4 h-4" />}
                     />
                     <div className="md:col-span-2">
                         <Textarea

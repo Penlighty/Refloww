@@ -51,17 +51,17 @@ export default function QuickActions() {
             label: 'Delivery Note',
         },
         {
-            href: '/customers',
+            href: '/customers?add=true',
             icon: <UserPlus className="w-3.5 h-3.5" strokeWidth={2} />,
             label: 'Add Customer',
         },
         {
-            href: '/products',
+            href: '/products?add=true',
             icon: <Package className="w-3.5 h-3.5" strokeWidth={2} />,
             label: 'Add Product',
         },
         {
-            href: '/templates/new',
+            href: '/templates',
             icon: <FolderPlus className="w-3.5 h-3.5" strokeWidth={2} />,
             label: 'New Template',
         },

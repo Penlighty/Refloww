@@ -4,7 +4,7 @@ import RecentTransactions from "@/components/RecentTransactions";
 
 export default function Home() {
   return (
-    <div className="max-w-7xl mx-auto flex flex-col gap-8">
+    <div className="w-full flex flex-col gap-8">
       {/* Stats Section */}
       <StatsGrid />
 

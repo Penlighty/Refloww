@@ -1,11 +1,12 @@
 "use client";
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useProductStore, useDocumentStore, useSettingsStore } from '@/lib/store';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { Button, Modal, ModalFooter, Input, Textarea, EmptyState } from '@/components/ui';
+import { generateSkuFromCategory } from '@/lib/utils/productUtils';
 import {
     ArrowLeft,
     Package,
@@ -19,7 +20,11 @@ import {
     Truck,
     Copy,
     TrendingUp,
-    ShoppingCart
+    ShoppingCart,
+    Plus,
+    Minus,
+    X,
+    Check
 } from 'lucide-react';
 
 export default function ProductDetailPage() {
@@ -27,7 +32,8 @@ export default function ProductDetailPage() {
     const router = useRouter();
     const productId = params.id as string;
 
-    const { products, updateProduct, deleteProduct, addProduct } = useProductStore();
+    // Store
+    const { products, categories, updateProduct, deleteProduct, addProduct, addCategory, removeCategory } = useProductStore();
     const { documents } = useDocumentStore();
     const { company } = useSettingsStore();
     const currency = company.currency;
@@ -45,6 +51,22 @@ export default function ProductDetailPage() {
         category: product?.category || '',
     });
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const [isCategoryListOpen, setIsCategoryListOpen] = useState(false);
+    const categoryContainerRef = useRef<HTMLDivElement>(null);
+
+    // Close category list when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (categoryContainerRef.current && !categoryContainerRef.current.contains(event.target as Node)) {
+                setIsCategoryListOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // Get product usage in documents
     const productUsage = useMemo(() => {
@@ -83,7 +105,7 @@ export default function ProductDetailPage() {
         // Sort by date descending
         recentDocuments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-        return { totalQuantity, totalRevenue, documentCount, recentDocuments: recentDocuments.slice(0, 5) };
+        return { totalQuantity, totalRevenue, documentCount, recentDocuments };
     }, [documents, productId]);
 
     // Document type config
@@ -220,125 +242,131 @@ export default function ProductDetailPage() {
                     </div>
 
                     {/* Details Card */}
-                    <div className="bg-white border border-neutral-100 rounded-2xl p-6">
-                        <h3 className="text-sm font-semibold text-[#2d3748] mb-4">Product Details</h3>
+                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
+                        <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white mb-4">Product Details</h3>
                         <div className="space-y-4">
                             <div>
-                                <p className="text-xs text-neutral-400 mb-1">SKU</p>
-                                <code className="text-sm font-mono text-[#2d3748]">{product.sku}</code>
+                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-1">SKU</p>
+                                <code className="text-sm font-mono text-[#2d3748] dark:text-white">{product.sku}</code>
                             </div>
                             {product.category && (
                                 <div>
-                                    <p className="text-xs text-neutral-400 mb-1">Category</p>
-                                    <p className="text-sm text-[#2d3748]">{product.category}</p>
+                                    <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-1">Category</p>
+                                    <p className="text-sm text-[#2d3748] dark:text-white">{product.category}</p>
                                 </div>
                             )}
                             <div>
-                                <p className="text-xs text-neutral-400 mb-1">Created</p>
-                                <p className="text-sm text-[#2d3748]">{formatDate(product.createdAt)}</p>
+                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-1">Created</p>
+                                <p className="text-sm text-[#2d3748] dark:text-white">{formatDate(product.createdAt)}</p>
                             </div>
                             {product.description && (
-                                <div className="pt-4 border-t border-neutral-100">
-                                    <p className="text-xs text-neutral-400 mb-2">Description</p>
-                                    <p className="text-sm text-neutral-600">{product.description}</p>
+                                <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700">
+                                    <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-2">Description</p>
+                                    <p className="text-sm text-neutral-600 dark:text-neutral-300">{product.description}</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Stats Card */}
-                    <div className="bg-white border border-neutral-100 rounded-2xl p-6">
-                        <h3 className="text-sm font-semibold text-[#2d3748] mb-4">Sales Statistics</h3>
+                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
+                        <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white mb-4">Sales Statistics</h3>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-3 bg-neutral-50 rounded-xl">
+                            <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
                                 <div className="flex items-center gap-2 mb-1">
                                     <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
-                                    <p className="text-xs text-neutral-400">Revenue</p>
+                                    <p className="text-xs text-neutral-400 dark:text-neutral-500">Revenue</p>
                                 </div>
-                                <p className="text-lg font-bold text-[#2d3748]">{formatCurrency(productUsage.totalRevenue, currency)}</p>
+                                <p className="text-lg font-bold text-[#2d3748] dark:text-white">{formatCurrency(productUsage.totalRevenue, currency)}</p>
                             </div>
-                            <div className="p-3 bg-neutral-50 rounded-xl">
+                            <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
                                 <div className="flex items-center gap-2 mb-1">
                                     <ShoppingCart className="w-3.5 h-3.5 text-blue-500" />
-                                    <p className="text-xs text-neutral-400">Qty Sold</p>
+                                    <p className="text-xs text-neutral-400 dark:text-neutral-500">Qty Sold</p>
                                 </div>
-                                <p className="text-lg font-bold text-[#2d3748]">{productUsage.totalQuantity}</p>
+                                <p className="text-lg font-bold text-[#2d3748] dark:text-white">{productUsage.totalQuantity}</p>
                             </div>
-                            <div className="col-span-2 p-3 bg-neutral-50 rounded-xl">
+                            <div className="col-span-2 p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
                                 <div className="flex items-center gap-2 mb-1">
                                     <FileText className="w-3.5 h-3.5 text-violet-500" />
-                                    <p className="text-xs text-neutral-400">Documents</p>
+                                    <p className="text-xs text-neutral-400 dark:text-neutral-500">Documents</p>
                                 </div>
-                                <p className="text-lg font-bold text-[#2d3748]">{productUsage.documentCount}</p>
+                                <p className="text-lg font-bold text-[#2d3748] dark:text-white">{productUsage.documentCount}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Right Column - Recent Usage */}
-                <div className="lg:col-span-2">
-                    <div className="bg-white border border-neutral-100 rounded-2xl overflow-hidden">
-                        <div className="px-6 py-4 border-b border-neutral-100">
-                            <h3 className="text-sm font-semibold text-[#2d3748]">Recent Usage</h3>
+                <div className="lg:col-span-2 h-[calc(100vh-140px)] min-h-[500px]">
+                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden h-full flex flex-col">
+                        <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-700 flex-shrink-0">
+                            <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white">Recent Usage</h3>
                         </div>
 
-                        {productUsage.recentDocuments.length === 0 ? (
-                            <div className="p-12">
-                                <EmptyState
-                                    icon={<ShoppingCart className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
-                                    title="No sales yet"
-                                    description="This product hasn't been used in any documents yet."
-                                />
-                            </div>
-                        ) : (
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b border-neutral-100">
-                                        <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">Document</th>
-                                        <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">Date</th>
-                                        <th className="text-right px-6 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">Quantity</th>
-                                        <th className="text-right px-6 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {productUsage.recentDocuments.map((doc) => {
-                                        const TypeIcon = docTypeConfig[doc.type].icon;
-                                        return (
-                                            <tr key={doc.id} className="border-b border-neutral-50 last:border-b-0 hover:bg-neutral-50/50 transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`p-2 rounded-lg ${docTypeConfig[doc.type].bgClass} ${docTypeConfig[doc.type].textClass}`}>
-                                                            <TypeIcon className="w-4 h-4" strokeWidth={1.75} />
+                        <div className="flex-1 overflow-y-auto">
+
+                            {productUsage.recentDocuments.length === 0 ? (
+                                <div className="p-12">
+                                    <EmptyState
+                                        icon={<ShoppingCart className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                                        title="No sales yet"
+                                        description="This product hasn't been used in any documents yet."
+                                    />
+                                </div>
+                            ) : (
+                                <table className="w-full relative">
+                                    <thead className="sticky top-0 bg-white dark:bg-neutral-800 z-10 shadow-sm shadow-neutral-100 dark:shadow-neutral-900/50">
+                                        <tr className="border-b border-neutral-100 dark:border-neutral-700">
+                                            <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Document</th>
+                                            <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Date</th>
+                                            <th className="text-right px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Quantity</th>
+                                            <th className="text-right px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {productUsage.recentDocuments.map((doc) => {
+                                            const TypeIcon = docTypeConfig[doc.type].icon;
+                                            return (
+                                                <tr key={doc.id} className="border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`p-2 rounded-lg ${docTypeConfig[doc.type].bgClass} ${docTypeConfig[doc.type].textClass}`}>
+                                                                <TypeIcon className="w-4 h-4" strokeWidth={1.75} />
+                                                            </div>
+                                                            <div>
+                                                                <span className="font-medium text-[#2d3748] dark:text-white block">{doc.documentNumber}</span>
+                                                                <span className="text-xs text-neutral-500 dark:text-neutral-400">{docTypeConfig[doc.type].label}</span>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <span className="font-medium text-[#2d3748] block">{doc.documentNumber}</span>
-                                                            <span className="text-xs text-neutral-500">{docTypeConfig[doc.type].label}</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className="text-sm text-neutral-500">{formatDate(doc.date)}</span>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <span className="text-sm font-medium text-[#2d3748]">{doc.quantity}</span>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <span className="font-semibold text-[#2d3748]">{formatCurrency(doc.subtotal, currency)}</span>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date)}</span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <span className="text-sm font-medium text-[#2d3748] dark:text-white">{doc.quantity}</span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <span className="font-semibold text-[#2d3748] dark:text-white">{formatCurrency(doc.subtotal, currency)}</span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Edit Modal */}
-            <Modal
+
+            {/* Edit Modal */}
+            < Modal
                 isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
+                onClose={() => setIsEditModalOpen(false)
+                }
                 title="Edit Product"
                 size="lg"
             >
@@ -370,13 +398,70 @@ export default function ProductDetailPage() {
                         error={formErrors.unitPrice}
                         leftIcon={<DollarSign className="w-4 h-4" />}
                     />
-                    <Input
-                        label="Category"
-                        placeholder="e.g. Electronics"
-                        value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        leftIcon={<Tag className="w-4 h-4" />}
-                    />
+                    <div className="relative" ref={categoryContainerRef}>
+                        <Input
+                            label="Category"
+                            placeholder="e.g. Electronics"
+                            value={formData.category}
+                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                            onFocus={() => setIsCategoryListOpen(true)}
+                            onBlur={() => {
+                                // Add new category if it doesn't exist (on blur)
+                                if (formData.category.trim() && !categories.includes(formData.category.trim())) {
+                                    const cat = formData.category.trim();
+                                    addCategory(cat);
+
+                                    // Generate SKU if empty
+                                    if (!formData.sku) {
+                                        const generatedSku = generateSkuFromCategory(cat, products);
+                                        setFormData(prev => ({ ...prev, category: cat, sku: generatedSku }));
+                                    }
+                                }
+                            }}
+                            leftIcon={<Tag className="w-4 h-4" />}
+                        />
+
+                        {isCategoryListOpen && (
+                            <div className="absolute z-50 w-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                {categories.filter(c => c.toLowerCase().includes(formData.category.toLowerCase())).length === 0 ? (
+                                    <div className="px-4 py-2 text-sm text-neutral-500 dark:text-neutral-400">
+                                        Type to create "{formData.category}"
+                                    </div>
+                                ) : (
+                                    categories
+                                        .filter(c => c.toLowerCase().includes(formData.category.toLowerCase()))
+                                        .map((category) => (
+                                            <div
+                                                key={category}
+                                                className="flex items-center justify-between px-3 py-2 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700/50 cursor-pointer group"
+                                                onClick={() => {
+                                                    const generatedSku = (!formData.sku)
+                                                        ? generateSkuFromCategory(category, products)
+                                                        : formData.sku;
+
+                                                    setFormData({ ...formData, category, sku: generatedSku });
+                                                    setIsCategoryListOpen(false);
+                                                }}
+                                            >
+                                                <span className="text-neutral-700 dark:text-neutral-200">{category}</span>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (confirm(`Remove "${category}" from options?`)) {
+                                                            removeCategory(category);
+                                                        }
+                                                    }}
+                                                    className="p-1 text-neutral-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                                    title="Remove from list"
+                                                >
+                                                    <Minus className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        ))
+                                )}
+                            </div>
+                        )}
+                    </div>
                     <div className="md:col-span-2">
                         <Textarea
                             label="Description"
@@ -391,10 +476,10 @@ export default function ProductDetailPage() {
                     <Button variant="ghost" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
                     <Button onClick={handleUpdate}>Save Changes</Button>
                 </ModalFooter>
-            </Modal>
+            </Modal >
 
             {/* Delete Modal */}
-            <Modal
+            < Modal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 title="Delete Product"
@@ -408,7 +493,7 @@ export default function ProductDetailPage() {
                     <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
                     <Button variant="danger" onClick={handleDelete}>Delete Product</Button>
                 </ModalFooter>
-            </Modal>
-        </div>
+            </Modal >
+        </div >
     );
 }

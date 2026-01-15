@@ -11,7 +11,7 @@ export default function EditReceiptPage() {
         <DocumentForm
             type="receipt"
             title="Edit Receipt"
-            backUrl="/receipts"
+            backUrl={`/receipts/${id}`}
             documentId={id}
         />
     );

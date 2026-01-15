@@ -520,6 +520,36 @@ export const downloadPdf = async (elementId: string, filename: string): Promise<
 
         pdf.addImage(imgData, 'PNG', 0, 0, widthMm, heightMm);
 
+        // ===========================================
+        // ADD CLICKABLE LINKS (Overlay)
+        // ===========================================
+        // Find all link elements in the DOM
+        const linkElements = element.querySelectorAll('[data-pdf-link]');
+
+        linkElements.forEach((el) => {
+            const url = (el as HTMLElement).getAttribute('data-pdf-link');
+            if (!url) return;
+
+            // Get absolute positions relative to viewport
+            const rect = el.getBoundingClientRect();
+            const parentRect = element.getBoundingClientRect();
+
+            // Calculate relative position within the DocumentRenderer (0.0 to 1.0)
+            const relX = (rect.left - parentRect.left) / parentRect.width;
+            const relY = (rect.top - parentRect.top) / parentRect.height;
+            const relW = rect.width / parentRect.width;
+            const relH = rect.height / parentRect.height;
+
+            // Convert to PDF coordinates (mm)
+            const xMm = relX * widthMm;
+            const yMm = relY * heightMm;
+            const wMm = relW * widthMm;
+            const hMm = relH * heightMm;
+
+            // Add the link annotation
+            pdf.link(xMm, yMm, wMm, hMm, { url });
+        });
+
         const safeFilename = sanitizeFilename(filename);
         pdf.save(`${safeFilename}.pdf`);
         toast.success('PDF downloaded successfully', { id: toastId });

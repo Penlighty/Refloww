@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo } from 'react';
-import { useDocumentStore, useSettingsStore } from '@/lib/store';
+import { useDocumentStore, useSettingsStore, useTemplateStore } from '@/lib/store';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getEffectiveGrandTotal } from '@/lib/utils';
 
 interface ChartDataPoint {
     date: string;
@@ -14,6 +14,7 @@ interface ChartDataPoint {
 export default function RevenueChart() {
     const { documents } = useDocumentStore();
     const { company } = useSettingsStore();
+    const { getTemplateById } = useTemplateStore();
     const currency = company.currency;
 
     // Calculate last 7 days revenue data
@@ -32,7 +33,7 @@ export default function RevenueChart() {
                     doc.status === 'paid' &&
                     doc.date.split('T')[0] === dateStr
                 )
-                .reduce((sum, doc) => sum + doc.grandTotal, 0);
+                .reduce((sum, doc) => sum + getEffectiveGrandTotal(doc, getTemplateById(doc.templateId)), 0);
 
             data.push({
                 date: dateStr,
@@ -42,7 +43,7 @@ export default function RevenueChart() {
         }
 
         return data;
-    }, [documents]);
+    }, [documents, getTemplateById]);
 
     // Calculate stats
     const stats = useMemo(() => {

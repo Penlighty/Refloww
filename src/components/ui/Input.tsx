@@ -31,7 +31,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 {label && (
                     <label
                         htmlFor={inputId}
-                        className="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                        className="text-xs font-medium text-neutral-700 dark:text-neutral-300"
                     >
                         {label}
                     </label>
@@ -47,7 +47,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                         id={inputId}
                         disabled={disabled}
                         className={clsx(
-                            'w-full h-10 px-4 text-sm rounded-lg border transition-all duration-200',
+                            'w-full h-10 px-4 text-xs rounded-lg border transition-all duration-200',
                             'bg-white dark:bg-neutral-800',
                             'text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500',
                             'focus:outline-none focus:ring-2 focus:ring-neutral-500/10 dark:focus:ring-neutral-400/10',

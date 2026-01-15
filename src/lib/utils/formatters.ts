@@ -1,6 +1,8 @@
 import { format, formatDistance, isAfter, parseISO } from 'date-fns';
 import { toWords } from 'number-to-words';
 
+import { useSettingsStore } from '@/lib/store/settingsStore';
+
 // -------------------- Currency Formatting --------------------
 
 const CURRENCY_LOCALE_MAP: Record<string, string> = {
@@ -26,21 +28,31 @@ const CURRENCY_LOCALE_MAP: Record<string, string> = {
 
 export const formatCurrency = (
     amount: number,
-    currency: string = 'USD',
+    currency?: string,
     locale: string = 'en-US'
 ): string => {
+    // Get preferences from store (non-reactive read)
+    const { company } = useSettingsStore.getState();
+    const targetCurrency = currency || company.currency || 'USD';
+
     // Use specific locale for the currency if available to ensure correct symbol rendering
     // explicit locale argument overrides the map
-    const targetLocale = locale === 'en-US' && CURRENCY_LOCALE_MAP[currency]
-        ? CURRENCY_LOCALE_MAP[currency]
+    const targetLocale = locale === 'en-US' && CURRENCY_LOCALE_MAP[targetCurrency]
+        ? CURRENCY_LOCALE_MAP[targetCurrency]
         : locale;
+
+    // Get decimal places preference from store (non-reactive read)
+    const decimalPlaces = company.decimalPlaces;
+
+    // Ensure valid range (0-20 per Int.NumberFormat spec, but usually 0-4 for currency)
+    const safeDecimals = Math.max(0, Math.min(20, decimalPlaces ?? 2));
 
     return new Intl.NumberFormat(targetLocale, {
         style: 'currency',
-        currency,
+        currency: targetCurrency,
         currencyDisplay: 'narrowSymbol',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+        minimumFractionDigits: safeDecimals,
+        maximumFractionDigits: safeDecimals,
     }).format(amount);
 };
 

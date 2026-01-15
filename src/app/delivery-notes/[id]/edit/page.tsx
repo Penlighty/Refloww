@@ -11,7 +11,7 @@ export default function EditDeliveryNotePage() {
         <DocumentForm
             type="delivery-note"
             title="Edit Delivery Note"
-            backUrl="/delivery-notes"
+            backUrl={`/delivery-notes/${id}`}
             documentId={id}
         />
     );

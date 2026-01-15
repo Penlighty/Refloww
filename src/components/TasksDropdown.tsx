@@ -6,6 +6,15 @@ import { useDocumentStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { DocumentType } from '@/lib/types';
 import Link from 'next/link';
+import { getAnnouncements, Announcement, subscribeToActiveAnnouncements } from '@/lib/firebase/admin';
+import { Megaphone, Gift, Info, AlertTriangle } from 'lucide-react';
+
+const typeConfig = {
+    announcement: { icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-900/30' },
+    promotion: { icon: Gift, color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-900/30' },
+    greeting: { icon: Info, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
+    warning: { icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-100 dark:bg-amber-900/30' }
+};
 
 interface Task {
     id: string;
@@ -27,6 +36,16 @@ export default function TasksDropdown() {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const [notifications, setNotifications] = useState<Announcement[]>([]);
+
+    useEffect(() => {
+        const unsubscribe = subscribeToActiveAnnouncements((data) => {
+            // Filter only 'notification' style
+            const filtered = data.filter(a => a.displayStyle === 'notification');
+            setNotifications(filtered);
+        });
+        return () => unsubscribe();
+    }, []);
 
     // Close on click outside
     useEffect(() => {
@@ -72,8 +91,20 @@ export default function TasksDropdown() {
             });
         });
 
+        // Notifications
+        notifications.forEach(note => {
+            generatedTasks.push({
+                id: note.id,
+                title: note.title,
+                category: note.type.charAt(0).toUpperCase() + note.type.slice(1),
+                priority: note.type === 'warning' ? 'urgent' : 'normal',
+                documentId: '', // Custom handling needed
+                type: 'invoice' // Placeholder
+            });
+        });
+
         return generatedTasks;
-    }, [documents]);
+    }, [documents, notifications]);
 
     const pendingCount = tasks.length;
 
@@ -121,13 +152,29 @@ export default function TasksDropdown() {
                                     <li
                                         key={task.id}
                                         onClick={() => {
-                                            router.push(`/${task.type}s/${task.documentId}`); // Assuming route structure
-                                            setIsOpen(false);
+                                            // Check if it's a notification
+                                            const note = notifications.find(n => n.id === task.id);
+                                            if (note) {
+                                                // Handle notification click
+                                                if (note.ctaLink) window.open(note.ctaLink, '_blank');
+                                            } else {
+                                                router.push(`/${task.type}s/${task.documentId}`);
+                                                setIsOpen(false);
+                                            }
                                         }}
                                         className="group flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-all cursor-pointer"
                                     >
                                         <div className="mt-0.5 relative flex items-center justify-center">
-                                            <div className={`w-2 h-2 rounded-full ${priorityConfig[task.priority].dotClass}`}></div>
+                                            {notifications.some(n => n.id === task.id) ? (
+                                                (() => {
+                                                    const note = notifications.find(n => n.id === task.id);
+                                                    const Icon = typeConfig[note?.type || 'announcement'].icon;
+                                                    const colorClass = typeConfig[note?.type || 'announcement'].color;
+                                                    return <Icon className={`w-4 h-4 ${colorClass}`} />;
+                                                })()
+                                            ) : (
+                                                <div className={`w-2 h-2 rounded-full ${priorityConfig[task.priority].dotClass}`}></div>
+                                            )}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-medium text-[#2d3748] dark:text-white group-hover:text-neutral-700 dark:group-hover:text-neutral-200 transition-colors line-clamp-1">
@@ -137,6 +184,11 @@ export default function TasksDropdown() {
                                                 <p className={`text-xs ${priorityConfig[task.priority].textClass}`}>
                                                     {task.category}
                                                 </p>
+                                                {notifications.find(n => n.id === task.id)?.message && (
+                                                    <span className="text-xs text-neutral-400 truncate max-w-[150px]">
+                                                        - {notifications.find(n => n.id === task.id)?.message}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                         <ArrowRight className="w-4 h-4 text-neutral-300 group-hover:text-neutral-500 dark:text-neutral-600 dark:group-hover:text-neutral-400 transition-colors opacity-0 group-hover:opacity-100" />

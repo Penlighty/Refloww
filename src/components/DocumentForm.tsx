@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTemplateStore, useCustomerStore, useProductStore, useDocumentStore, useSettingsStore, useDiscountStore } from '@/lib/store';
 import { formatCurrency, formatDate, downloadPdf, downloadPng, printDocument, formatAmountInWords } from '@/lib/utils';
-import { Button, Modal, ModalFooter, Input, Select, Textarea } from '@/components/ui';
+import { Button, Modal, ModalFooter, Input, Select, Textarea, HelpTooltip } from '@/components/ui';
 import { LineItem, DocumentType } from '@/lib/types';
+import { toast } from 'react-hot-toast';
 import DocumentRenderer, { DocumentData } from '@/components/DocumentRenderer';
 import DocumentPreviewWrapper from '@/components/DocumentPreviewWrapper';
 import {
@@ -43,7 +44,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     const { discounts } = useDiscountStore();
     const { company, getNextDocumentNumber, incrementDocumentNumber, updateNumbering } = useSettingsStore();
     const currency = company.currency;
-    const { addDocument, updateDocument, getDocumentById, getDocumentsByType } = useDocumentStore();
+    const { addDocument, updateDocument, getDocumentById, getDocumentsByType, getTotalPaidForInvoice } = useDocumentStore();
 
     // State
     const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
@@ -54,6 +55,8 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     const [notes, setNotes] = useState('');
     const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
     const [sourceDocumentId, setSourceDocumentId] = useState<string | undefined>(undefined);
+    const [sourceGrandTotal, setSourceGrandTotal] = useState<number>(0); // Tracks source invoice's grand total for receipts
+    const [previousPayments, setPreviousPayments] = useState<number>(0); // Sum of prior receipts against source invoice
 
     // Form control state
     const [isInitialized, setIsInitialized] = useState(false);
@@ -69,12 +72,24 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     const [discountName, setDiscountName] = useState('');
     const [manualSubtotal, setManualSubtotal] = useState(0);
     const [amountInWords, setAmountInWords] = useState('');
-    const [amountPaid, setAmountPaid] = useState(0);
+    const [amountPaid, setAmountPaid] = useState(0); // For receipts: this is "This Payment" amount
 
     // UI State
     const [showPreview, setShowPreview] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+
+    // 4. Reactive Defaults (Apply when store loads)
+    const hasAppliedDefaultTax = useRef(false);
+    useEffect(() => {
+        // Only for NEW documents (not edit, not conversion)
+        if (documentId || searchParams.get('sourceId')) return;
+
+        if (!hasAppliedDefaultTax.current && company.taxRate > 0) {
+            setTaxPercent(company.taxRate);
+            hasAppliedDefaultTax.current = true;
+        }
+    }, [company.taxRate, documentId, searchParams]);
 
     // --- INITIALIZATION ---
     useEffect(() => {
@@ -87,113 +102,113 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                 setSelectedTemplateId(doc.templateId);
                 setSelectedCustomerId(doc.customerId);
                 setDocumentNumber(doc.documentNumber);
-                setDocumentDate(doc.date.split('T')[0]); // Ensure YYYY-MM-DD
+                setDocumentDate(doc.date.split('T')[0]);
                 if (doc.dueDate) setDueDate(doc.dueDate.split('T')[0]);
                 setLineItems(doc.lineItems.length > 0 ? doc.lineItems : [{ id: uuidv4(), productId: '', productName: '', description: '', quantity: 1, unitPrice: 0, subtotal: 0 }]);
                 setDiscountPercent(doc.discountPercent);
                 setTaxPercent(doc.taxPercent);
                 if (doc.discountName) setDiscountName(doc.discountName);
-                if (doc.notes) setNotes(doc.notes);
-                if (doc.customValues) setCustomFieldValues(doc.customValues);
-                if (doc.amountPaid) setAmountPaid(doc.amountPaid);
-
-                // If template is loaded (synchronously derived below, but we need to check here or in a separate effect)
-                // Since selectedTemplate is derived from selectedTemplateId, and we just set it... 
-                // We might need to rely on the derived subtotal logic to pick up the doc.subtotal if manual.
-                // But doc.subtotal is just a number. 
-                // We'll set manualSubtotal to doc.subtotal so it's ready.
-                // But doc.subtotal is just a number. 
-                // We'll set manualSubtotal to doc.subtotal so it's ready.
+                setNotes(doc.notes || '');
+                setCustomFieldValues(doc.customValues || {});
+                setAmountPaid(doc.amountPaid || 0);
                 setManualSubtotal(doc.subtotal);
-
-                // Set amount in words if present in doc (we assume we might save it later, currently doc type doesn't have it but we can use customValues or just recalculate)
-                // Actually, let's just recalculate it to be safe, or check if we store it.
-                // The Document interface doesn't strictly have 'amountInWords', so it might be in customValues if we save it there.
-                // For now, let's recalculate it on load to ensure consistency.
             } else {
-                console.error("Document not found");
                 router.push(backUrl);
             }
         } else {
-            // CHECK FOR SOURCE DOCUMENT (Conversion Flow)
+            // CREATE MODE (New or Conversion)
             const sourceIdParam = searchParams.get('sourceId');
             if (sourceIdParam) {
                 const sourceDoc = getDocumentById(sourceIdParam);
                 if (sourceDoc) {
                     setSourceDocumentId(sourceDoc.id);
-                    setSelectedTemplateId(sourceDoc.templateId); // Keep same template suite
+                    setSelectedTemplateId(sourceDoc.templateId);
                     setSelectedCustomerId(sourceDoc.customerId);
-
-                    // Clone line items to new IDs
-                    const clonedItems = sourceDoc.lineItems.map(item => ({
-                        ...item,
-                        id: uuidv4()
-                    }));
-                    setLineItems(clonedItems);
-
-                    // Financials
+                    setLineItems(sourceDoc.lineItems.map(item => ({ ...item, id: uuidv4() })));
                     setDiscountPercent(sourceDoc.discountPercent);
                     setTaxPercent(sourceDoc.taxPercent);
-                    if (sourceDoc.discountName) setDiscountName(sourceDoc.discountName);
+                    setDiscountName(sourceDoc.discountName || '');
 
-                    // Smart Defaults based on Type
                     if (type === 'receipt') {
-                        // Inherit full payment by default, or remaining due?
-                        // User said "confirm payment", implying paying off the invoice.
-                        // Default to the source's Current Amount Due (or Grand Total if fully unpaid)
-                        const due = sourceDoc.amountDue ?? (sourceDoc.grandTotal - (sourceDoc.amountPaid || 0));
-                        setAmountPaid(due > 0 ? due : sourceDoc.grandTotal);
+                        // IMPORTANT: Recalculate the proper grand total based on source template capabilities
+                        // The stored grandTotal might include tax even if the template doesn't show it
+                        const sourceTemplate = getTemplateById(sourceDoc.templateId);
+                        const sourceSupportsTax = sourceTemplate?.fields.some(f => f.type === 'tax') ?? false;
+                        const sourceSupportsDiscount = sourceTemplate?.fields.some(f => f.type === 'discount') ?? false;
 
-                        // Notes: Add reference
+                        // Calculate the ACTUAL subtotal from line items
+                        const sourceSubtotal = sourceDoc.lineItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+
+                        // Apply discount only if template supports it
+                        const sourceDiscountAmount = sourceSupportsDiscount && sourceDoc.discountPercent > 0
+                            ? sourceSubtotal * (sourceDoc.discountPercent / 100)
+                            : 0;
+                        const sourceTaxableAmount = sourceSubtotal - sourceDiscountAmount;
+
+                        // Apply tax only if template supports it
+                        const sourceTaxAmount = sourceSupportsTax && sourceDoc.taxPercent > 0
+                            ? sourceTaxableAmount * (sourceDoc.taxPercent / 100)
+                            : 0;
+
+                        // Correctly calculated grand total
+                        const correctGrandTotal = sourceTaxableAmount + sourceTaxAmount;
+
+                        // Store the correctly calculated source grand total
+                        setSourceGrandTotal(correctGrandTotal);
+
+                        // Get sum of all previous receipts linked to this invoice
+                        const alreadyPaid = getTotalPaidForInvoice(sourceDoc.id);
+                        setPreviousPayments(alreadyPaid);
+
+                        // Outstanding balance = Invoice Total - Previous Payments
+                        const outstanding = Math.max(0, correctGrandTotal - alreadyPaid);
+
+                        // Pre-fill with remaining outstanding amount
+                        setAmountPaid(outstanding);
                         setNotes(`Payment for ${sourceDoc.documentNumber}`);
                     } else if (type === 'delivery-note') {
-                        // Notes: Add reference
                         setNotes(`Delivery for ${sourceDoc.documentNumber}`);
                     }
+                    setCustomFieldValues(sourceDoc.customValues || {});
+                }
+            } else {
+                // BRAND NEW (Initial apply)
+                const customerIdParam = searchParams.get('customerId');
+                if (customerIdParam) setSelectedCustomerId(customerIdParam);
 
-                    // Copy custom values
-                    if (sourceDoc.customValues) setCustomFieldValues(sourceDoc.customValues);
+                // Set default tax rate if we have one ready
+                if (company.taxRate > 0) {
+                    setTaxPercent(company.taxRate);
+                    hasAppliedDefaultTax.current = true;
                 }
             }
 
-            // CREATE MODE - Generate new number
-            let numberingType: 'invoice' | 'receipt' | 'delivery-note';
+            // Handle Numbering
+            let numberingType: 'invoice' | 'receipt' | 'deliveryNote';
             switch (type) {
-                case 'invoice': numberingType = 'invoice'; break;
                 case 'receipt': numberingType = 'receipt'; break;
-                case 'delivery-note': numberingType = 'delivery-note'; break;
-                // Fallback for safety
+                case 'delivery-note': numberingType = 'deliveryNote'; break;
                 default: numberingType = 'invoice';
             }
 
-            // Smart Numbering: Check for collisions with existing documents
             const existingDocs = getDocumentsByType(type);
             let nextNum = getNextDocumentNumber(numberingType);
-
-            // If the generated number already exists, keep incrementing the settings
-            // This "fast-forwards" the settings until we find a free gap.
-            // We use a safety limit to prevent infinite loops.
             let safetyCounter = 0;
             while (existingDocs.some(d => d.documentNumber === nextNum) && safetyCounter < 100) {
                 incrementDocumentNumber(numberingType);
                 nextNum = getNextDocumentNumber(numberingType);
                 safetyCounter++;
             }
-
             setDocumentNumber(nextNum);
-            setTaxPercent(company.taxRate || 0);
 
-            // Auto-set Due Date based on default days
+            // Default Due Date
             const days = company.defaultDueDateDays ?? 30;
-            // Use UTC logic to match the date string format (YYYY-MM-DD treated as UTC)
-            const todayStr = new Date().toISOString().split('T')[0];
-            const d = new Date(todayStr);
-            d.setUTCDate(d.getUTCDate() + days);
+            const d = new Date();
+            d.setDate(d.getDate() + days);
             setDueDate(d.toISOString().split('T')[0]);
         }
-
         setIsInitialized(true);
-    }, [documentId, getDocumentById, type, backUrl, router, isInitialized, company.taxRate, company.defaultDueDateDays, getNextDocumentNumber, incrementDocumentNumber, getDocumentsByType]);
+    }, [documentId, getDocumentById, type, searchParams, company.taxRate, company.defaultDueDateDays, isInitialized, getNextDocumentNumber, incrementDocumentNumber, getDocumentsByType, backUrl, router]);
 
     // Auto-update Due Date when Document Date changes (if initialized)
     useEffect(() => {
@@ -216,7 +231,8 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     const rawTemplate = selectedTemplateId ? getTemplateById(selectedTemplateId) : null;
 
     // If connected template and type differs, swap to variant
-    const selectedTemplate = (rawTemplate && type !== rawTemplate.type && rawTemplate.mode === 'connected' && rawTemplate.variants?.[type])
+    // If connected template, always check variants first to avoid mashed root data
+    const selectedTemplate = (rawTemplate && rawTemplate.mode === 'connected' && rawTemplate.variants?.[type])
         ? {
             ...rawTemplate,
             imageUrl: rawTemplate.variants[type]!.imageUrl,
@@ -229,31 +245,72 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
     // Feature Flags based on Template
-    const hasLineItems = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'line-items') : true; // Default true to show controls until template selected? Or false? 
-    // Actually, if selectedTemplate is null, we show nothing or default. Let's default to true so it behaves normally during loading or initial creation if logic falls through.
-    // But logically, if no template selected, we shouldn't assume.
-    // The previous code had `const lineItemsField = selectedTemplate?.fields.find...`
-
-    // Notes:
-    const hasNotes = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'notes') : true;
-    const hasDiscount = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'discount') : true;
-    const hasTax = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'tax') : true;
-    const hasDueDate = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'due-date') : true;
+    // Default to false when no template selected - fields only show if explicitly mapped in template
+    const hasLineItems = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'line-items') : false;
+    const hasNotes = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'notes') : false;
+    const hasDiscount = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'discount') : false;
+    const hasTax = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'tax') : false;
+    const hasDueDate = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'due-date') : false;
     const hasAmountInWords = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'amount-in-words') : false;
     const hasAmountPaid = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'amount-paid') : false;
     const hasAmountDue = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'amount-due') : false;
 
-
     // Calculate totals
-    const subtotal = hasLineItems
+    // Subtotal is either from line items or manual entry
+    const calculatedSubtotal = hasLineItems
         ? lineItems.reduce((sum, item) => sum + item.subtotal, 0)
         : manualSubtotal;
 
-    const discountAmount = hasDiscount ? subtotal * (discountPercent / 100) : 0;
-    const taxableAmount = subtotal - discountAmount;
-    const taxAmount = hasTax ? taxableAmount * (taxPercent / 100) : 0;
-    const grandTotal = taxableAmount + taxAmount;
-    const amountDue = grandTotal - amountPaid;
+    // Only apply discount if template has discount field mapped AND discount is set
+    const discountAmount = hasDiscount && discountPercent > 0 ? calculatedSubtotal * (discountPercent / 100) : 0;
+    const taxableAmount = calculatedSubtotal - discountAmount;
+
+    // Only apply tax if template has tax field mapped AND tax is set
+    const taxAmount = hasTax && taxPercent > 0 ? taxableAmount * (taxPercent / 100) : 0;
+    const calculatedGrandTotal = taxableAmount + taxAmount;
+
+    // ============================================
+    // FINANCIAL CALCULATIONS BY DOCUMENT TYPE
+    // ============================================
+
+    let grandTotal: number;
+    let subtotal: number;
+    let amountDue: number;
+
+    if (type === 'receipt') {
+        // RECEIPT CALCULATIONS
+        if (sourceGrandTotal > 0) {
+            // Receipt FROM SOURCE INVOICE
+            // Invoice Total = pulled from source invoice
+            // Previous Payments = sum of all prior receipts for this invoice
+            // This Payment = amountPaid (user input)
+            // Remaining Balance = Invoice Total - Previous Payments - This Payment
+
+            grandTotal = sourceGrandTotal; // This is the Invoice Total (for display)
+            subtotal = sourceGrandTotal;
+
+            // Remaining Balance after this payment
+            amountDue = Math.max(0, sourceGrandTotal - previousPayments - amountPaid);
+        } else {
+            // STANDALONE RECEIPT (no source invoice)
+            // User enters the receipt amount directly
+            // Amount Paid = user input (what was paid)
+            // If they enter both amount and paid separately, Amount Due = amount - paid
+            // But typically for standalone receipt: Amount = Paid = Full Amount
+
+            grandTotal = manualSubtotal; // The total amount for this receipt
+            subtotal = manualSubtotal;
+            amountDue = Math.max(0, manualSubtotal - amountPaid);
+        }
+    } else {
+        // INVOICE / DELIVERY NOTE CALCULATIONS
+        // Standard calculation: Line Items → Subtotal → -Discount → +Tax → Grand Total
+        // Amount Due = Grand Total - Amount Paid
+
+        grandTotal = calculatedGrandTotal;
+        subtotal = calculatedSubtotal;
+        amountDue = Math.max(0, grandTotal - amountPaid);
+    }
 
     // Auto-update Amount in Words
     useEffect(() => {
@@ -405,31 +462,40 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
         };
 
         try {
+            let targetUrl = backUrl; // Default: go back to where we came from
+
             if (documentId) {
-                // Update
+                // Update existing document
                 updateDocument(documentId, docData);
+                toast.success(`${documentNumber || title.replace('Edit ', '')} updated successfully!`);
+                // backUrl already points to detail page for edit mode
             } else {
-                // Create
-                addDocument({
+                // Create new document
+                const newDoc = addDocument({
                     type,
                     ...docData,
                     status: 'draft',
                 });
 
                 // Increment sequence number in settings
-                let numberingType: 'invoice' | 'receipt' | 'delivery-note';
+                let numberingType: 'invoice' | 'receipt' | 'deliveryNote';
                 switch (type) {
                     case 'invoice': numberingType = 'invoice'; break;
                     case 'receipt': numberingType = 'receipt'; break;
-                    case 'delivery-note': numberingType = 'delivery-note'; break;
+                    case 'delivery-note': numberingType = 'deliveryNote'; break;
                     default: numberingType = 'invoice';
                 }
                 incrementDocumentNumber(numberingType);
+
+                // Navigate to the newly created document's detail page
+                const basePath = type === 'delivery-note' ? 'delivery-notes' : `${type}s`;
+                targetUrl = `/${basePath}/${newDoc.id}`;
+                toast.success(`${documentNumber} created successfully!`);
             }
 
             setShowSuccess(true);
             setTimeout(() => {
-                router.push(backUrl);
+                router.push(targetUrl);
             }, 1000);
         } catch (error) {
             console.error('Error saving document:', error);
@@ -548,20 +614,28 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                         </div>
 
                         {/* Custom Fields Inputs */}
-                        {selectedTemplate && selectedTemplate.fields.filter(f => f.type === 'custom' || f.type === 'text').length > 0 && (
+                        {selectedTemplate && selectedTemplate.fields.filter(f => f.type === 'custom' || f.type === 'text' || f.type === 'link-button').length > 0 && (
                             <div className="mt-4 pt-4 border-t border-neutral-100 dark:border-neutral-700 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <h3 className="col-span-1 md:col-span-2 text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1">Mapped Custom Fields</h3>
-                                {selectedTemplate.fields.filter(f => f.type === 'custom' || f.type === 'text').map(field => (
+                                {selectedTemplate.fields.filter(f => f.type === 'custom' || f.type === 'text' || f.type === 'link-button').map(field => (
                                     <Input
                                         key={field.id}
                                         label={field.label}
-                                        value={customFieldValues[field.id] || ''}
-                                        placeholder={field.label}
+                                        // Use the document-specific value if set, otherwise fallback to template value (for display in input, we typically show what will be used)
+                                        // However, for input, we usually want empty if not set locally, UNLESS we want to pre-fill.
+                                        // Let's pre-fill with template default if local is empty.
+                                        // Actually, if we just show empty, the user might think there is no link.
+                                        // Better to show the template default as placeholder or initial value.
+                                        value={customFieldValues[field.id] !== undefined ? customFieldValues[field.id] : (field.type === 'link-button' ? (field as any).customValues?.url || '' : '')}
+                                        placeholder={field.type === 'link-button' ? 'https://example.com' : field.label}
                                         onChange={(e) => {
                                             const val = e.target.value;
                                             setCustomFieldValues({ ...customFieldValues, [field.id]: val });
 
-                                            // Intelligent Sync: If this field is "Amount" or "Total", sync to manualSubtotal
+                                            // Link buttons don't need sync logic
+                                            if (field.type === 'link-button') return;
+
+                                            // Intelligent Sync for other fields
                                             const label = field.label.toLowerCase();
                                             if (!hasLineItems) {
                                                 if (['amount', 'total', 'grand total', 'price', 'sum'].includes(label)) {
@@ -898,9 +972,29 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
 
                         {/* Discount & Tax Inputs */}
                         <div className="space-y-3 mb-6">
-                            {!hasLineItems && (
+                            {/* For receipts from source invoice: show source total (read-only) */}
+                            {type === 'receipt' && sourceGrandTotal > 0 && (
+                                <div className="space-y-1">
+                                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                        Invoice Total
+                                        <HelpTooltip termKey="invoice-total" />
+                                    </label>
+                                    <div className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl">
+                                        <span className="text-lg font-bold text-blue-700 dark:text-blue-300">{formatCurrency(sourceGrandTotal, currency)}</span>
+                                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">Pulled from source invoice</p>
+                                        {previousPayments > 0 && (
+                                            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                                                Previous payments: {formatCurrency(previousPayments, currency)}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* For standalone receipts or documents without line items: allow manual amount entry */}
+                            {!hasLineItems && !(type === 'receipt' && sourceGrandTotal > 0) && (
                                 <Input
-                                    label="Amount"
+                                    label={type === 'receipt' ? 'Receipt Amount' : 'Amount'}
                                     type="number"
                                     min="0"
                                     step="0.01"
@@ -910,68 +1004,57 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                         setManualSubtotal(val);
 
                                         // Reverse Sync: Update left-side custom field if it exists
-                                        if (!hasLineItems) {
-                                            const amountField = selectedTemplate?.fields.find(f =>
-                                                (f.type === 'custom' || f.type === 'text') &&
-                                                ['amount', 'total', 'grand total', 'price', 'sum'].includes(f.label.toLowerCase())
-                                            );
+                                        const amountField = selectedTemplate?.fields.find(f =>
+                                            (f.type === 'custom' || f.type === 'text') &&
+                                            ['amount', 'total', 'grand total', 'price', 'sum'].includes(f.label.toLowerCase())
+                                        );
 
-                                            if (amountField) {
-                                                // Format nicely for text input
-                                                // using en-US for standard comma separation, or maybe just raw?
-                                                // User screenshot showed commas "30,000.00"
-                                                const formatted = val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                                setCustomFieldValues(prev => ({
-                                                    ...prev,
-                                                    [amountField.id]: formatted
-                                                }));
-                                            }
+                                        if (amountField) {
+                                            const formatted = val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                            setCustomFieldValues(prev => ({
+                                                ...prev,
+                                                [amountField.id]: formatted
+                                            }));
                                         }
                                     }}
-                                // leftIcon={<span className="text-neutral-500 font-sans">{currency}</span>} // Currency icon usually complex, using text prefix if supported or just standard input
                                 />
                             )}
 
                             {hasDiscount && (
                                 <div className="space-y-2">
-                                    {discounts.some(d => d.isActive) && (
-                                        <Select
-                                            options={[
-                                                { label: 'Select Promo...', value: '' },
-                                                ...discounts
-                                                    .filter(d => d.isActive)
-                                                    .map(d => ({ label: `${d.name} (${d.percentage}%)`, value: d.percentage.toString() }))
-                                            ]}
-                                            value={discounts.find(d => d.isActive && d.percentage === discountPercent)?.percentage.toString() || ''}
-                                            onChange={(v) => {
-                                                if (!v) return;
-                                                const d = discounts.find(d => d.percentage.toString() === v && d.isActive);
-                                                if (d) {
-                                                    setDiscountPercent(d.percentage);
-                                                    setDiscountName(d.name);
-                                                }
-                                            }}
-                                            className="text-xs"
-                                        />
-                                    )}
-                                    <Input
-                                        label="Discount %"
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        step="0.1"
-                                        value={discountPercent || ''}
-                                        onChange={(e) => setDiscountPercent(parseFloat(e.target.value) || 0)}
-                                        leftIcon={<Percent className="w-4 h-4" />}
+                                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                        Discount
+                                        <HelpTooltip termKey="discount" />
+                                    </label>
+                                    <Select
+                                        options={[
+                                            { label: 'No Discount', value: '' },
+                                            ...discounts
+                                                .filter(d => d.isActive)
+                                                .map(d => ({ label: `${d.name} (${d.percentage}%)`, value: d.id }))
+                                        ]}
+                                        value={discounts.find(d => d.isActive && d.percentage === discountPercent && d.name === discountName)?.id || ''}
+                                        onChange={(v) => {
+                                            if (!v) {
+                                                setDiscountPercent(0);
+                                                setDiscountName('');
+                                                return;
+                                            }
+                                            const d = discounts.find(d => d.id === v);
+                                            if (d) {
+                                                setDiscountPercent(d.percentage);
+                                                setDiscountName(d.name);
+                                            }
+                                        }}
+                                        className="text-sm"
                                     />
                                     {discountPercent > 0 && (
-                                        <Input
-                                            label="Discount Name"
-                                            value={discountName}
-                                            onChange={(e) => setDiscountName(e.target.value)}
-                                            placeholder="e.g. Winter Sale"
-                                            leftIcon={<Tag className="w-4 h-4" />}
-                                        />
+                                        <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-100 dark:border-emerald-800">
+                                            <Tag className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                                                {discountName} applied: {discountPercent}% off
+                                            </span>
+                                        </div>
                                     )}
                                 </div>
                             )}
@@ -1002,52 +1085,96 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             )}
 
                             {hasAmountPaid && (
-                                <Input
-                                    label="Amount Paid"
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    value={amountPaid || ''}
-                                    onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
-                                // leftIcon={<span className="text-neutral-500 text-xs font-sans">{currency}</span>}
-                                />
+                                <div className="space-y-1">
+                                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                        {type === 'receipt' ? 'This Payment' : 'Amount Paid'}
+                                        <HelpTooltip termKey={type === 'receipt' ? 'this-payment' : 'amount-paid'} />
+                                    </label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={amountPaid || ''}
+                                        onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
+                                    />
+                                </div>
                             )}
                         </div>
 
                         {/* Totals */}
                         <div className="space-y-3 pt-4 border-t border-neutral-100 dark:border-neutral-700">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-neutral-500 dark:text-neutral-400">Subtotal</span>
-                                <span className="text-sm font-medium text-[#2d3748] dark:text-white">{formatCurrency(subtotal, currency)}</span>
-                            </div>
-                            {discountPercent > 0 && (
+                            {/* Only show subtotal if different from grand total (i.e., has discount or tax) */}
+                            {(hasDiscount || hasTax) && type !== 'receipt' && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-neutral-500">Discount ({discountPercent}%)</span>
+                                    <span className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                        Subtotal
+                                        <HelpTooltip termKey="subtotal" />
+                                    </span>
+                                    <span className="text-sm font-medium text-[#2d3748] dark:text-white">{formatCurrency(subtotal, currency)}</span>
+                                </div>
+                            )}
+                            {hasDiscount && discountPercent > 0 && type !== 'receipt' && (
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-neutral-500 flex items-center gap-1">
+                                        Discount ({discountPercent}%)
+                                        <HelpTooltip termKey="discount" />
+                                    </span>
                                     <span className="text-sm font-medium text-red-500">-{formatCurrency(discountAmount, currency)}</span>
                                 </div>
                             )}
-                            {taxPercent > 0 && (
+                            {hasTax && taxPercent > 0 && type !== 'receipt' && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-neutral-500 dark:text-neutral-400">Tax ({taxPercent}%)</span>
+                                    <span className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                        Tax ({taxPercent}%)
+                                        <HelpTooltip termKey="tax" />
+                                    </span>
                                     <span className="text-sm font-medium text-[#2d3748] dark:text-white">{formatCurrency(taxAmount, currency)}</span>
                                 </div>
                             )}
+
+                            {/* Grand Total / Invoice Total */}
                             <div className="flex items-center justify-between pt-3 border-t border-neutral-200 dark:border-neutral-700">
-                                <span className="text-base font-semibold text-[#2d3748] dark:text-white">Grand Total</span>
+                                <span className="text-base font-semibold text-[#2d3748] dark:text-white flex items-center gap-1.5">
+                                    {type === 'receipt' && sourceGrandTotal > 0 ? 'Invoice Total' : 'Grand Total'}
+                                    <HelpTooltip termKey={type === 'receipt' && sourceGrandTotal > 0 ? 'invoice-total' : 'grand-total'} />
+                                </span>
                                 <span className="text-xl font-bold text-[#2d3748] dark:text-white">{formatCurrency(grandTotal, currency)}</span>
                             </div>
 
-                            {hasAmountPaid && (
+                            {/* Previous Payments - only for receipts with source invoice */}
+                            {type === 'receipt' && sourceGrandTotal > 0 && previousPayments > 0 && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-neutral-500 dark:text-neutral-400">Amount Paid</span>
-                                    <span className="text-sm font-medium text-emerald-600">-{formatCurrency(amountPaid, currency)}</span>
+                                    <span className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                        Previous Payments
+                                        <HelpTooltip termKey="previous-payments" />
+                                    </span>
+                                    <span className="text-sm font-medium text-emerald-600">-{formatCurrency(previousPayments, currency)}</span>
                                 </div>
                             )}
 
+                            {/* This Payment / Amount Paid */}
+                            {hasAmountPaid && (
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                        {type === 'receipt' ? 'This Payment' : 'Amount Paid'}
+                                        <HelpTooltip termKey={type === 'receipt' ? 'this-payment' : 'amount-paid'} />
+                                    </span>
+                                    <span className="text-sm font-medium text-emerald-600">
+                                        {type === 'receipt' ? formatCurrency(amountPaid, currency) : `-${formatCurrency(amountPaid, currency)}`}
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Amount Due / Remaining Balance */}
                             {(hasAmountPaid || hasAmountDue) && (
                                 <div className="flex items-center justify-between pt-2 border-t border-dashed border-neutral-200 dark:border-neutral-700">
-                                    <span className="text-sm font-medium text-[#2d3748] dark:text-white">Amount Due</span>
-                                    <span className="text-lg font-bold text-[#2d3748] dark:text-white">{formatCurrency(amountDue, currency)}</span>
+                                    <span className="text-sm font-medium text-[#2d3748] dark:text-white flex items-center gap-1.5">
+                                        {type === 'receipt' ? 'Remaining Balance' : 'Amount Due'}
+                                        <HelpTooltip termKey={type === 'receipt' ? 'remaining-balance' : 'amount-due'} />
+                                    </span>
+                                    <span className={`text-lg font-bold ${amountDue === 0 ? 'text-emerald-600' : 'text-[#2d3748] dark:text-white'}`}>
+                                        {formatCurrency(amountDue, currency)}
+                                    </span>
                                 </div>
                             )}
                         </div>

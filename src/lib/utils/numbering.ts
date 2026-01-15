@@ -3,16 +3,20 @@ import { format } from 'date-fns';
 export interface NumberingContext {
     details?: {
         customerCode?: string;
+        customerName?: string;
         date?: Date;
+        category?: string;
     };
 }
 
-export type NumberingToken = 'YYYY' | 'MM' | 'DD' | '####' | 'CUST' | 'LOC' | string;
+export type NumberingToken = 'YYYY' | 'MM' | 'DD' | '####' | 'CUST' | 'LOC' | 'INIT' | string;
 
 export const DEFAULT_FORMATS = {
     invoice: 'INV-YYYY-####',
     receipt: 'RCT-YYYY-####',
     deliveryNote: 'DN-YYYY-####',
+    customer: 'CUST-####',
+    product: 'SKU-####',
 };
 
 /**
@@ -21,8 +25,8 @@ export const DEFAULT_FORMATS = {
  */
 export function parseFormat(formatStr: string): string[] {
     // Regex to split by known tokens
-    // Captures: YYYY, MM, DD, CUST, LOC, and sequences of #
-    const regex = /(YYYY|MM|DD|CUST|LOC|#+)/g;
+    // Captures: YYYY, MM, DD, CUST, LOC, INIT, CAT, and sequences of #
+    const regex = /(YYYY|MM|DD|CUST|LOC|INIT|CAT|#+)/g;
     return formatStr.split(regex).filter(Boolean);
 }
 
@@ -36,6 +40,21 @@ export function generateDocumentNumber(
 ): string {
     const date = context?.details?.date || new Date();
     const customerCode = context?.details?.customerCode || 'CUST'; // Fallback if no customer
+    const customerName = context?.details?.customerName || 'John Doe';
+    const category = context?.details?.category || 'CAT';
+
+    // Generate Initials
+    const initials = customerName
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+
+    // Generate Category Prefix
+    const catPrefix = category
+        .substring(0, 3)
+        .toUpperCase();
 
     // Replace standard tokens
     let result = formatStr
@@ -43,7 +62,9 @@ export function generateDocumentNumber(
         .replace(/MM/g, format(date, 'MM'))
         .replace(/DD/g, format(date, 'dd'))
         .replace(/CUST/g, customerCode.toUpperCase().slice(0, 3)) // Limit CUST to 3 chars standard
-        .replace(/LOC/g, 'HQ'); // Default location for now 
+        .replace(/LOC/g, 'HQ') // Default location for now 
+        .replace(/INIT/g, initials)
+        .replace(/CAT/g, catPrefix);
 
     // Replace Sequence (####)
     // Find any sequence of '#' and replace with padded number
