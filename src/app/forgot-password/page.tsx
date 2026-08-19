@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
     const displayError = localError || error;
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900 p-4">
+        <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900 p-4">
             <div className="w-full max-w-md">
                 {/* Back Link */}
                 <Link

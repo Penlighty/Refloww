@@ -34,25 +34,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 if (hasAccess) {
                     setIsAuthorized(true);
                 } else {
-                    // For development/demo: Allow specific emails
-                    const adminEmails = [
-                        'admin@reflow.app',
-                        'admin@refloww.com',
-                        // Add your email here for testing
-                        user.email // Temporarily allow current user for demo
-                    ].filter(Boolean);
-
-                    if (adminEmails.includes(user.email || '')) {
-                        setIsAuthorized(true);
-                    } else {
-                        setError('You do not have admin access.');
-                    }
+                    router.push('/');
                 }
             } catch (err) {
                 console.error('Error checking admin access:', err);
-                // Fallback: Allow access for demo purposes
-                // In production, you should show an error
-                setIsAuthorized(true);
+                router.push('/');
             } finally {
                 setCheckingAuth(false);
             }

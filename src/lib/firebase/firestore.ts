@@ -280,10 +280,10 @@ export const updateUserSettings = async (settings: DocumentData): Promise<void> 
     const userId = getUserId();
     const userRef = doc(db, 'users', userId);
 
-    await updateDoc(userRef, sanitizeData({
+    await setDoc(userRef, sanitizeData({
         settings,
         updatedAt: serverTimestamp(),
-    }));
+    }), { merge: true });
 };
 
 /**

@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSettingsStore } from '@/lib/store';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { Button, Input, Select } from '@/components/ui';
 import { currencies } from '@/lib/constants/currencies';
 import DocumentNumbering from '@/components/settings/DocumentNumbering';
@@ -22,6 +23,7 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
 
 export default function SettingsPage() {
     const { company, updateCompany, theme, setTheme, numbering, updateNumbering } = useSettingsStore();
+    const { user, updateUserProfile } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [activeTab, setActiveTab] = useState<TabId>('general');
 
@@ -46,14 +48,27 @@ export default function SettingsPage() {
         setIsDirty(true);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         updateCompany(formData);
         updateNumbering(numberingData);
+
+        // Reactively update Google/Firebase Auth details so they stay synchronized in the header
+        if (user && updateUserProfile) {
+            try {
+                await updateUserProfile({
+                    displayName: formData.name,
+                    photoURL: formData.logo || undefined
+                });
+            } catch (error) {
+                console.error('[Settings] Error syncing company details to auth profile:', error);
+            }
+        }
+
         toast.success('Settings saved successfully');
         setIsDirty(false);
     };
 
-    const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -69,12 +84,17 @@ export default function SettingsPage() {
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const base64 = event.target?.result as string;
+        const loadingToast = toast.loading('Compressing logo...');
+        try {
+            const { compressImage } = await import('@/lib/utils/image-utils');
+            // Compress with max width 800px and quality 0.6 for reliable Firestore storage
+            const base64 = await compressImage(file, 800, 0.6);
             handleChange('logo', base64);
-        };
-        reader.readAsDataURL(file);
+            toast.success('Logo loaded and compressed successfully', { id: loadingToast });
+        } catch (error) {
+            console.error('Error compressing logo:', error);
+            toast.error('Failed to process image logo', { id: loadingToast });
+        }
     };
 
     const handleRemoveLogo = () => {
@@ -85,25 +105,28 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto h-[calc(100vh-140px)] min-h-[600px] flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8 flex-shrink-0">
-                <div>
-                    <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Settings</h1>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Manage your company profile and application preferences.</p>
+        <div className="max-w-6xl mx-auto h-[calc(100vh-100px)] md:h-[calc(100vh-140px)] flex flex-col overflow-hidden">
+            {/* Header & Tabs Container (Static, doesn't scroll) */}
+            <div className="bg-background-light dark:bg-background-dark pt-4 pb-3 flex-shrink-0 border-b border-neutral-200/50 dark:border-neutral-750 md:border-b-0">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 md:mb-6">
+                    <div>
+                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white font-sans tracking-tight">Settings</h1>
+                        <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 hidden sm:block">Manage your company profile and application preferences.</p>
+                    </div>
+                    <div className="hidden sm:block">
+                        <Button
+                            onClick={handleSave}
+                            disabled={!isDirty}
+                            leftIcon={<Save className="w-4 h-4" />}
+                        >
+                            Save Changes
+                        </Button>
+                    </div>
                 </div>
-                <Button
-                    onClick={handleSave}
-                    disabled={!isDirty}
-                    leftIcon={<Save className="w-4 h-4" />}
-                >
-                    Save Changes
-                </Button>
-            </div>
 
-            <div className="flex-1 flex gap-8 overflow-hidden">
-                {/* Sidebar Navigation */}
-                <div className="w-64 flex-shrink-0 flex flex-col gap-2">
+                {/* Mobile Navigation Tabs */}
+                <div className="flex flex-row gap-2 overflow-x-auto pb-1 w-full scrollbar-none md:hidden py-1">
                     {TABS.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.id;
@@ -111,9 +134,32 @@ export default function SettingsPage() {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
+                                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl transition-all flex-shrink-0 text-sm whitespace-nowrap ${isActive
+                                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold'
+                                    : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 font-medium'
+                                    }`}
+                            >
+                                <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.75} />
+                                {tab.label}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-8 overflow-hidden min-h-0 pt-4 md:pt-0">
+                {/* Sidebar Navigation (Desktop only) */}
+                <div className="hidden md:flex md:flex-col gap-2 w-64 flex-shrink-0">
+                    {TABS.map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all flex-shrink-0 text-sm whitespace-nowrap ${isActive
                                     ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
-                                    : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                                    : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 font-normal'
                                     }`}
                             >
                                 <Icon className="w-5 h-5" strokeWidth={isActive ? 2 : 1.75} />
@@ -124,7 +170,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex-1 overflow-y-auto pr-2 pb-10">
+                <div className="flex-1 overflow-y-auto pr-2 pb-24 scrollbar-none min-h-0">
                     {/* General Tab */}
                     {activeTab === 'general' && (
                         <div className="space-y-6 max-w-3xl animate-in fade-in slide-in-from-right-4 duration-300">
@@ -137,9 +183,9 @@ export default function SettingsPage() {
                                     <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">Company Logo</h2>
                                 </div>
 
-                                <div className="flex items-start gap-6">
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
                                     {/* Logo Preview */}
-                                    <div className="relative">
+                                    <div className="relative flex-shrink-0">
                                         {formData.logo ? (
                                             <div className="relative group">
                                                 <img
@@ -149,7 +195,7 @@ export default function SettingsPage() {
                                                 />
                                                 <button
                                                     onClick={handleRemoveLogo}
-                                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
+                                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
                                                 >
                                                     <X className="w-3.5 h-3.5" />
                                                 </button>
@@ -162,7 +208,7 @@ export default function SettingsPage() {
                                     </div>
 
                                     {/* Upload Area */}
-                                    <div className="flex-1">
+                                    <div className="flex-1 w-full text-center sm:text-left">
                                         <input
                                             type="file"
                                             ref={fileInputRef}
@@ -451,6 +497,22 @@ export default function SettingsPage() {
                         </div>
                     )}
                 </div>
+            </div>
+
+            {/* Mobile Floating Save Changes Button */}
+            <div className="fixed bottom-6 right-6 z-40 sm:hidden">
+                <button
+                    onClick={handleSave}
+                    disabled={!isDirty}
+                    className={`flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-sm shadow-xl transition-all duration-300 active:scale-95 ${
+                        isDirty
+                            ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/20'
+                            : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500 cursor-not-allowed opacity-75'
+                    }`}
+                >
+                    <Save className="w-4 h-4" />
+                    <span>Save Changes</span>
+                </button>
             </div>
         </div>
     );

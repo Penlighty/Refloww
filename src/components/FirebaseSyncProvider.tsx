@@ -33,6 +33,11 @@ export function FirebaseSyncProvider({ children }: FirebaseSyncProviderProps) {
     useEffect(() => {
         const checkForLocalData = async () => {
             if (!user || migrationChecked) return;
+            
+            if (typeof window !== 'undefined' && localStorage.getItem('inflow-migration-skipped') === 'true') {
+                setMigrationChecked(true);
+                return;
+            }
 
             // Check if user already has data in Firestore
             try {
@@ -66,7 +71,7 @@ export function FirebaseSyncProvider({ children }: FirebaseSyncProviderProps) {
             const products = getLocalData('inflow-products')?.products || [];
             const documents = getLocalData('inflow-documents')?.documents || [];
             const discounts = getLocalData('inflow-discounts')?.discounts || [];
-            const settingsData = getLocalData('inflow-settings');
+            const settingsData = getLocalData('inflow-settings-storage');
             const settings = settingsData ? {
                 company: settingsData.company,
                 numbering: settingsData.numbering
@@ -108,6 +113,9 @@ export function FirebaseSyncProvider({ children }: FirebaseSyncProviderProps) {
 
     // Handle migration skip
     const handleMigrationSkip = () => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('inflow-migration-skipped', 'true');
+        }
         setShowMigration(false);
         setMigrationChecked(true);
     };
@@ -123,19 +131,14 @@ export function FirebaseSyncProvider({ children }: FirebaseSyncProviderProps) {
         );
     }
 
-    // Show loading state while initial sync is happening
-    if (isLoading) {
-        return (
-            <div className="h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                        Syncing your data...
-                    </p>
+    return (
+        <>
+            {isLoading && (
+                <div className="fixed top-0 left-0 right-0 z-[9999] h-1 bg-blue-500/20 overflow-hidden pointer-events-none">
+                    <div className="h-full bg-blue-600 animate-pulse w-full"></div>
                 </div>
-            </div>
-        );
-    }
-
-    return <>{children}</>;
+            )}
+            {children}
+        </>
+    );
 }

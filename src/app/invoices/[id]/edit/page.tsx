@@ -1,18 +1,12 @@
-"use client";
+import InvoiceEditClientWrapper from './InvoiceEditClientWrapper';
 
-import DocumentForm from '@/components/DocumentForm';
-
-import { useParams } from 'next/navigation';
-
-export default function EditInvoicePage() {
-    const params = useParams();
-    const id = params.id as string;
-    return (
-        <DocumentForm
-            type="invoice"
-            title="Edit Invoice"
-            backUrl={`/invoices/${id}`}
-            documentId={id}
-        />
-    );
+export function generateStaticParams() {
+  return [{ id: '1' }];
 }
+
+export default async function EditInvoicePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <InvoiceEditClientWrapper id={id} />;
+}
+
+

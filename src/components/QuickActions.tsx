@@ -32,6 +32,31 @@ function QuickActionPill({ href, icon, label, variant = 'secondary' }: QuickActi
     );
 }
 
+function QuickActionTile({ href, icon, label, variant = 'secondary' }: QuickActionProps) {
+    const isPrimary = variant === 'primary';
+
+    return (
+        <Link
+            href={href}
+            className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 text-center border group ${isPrimary
+                ? 'bg-secondary/15 dark:bg-secondary/10 border-secondary/35 dark:border-secondary/20 text-neutral-900 dark:text-neutral-100 hover:bg-secondary/25'
+                : 'bg-neutral-50/50 dark:bg-neutral-800/40 border-neutral-100/80 dark:border-neutral-700/50 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/70'
+                } shadow-sm active:scale-95`}
+        >
+            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-2 transition-transform duration-200 group-hover:scale-105 group-active:scale-95 ${isPrimary
+                ? 'bg-secondary text-neutral-900'
+                : 'bg-white dark:bg-neutral-800 text-[#2d3748] dark:text-neutral-200 shadow-sm'
+                } [&_svg]:w-5 [&_svg]:h-5 [&_svg]:stroke-[2]`}
+            >
+                {icon}
+            </div>
+            <span className="text-xs font-semibold leading-tight line-clamp-1">
+                {label}
+            </span>
+        </Link>
+    );
+}
+
 export default function QuickActions() {
     const actions: QuickActionProps[] = [
         {
@@ -70,7 +95,16 @@ export default function QuickActions() {
     return (
         <section className="mt-2">
             <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-4">Quick Actions</h3>
-            <div className="flex items-center gap-3 flex-wrap">
+            
+            {/* Mobile Grid View */}
+            <div className="grid grid-cols-3 gap-3 md:hidden">
+                {actions.map((action, index) => (
+                    <QuickActionTile key={index} {...action} />
+                ))}
+            </div>
+
+            {/* Desktop Pill View */}
+            <div className="hidden md:flex items-center gap-3 flex-wrap">
                 {actions.map((action, index) => (
                     <QuickActionPill key={index} {...action} />
                 ))}

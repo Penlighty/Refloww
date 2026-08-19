@@ -123,7 +123,7 @@ export function MigrationDialog({ localData, onComplete, onSkip }: MigrationDial
             localStorage.removeItem('inflow-products');
             localStorage.removeItem('inflow-documents');
             localStorage.removeItem('inflow-discounts');
-            localStorage.removeItem('inflow-settings');
+            localStorage.removeItem('inflow-settings-storage');
 
             setTimeout(onComplete, 1500);
         } catch (err: any) {

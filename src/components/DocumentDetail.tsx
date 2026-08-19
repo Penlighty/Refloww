@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useDocumentStore, useTemplateStore, useCustomerStore, useSettingsStore } from '@/lib/store';
-import { formatCurrency, formatDate, downloadPdf, downloadPng, printDocument, formatAmountInWords } from '@/lib/utils';
+import { formatCurrency, formatDate, downloadPdf, downloadPng, printDocument, shareDocument, formatAmountInWords, capturePreviewAsCanvas } from '@/lib/utils';
 import { Button, Modal, ModalFooter } from '@/components/ui';
 import { DocumentType } from '@/lib/types';
 import { toast } from 'react-hot-toast';
@@ -28,7 +28,8 @@ import {
     Phone,
     MapPin,
     Image,
-    Plus
+    Plus,
+    Share2
 } from 'lucide-react';
 
 interface DocumentDetailProps {
@@ -60,6 +61,10 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
     const [isDownloadingPng, setIsDownloadingPng] = useState(false);
     const [isPrinting, setIsPrinting] = useState(false);
 
+    // Multi-page PDF download states
+    const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+    const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -70,8 +75,7 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
     // Get template with Connected Logic
     const rawTemplate = doc ? getTemplateById(doc.templateId) : null;
 
-    // If connected template and type differs (e.g. Invoice Template used for Receipt), swap to variant
-    const template = (rawTemplate && doc && doc.type !== rawTemplate.type && rawTemplate.mode === 'connected' && rawTemplate.variants?.[doc.type])
+    const template = (rawTemplate && doc && rawTemplate.mode === 'connected' && rawTemplate.variants?.[doc.type])
         ? {
             ...rawTemplate,
             imageUrl: rawTemplate.variants[doc.type]!.imageUrl,
@@ -84,6 +88,172 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
 
     // Get customer
     const customer = doc ? getCustomerById(doc.customerId) : null;
+
+    // Gather all documents linked to the same Hub
+    const hubId = doc ? (doc.type === 'invoice' ? doc.id : doc.sourceDocumentId) : undefined;
+    const allDocs = useDocumentStore(state => state.documents);
+
+    // Linked Invoice
+    const linkedInvoice = doc ? (doc.type === 'invoice' ? doc : (hubId ? allDocs.find(d => d.id === hubId && d.type === 'invoice') : null)) : null;
+
+    // Linked Receipts
+    const linkedReceipts = doc ? (hubId
+        ? allDocs.filter(d => d.sourceDocumentId === hubId && d.type === 'receipt')
+            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+        : []) : [];
+    if (doc && doc.type === 'receipt' && !linkedReceipts.find(r => r.id === doc.id)) {
+        linkedReceipts.push(doc);
+    }
+
+    // Linked Delivery Note
+    const linkedDelivery = doc ? (doc.type === 'delivery-note' ? doc : (hubId ? allDocs.find(d => d.sourceDocumentId === hubId && d.type === 'delivery-note') : null)) : null;
+
+    const allLinkedDocs = [
+        linkedInvoice,
+        ...linkedReceipts,
+        linkedDelivery
+    ].filter(Boolean) as any[];
+
+    // Template resolver for exporting different linked docs
+    const getTemplateForDoc = (targetDoc: any) => {
+        const rawT = getTemplateById(targetDoc.templateId);
+        const docType = targetDoc.type as DocumentType;
+        return (rawT && rawT.mode === 'connected' && rawT.variants?.[docType])
+            ? {
+                ...rawT,
+                imageUrl: rawT.variants[docType]!.imageUrl,
+                fields: rawT.variants[docType]!.fields,
+                width: rawT.variants[docType]!.width,
+                height: rawT.variants[docType]!.height,
+                orientation: rawT.variants[docType]!.orientation
+            }
+            : rawT;
+    };
+
+    // Data resolver for rendering preview of different linked docs
+    const getPreviewDataForDoc = (targetDoc: any) => {
+        const docCustomer = getCustomerById(targetDoc.customerId);
+        
+        const docTemplate = getTemplateById(targetDoc.templateId);
+        const hasLineItems = docTemplate?.fields?.some(f => f.type === 'line-items') ?? (targetDoc.lineItems && targetDoc.lineItems.length > 0);
+        const hasDiscount = docTemplate?.fields?.some(f => f.type === 'discount') ?? true;
+        const hasTax = docTemplate?.fields?.some(f => f.type === 'tax') ?? true;
+
+        const subtotal = hasLineItems
+            ? targetDoc.lineItems.reduce((sum: number, item: any) => sum + (item.quantity * item.unitPrice), 0)
+            : targetDoc.subtotal;
+
+        const discountAmount = hasDiscount ? subtotal * (targetDoc.discountPercent / 100) : 0;
+        const taxableAmount = subtotal - discountAmount;
+        const taxAmount = hasTax ? taxableAmount * (targetDoc.taxPercent / 100) : 0;
+        const grandTotal = subtotal - discountAmount + taxAmount;
+
+        const amountPaidInWords = targetDoc.customValues?.amountPaidInWords || formatAmountInWords(targetDoc.amountPaid || 0, company.currency);
+
+        return {
+            documentNumber: targetDoc.documentNumber,
+            date: targetDoc.date,
+            dueDate: targetDoc.dueDate,
+            customerName: targetDoc.customerName,
+            customerEmail: docCustomer?.email,
+            customerPhone: docCustomer?.phone,
+            customerAddress: docCustomer?.address,
+            lineItems: targetDoc.lineItems,
+            subtotal,
+            discountAmount,
+            discountName: targetDoc.discountName,
+            taxAmount,
+            grandTotal,
+            notes: targetDoc.notes,
+            customValues: targetDoc.customValues,
+            amountInWords: formatAmountInWords(grandTotal, company.currency),
+            amountPaid: targetDoc.amountPaid,
+            amountPaidInWords,
+            amountDue: targetDoc.amountDue ?? (grandTotal - (targetDoc.amountPaid || 0)),
+        };
+    };
+
+    // Generate multi-page PDF bundle
+    const generateMultiPagePdf = async (selectedIds: string[]) => {
+        setIsDownloadingPdf(true);
+        const toastId = toast.loading('Generating PDF bundle...');
+
+        try {
+            const jsPDF = (await import('jspdf')).default;
+            const pxToMm = 0.352778;
+
+            let pdfInstance: any = null;
+
+            for (let i = 0; i < selectedIds.length; i++) {
+                const id = selectedIds[i];
+                const elementId = `export-preview-${id}`;
+                
+                // Wait for offscreen DOM element to render
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                const element = document.getElementById(elementId);
+                if (!element) continue;
+
+                const widthMm = element.offsetWidth * pxToMm;
+                const heightMm = element.offsetHeight * pxToMm;
+
+                const canvas = await capturePreviewAsCanvas(elementId);
+                const imgData = canvas.toDataURL('image/png', 1.0);
+
+                if (!pdfInstance) {
+                    pdfInstance = new jsPDF({
+                        orientation: widthMm > heightMm ? 'landscape' : 'portrait',
+                        unit: 'mm',
+                        format: [widthMm, heightMm],
+                        compress: true,
+                    });
+                } else {
+                    pdfInstance.addPage([widthMm, heightMm], widthMm > heightMm ? 'landscape' : 'portrait');
+                }
+
+                pdfInstance.addImage(imgData, 'PNG', 0, 0, widthMm, heightMm);
+
+                // Add links overlay
+                const linkElements = element.querySelectorAll('[data-pdf-link]');
+                linkElements.forEach((el) => {
+                    const url = (el as HTMLElement).getAttribute('data-pdf-link');
+                    if (!url) return;
+
+                    const rect = el.getBoundingClientRect();
+                    const parentRect = element.getBoundingClientRect();
+
+                    const relX = (rect.left - parentRect.left) / parentRect.width;
+                    const relY = (rect.top - parentRect.top) / parentRect.height;
+                    const relW = rect.width / parentRect.width;
+                    const relH = rect.height / parentRect.height;
+
+                    const xMm = relX * widthMm;
+                    const yMm = relY * heightMm;
+                    const wMm = relW * widthMm;
+                    const hMm = relH * heightMm;
+
+                    pdfInstance.link(xMm, yMm, wMm, hMm, { url });
+                });
+            }
+
+            if (pdfInstance) {
+                const filename = selectedIds.length === 1 
+                    ? allLinkedDocs.find(d => d.id === selectedIds[0])?.documentNumber || 'document'
+                    : `${doc!.documentNumber}_bundle`;
+                
+                const sanitizeFilename = (fn: string) => fn.replace(/[\\/:*?"<>|]/g, '_').trim();
+                pdfInstance.save(`${sanitizeFilename(filename)}.pdf`);
+                toast.success('PDF bundle downloaded successfully', { id: toastId });
+            } else {
+                toast.error('No pages were generated', { id: toastId });
+            }
+        } catch (error) {
+            console.error('Multi-page PDF generation failed:', error);
+            toast.error('Failed to generate PDF bundle', { id: toastId });
+        } finally {
+            setIsDownloadingPdf(false);
+        }
+    };
 
     if (!mounted) {
         return <div className="max-w-7xl mx-auto py-12 flex justify-center items-center min-h-[400px]">
@@ -193,6 +363,15 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
         }
     };
 
+    const handleDownloadClick = () => {
+        if (allLinkedDocs.length > 1) {
+            setSelectedDocIds(allLinkedDocs.map(d => d.id));
+            setIsDownloadModalOpen(true);
+        } else {
+            handleDownload();
+        }
+    };
+
     const handleDownloadPng = async () => {
         setIsDownloadingPng(true);
         try {
@@ -236,7 +415,15 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                        variant="primary"
+                        leftIcon={<Share2 className="w-4 h-4" />}
+                        onClick={() => shareDocument('document-preview', doc.documentNumber, type.toUpperCase())}
+                        disabled={isDownloadingPdf || isDownloadingPng || isPrinting}
+                    >
+                        Share
+                    </Button>
                     <Link href={`/${type}s/${documentId}/edit`}>
                         <Button variant="outline" leftIcon={<Edit2 className="w-4 h-4" />}>
                             Edit
@@ -245,7 +432,7 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
                     <Button
                         variant="outline"
                         leftIcon={<Download className="w-4 h-4" />}
-                        onClick={handleDownload}
+                        onClick={handleDownloadClick}
                         isLoading={isDownloadingPdf}
                         disabled={isDownloadingPdf || isDownloadingPng || isPrinting}
                     >
@@ -284,26 +471,7 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
 
                 if (!supportsReceipt && !supportsDelivery) return null;
 
-                // Find existing docs related to the Hub
-                const allDocs = useDocumentStore.getState().documents;
                 const { getTotalPaidForInvoice } = useDocumentStore.getState();
-
-                // Invoice
-                let linkedInvoice = hubId ? allDocs.find(d => d.id === hubId && d.type === 'invoice') : null;
-                if (doc.type === 'invoice') linkedInvoice = doc;
-
-                // Receipts - Find ALL receipts linked to this invoice
-                const linkedReceipts = hubId
-                    ? allDocs.filter(d => d.sourceDocumentId === hubId && d.type === 'receipt')
-                        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-                    : [];
-                if (doc.type === 'receipt' && !linkedReceipts.find(r => r.id === doc.id)) {
-                    linkedReceipts.push(doc);
-                }
-
-                // Delivery Note - only one per invoice typically
-                let linkedDelivery = hubId ? allDocs.find(d => d.sourceDocumentId === hubId && d.type === 'delivery-note') : null;
-                if (doc.type === 'delivery-note') linkedDelivery = doc;
 
                 // Calculate payment status for showing "Add Receipt" option
                 // IMPORTANT: Recalculate invoice total based on template capabilities
@@ -541,6 +709,117 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
                     </div>
                 </div>
             </div>
+
+            {/* Hidden export containers to render connected templates for multi-page PDF generation */}
+            {isDownloadingPdf && (
+                <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '2000px', height: '2000px', pointerEvents: 'none', overflow: 'hidden' }}>
+                    {allLinkedDocs.map((linkedDoc) => (
+                        <div 
+                            key={linkedDoc.id} 
+                            id={`export-preview-${linkedDoc.id}`}
+                            style={{ 
+                                width: `${getTemplateForDoc(linkedDoc)?.width || (getTemplateForDoc(linkedDoc)?.orientation === 'landscape' ? 842 : 595)}px`,
+                                height: `${getTemplateForDoc(linkedDoc)?.height || (getTemplateForDoc(linkedDoc)?.orientation === 'landscape' ? 595 : 842)}px`,
+                                background: '#ffffff',
+                                overflow: 'hidden',
+                                display: 'block'
+                            }}
+                        >
+                            <DocumentRenderer
+                                template={getTemplateForDoc(linkedDoc)!}
+                                data={getPreviewDataForDoc(linkedDoc)}
+                            />
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* PDF Bundle Download Modal */}
+            <Modal
+                isOpen={isDownloadModalOpen}
+                onClose={() => setIsDownloadModalOpen(false)}
+                title="Download PDF"
+                size="md"
+            >
+                <div className="space-y-4 py-2">
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                        This document has multiple linked records. Select the documents you want to export into a single PDF bundle:
+                    </p>
+
+                    <div className="space-y-2.5 max-h-[40vh] overflow-y-auto pr-1">
+                        {allLinkedDocs.map((linkedDoc) => {
+                            const isSelected = selectedDocIds.includes(linkedDoc.id);
+                            
+                            // Beautiful icons and labels based on document type
+                            let icon = <FileText className="w-5 h-5 text-blue-500" />;
+                            let label = linkedDoc.documentNumber;
+                            let subLabel = 'Invoice';
+                            
+                            if (linkedDoc.type === 'receipt') {
+                                icon = <Receipt className="w-5 h-5 text-emerald-500" />;
+                                const rIndex = linkedReceipts.findIndex(r => r.id === linkedDoc.id);
+                                subLabel = linkedReceipts.length > 1 ? `Payment ${rIndex + 1}` : 'Receipt';
+                            } else if (linkedDoc.type === 'delivery-note') {
+                                icon = <Truck className="w-5 h-5 text-amber-500" />;
+                                subLabel = 'Delivery Note';
+                            }
+
+                            return (
+                                <label
+                                    key={linkedDoc.id}
+                                    className={`
+                                        flex items-center justify-between p-3.5 rounded-xl border-2 cursor-pointer transition-all duration-200 bg-neutral-50/50 dark:bg-neutral-800/30
+                                        ${isSelected 
+                                            ? 'border-blue-500 bg-blue-50/10 dark:border-blue-500' 
+                                            : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600'
+                                        }
+                                    `}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 rounded-lg bg-white dark:bg-neutral-800 flex items-center justify-center border border-neutral-100 dark:border-neutral-700 shadow-sm">
+                                            {icon}
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-neutral-900 dark:text-white">
+                                                {label}
+                                            </div>
+                                            <div className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">
+                                                {subLabel}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        onChange={() => {
+                                            if (isSelected) {
+                                                setSelectedDocIds(prev => prev.filter(id => id !== linkedDoc.id));
+                                            } else {
+                                                setSelectedDocIds(prev => [...prev, linkedDoc.id]);
+                                            }
+                                        }}
+                                        className="w-4.5 h-4.5 text-blue-600 border-neutral-300 rounded focus:ring-blue-500"
+                                    />
+                                </label>
+                            );
+                        })}
+                    </div>
+                </div>
+                <ModalFooter>
+                    <Button variant="ghost" onClick={() => setIsDownloadModalOpen(false)}>
+                        Cancel
+                    </Button>
+                    <Button 
+                        onClick={() => {
+                            setIsDownloadModalOpen(false);
+                            generateMultiPagePdf(selectedDocIds);
+                        }}
+                        disabled={selectedDocIds.length === 0}
+                    >
+                        Download PDF Bundle
+                    </Button>
+                </ModalFooter>
+            </Modal>
 
             {/* Delete Modal */}
             <Modal

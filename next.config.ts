@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
+const isBuild = process.env.NODE_ENV === 'production' || process.env.CAPACITOR_BUILD === 'true';
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  ...(isBuild ? { output: 'export' } : {}),
+  images: {
+    unoptimized: true,
+  }
 };
 
 export default nextConfig;
+

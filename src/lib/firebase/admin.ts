@@ -45,7 +45,7 @@ export interface UserSummary {
     photoURL?: string;
     lastLogin?: string;
     createdAt?: string;
-    role: 'user' | 'admin';
+    role: 'admin' | 'free' | 'pro' | 'premium' | 'enterprise';
     metadata?: {
         documentCount?: number;
         templateCount?: number;
@@ -145,7 +145,7 @@ export const isUserAdmin = async (userId: string): Promise<boolean> => {
  */
 export const setUserAsAdmin = async (userId: string, isAdmin: boolean): Promise<void> => {
     await updateDoc(doc(db, 'users', userId), {
-        role: isAdmin ? 'admin' : 'user',
+        role: isAdmin ? 'admin' : 'free',
         isAdmin: isAdmin
     });
 };

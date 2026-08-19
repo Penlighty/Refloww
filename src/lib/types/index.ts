@@ -25,6 +25,7 @@ export type FieldType =
 
     | 'notes'
     | 'amount-in-words'
+    | 'amount-paid-in-words'
     | 'amount-paid'
     | 'amount-due'
     | 'link-button'
@@ -102,17 +103,106 @@ export interface Customer {
 
 // -------------------- Product Types --------------------
 
+export type StorefrontLabel = 'in-stock' | 'flash-sale' | 'low-stock' | 'new' | 'out-of-stock' | 'best-seller';
+
 export interface Product {
     id: string;
     name: string;
     sku: string;
+    barcode?: string;
     description: string;
     unitPrice: number;
     category?: string;
     inStock?: boolean;
+    stockQuantity?: number;       // Optional — leave blank for services
+    imageUrl?: string;
+    images?: string[];
+    discountedPrice?: number;
+    discountId?: string;           // Links to a saved Discount
+    storefrontLabel?: StorefrontLabel; // Badge shown on storefront card
+    isPublishedToStore?: boolean;
+    storeDescription?: string;
     createdAt: string;
     updatedAt: string;
 }
+
+// -------------------- Storefront Types --------------------
+
+export interface StorefrontSettings {
+    storeName: string;
+    storeSlug: string;
+    description: string;
+    bannerUrl?: string;
+    logoUrl?: string;
+    contactEmail: string;
+    contactPhone: string;
+    websiteUrl?: string;
+    address: string;
+    currency: string;
+    isActive: boolean;
+    paymentInstructions?: string;
+    allowDirectCheckout: boolean;
+    themePreset?: 'slate-dark' | 'ocean-blue' | 'emerald-green' | 'royal-purple' | 'sunset-rose' | 'clean-light';
+    headerGradient?: string;
+    primaryAccentColor?: string;
+    headerTextColor?: string;
+    // Monnify Gateway Integration Configuration
+    enableMonnifyPayment?: boolean;
+    monnifyApiKey?: string;
+    monnifySecretKey?: string;
+    monnifyContractCode?: string;
+    monnifySubAccountCode?: string;
+    monnifyEnvironment?: 'sandbox' | 'live';
+    
+    // Paystack Gateway Integration Configuration
+    enablePaystackPayment?: boolean;
+    paystackPublicKey?: string;
+    paystackSubAccountCode?: string;
+
+    // Merchant Payout Bank Account Details (Automated Subaccounts)
+    bankName?: string;
+    bankCode?: string;
+    accountNumber?: string;
+    accountName?: string;
+
+    feeBearer?: 'customer' | 'storefront';
+}
+
+export interface StorefrontCartItem {
+    product: Product;
+    quantity: number;
+}
+
+export interface StorefrontOrder {
+    id: string;
+    orderNumber: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    customerAddress: string;
+    items: {
+        productId: string;
+        productName: string;
+        quantity: number;
+        unitPrice: number;
+        subtotal: number;
+    }[];
+    subtotal: number;
+    grandTotal: number;
+    status: 'pending' | 'completed' | 'cancelled';
+    invoiceId: string;
+    receiptId?: string;
+    createdAt: string;
+    // Payment & Monnify Fee Split Details
+    paymentMethod?: 'paystack' | 'monnify' | 'cash';
+    paymentReference?: string;
+    paymentFee?: number;
+    monnifyCost?: number;
+    platformProfit?: number;
+    merchantPayout?: number;
+    paymentStatus?: 'paid' | 'pending' | 'failed';
+}
+
 
 // -------------------- Discount Types --------------------
 
@@ -239,10 +329,20 @@ export interface CustomerFormData {
 export interface ProductFormData {
     name: string;
     sku: string;
+    barcode?: string;
     description: string;
     unitPrice: number;
     category?: string;
+    imageUrl?: string;
+    images?: string[];
+    stockQuantity?: number;
+    discountedPrice?: number;
+    discountId?: string;
+    storefrontLabel?: StorefrontLabel;
+    isPublishedToStore?: boolean;
+    storeDescription?: string;
 }
+
 
 export interface DocumentFormData {
     templateId: string;

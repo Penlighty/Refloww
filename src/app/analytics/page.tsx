@@ -1,4 +1,6 @@
 "use client";
+// Force Next.js dev server compilation trigger for analytics page
+
 
 import React, { useMemo, useState } from 'react';
 import { useDocumentStore, useSettingsStore, useTemplateStore } from '@/lib/store';

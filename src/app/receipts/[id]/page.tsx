@@ -1,17 +1,12 @@
-"use client";
+import ReceiptDetailClientWrapper from './ReceiptDetailClientWrapper';
 
-import DocumentDetail from '@/components/DocumentDetail';
-
-import { useParams } from 'next/navigation';
-
-export default function ReceiptDetailPage() {
-    const params = useParams();
-    const id = params.id as string;
-    return (
-        <DocumentDetail
-            type="receipt"
-            documentId={id}
-            backUrl="/receipts"
-        />
-    );
+export function generateStaticParams() {
+  return [{ id: '1' }];
 }
+
+export default async function ReceiptDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <ReceiptDetailClientWrapper id={id} />;
+}
+
+

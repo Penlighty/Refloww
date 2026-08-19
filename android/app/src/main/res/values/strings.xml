@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Inflow</string>
+    <string name="title_activity_main">Inflow</string>
+    <string name="package_name">com.inflow.app</string>
+    <string name="custom_url_scheme">com.inflow.app</string>
+    <string name="server_client_id">938128551688-rbgf5oe3qvrjuff3s2ccrur8lp0t8eog.apps.googleusercontent.com</string>
+</resources>
+

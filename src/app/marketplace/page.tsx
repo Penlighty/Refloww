@@ -27,10 +27,10 @@ import {
     incrementTemplateDownload,
     MarketplaceTemplate
 } from '@/lib/firebase/admin';
-import { createDocument } from '@/lib/firebase';
 import { useTemplateStore } from '@/lib/store';
 import { Template, MappedField } from '@/lib/types';
 import { toast } from 'react-hot-toast';
+import TemplateSheetSlider, { extractTemplateSheets } from '@/components/TemplateSheetSlider';
 
 const typeConfig = {
     'invoice': { icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30', gradient: 'from-blue-500 to-cyan-500' },
@@ -226,7 +226,7 @@ export default function MarketplacePage() {
             </div>
 
             {/* Filters */}
-            <div className="sticky top-0 z-20 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-200/50 dark:border-neutral-700/50">
+            <div className="sticky top-16 z-10 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-200/50 dark:border-neutral-700/50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                         {/* Search */}
@@ -521,16 +521,10 @@ export default function MarketplacePage() {
 
                         {/* Modal Content */}
                         <div className="p-6 overflow-y-auto max-h-[60vh]">
-                            {/* Thumbnail */}
-                            {previewTemplate.thumbnail && (
-                                <div className="mb-6 rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-700">
-                                    <img
-                                        src={previewTemplate.thumbnail}
-                                        alt={previewTemplate.name}
-                                        className="w-full h-auto"
-                                    />
-                                </div>
-                            )}
+                            {/* Interactive Template Sheet Slider */}
+                            <div className="mb-6">
+                                <TemplateSheetSlider sheets={extractTemplateSheets(previewTemplate)} />
+                            </div>
 
                             {/* Description */}
                             <div className="mb-6">

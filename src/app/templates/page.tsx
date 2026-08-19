@@ -28,6 +28,7 @@ import {
     Lock
 } from 'lucide-react';
 import TemplateImportExport, { downloadTemplate } from '@/components/TemplateImportExport';
+import { v4 as uuidv4 } from 'uuid';
 
 type ViewMode = 'grid' | 'list';
 type SortField = 'name' | 'type' | 'fields' | 'createdAt';
@@ -146,14 +147,71 @@ export default function TemplatesPage() {
     }, []);
 
     const handleFileSelect = (file: File) => {
-        const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'application/pdf'];
-        if (!validTypes.includes(file.type)) {
-            setUploadError('Please upload a PDF, PNG, JPG, or SVG file');
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
+
+        // Automatically import .rfw and .json template files!
+        if (fileExt === 'rfw' || fileExt === 'json') {
+            const loadingToast = toast.loading('Importing template file...');
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const text = event.target?.result as string;
+                    const data = JSON.parse(text);
+
+                    // Basic validation
+                    if (!data.name || !data.fields || !Array.isArray(data.fields)) {
+                        throw new Error("Invalid .rfw file format");
+                    }
+
+                    // Sanitize and import with new unique template ID to prevent collision
+                    const importedTemplate = {
+                        ...data,
+                        id: uuidv4(),
+                        createdAt: data.createdAt || new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                        fields: data.fields.map((f: any) => ({
+                            ...f,
+                            id: f.id || uuidv4()
+                        })),
+                        isDefault: false,
+                    };
+
+                    // Process variants if they exist
+                    if (importedTemplate.variants) {
+                        const processedVariants: any = {};
+                        Object.entries(importedTemplate.variants).forEach(([key, variant]) => {
+                            if (variant && (variant as any).fields) {
+                                processedVariants[key] = {
+                                    ...(variant as any),
+                                    fields: (variant as any).fields.map((f: any) => ({ ...f, id: f.id || uuidv4() }))
+                                };
+                            }
+                        });
+                        importedTemplate.variants = processedVariants;
+                    }
+
+                    addTemplate(importedTemplate);
+                    toast.success(`Template "${importedTemplate.name}" imported successfully!`, { id: loadingToast });
+                } catch (error) {
+                    console.error("Import failed:", error);
+                    toast.error("Failed to import template. Please ensure the file is a valid template.", { id: loadingToast });
+                }
+            };
+            reader.readAsText(file);
+            return;
+        }
+
+        // Robust validation using both MIME type and file extension
+        const isImage = file.type.startsWith('image/') || ['png', 'jpg', 'jpeg', 'svg'].includes(fileExt);
+        const isPdf = file.type === 'application/pdf' || fileExt === 'pdf';
+
+        if (!isImage && !isPdf) {
+            toast.error('Unsupported file format. Please upload a PDF, PNG, JPG, or SVG design file, or a .rfw template.');
             return;
         }
 
         if (file.size > 10 * 1024 * 1024) { // 10MB limit
-            setUploadError('File size must be less than 10MB');
+            toast.error('File size must be less than 10MB');
             return;
         }
 
@@ -161,36 +219,42 @@ export default function TemplatesPage() {
         setUploadFileName(file.name);
 
         // For images, create a preview
-        // For images, create a preview
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const result = e.target?.result as string;
-                setUploadPreview(result);
+        if (isImage) {
+            const loadingToast = toast.loading('Compressing template image...');
+            import('@/lib/utils/image-utils')
+                .then(async ({ compressImage }) => {
+                    // Compress image to fit under 1MB Firestore document limit (e.g. max width 1200, quality 0.7)
+                    const result = await compressImage(file, 1200, 0.7);
+                    setUploadPreview(result);
 
-                // Detect dimensions
-                const img = new window.Image();
-                img.onload = () => {
-                    const isLandscape = img.width > img.height;
-                    setUploadOrientation(isLandscape ? 'landscape' : 'portrait');
+                    // Detect dimensions
+                    const img = new window.Image();
+                    img.onload = () => {
+                        const isLandscape = img.width > img.height;
+                        setUploadOrientation(isLandscape ? 'landscape' : 'portrait');
 
-                    // Calculate document dimensions based on standard A4 widths
-                    // Portrait A4 width: 595px
-                    // Landscape A4 width: 842px
-                    // We lock the width to standard A4 sizes for consistency, but allow height to flow naturally
-                    // This ensures "Zoom 100%" feels physically correct on screen
+                        // Calculate document dimensions based on standard A4 widths
+                        // Portrait A4 width: 595px
+                        // Landscape A4 width: 842px
+                        // We lock the width to standard A4 sizes for consistency, but allow height to flow naturally
+                        // This ensures "Zoom 100%" feels physically correct on screen
 
-                    if (isLandscape) {
-                        setUploadWidth(842);
-                        setUploadHeight(Math.round(842 * (img.height / img.width)));
-                    } else {
-                        setUploadWidth(595);
-                        setUploadHeight(Math.round(595 * (img.height / img.width)));
-                    }
-                };
-                img.src = result;
-            };
-            reader.readAsDataURL(file);
+                        if (isLandscape) {
+                            setUploadWidth(842);
+                            setUploadHeight(Math.round(842 * (img.height / img.width)));
+                        } else {
+                            setUploadWidth(595);
+                            setUploadHeight(Math.round(595 * (img.height / img.width)));
+                        }
+                    };
+                    img.src = result;
+                    toast.success('Template image compressed and loaded', { id: loadingToast });
+                })
+                .catch((err) => {
+                    console.error('Error compressing template image:', err);
+                    setUploadError('Failed to process image');
+                    toast.error('Failed to process template image', { id: loadingToast });
+                });
         } else {
             // For PDFs, we'd need to confirm orientation via PDF.js, defaulting to portrait for now
             setUploadPreview('/pdf-placeholder.png');
@@ -291,7 +355,7 @@ export default function TemplatesPage() {
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".pdf,.png,.jpg,.jpeg,.svg"
+                    accept=".rfw,.json,.pdf,.png,.jpg,.jpeg,.svg"
                     onChange={handleFileInputChange}
                     className="hidden"
                 />
@@ -445,7 +509,7 @@ export default function TemplatesPage() {
                                 const TypeIcon = config ? config.icon : Lock;
 
                                 return (
-                                    <div key={template.id} className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 shadow-sm relative">
+                                    <div key={template.id} className={`bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 shadow-sm relative ${openMenuId === template.id ? 'z-30' : ''}`}>
                                         <div className="relative aspect-square bg-neutral-100 dark:bg-neutral-900 overflow-hidden rounded-t-2xl border-b border-neutral-100 dark:border-neutral-700">
                                             {(template.coverImage || template.imageUrl) ? (
                                                 <img
@@ -599,7 +663,8 @@ export default function TemplatesPage() {
                         </div>
                     ) : (
                         <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden shadow-sm">
-                            <table className="w-full">
+                            <div className="overflow-x-auto">
+                                <table className="w-full min-w-[700px] md:min-w-full">
                                 <thead>
                                     <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
                                         <th className="text-left px-6 py-4">
@@ -648,7 +713,7 @@ export default function TemplatesPage() {
                                         const TypeIcon = config ? config.icon : Lock;
 
                                         return (
-                                            <tr key={template.id} className="border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors group/row">
+                                            <tr key={template.id} className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors group/row ${openMenuId === template.id ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}>
                                                 <td className="px-6 py-4">
                                                     {isLocked ? (
                                                         <div className="flex items-center gap-3 group select-none opacity-75">
@@ -814,6 +879,7 @@ export default function TemplatesPage() {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
                     )}
                 </>
             )

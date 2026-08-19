@@ -68,7 +68,7 @@ export function AdminSidebar() {
                     System
                 </div>
                 <Link
-                    href="/dashboard"
+                    href="/"
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors text-emerald-600 dark:text-emerald-400"
                 >
                     <ExternalLink className="w-5 h-5" />

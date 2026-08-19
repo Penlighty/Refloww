@@ -5,6 +5,7 @@ import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     signInWithPopup,
+    signInWithCredential,
     GoogleAuthProvider,
     signOut as firebaseSignOut,
     sendPasswordResetEmail,
@@ -15,6 +16,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './config';
+import { Capacitor } from '@capacitor/core';
 
 // Google Auth Provider
 const googleProvider = new GoogleAuthProvider();
@@ -25,6 +27,8 @@ export interface UserProfile {
     email: string | null;
     displayName: string | null;
     photoURL: string | null;
+    role?: 'admin' | 'free' | 'pro' | 'premium' | 'enterprise';
+    isAdmin?: boolean;
 }
 
 // ============================================
@@ -65,7 +69,45 @@ export const signUpWithEmail = async (
  * Sign in with Google OAuth
  */
 export const signInWithGoogle = async (): Promise<UserCredential> => {
-    const userCredential = await signInWithPopup(auth, googleProvider);
+    let userCredential: UserCredential;
+
+    if (Capacitor.isNativePlatform()) {
+        try {
+            const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+            await GoogleAuth.initialize({
+                clientId: '938128551688-rbgf5oe3qvrjuff3s2ccrur8lp0t8eog.apps.googleusercontent.com',
+                scopes: ['profile', 'email'],
+                grantOfflineAccess: true,
+            });
+            const googleUser = await GoogleAuth.signIn();
+            if (googleUser && googleUser.authentication && googleUser.authentication.idToken) {
+                const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+                userCredential = await signInWithCredential(auth, credential);
+            } else {
+                throw new Error('auth/google-sign-in-failed');
+            }
+        } catch (nativeErr: any) {
+            console.error('Native Google Auth error:', nativeErr);
+            // Don't crash if user cancelled
+            const errStr = String(nativeErr?.message || nativeErr?.code || nativeErr).toLowerCase();
+            if (
+                nativeErr?.code === '12501' ||
+                errStr.includes('cancel') ||
+                errStr.includes('closed') ||
+                errStr.includes('popup_closed')
+            ) {
+                throw new Error('auth/popup-closed-by-user');
+            }
+            // Fallback attempt with web popup if native fails
+            try {
+                userCredential = await signInWithPopup(auth, googleProvider);
+            } catch (fallbackErr: any) {
+                throw nativeErr || fallbackErr;
+            }
+        }
+    } else {
+        userCredential = await signInWithPopup(auth, googleProvider);
+    }
 
     // Check if user profile exists, create if not
     const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
@@ -151,5 +193,7 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
         email: data.email,
         displayName: data.displayName,
         photoURL: data.photoURL,
+        role: data.role,
+        isAdmin: data.isAdmin,
     };
 };

@@ -47,6 +47,7 @@ export interface DocumentData {
     notes?: string;
     customValues?: Record<string, string>;
     amountInWords?: string;
+    amountPaidInWords?: string;
     discountName?: string;
     amountPaid?: number;
     amountDue?: number;
@@ -161,7 +162,7 @@ const TableField = ({ field, lineItems, currency, docHeight, fontFamily }: Table
         { id: 'desc', header: 'Description', width: 45, type: 'text', key: 'description' },
         { id: 'qty', header: 'Qty', width: 15, type: 'number', key: 'quantity' },
         { id: 'price', header: 'Price', width: 20, type: 'currency', key: 'unitPrice' },
-        { id: 'total', header: 'Total', width: 20, type: 'currency', key: 'subtotal' }
+        { id: 'total', header: 'Sub Total', width: 20, type: 'currency', key: 'subtotal' }
     ];
 
     // Calculate dimensions
@@ -401,6 +402,8 @@ export default function DocumentRenderer({ template, data, id }: DocumentRendere
                 return typeof data.amountDue === 'number' ? formatCurrency(data.amountDue, currency) : '';
             case 'amount-in-words':
                 return data.amountInWords || '';
+            case 'amount-paid-in-words':
+                return data.amountPaidInWords || data.customValues?.['amountPaidInWords'] || '';
             case 'notes':
                 return data.notes || '';
             case 'discount-name':

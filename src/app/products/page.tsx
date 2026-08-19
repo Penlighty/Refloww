@@ -3,12 +3,13 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useProductStore, useSettingsStore } from '@/lib/store';
-import { Product, ProductFormData } from '@/lib/types';
+import { useProductStore, useSettingsStore, useDiscountStore } from '@/lib/store';
+import { Product, ProductFormData, StorefrontLabel } from '@/lib/types';
 import { formatCurrency, formatDate, parseCSV, generateCSV, downloadCSV, readFileAsText } from '@/lib/utils';
-import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea } from '@/components/ui';
+import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea, ImageUploader, Select } from '@/components/ui';
 import { toast } from 'react-hot-toast';
 import { generateSkuFromCategory } from '@/lib/utils/productUtils';
+import { validateContentPolicy } from '@/lib/utils/contentPolicy';
 import {
     Plus,
     Package,
@@ -26,8 +27,13 @@ import {
     Check,
     Eye,
     Minus,
-    X
+    X,
+    ScanLine,
+    Barcode as BarcodeIcon,
+    Store,
+    Image as ImageIcon
 } from 'lucide-react';
+import BarcodeScannerModal from '@/components/BarcodeScannerModal';
 
 type SortField = 'name' | 'unitPrice' | 'sku' | 'createdAt';
 type SortOrder = 'asc' | 'desc';
@@ -40,6 +46,9 @@ const productCSVMapping = {
     'sku': 'sku' as const,
     'product sku': 'sku' as const,
     'code': 'sku' as const,
+    'barcode': 'barcode' as const,
+    'upc': 'barcode' as const,
+    'ean': 'barcode' as const,
     'description': 'description' as const,
     'price': 'unitPrice' as const,
     'unit price': 'unitPrice' as const,
@@ -50,6 +59,7 @@ const productCSVMapping = {
 export default function ProductsPage() {
     const { products, categories, addProduct, updateProduct, deleteProduct, addCategory, removeCategory } = useProductStore();
     const { numbering, company } = useSettingsStore();
+    const { discounts } = useDiscountStore();
     const searchParams = useSearchParams();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -60,6 +70,7 @@ export default function ProductsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -68,11 +79,16 @@ export default function ProductsPage() {
     useEffect(() => {
         if (searchParams.get('add') === 'true') {
             setEditingProduct(null);
-            setFormData({ name: '', sku: '', description: '', unitPrice: 0, category: '' });
+            setFormData({ name: '', sku: '', barcode: '', description: '', unitPrice: 0, category: '' });
             setFormErrors({});
             setIsModalOpen(true);
         }
     }, [searchParams]);
+
+    // Dynamic browser tab title
+    useEffect(() => {
+        document.title = 'Products & Inventory | Refloww';
+    }, []);
 
     // Category Dropdown State
     const [isCategoryListOpen, setIsCategoryListOpen] = useState(false);
@@ -101,9 +117,17 @@ export default function ProductsPage() {
     const [formData, setFormData] = useState<ProductFormData>({
         name: '',
         sku: '',
+        barcode: '',
         description: '',
         unitPrice: 0,
         category: '',
+        imageUrl: '',
+        stockQuantity: undefined,
+        discountedPrice: undefined,
+        discountId: undefined,
+        storefrontLabel: undefined,
+        isPublishedToStore: true,
+        storeDescription: '',
     });
     const [formErrors, setFormErrors] = useState<Partial<Record<keyof ProductFormData, string>>>({});
 
@@ -158,19 +182,48 @@ export default function ProductsPage() {
 
     const openCreateModal = () => {
         setEditingProduct(null);
-        setFormData({ name: '', sku: '', description: '', unitPrice: 0, category: '' });
+        setFormData({
+            name: '',
+            sku: '',
+            barcode: '',
+            description: '',
+            unitPrice: 0,
+            category: '',
+            imageUrl: '',
+            images: ['', '', '', '', ''],
+            stockQuantity: undefined,
+            discountedPrice: undefined,
+            discountId: undefined,
+            storefrontLabel: undefined,
+            isPublishedToStore: true,
+            storeDescription: ''
+        });
         setFormErrors({});
         setIsModalOpen(true);
     };
 
     const openEditModal = (product: Product) => {
         setEditingProduct(product);
+        const existingImages = product.images && product.images.length > 0
+            ? product.images
+            : [product.imageUrl || ''];
+        const imageSlots = Array(5).fill('').map((_, i) => existingImages[i] || '');
+
         setFormData({
             name: product.name,
             sku: product.sku,
+            barcode: product.barcode || '',
             description: product.description,
             unitPrice: product.unitPrice,
             category: product.category || '',
+            imageUrl: product.imageUrl || '',
+            images: imageSlots,
+            stockQuantity: product.stockQuantity,
+            discountedPrice: product.discountedPrice,
+            discountId: product.discountId,
+            storefrontLabel: product.storefrontLabel,
+            isPublishedToStore: product.isPublishedToStore !== false,
+            storeDescription: product.storeDescription || '',
         });
         setFormErrors({});
         setIsModalOpen(true);
@@ -215,11 +268,45 @@ export default function ProductsPage() {
     const handleSubmit = () => {
         if (!validateForm()) return;
 
+        // Platform Content Safety Policy Check
+        const policyCheck = validateContentPolicy({
+            name: formData.name,
+            description: formData.description,
+            category: formData.category,
+            storeDescription: formData.storeDescription,
+        });
+
+        if (!policyCheck.isValid) {
+            toast.error(policyCheck.violationReason || 'Prohibited product content detected.', { duration: 6000 });
+            return;
+        }
+
+        const validImages = (formData.images || []).map(img => img.trim()).filter(Boolean);
+        const primaryImage = validImages[0] || formData.imageUrl || '';
+
+        // If a discount is selected, auto-compute the discountedPrice from it
+        let computedDiscountedPrice = formData.discountedPrice;
+        if (formData.discountId) {
+            const selectedDiscount = discounts.find(d => d.id === formData.discountId);
+            if (selectedDiscount) {
+                computedDiscountedPrice = parseFloat(
+                    (formData.unitPrice * (1 - selectedDiscount.percentage / 100)).toFixed(2)
+                );
+            }
+        }
+
+        const payload: ProductFormData = {
+            ...formData,
+            imageUrl: primaryImage,
+            images: validImages,
+            discountedPrice: computedDiscountedPrice,
+        };
+
         if (editingProduct) {
-            updateProduct(editingProduct.id, formData);
+            updateProduct(editingProduct.id, payload);
             toast.success(`Product "${formData.name}" updated`);
         } else {
-            addProduct(formData);
+            addProduct(payload);
             toast.success(`Product "${formData.name}" added successfully!`);
         }
 
@@ -320,7 +407,12 @@ export default function ProductsPage() {
                         Manage your product inventory
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                    <Link href="/storefront">
+                        <Button variant="outline" leftIcon={<Store className="w-4 h-4 text-blue-600" />}>
+                            Manage Storefront
+                        </Button>
+                    </Link>
                     <Button variant="ghost" leftIcon={<Download className="w-4 h-4" />} onClick={handleExportCSV}>
                         Export
                     </Button>
@@ -380,9 +472,10 @@ export default function ProductsPage() {
                     />
                 </div>
             ) : (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl">
-                    <table className="w-full">
-                        <thead>
+                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16">
+                    <div className="overflow-x-auto min-h-[300px]">
+                        <table className="w-full min-w-[700px] md:min-w-full">
+                            <thead>
                             <tr className="border-b border-neutral-100 dark:border-neutral-700">
                                 <th className="text-left px-6 py-4">
                                     <button
@@ -390,15 +483,6 @@ export default function ProductsPage() {
                                         className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                     >
                                         Product
-                                        <ArrowUpDown className="w-3 h-3" />
-                                    </button>
-                                </th>
-                                <th className="text-left px-6 py-4">
-                                    <button
-                                        onClick={() => handleSort('sku')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-                                    >
-                                        SKU
                                         <ArrowUpDown className="w-3 h-3" />
                                     </button>
                                 </th>
@@ -417,13 +501,14 @@ export default function ProductsPage() {
                                     </button>
                                 </th>
                                 <th className="text-left px-6 py-4 hidden md:table-cell">
-                                    <button
-                                        onClick={() => handleSort('createdAt')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-                                    >
-                                        Added
-                                        <ArrowUpDown className="w-3 h-3" />
-                                    </button>
+                                    <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                        Stock
+                                    </span>
+                                </th>
+                                <th className="text-left px-6 py-4 hidden xl:table-cell">
+                                    <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                        Status
+                                    </span>
                                 </th>
                                 <th className="text-right px-6 py-4">
                                     <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
@@ -431,26 +516,52 @@ export default function ProductsPage() {
                                     </span>
                                 </th>
                             </tr>
-                        </thead>
+                            </thead>
                         <tbody>
-                            {filteredProducts.map((product) => (
+                            {filteredProducts.map((product, index) => {
+                                const isNearBottom = index >= Math.max(0, filteredProducts.length - 2) || filteredProducts.length <= 2;
+                                const popupPosClass = isNearBottom ? 'bottom-full mb-1' : 'top-full mt-1';
+                                const hasDiscount = product.discountedPrice && product.discountedPrice < product.unitPrice;
+                                const stockQty = product.stockQuantity;
+                                const stockStatus = stockQty === undefined
+                                    ? null
+                                    : stockQty === 0
+                                        ? { label: 'Out of stock', cls: 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400' }
+                                        : stockQty <= 5
+                                            ? { label: `${stockQty} left`, cls: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' }
+                                            : { label: `${stockQty} units`, cls: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' };
+                                return (
                                 <tr
                                     key={product.id}
-                                    className="border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors"
+                                    className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${openMenuId === product.id ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}
                                 >
+                                    {/* Product name + SKU + storefront badge */}
                                     <td className="px-6 py-4">
                                         <Link href={`/products/${product.id}`} className="flex items-center gap-3 group">
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400 to-violet-600 flex items-center justify-center text-white flex-shrink-0">
-                                                <Package className="w-5 h-5" strokeWidth={1.75} />
+                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400 to-violet-600 flex items-center justify-center text-white flex-shrink-0 overflow-hidden">
+                                                {product.imageUrl ? (
+                                                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <Package className="w-5 h-5" strokeWidth={1.75} />
+                                                )}
                                             </div>
-                                            <span className="font-medium text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{product.name}</span>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-medium text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                                                        {product.name}
+                                                    </span>
+                                                    {product.isPublishedToStore && (
+                                                        <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-emerald-400" title="Published to storefront" />
+                                                    )}
+                                                </div>
+                                                <code className="text-[11px] font-mono text-neutral-400 dark:text-neutral-500">
+                                                    {product.sku}
+                                                </code>
+                                            </div>
                                         </Link>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <code className="text-sm font-mono text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-700 px-2 py-0.5 rounded">
-                                            {product.sku}
-                                        </code>
-                                    </td>
+
+                                    {/* Category */}
                                     <td className="px-6 py-4 hidden lg:table-cell">
                                         {product.category ? (
                                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getCategoryStyle(product.category)}`}>
@@ -461,11 +572,52 @@ export default function ProductsPage() {
                                             <span className="text-sm text-neutral-400">—</span>
                                         )}
                                     </td>
+
+                                    {/* Price + sale price */}
                                     <td className="px-6 py-4">
-                                        <span className="font-semibold text-[#2d3748] dark:text-white">{formatCurrency(product.unitPrice, company.currency)}</span>
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="font-semibold text-[#2d3748] dark:text-white">
+                                                {formatCurrency(product.unitPrice, company.currency)}
+                                            </span>
+                                            {hasDiscount && (
+                                                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                                                    Sale: {formatCurrency(product.discountedPrice!, company.currency)}
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
+
+                                    {/* Stock */}
                                     <td className="px-6 py-4 hidden md:table-cell">
-                                        <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(product.createdAt)}</span>
+                                        {stockStatus ? (
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${stockStatus.cls}`}>
+                                                {stockStatus.label}
+                                            </span>
+                                        ) : (
+                                            <span className="text-xs text-neutral-400 italic">Service</span>
+                                        )}
+                                    </td>
+
+                                    {/* Status — storefront label */}
+                                    <td className="px-6 py-4 hidden xl:table-cell">
+                                        {product.storefrontLabel ? (() => {
+                                            const labelMap: Record<string, { text: string; cls: string }> = {
+                                                'in-stock':     { text: '✓ In Stock',     cls: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                                                'low-stock':    { text: '⚡ Low Stock',   cls: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+                                                'out-of-stock': { text: '✕ Out of Stock', cls: 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                                                'flash-sale':   { text: '🔥 Flash Sale',  cls: 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' },
+                                                'new':          { text: '★ New',           cls: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+                                                'best-seller':  { text: '🏆 Best Seller', cls: 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+                                            };
+                                            const lbl = labelMap[product.storefrontLabel];
+                                            return lbl ? (
+                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${lbl.cls}`}>
+                                                    {lbl.text}
+                                                </span>
+                                            ) : null;
+                                        })() : (
+                                            <span className="text-xs text-neutral-400">—</span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="relative inline-block">
@@ -476,7 +628,7 @@ export default function ProductsPage() {
                                                 <MoreVertical className="w-4 h-4" />
                                             </button>
                                             {openMenuId === product.id && (
-                                                <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-neutral-800 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-1 z-10">
+                                                <div className={`absolute right-0 ${popupPosClass} w-44 bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 py-1 z-[100]`}>
                                                     <Link
                                                         href={`/products/${product.id}`}
                                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
@@ -511,10 +663,12 @@ export default function ProductsPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                            );
+                        })}
                         </tbody>
                     </table>
                 </div>
+            </div>
             )}
 
             {/* Create/Edit Modal */}
@@ -526,43 +680,32 @@ export default function ProductsPage() {
                 size="lg"
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                        label="Product Name"
-                        placeholder="e.g. Premium Widget"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        error={formErrors.name}
-                        leftIcon={<Package className="w-4 h-4" />}
-                    />
-                    <Input
-                        label="SKU"
-                        placeholder="e.g. PWD-001"
-                        value={formData.sku}
-                        onChange={(e) => setFormData({ ...formData, sku: e.target.value.toUpperCase() })}
-                        error={formErrors.sku}
-                        leftIcon={<Hash className="w-4 h-4" />}
-                    />
-                    <div className="relative" ref={categoryContainerRef}>
+                    {/* Category (FIRST) */}
+                    <div className={`relative ${isCategoryListOpen ? 'z-30' : ''}`} ref={categoryContainerRef}>
                         <Input
                             label="Category"
-                            placeholder="e.g. Electronics"
+                            placeholder="e.g. Electronics & Gadgets"
                             value={formData.category}
-                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                            onChange={(e) => {
+                                const newCat = e.target.value;
+                                const generatedSku = (!formData.sku || formData.sku.startsWith('SKU-'))
+                                    ? generateSkuFromCategory(newCat, products, numbering.product.format)
+                                    : formData.sku;
+                                setFormData({ ...formData, category: newCat, sku: generatedSku });
+                            }}
                             onFocus={() => setIsCategoryListOpen(true)}
                             onBlur={() => {
-                                // Add new category if it doesn't exist (on blur)
                                 if ((formData.category || '').trim() && !categories.includes((formData.category || '').trim())) {
                                     const cat = (formData.category || '').trim();
                                     addCategory(cat);
 
-                                    // Generate SKU if empty
-                                    if (!formData.sku) {
+                                    if (!formData.sku || formData.sku.startsWith('SKU-')) {
                                         const generatedSku = generateSkuFromCategory(cat, products, numbering.product.format);
                                         setFormData(prev => ({ ...prev, category: cat, sku: generatedSku }));
                                     }
                                 }
                             }}
-                            leftIcon={<Tag className="w-4 h-4" />}
+                            leftIcon={<Tag className="w-4 h-4 text-blue-500" />}
                         />
 
                         {isCategoryListOpen && (
@@ -579,7 +722,7 @@ export default function ProductsPage() {
                                                 key={category}
                                                 className="flex items-center justify-between px-3 py-2 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700/50 cursor-pointer group"
                                                 onClick={() => {
-                                                    const generatedSku = (!formData.sku)
+                                                    const generatedSku = (!formData.sku || formData.sku.startsWith('SKU-'))
                                                         ? generateSkuFromCategory(category, products, numbering.product.format)
                                                         : formData.sku;
 
@@ -607,6 +750,52 @@ export default function ProductsPage() {
                             </div>
                         )}
                     </div>
+
+                    {/* Product Name */}
+                    <Input
+                        label="Product Name"
+                        placeholder="e.g. Premium Wireless Headphones"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        error={formErrors.name}
+                        leftIcon={<Package className="w-4 h-4" />}
+                    />
+
+                    {/* SKU */}
+                    <Input
+                        label="SKU"
+                        placeholder="e.g. ELE-001"
+                        value={formData.sku}
+                        onChange={(e) => setFormData({ ...formData, sku: e.target.value.toUpperCase() })}
+                        error={formErrors.sku}
+                        hint="Auto-filled by category. Edit freely."
+                        leftIcon={<Hash className="w-4 h-4" />}
+                    />
+
+                    {/* Barcode / UPC */}
+                    <div className="flex items-end gap-2">
+                        <div className="flex-1">
+                            <Input
+                                label="Barcode / UPC"
+                                placeholder="Scan or enter..."
+                                value={formData.barcode || ''}
+                                onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                                leftIcon={<BarcodeIcon className="w-4 h-4" />}
+                            />
+                        </div>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsBarcodeScannerOpen(true)}
+                            className="h-10 px-3 shrink-0"
+                            title="Scan barcode with camera"
+                            leftIcon={<ScanLine className="w-4 h-4 text-blue-600" />}
+                        >
+                            Scan
+                        </Button>
+                    </div>
+
+                    {/* Unit Price */}
                     <Input
                         label="Unit Price"
                         type="number"
@@ -618,13 +807,106 @@ export default function ProductsPage() {
                         error={formErrors.unitPrice}
                         leftIcon={<DollarSign className="w-4 h-4" />}
                     />
+
+                    {/* Stock Quantity */}
+                    <Input
+                        label="Stock Quantity (optional)"
+                        type="number"
+                        min="0"
+                        placeholder="e.g. 50"
+                        value={formData.stockQuantity !== undefined ? String(formData.stockQuantity) : ''}
+                        onChange={(e) => setFormData({
+                            ...formData,
+                            stockQuantity: e.target.value !== '' ? parseInt(e.target.value) : undefined
+                        })}
+                        hint="Leave blank for services with no physical count."
+                        leftIcon={<Package className="w-4 h-4" />}
+                    />
+
+                    {/* Storefront Section */}
+                    <div className="md:col-span-2 pt-4 border-t border-neutral-100 dark:border-neutral-700 space-y-4">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                            <Store className="w-3.5 h-3.5" />
+                            <span>Storefront</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <ImageUploader
+                                label="Product Photo"
+                                value={formData.imageUrl || ''}
+                                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                                aspectRatio="square"
+                                hint="Upload or paste a URL."
+                            />
+
+                            {/* Discount — select from saved discounts */}
+                            <div className="space-y-1.5">
+                                {discounts.filter(d => d.isActive).length === 0 ? (
+                                    <div>
+                                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-200 mb-1">
+                                            Discount (optional)
+                                        </label>
+                                        <p className="text-xs text-neutral-400 py-2">
+                                            No active discounts yet.{' '}
+                                            <a href="/discounts" className="text-blue-500 underline">Create one</a>.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <Select
+                                        label="Discount (optional)"
+                                        value={formData.discountId || ''}
+                                        onChange={(val) => setFormData({
+                                            ...formData,
+                                            discountId: val || undefined,
+                                            discountedPrice: undefined // will be recomputed on submit
+                                        })}
+                                        options={[
+                                            { value: '', label: '— No discount —' },
+                                            ...discounts.filter(d => d.isActive).map(d => ({
+                                                value: d.id,
+                                                label: `${d.name} (${d.percentage}% off)`,
+                                                description: formData.unitPrice > 0
+                                                    ? `Sale price: ${formatCurrency(formData.unitPrice * (1 - d.percentage / 100), company.currency)}`
+                                                    : undefined
+                                            }))
+                                        ]}
+                                        placeholder="Select a discount..."
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+
+
+                        <Textarea
+                            label="Storefront Description"
+                            placeholder="What customers will see in your store..."
+                            value={formData.storeDescription || ''}
+                            onChange={(e) => setFormData({ ...formData, storeDescription: e.target.value })}
+                            rows={2}
+                        />
+
+                        <div className="flex items-center gap-3 pt-1">
+                            <input
+                                type="checkbox"
+                                id="isPublishedToStoreForm"
+                                checked={formData.isPublishedToStore !== false}
+                                onChange={(e) => setFormData({ ...formData, isPublishedToStore: e.target.checked })}
+                                className="w-4 h-4 text-blue-600 rounded border-neutral-300 focus:ring-blue-500"
+                            />
+                            <label htmlFor="isPublishedToStoreForm" className="text-sm font-medium text-[#2d3748] dark:text-white cursor-pointer">
+                                Publish to storefront
+                            </label>
+                        </div>
+                    </div>
+
                     <div className="md:col-span-2">
                         <Textarea
-                            label="Description"
-                            placeholder="Brief description of the product..."
+                            label="Internal Notes"
+                            placeholder="Private notes for your team..."
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            rows={3}
+                            rows={2}
                         />
                     </div>
                 </div>
@@ -758,6 +1040,18 @@ export default function ProductsPage() {
                     )}
                 </ModalFooter>
             </Modal>
+
+            {/* Barcode Camera Scanner Modal */}
+            <BarcodeScannerModal
+                isOpen={isBarcodeScannerOpen}
+                onClose={() => setIsBarcodeScannerOpen(false)}
+                onScan={(code) => {
+                    setFormData(prev => ({ ...prev, barcode: code }));
+                    toast.success(`Barcode registered: ${code}`);
+                }}
+                mode="single"
+                title="Register Product Barcode"
+            />
         </div>
     );
 }

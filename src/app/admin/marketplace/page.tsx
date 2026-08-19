@@ -228,16 +228,15 @@ export default function MarketplaceAdminPage() {
             return;
         }
 
+        const loadingToast = toast.loading('Compressing cover image...');
         try {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const base64 = event.target?.result as string;
-                setFormData(prev => ({ ...prev, thumbnail: base64 }));
-                toast.success('Cover image uploaded');
-            };
-            reader.readAsDataURL(file);
+            const { compressImage } = await import('@/lib/utils/image-utils');
+            const compressedBase64 = await compressImage(file, 800, 0.6);
+            setFormData(prev => ({ ...prev, thumbnail: compressedBase64 }));
+            toast.success('Cover image processed and loaded', { id: loadingToast });
         } catch (error) {
-            toast.error('Failed to upload image');
+            console.error('Error processing cover image:', error);
+            toast.error('Failed to upload cover image', { id: loadingToast });
         }
     };
 
@@ -636,9 +635,9 @@ export default function MarketplaceAdminPage() {
             )}
 
             {/* Templates Table */}
-            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow-sm">
-                <div className="overflow-visible">
-                    <table className="w-full text-left border-collapse">
+            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[800px] md:min-w-full">
                         <thead>
                             <tr className="bg-neutral-50/50 dark:bg-neutral-800/50 border-b border-neutral-100 dark:border-neutral-700 text-xs font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
                                 <th className="px-6 py-4">Template Name</th>

@@ -214,14 +214,94 @@ export const downloadPdf = async (elementId: string, filename: string) => {
             compress: true
         });
 
-        const imgData = canvas.toDataURL('image/png', 1.0);
-        pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
+        const pdfArrayBuffer = pdf.output('arraybuffer');
+        const pdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+        const blobUrl = URL.createObjectURL(pdfBlob);
 
-        pdf.save(`${filename}.pdf`);
+        // Standard Blob download link trigger (works across Web & WebViews)
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `${filename}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+
+        try {
+            pdf.save(`${filename}.pdf`);
+        } catch (e) {
+            // Ignored fallback
+        }
+
         toast.success('PDF downloaded successfully', { id: toastId });
     } catch (error) {
         console.error('PDF generation failed:', error);
         toast.error('Failed to generate PDF', { id: toastId });
+    } finally {
+        if (iframe?.parentNode) {
+            iframe.parentNode.removeChild(iframe);
+        }
+    }
+};
+
+/**
+ * Native Share document (triggers Android / Mobile native share sheet)
+ */
+export const shareDocument = async (elementId: string, filename: string, title: string = 'Document') => {
+    const element = document.getElementById(elementId);
+    if (!element) {
+        toast.error('Could not find document element');
+        return;
+    }
+
+    const toastId = toast.loading('Preparing document for sharing...');
+    let iframe: HTMLIFrameElement | null = null;
+
+    try {
+        const { iframe: iframeEl, clone } = await createIsolatedClone(element);
+        iframe = iframeEl;
+
+        const canvas = await html2canvas(clone, getCanvasConfig(clone, iframe.contentWindow!));
+        const imgData = canvas.toDataURL('image/png', 1.0);
+
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+            compress: true
+        });
+
+        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+        const pdfArrayBuffer = pdf.output('arraybuffer');
+        const pdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+        const file = new File([pdfBlob], `${filename}.pdf`, { type: 'application/pdf' });
+
+        if (typeof navigator !== 'undefined' && navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                title: filename,
+                text: `${title}: ${filename}`,
+                files: [file]
+            });
+            toast.success('Document shared successfully', { id: toastId });
+        } else if (typeof navigator !== 'undefined' && navigator.share) {
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            await navigator.share({
+                title: filename,
+                text: `${title}: ${filename}`,
+                url: blobUrl
+            });
+            toast.success('Document shared successfully', { id: toastId });
+        } else {
+            pdf.save(`${filename}.pdf`);
+            toast.success('PDF saved to downloads', { id: toastId });
+        }
+    } catch (error: any) {
+        console.error('Share error:', error);
+        if (error?.name !== 'AbortError') {
+            toast.error('Could not share document', { id: toastId });
+        } else {
+            toast.dismiss(toastId);
+        }
     } finally {
         if (iframe?.parentNode) {
             iframe.parentNode.removeChild(iframe);

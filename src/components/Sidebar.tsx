@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { useSidebarStore } from '@/lib/sidebar-store';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import {
     LayoutDashboard,
     FileText,
@@ -18,15 +19,25 @@ import {
     LogOut,
     ChevronLeft,
     ChevronRight,
+    ChevronDown,
     Sparkles,
     Percent,
-    Store
+    Store,
+    ShoppingBag,
+    LayoutGrid,
+    Briefcase,
+    Shield
 } from 'lucide-react';
 
 export default function Sidebar() {
     const pathname = usePathname();
     const { isCollapsed, setCollapsed, toggleCollapsed, isMobileOpen, setMobileOpen, toggleMobile } = useSidebarStore();
+    const { profile } = useAuth();
     const [mounted, setMounted] = useState(false);
+    const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+        'Documents': true,
+        'Management': false
+    });
     const sidebarRef = useRef<HTMLElement>(null);
 
     const isEditorPage = pathname?.includes('/edit') && pathname?.includes('/templates/');
@@ -74,6 +85,22 @@ export default function Sidebar() {
         if (!isEditorPage) {
             localStorage.setItem('sidebar-collapsed', String(newState));
         }
+        // When collapsing sidebar, we might want to collapse all sections too
+        if (newState) {
+            setExpandedSections({});
+        }
+    };
+
+    const toggleSection = (label: string) => {
+        if (isCollapsed && !isMobileOpen) {
+            setCollapsed(false);
+            setExpandedSections({ [label]: true });
+            return;
+        }
+        setExpandedSections(prev => ({
+            ...prev,
+            [label]: !prev[label]
+        }));
     };
 
     const isActive = (path: string) => {
@@ -82,17 +109,32 @@ export default function Sidebar() {
         return false;
     };
 
-    const mainNavItems = [
+    const navigation = [
         { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/invoices', label: 'Invoices', icon: FileText },
-        { path: '/receipts', label: 'Receipts', icon: Receipt },
-        { path: '/delivery-notes', label: 'Delivery Notes', icon: Truck },
+        {
+            label: 'Documents',
+            icon: FileText,
+            children: [
+                { path: '/invoices', label: 'Invoices', icon: FileText },
+                { path: '/receipts', label: 'Receipts', icon: Receipt },
+                { path: '/delivery-notes', label: 'Delivery Notes', icon: Truck },
+            ]
+        },
         { path: '/templates', label: 'Templates', icon: FolderOpen },
         { path: '/marketplace', label: 'Marketplace', icon: Store },
-        { path: '/customers', label: 'Customers', icon: Users },
-        { path: '/products', label: 'Products', icon: Package },
-        { path: '/discounts', label: 'Discounts', icon: Percent },
-        { path: '/ledger', label: 'Ledger', icon: BookOpen },
+        {
+            label: 'Management',
+            icon: Briefcase,
+            children: [
+                { path: '/customers', label: 'Customers', icon: Users },
+                { path: '/products', label: 'Products', icon: Package },
+                { path: '/storefront', label: 'Storefront', icon: ShoppingBag },
+                { path: '/discounts', label: 'Discounts', icon: Percent },
+                { path: '/ledger', label: 'Ledger', icon: BookOpen },
+            ]
+        },
+
+        ...(profile?.role === 'admin' || profile?.isAdmin === true ? [{ path: '/admin', label: 'Admin Panel', icon: Shield }] : []),
     ];
 
     const bottomNavItems = [
@@ -155,13 +197,64 @@ export default function Sidebar() {
 
                 {/* Navigation Links */}
                 <nav className={`flex-1 ${isCollapsed ? 'md:px-2' : 'px-3'} px-3 py-4 flex flex-col gap-1 overflow-y-auto overflow-x-hidden`}>
-                    {mainNavItems.map((item) => {
+                    {navigation.map((item) => {
+                        if (item.children) {
+                            const isExpanded = expandedSections[item.label];
+                            const isChildActive = item.children.some(child => isActive(child.path));
+                            const Icon = item.icon;
+
+                            return (
+                                <div key={item.label} className="flex flex-col gap-1">
+                                    <button
+                                        onClick={() => toggleSection(item.label)}
+                                        className={`flex items-center gap-3 ${isCollapsed ? 'md:justify-center md:px-2' : 'px-3'} py-2.5 rounded-xl transition-all duration-200 group ${isChildActive && !isExpanded
+                                            ? 'bg-neutral-100/50 dark:bg-neutral-700/50 text-[#2d3748] dark:text-white'
+                                            : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 hover:text-[#2d3748] dark:hover:text-white'
+                                            }`}
+                                    >
+                                        <Icon className={`w-5 h-5 flex-shrink-0 ${isChildActive ? 'text-[#2d3748] dark:text-white' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300'}`} strokeWidth={1.75} />
+                                        <span className={`text-sm text-nowrap flex-1 text-left ${isCollapsed ? 'md:hidden' : 'block'} ${isChildActive ? 'font-semibold' : 'font-medium'}`}>
+                                            {item.label}
+                                        </span>
+                                        {!isCollapsed && (
+                                            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                                        )}
+                                    </button>
+
+                                    {(!isCollapsed || isMobileOpen) && isExpanded && (
+                                        <div className="flex flex-col gap-1 ml-4 pl-4 border-l border-neutral-100 dark:border-neutral-700 mt-1">
+                                            {item.children.map((child) => {
+                                                const ChildIcon = child.icon;
+                                                const active = isActive(child.path);
+                                                return (
+                                                    <Link
+                                                        key={child.path}
+                                                        href={child.path}
+                                                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${active
+                                                            ? 'bg-neutral-100 dark:bg-neutral-700 text-[#2d3748] dark:text-white'
+                                                            : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 hover:text-[#2d3748] dark:hover:text-white'
+                                                            }`}
+                                                        onClick={() => isMobileOpen && setMobileOpen(false)}
+                                                    >
+                                                        <ChildIcon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-[#2d3748] dark:text-white' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300'}`} strokeWidth={1.75} />
+                                                        <span className={`text-sm text-nowrap ${active ? 'font-semibold' : 'font-medium'}`}>
+                                                            {child.label}
+                                                        </span>
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        }
+
                         const Icon = item.icon;
-                        const active = isActive(item.path);
+                        const active = isActive(item.path || '');
                         return (
                             <Link
                                 key={item.path}
-                                href={item.path}
+                                href={item.path || '/'}
                                 title={isCollapsed ? item.label : undefined}
                                 className={`flex items-center gap-3 ${isCollapsed ? 'md:justify-center md:px-2' : 'px-3'} py-2.5 rounded-xl transition-all duration-200 group ${active
                                     ? 'bg-neutral-100 dark:bg-neutral-700 text-[#2d3748] dark:text-white'
@@ -178,23 +271,7 @@ export default function Sidebar() {
                     })}
                 </nav>
 
-                {/* Upgrade Card - Hidden on Mobile to save space or kept? Stick to "No feature reduction". We keep it but maybe ensure it fits. */}
-                {(!isCollapsed || isMobileOpen) && (
-                    <div className={`px-3 pb-3 ${isCollapsed ? 'md:hidden' : 'block'}`}>
-                        <div className="bg-neutral-50 dark:bg-neutral-700/50 rounded-xl p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Sparkles className="w-4 h-4 text-accent" />
-                                <span className="text-xs font-bold text-[#2d3748] dark:text-white">Upgrade To Pro</span>
-                            </div>
-                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-3 leading-relaxed">
-                                Get access to additional features and content.
-                            </p>
-                            <button className="w-full py-2 px-4 bg-gradient-to-r from-accent to-violet-500 text-white text-sm font-medium rounded-lg hover:shadow-lg hover:shadow-accent/20 transition-all duration-300">
-                                Upgrade
-                            </button>
-                        </div>
-                    </div>
-                )}
+
 
                 {/* Bottom Navigation */}
                 <div className={`${isCollapsed ? 'md:px-2' : 'px-3'} px-3 pb-3 border-t border-neutral-100 dark:border-neutral-700 pt-3`}>

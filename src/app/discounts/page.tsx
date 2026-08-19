@@ -194,9 +194,10 @@ export default function DiscountsPage() {
                     />
                 </div>
             ) : (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl">
-                    <table className="w-full">
-                        <thead>
+                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16">
+                    <div className="overflow-x-auto min-h-[300px]">
+                        <table className="w-full min-w-[600px] md:min-w-full">
+                            <thead>
                             <tr className="border-b border-neutral-100 dark:border-neutral-700">
                                 <th className="text-left px-6 py-4">
                                     <button
@@ -233,10 +234,13 @@ export default function DiscountsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredDiscounts.map((discount) => (
+                            {filteredDiscounts.map((discount, index) => {
+                                const isNearBottom = index >= Math.max(0, filteredDiscounts.length - 2) || filteredDiscounts.length <= 2;
+                                const popupPosClass = isNearBottom ? 'bottom-full mb-1' : 'top-full mt-1';
+                                return (
                                 <tr
                                     key={discount.id}
-                                    className="border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors"
+                                    className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${openMenuId === discount.id ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}
                                 >
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
@@ -274,7 +278,7 @@ export default function DiscountsPage() {
                                                 <MoreVertical className="w-4 h-4" />
                                             </button>
                                             {openMenuId === discount.id && (
-                                                <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-neutral-800 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-1 z-10">
+                                                <div className={`absolute right-0 ${popupPosClass} w-44 bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 py-1 z-[100]`}>
                                                     <button
                                                         onClick={() => {
                                                             updateDiscount(discount.id, { isActive: !discount.isActive });
@@ -306,10 +310,12 @@ export default function DiscountsPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
+            </div>
             )}
 
             {/* Create/Edit Modal */}

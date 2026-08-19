@@ -33,6 +33,7 @@ interface AuthContextType {
     logout: () => Promise<void>;
     forgotPassword: (email: string) => Promise<void>;
     clearError: () => void;
+    updateUserProfile: (data: { displayName?: string; photoURL?: string }) => Promise<void>;
 }
 
 // ============================================
@@ -144,6 +145,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const clearError = () => setError(null);
 
+    const updateUserProfile = async (data: { displayName?: string; photoURL?: string }) => {
+        try {
+            setError(null);
+            setLoading(true);
+            const { updateProfile: firebaseUpdateProfile } = await import('@/lib/firebase/auth');
+            await firebaseUpdateProfile(data);
+            
+            // Reactively update local profile state
+            setProfile(prev => {
+                if (prev) {
+                    return {
+                        ...prev,
+                        displayName: data.displayName !== undefined ? data.displayName : prev.displayName,
+                        photoURL: data.photoURL !== undefined ? data.photoURL : prev.photoURL
+                    };
+                }
+                return {
+                    uid: user?.uid || '',
+                    email: user?.email || '',
+                    displayName: data.displayName || null,
+                    photoURL: data.photoURL || null
+                };
+            });
+        } catch (err: any) {
+            setError(getErrorMessage(err.code));
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // ============================================
     // CONTEXT VALUE
     // ============================================
@@ -159,6 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         forgotPassword,
         clearError,
+        updateUserProfile,
     };
 
     return (

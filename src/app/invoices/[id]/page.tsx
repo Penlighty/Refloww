@@ -1,17 +1,12 @@
-"use client";
+import InvoiceDetailClientWrapper from './InvoiceDetailClientWrapper';
 
-import DocumentDetail from '@/components/DocumentDetail';
-
-import { useParams } from 'next/navigation';
-
-export default function InvoiceDetailPage() {
-    const params = useParams();
-    const id = params.id as string;
-    return (
-        <DocumentDetail
-            type="invoice"
-            documentId={id}
-            backUrl="/invoices"
-        />
-    );
+export function generateStaticParams() {
+  return [{ id: '1' }];
 }
+
+export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <InvoiceDetailClientWrapper id={id} />;
+}
+
+

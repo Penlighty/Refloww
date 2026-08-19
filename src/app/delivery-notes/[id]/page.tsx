@@ -1,17 +1,12 @@
-"use client";
+import DeliveryNoteDetailClientWrapper from './DeliveryNoteDetailClientWrapper';
 
-import DocumentDetail from '@/components/DocumentDetail';
-
-import { useParams } from 'next/navigation';
-
-export default function DeliveryNoteDetailPage() {
-    const params = useParams();
-    const id = params.id as string;
-    return (
-        <DocumentDetail
-            type="delivery-note"
-            documentId={id}
-            backUrl="/delivery-notes"
-        />
-    );
+export function generateStaticParams() {
+  return [{ id: '1' }];
 }
+
+export default async function DeliveryNoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <DeliveryNoteDetailClientWrapper id={id} />;
+}
+
+

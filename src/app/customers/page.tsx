@@ -75,6 +75,11 @@ export default function CustomersPage() {
     const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
+    // Dynamic browser tab title
+    useEffect(() => {
+        document.title = 'Customer Directory | Refloww';
+    }, []);
+
     // Auto-open modal if 'add' query param is present
     useEffect(() => {
         if (searchParams.get('add') === 'true') {
@@ -340,125 +345,131 @@ export default function CustomersPage() {
                     />
                 </div>
             ) : (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="border-b border-neutral-100 dark:border-neutral-700">
-                                <th className="text-left px-6 py-4">
-                                    <button
-                                        onClick={() => handleSort('name')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-                                    >
-                                        Customer
-                                        <ArrowUpDown className="w-3 h-3" />
-                                    </button>
-                                </th>
-                                <th className="text-left px-6 py-4">
-                                    <button
-                                        onClick={() => handleSort('email')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-                                    >
-                                        Contact
-                                        <ArrowUpDown className="w-3 h-3" />
-                                    </button>
-                                </th>
-                                <th className="text-left px-6 py-4 hidden lg:table-cell">
-                                    <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                                        Address
-                                    </span>
-                                </th>
-                                <th className="text-left px-6 py-4 hidden md:table-cell">
-                                    <button
-                                        onClick={() => handleSort('createdAt')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-                                    >
-                                        Added
-                                        <ArrowUpDown className="w-3 h-3" />
-                                    </button>
-                                </th>
-                                <th className="text-right px-6 py-4">
-                                    <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                                        Actions
-                                    </span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredCustomers.map((customer) => (
-                                <tr
-                                    key={customer.id}
-                                    className="border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors"
-                                >
-                                    <td className="px-6 py-4">
-                                        <Link href={`/customers/${customer.id}`} className="flex items-center gap-3 group">
-                                            <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(customer.name)} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0`}>
-                                                {customer.name.charAt(0).toUpperCase()}
-                                            </div>
-                                            <span className="font-medium text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{customer.name}</span>
-                                        </Link>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col gap-0.5">
-                                            <span className="text-sm text-neutral-600 dark:text-neutral-300">{customer.email}</span>
-                                            {customer.phone && (
-                                                <span className="text-xs text-neutral-400 dark:text-neutral-500">{formatPhone(customer.phone)}</span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 hidden lg:table-cell">
-                                        {customer.address ? (
-                                            <span className="text-sm text-neutral-500 dark:text-neutral-400 truncate block max-w-[200px]">{customer.address}</span>
-                                        ) : (
-                                            <span className="text-sm text-neutral-400 dark:text-neutral-500">—</span>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 hidden md:table-cell">
-                                        <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(customer.createdAt)}</span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="relative inline-block">
-                                            <button
-                                                onClick={() => setOpenMenuId(openMenuId === customer.id ? null : customer.id)}
-                                                className="p-2 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
-                                            >
-                                                <MoreVertical className="w-4 h-4" />
-                                            </button>
-                                            {openMenuId === customer.id && (
-                                                <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-neutral-800 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-1 z-10">
-                                                    <Link
-                                                        href={`/customers/${customer.id}`}
-                                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
-                                                    >
-                                                        <Eye className="w-4 h-4" />
-                                                        View Details
-                                                    </Link>
-                                                    <button
-                                                        onClick={() => openEditModal(customer)}
-                                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
-                                                    >
-                                                        <Edit2 className="w-4 h-4" />
-                                                        Edit Customer
-                                                    </button>
-                                                    <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors">
-                                                        <FileText className="w-4 h-4" />
-                                                        View Documents
-                                                    </button>
-                                                    <div className="h-px bg-neutral-100 dark:bg-neutral-700 my-1" />
-                                                    <button
-                                                        onClick={() => openDeleteModal(customer)}
-                                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </td>
+                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16">
+                    <div className="overflow-x-auto min-h-[300px]">
+                        <table className="w-full min-w-[700px] md:min-w-full">
+                            <thead>
+                                <tr className="border-b border-neutral-100 dark:border-neutral-700">
+                                    <th className="text-left px-6 py-4">
+                                        <button
+                                            onClick={() => handleSort('name')}
+                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        >
+                                            Customer
+                                            <ArrowUpDown className="w-3 h-3" />
+                                        </button>
+                                    </th>
+                                    <th className="text-left px-6 py-4">
+                                        <button
+                                            onClick={() => handleSort('email')}
+                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        >
+                                            Contact
+                                            <ArrowUpDown className="w-3 h-3" />
+                                        </button>
+                                    </th>
+                                    <th className="text-left px-6 py-4 hidden lg:table-cell">
+                                        <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                            Address
+                                        </span>
+                                    </th>
+                                    <th className="text-left px-6 py-4 hidden md:table-cell">
+                                        <button
+                                            onClick={() => handleSort('createdAt')}
+                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        >
+                                            Added
+                                            <ArrowUpDown className="w-3 h-3" />
+                                        </button>
+                                    </th>
+                                    <th className="text-right px-6 py-4">
+                                        <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                            Actions
+                                        </span>
+                                    </th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {filteredCustomers.map((customer, index) => {
+                                    const isNearBottom = index >= Math.max(0, filteredCustomers.length - 2) || filteredCustomers.length <= 2;
+                                    const popupPosClass = isNearBottom ? 'bottom-full mb-1' : 'top-full mt-1';
+                                    return (
+                                    <tr
+                                        key={customer.id}
+                                        className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${openMenuId === customer.id ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}
+                                    >
+                                        <td className="px-6 py-4">
+                                            <Link href={`/customers/${customer.id}`} className="flex items-center gap-3 group">
+                                                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(customer.name)} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0`}>
+                                                    {customer.name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <span className="font-medium text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{customer.name}</span>
+                                            </Link>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="text-sm text-neutral-600 dark:text-neutral-300">{customer.email}</span>
+                                                {customer.phone && (
+                                                    <span className="text-xs text-neutral-400 dark:text-neutral-500">{formatPhone(customer.phone)}</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 hidden lg:table-cell">
+                                            {customer.address ? (
+                                                <span className="text-sm text-neutral-500 dark:text-neutral-400 truncate block max-w-[200px]">{customer.address}</span>
+                                            ) : (
+                                                <span className="text-sm text-neutral-400 dark:text-neutral-500">—</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 hidden md:table-cell">
+                                            <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(customer.createdAt)}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="relative inline-block">
+                                                <button
+                                                    onClick={() => setOpenMenuId(openMenuId === customer.id ? null : customer.id)}
+                                                    className="p-2 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                                                >
+                                                    <MoreVertical className="w-4 h-4" />
+                                                </button>
+                                                {openMenuId === customer.id && (
+                                                    <div className={`absolute right-0 ${popupPosClass} w-44 bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 py-1 z-[100]`}>
+                                                        <Link
+                                                            href={`/customers/${customer.id}`}
+                                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+                                                        >
+                                                            <Eye className="w-4 h-4" />
+                                                            View Details
+                                                        </Link>
+                                                        <button
+                                                            onClick={() => openEditModal(customer)}
+                                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                            Edit Customer
+                                                        </button>
+                                                        <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors">
+                                                            <FileText className="w-4 h-4" />
+                                                            View Documents
+                                                        </button>
+                                                        <div className="h-px bg-neutral-100 dark:bg-neutral-700 my-1" />
+                                                        <button
+                                                            onClick={() => openDeleteModal(customer)}
+                                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 

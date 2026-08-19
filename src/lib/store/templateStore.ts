@@ -21,6 +21,7 @@ interface TemplateState {
         mode?: 'single' | 'connected';
         fields?: MappedField[];
         variants?: any;
+        coverImage?: string;
     }) => Template;
     importTemplate: (template: Template) => void;
     updateTemplate: (id: string, data: Partial<Omit<Template, 'id' | 'createdAt'>>) => void;
@@ -60,6 +61,7 @@ export const useTemplateStore = create<TemplateState>()(
                     createdAt: now,
                     updatedAt: now,
                     mode: data.mode || 'single',
+                    coverImage: data.coverImage,
                     variants: data.variants || (data.mode === 'connected' ? {
                         [data.type]: {
                             imageUrl: data.imageUrl,

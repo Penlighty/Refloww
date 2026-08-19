@@ -3,10 +3,11 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useDocumentStore, useCustomerStore, useSettingsStore, useTemplateStore } from '@/lib/store';
-import { formatCurrency, formatDate, sumEffectiveGrandTotals } from '@/lib/utils';
+import { formatCurrency, formatDate, sumEffectiveGrandTotals, downloadPdf, shareDocument, formatAmountInWords } from '@/lib/utils';
 import { Button, EmptyState, SearchInput, Select, Modal, ModalFooter } from '@/components/ui';
 import { DocumentType } from '@/lib/types';
 import { toast } from 'react-hot-toast';
+import DocumentRenderer from '@/components/DocumentRenderer';
 import {
     Plus,
     FileText,
@@ -23,6 +24,7 @@ import {
     Truck,
     Edit2,
     Copy,
+    Share2
 } from 'lucide-react';
 
 interface DocumentListProps {
@@ -48,6 +50,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
     const { documents, updateDocument, deleteDocument, duplicateDocument } = useDocumentStore();
     const { company } = useSettingsStore();
     const { getTemplateById } = useTemplateStore();
+    const { getCustomerById } = useCustomerStore();
     const currency = company.currency;
 
     // Filter by type
@@ -62,6 +65,79 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
     const [openStatusMenuId, setOpenStatusMenuId] = useState<string | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+    const [activePdfDoc, setActivePdfDoc] = useState<any | null>(null);
+
+    // PDF and Share helpers for document list items
+    const getTemplateForDoc = (targetDoc: any) => {
+        const rawT = getTemplateById(targetDoc.templateId);
+        const docType = targetDoc.type as DocumentType;
+        return (rawT && rawT.mode === 'connected' && rawT.variants?.[docType])
+            ? {
+                ...rawT,
+                imageUrl: rawT.variants[docType]!.imageUrl,
+                fields: rawT.variants[docType]!.fields,
+                width: rawT.variants[docType]!.width,
+                height: rawT.variants[docType]!.height,
+                orientation: rawT.variants[docType]!.orientation
+            }
+            : rawT;
+    };
+
+    const getPreviewDataForDoc = (targetDoc: any) => {
+        const docCustomer = getCustomerById(targetDoc.customerId);
+        const docTemplate = getTemplateById(targetDoc.templateId);
+        const hasLineItems = docTemplate?.fields?.some(f => f.type === 'line-items') ?? (targetDoc.lineItems && targetDoc.lineItems.length > 0);
+        const hasDiscount = docTemplate?.fields?.some(f => f.type === 'discount') ?? true;
+        const hasTax = docTemplate?.fields?.some(f => f.type === 'tax') ?? true;
+
+        const subtotal = hasLineItems
+            ? targetDoc.lineItems.reduce((sum: number, item: any) => sum + (item.quantity * item.unitPrice), 0)
+            : targetDoc.subtotal;
+
+        const discountAmount = hasDiscount ? subtotal * (targetDoc.discountPercent / 100) : 0;
+        const taxableAmount = subtotal - discountAmount;
+        const taxAmount = hasTax ? taxableAmount * (targetDoc.taxPercent / 100) : 0;
+        const grandTotal = subtotal - discountAmount + taxAmount;
+
+        return {
+            documentNumber: targetDoc.documentNumber,
+            date: targetDoc.date,
+            dueDate: targetDoc.dueDate,
+            customerName: targetDoc.customerName,
+            customerEmail: docCustomer?.email,
+            customerPhone: docCustomer?.phone,
+            customerAddress: docCustomer?.address,
+            lineItems: targetDoc.lineItems,
+            subtotal,
+            discountAmount,
+            discountName: targetDoc.discountName,
+            taxAmount,
+            grandTotal,
+            notes: targetDoc.notes,
+            customValues: targetDoc.customValues,
+            amountInWords: formatAmountInWords(grandTotal, company.currency),
+            amountPaid: targetDoc.amountPaid,
+            amountDue: targetDoc.amountDue ?? (grandTotal - (targetDoc.amountPaid || 0)),
+        };
+    };
+
+    const handleDownloadPdf = async (targetDoc: any) => {
+        setOpenMenuId(null);
+        setActivePdfDoc(targetDoc);
+        setTimeout(async () => {
+            await downloadPdf(`document-list-preview-${targetDoc.id}`, targetDoc.documentNumber);
+            setActivePdfDoc(null);
+        }, 250);
+    };
+
+    const handleShareDoc = async (targetDoc: any) => {
+        setOpenMenuId(null);
+        setActivePdfDoc(targetDoc);
+        setTimeout(async () => {
+            await shareDocument(`document-list-preview-${targetDoc.id}`, targetDoc.documentNumber, title.slice(0, -1));
+            setActivePdfDoc(null);
+        }, 250);
+    };
 
     // Icon based on type
     const TypeIcon = type === 'invoice' ? FileText : type === 'receipt' ? Receipt : Truck;
@@ -270,8 +346,9 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                     />
                 </div>
             ) : (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl">
-                    <table className="w-full">
+                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16">
+                    <div className="overflow-x-auto min-h-[300px]">
+                        <table className="w-full min-w-[700px] md:min-w-full">
                         <thead>
                             <tr className="border-b border-neutral-100 dark:border-neutral-700">
                                 <th className="text-left px-6 py-4">
@@ -322,11 +399,16 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredDocuments.map((doc) => {
+                            {filteredDocuments.map((doc, index) => {
                                 const config = statusConfig[doc.status] || statusConfig['draft'];
                                 const isLocked = (doc as any)._isLocked === true;
+                                const isNearBottom = index >= Math.max(0, filteredDocuments.length - 2) || filteredDocuments.length <= 2;
+                                const popupPosClass = isNearBottom ? 'bottom-full mb-1' : 'top-full mt-1';
+
+                                const isMenuOpen = openMenuId === doc.id || openStatusMenuId === doc.id;
+
                                 return (
-                                    <tr key={doc.id} className="border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors">
+                                    <tr key={doc.id} className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${isMenuOpen ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}>
                                         <td className="px-6 py-4">
                                             <Link href={`/${type}s/${doc.id}`} className="flex items-center gap-3 group">
                                                 <div className={`w-10 h-10 rounded-xl ${isLocked ? 'bg-gradient-to-br from-amber-400 to-amber-600' : 'bg-gradient-to-br from-blue-400 to-blue-600'} flex items-center justify-center text-white flex-shrink-0`}>
@@ -398,7 +480,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                 </button>
 
                                                 {openStatusMenuId === doc.id && (
-                                                    <div className="absolute left-0 top-full mt-1 w-36 bg-white dark:bg-neutral-800 rounded-lg shadow-xl border border-neutral-200 dark:border-neutral-700 py-1 z-50">
+                                                    <div className={`absolute left-0 ${popupPosClass} w-36 bg-white dark:bg-neutral-800 rounded-lg shadow-2xl border border-neutral-200 dark:border-neutral-700 py-1 z-[100]`}>
                                                         {Object.entries(statusConfig)
                                                             .filter(([statusKey]) => {
                                                                 // Filter statuses based on document type
@@ -441,7 +523,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                     <MoreVertical className="w-4 h-4" />
                                                 </button>
                                                 {openMenuId === doc.id && (
-                                                    <div className="absolute right-0 top-full mt-1 w-64 bg-white dark:bg-neutral-800 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-1 z-10 z-[100]">
+                                                    <div className={`absolute right-0 ${popupPosClass} w-64 bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 py-1.5 z-[100]`}>
                                                         <Link
                                                             href={`/${type}s/${doc.id}/edit`}
                                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
@@ -490,10 +572,22 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                             </>
                                                         )}
 
-                                                        <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors">
+                                                        <button
+                                                            onClick={() => handleDownloadPdf(doc)}
+                                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+                                                        >
                                                             <Download className="w-4 h-4" />
                                                             Download PDF
                                                         </button>
+
+                                                        <button
+                                                            onClick={() => handleShareDoc(doc)}
+                                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-blue-600 dark:text-blue-400 font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                                        >
+                                                            <Share2 className="w-4 h-4" />
+                                                            Share
+                                                        </button>
+
                                                         {doc.status === 'draft' && type !== 'receipt' && (
                                                             <button
                                                                 onClick={() => handleSend(doc.id)}
@@ -529,6 +623,21 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                             })}
                         </tbody>
                     </table>
+                </div>
+            </div>
+            )}
+
+            {/* Offscreen element for generating PDF / Native Share from document list */}
+            {activePdfDoc && (
+                <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', pointerEvents: 'none' }}>
+                    <div id={`document-list-preview-${activePdfDoc.id}`} style={{ width: '595px', height: '842px', background: '#ffffff' }}>
+                        {getTemplateForDoc(activePdfDoc) && (
+                            <DocumentRenderer
+                                template={getTemplateForDoc(activePdfDoc)!}
+                                data={getPreviewDataForDoc(activePdfDoc)}
+                            />
+                        )}
+                    </div>
                 </div>
             )}
 

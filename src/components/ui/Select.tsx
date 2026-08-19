@@ -18,6 +18,7 @@ interface SelectProps {
     label?: string;
     error?: string;
     searchable?: boolean;
+    searchMatcher?: (option: SelectOption, query: string) => boolean;
     disabled?: boolean;
     className?: string;
 }
@@ -30,6 +31,7 @@ export function Select({
     label,
     error,
     searchable = false,
+    searchMatcher,
     disabled = false,
     className,
 }: SelectProps) {
@@ -45,11 +47,15 @@ export function Select({
     const selectedOption = options.find((opt) => opt.value === value);
 
     const filteredOptions = searchable
-        ? options.filter(
-            (opt) =>
+        ? options.filter((opt) => {
+            if (searchMatcher) {
+                return searchMatcher(opt, searchQuery);
+            }
+            return (
                 opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 opt.description?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+            );
+        })
         : options;
 
     const handleClickOutside = useCallback((e: MouseEvent) => {
@@ -132,13 +138,13 @@ export function Select({
     };
 
     return (
-        <div className={clsx('flex flex-col gap-1.5', className)} ref={containerRef}>
+        <div className={clsx('flex flex-col gap-1.5', className, isOpen && 'relative z-50')} ref={containerRef}>
             {label && (
                 <label className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
                     {label}
                 </label>
             )}
-            <div className="relative">
+            <div className={clsx('relative', isOpen && 'z-50')}>
                 <button
                     type="button"
                     onClick={() => !disabled && setIsOpen(!isOpen)}
@@ -167,7 +173,7 @@ export function Select({
                 </button>
 
                 {isOpen && (
-                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-xl overflow-hidden">
+                    <div className="absolute z-[100] w-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-2xl overflow-hidden">
                         {searchable && (
                             <div className="p-2 border-b border-neutral-100 dark:border-neutral-700">
                                 <div className="relative">

@@ -3,7 +3,7 @@
 // Firebase Sync Hook
 // Handles syncing Zustand stores with Firestore when user is authenticated
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useEncryptionSafe } from '@/contexts/EncryptionContext';
 import {
@@ -33,6 +33,14 @@ let hasSynced = false;
 export function useFirebaseSync() {
     const { user } = useAuth();
     const encryptionContext = useEncryptionSafe();
+    const [isSyncLoaded, setIsSyncLoaded] = useState(() => {
+        if (hasSynced) return true;
+        if (typeof window !== 'undefined') {
+            const hasLocalDocs = localStorage.getItem('inflow-documents');
+            if (hasLocalDocs) return true;
+        }
+        return false;
+    });
     const syncInProgress = useRef(false);
     const isLoadingFromFirestore = useRef(false); // Prevent sync-back during load
     const pendingOperations = useRef<Map<string, NodeJS.Timeout>>(new Map());
@@ -52,7 +60,8 @@ export function useFirebaseSync() {
     const productStore = useProductStore();
     const documentStore = useDocumentStore();
     const discountStore = useDiscountStore();
-    const settingsStore = useSettingsStore();
+    const company = useSettingsStore(state => state.company);
+    const numbering = useSettingsStore(state => state.numbering);
 
     // ============================================
     // LOAD DATA FROM FIRESTORE
@@ -129,10 +138,12 @@ export function useFirebaseSync() {
                 // BUT if we just updated settings, we might lose it.
                 // However, settings writes are debounced 1s, less likely to conflict.
                 if (settings.company) {
-                    useSettingsStore.setState({ company: settings.company });
+                    const current = useSettingsStore.getState().company;
+                    useSettingsStore.setState({ company: { ...current, ...settings.company } });
                 }
                 if (settings.numbering) {
-                    useSettingsStore.setState({ numbering: settings.numbering });
+                    const current = useSettingsStore.getState().numbering;
+                    useSettingsStore.setState({ numbering: { ...current, ...settings.numbering } });
                 }
             }
 
@@ -143,11 +154,13 @@ export function useFirebaseSync() {
 
             isLoadingFromFirestore.current = false; // Enable sync-back
             hasSynced = true;
+            setIsSyncLoaded(true);
         } catch (error) {
             console.error('[Firebase Sync] Error loading data:', error);
             // Even if load fails, mark as synced so we can start saving new changes
             // Otherwise the app remains in "read-only" mode forever
             hasSynced = true;
+            setIsSyncLoaded(true);
             isLoadingFromFirestore.current = false;
         } finally {
             syncInProgress.current = false;
@@ -226,15 +239,20 @@ export function useFirebaseSync() {
 
         try {
             const settings = {
-                company: settingsStore.company,
-                numbering: settingsStore.numbering,
+                company,
+                numbering,
             };
             await updateUserSettings(settings);
-            console.log('[Firebase Sync] Settings synced');
-        } catch (error) {
+            console.log('[Firebase Sync] Settings synced successfully');
+        } catch (error: any) {
             console.error('[Firebase Sync] Error syncing settings:', error);
+            const { toast } = await import('react-hot-toast');
+            toast.error(`Failed to sync settings with cloud: ${error?.message || 'Unknown error'}`, {
+                id: 'settings-sync-error',
+                duration: 5000
+            });
         }
-    }, [user, settingsStore.company, settingsStore.numbering]);
+    }, [user, company, numbering]);
 
     // ============================================
     // INITIAL LOAD ON AUTH
@@ -261,6 +279,7 @@ export function useFirebaseSync() {
         // Reset sync status on logout
         if (!user) {
             hasSynced = false;
+            setIsSyncLoaded(false);
         }
     }, [user, loadFromFirestore, encryptionCheckComplete, encryptionContext?.isEnabled, encryptionContext?.isUnlocked]);
 
@@ -419,18 +438,18 @@ export function useFirebaseSync() {
     // Settings (debounced)
     useEffect(() => {
         // Don't sync until initial load is complete
-        if (!hasSynced) return;
+        if (!isSyncLoaded) return;
 
         const timeout = setTimeout(() => {
             syncSettings();
         }, 1000); // 1 second debounce for settings
 
         return () => clearTimeout(timeout);
-    }, [settingsStore.company, settingsStore.numbering, syncSettings]);
+    }, [company, numbering, syncSettings, isSyncLoaded]);
 
     return {
-        isLoading: !hasSynced && !!user,
-        hasSynced,
+        isLoading: !isSyncLoaded && !!user,
+        hasSynced: isSyncLoaded,
         refresh: loadFromFirestore,
     };
 }

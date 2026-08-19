@@ -23,8 +23,18 @@ import {
     Hash,
     Percent,
     Tag,
+    Truck,
+    Receipt,
+    LayoutGrid,
+    List,
+    ChevronDown,
+    ChevronUp,
+    ScanLine,
+    Barcode as BarcodeIcon
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import BarcodeScannerModal from '@/components/BarcodeScannerModal';
+import { playScanBeep } from '@/lib/utils/audio';
 
 interface DocumentFormProps {
     type: DocumentType;
@@ -40,7 +50,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     // Stores
     const { templates, getTemplateById } = useTemplateStore();
     const { customers } = useCustomerStore();
-    const { products } = useProductStore();
+    const { products, getProductByBarcode } = useProductStore();
     const { discounts } = useDiscountStore();
     const { company, getNextDocumentNumber, incrementDocumentNumber, updateNumbering } = useSettingsStore();
     const currency = company.currency;
@@ -72,12 +82,19 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     const [discountName, setDiscountName] = useState('');
     const [manualSubtotal, setManualSubtotal] = useState(0);
     const [amountInWords, setAmountInWords] = useState('');
+    const [amountPaidInWords, setAmountPaidInWords] = useState('');
     const [amountPaid, setAmountPaid] = useState(0); // For receipts: this is "This Payment" amount
 
     // UI State
     const [showPreview, setShowPreview] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [isVisualTemplatePickerOpen, setIsVisualTemplatePickerOpen] = useState(false);
+    const [tempSelectedTemplateId, setTempSelectedTemplateId] = useState<string>('');
+    const [pickerViewMode, setPickerViewMode] = useState<'grid' | 'list'>('grid');
+    const [expandedLineItemId, setExpandedLineItemId] = useState<string | null>(null);
+    const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
+    const [quickBarcodeQuery, setQuickBarcodeQuery] = useState('');
 
     // 4. Reactive Defaults (Apply when store loads)
     const hasAppliedDefaultTax = useRef(false);
@@ -90,6 +107,16 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
             hasAppliedDefaultTax.current = true;
         }
     }, [company.taxRate, documentId, searchParams]);
+ 
+    // Auto-select default template when templates load (for new documents only)
+    useEffect(() => {
+        if (documentId || searchParams.get('sourceId') || selectedTemplateId) return;
+ 
+        const defaultTemp = templates.find(t => t.isDefault && (t.type === type || (t.mode === 'connected' && t.variants?.[type])));
+        if (defaultTemp) {
+            setSelectedTemplateId(defaultTemp.id);
+        }
+    }, [templates, type, documentId, searchParams, selectedTemplateId]);
 
     // --- INITIALIZATION ---
     useEffect(() => {
@@ -104,7 +131,9 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                 setDocumentNumber(doc.documentNumber);
                 setDocumentDate(doc.date.split('T')[0]);
                 if (doc.dueDate) setDueDate(doc.dueDate.split('T')[0]);
-                setLineItems(doc.lineItems.length > 0 ? doc.lineItems : [{ id: uuidv4(), productId: '', productName: '', description: '', quantity: 1, unitPrice: 0, subtotal: 0 }]);
+                const loadedItems = doc.lineItems.length > 0 ? doc.lineItems : [{ id: uuidv4(), productId: '', productName: '', description: '', quantity: 1, unitPrice: 0, subtotal: 0 }];
+                setLineItems(loadedItems);
+                setExpandedLineItemId(loadedItems[0]?.id || null);
                 setDiscountPercent(doc.discountPercent);
                 setTaxPercent(doc.taxPercent);
                 if (doc.discountName) setDiscountName(doc.discountName);
@@ -124,7 +153,9 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                     setSourceDocumentId(sourceDoc.id);
                     setSelectedTemplateId(sourceDoc.templateId);
                     setSelectedCustomerId(sourceDoc.customerId);
-                    setLineItems(sourceDoc.lineItems.map(item => ({ ...item, id: uuidv4() })));
+                    const convertedItems = sourceDoc.lineItems.map(item => ({ ...item, id: uuidv4() }));
+                    setLineItems(convertedItems);
+                    setExpandedLineItemId(convertedItems[0]?.id || null);
                     setDiscountPercent(sourceDoc.discountPercent);
                     setTaxPercent(sourceDoc.taxPercent);
                     setDiscountName(sourceDoc.discountName || '');
@@ -164,7 +195,12 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                         const outstanding = Math.max(0, correctGrandTotal - alreadyPaid);
 
                         // Pre-fill with remaining outstanding amount
-                        setAmountPaid(outstanding);
+                        // If this is the first receipt and the source invoice had an initial amount paid (e.g. deposit), inherit that amount.
+                        // Otherwise, default to the full outstanding balance.
+                        const initialAmountPaid = (alreadyPaid === 0 && sourceDoc.amountPaid && sourceDoc.amountPaid > 0)
+                            ? sourceDoc.amountPaid
+                            : outstanding;
+                        setAmountPaid(initialAmountPaid);
                         setNotes(`Payment for ${sourceDoc.documentNumber}`);
                     } else if (type === 'delivery-note') {
                         setNotes(`Delivery for ${sourceDoc.documentNumber}`);
@@ -175,6 +211,10 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                 // BRAND NEW (Initial apply)
                 const customerIdParam = searchParams.get('customerId');
                 if (customerIdParam) setSelectedCustomerId(customerIdParam);
+
+                const newId = uuidv4();
+                setLineItems([{ id: newId, productId: '', productName: '', description: '', quantity: 1, unitPrice: 0, subtotal: 0 }]);
+                setExpandedLineItemId(newId);
 
                 // Set default tax rate if we have one ready
                 if (company.taxRate > 0) {
@@ -252,6 +292,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     const hasTax = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'tax') : false;
     const hasDueDate = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'due-date') : false;
     const hasAmountInWords = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'amount-in-words') : false;
+    const hasAmountPaidInWords = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'amount-paid-in-words') : false;
     const hasAmountPaid = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'amount-paid') : false;
     const hasAmountDue = selectedTemplate ? selectedTemplate.fields.some(f => f.type === 'amount-due') : false;
 
@@ -317,6 +358,11 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
         setAmountInWords(formatAmountInWords(grandTotal, currency));
     }, [grandTotal, currency]);
 
+    // Auto-update Amount Paid in Words
+    useEffect(() => {
+        setAmountPaidInWords(formatAmountInWords(amountPaid, currency));
+    }, [amountPaid, currency]);
+
     // Intelligent Sync: Auto-fill custom fields based on label matching (Forward Sync)
     useEffect(() => {
         if (!selectedTemplate) return;
@@ -360,12 +406,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
         });
     }, [grandTotal, amountPaid, amountDue, selectedTemplate, currency, hasLineItems, hasAmountPaid]);
 
-    // Template options
-    // Template options logic:
-    // 1. Direct match (t.type === type)
-    // 2. Connected template with a valid variant for this type
     const templateOptions = templates
-        .filter(t => t.type === type || (t.mode === 'connected' && t.variants?.[type]))
         .map(t => ({ value: t.id, label: t.name }));
 
     // Get Line Items Configuration
@@ -382,6 +423,56 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     // Customer options
     const customerOptions = customers.map(c => ({ value: c.id, label: c.name }));
 
+    // --- POS BARCODE SCANNING HANDLER ---
+    const handleBarcodeScan = (scannedCode: string) => {
+        if (!scannedCode) return;
+        const matchedProduct = getProductByBarcode(scannedCode);
+        if (!matchedProduct) {
+            toast.error(`No product found for barcode: "${scannedCode}"`);
+            return;
+        }
+
+        playScanBeep();
+
+        setLineItems(prevItems => {
+            const existingIndex = prevItems.findIndex(item => item.productId === matchedProduct.id);
+
+            if (existingIndex >= 0) {
+                const updated = [...prevItems];
+                const item = updated[existingIndex];
+                const newQty = item.quantity + 1;
+                updated[existingIndex] = {
+                    ...item,
+                    quantity: newQty,
+                    subtotal: newQty * item.unitPrice
+                };
+                toast.success(`Scanned: ${matchedProduct.name} (+1, Qty: ${newQty})`);
+                return updated;
+            }
+
+            const emptyIndex = prevItems.findIndex(item => !item.productId && item.unitPrice === 0);
+            const newItem: LineItem = {
+                id: emptyIndex >= 0 ? prevItems[emptyIndex].id : uuidv4(),
+                productId: matchedProduct.id,
+                productName: matchedProduct.name,
+                description: matchedProduct.description,
+                quantity: 1,
+                unitPrice: matchedProduct.unitPrice,
+                subtotal: matchedProduct.unitPrice
+            };
+
+            toast.success(`Added: ${matchedProduct.name}`);
+
+            if (emptyIndex >= 0) {
+                const updated = [...prevItems];
+                updated[emptyIndex] = newItem;
+                return updated;
+            } else {
+                return [...prevItems, newItem];
+            }
+        });
+    };
+
     // --- LINE ITEM HANDLERS ---
     const addLineItem = () => {
         // Enforce max rows
@@ -389,15 +480,21 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
             return;
         }
 
+        const newId = uuidv4();
         setLineItems([
             ...lineItems,
-            { id: uuidv4(), productId: '', productName: '', description: '', quantity: 1, unitPrice: 0, subtotal: 0 }
+            { id: newId, productId: '', productName: '', description: '', quantity: 1, unitPrice: 0, subtotal: 0 }
         ]);
+        setExpandedLineItemId(newId);
     };
 
     const removeLineItem = (id: string) => {
         if (lineItems.length > 1) {
-            setLineItems(lineItems.filter(item => item.id !== id));
+            const updated = lineItems.filter(item => item.id !== id);
+            setLineItems(updated);
+            if (expandedLineItemId === id && updated.length > 0) {
+                setExpandedLineItemId(updated[0].id);
+            }
         }
     };
 
@@ -457,7 +554,8 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                 // The renderer gets `data` from `DocumentData`.
                 // But where is it saved in the database? The `Document` type doesn't have it.
                 // We should save it in customValues to be safe if we want to persist manual edits to it.
-                ...(hasAmountInWords ? { 'amountInWords': amountInWords } : {})
+                ...(hasAmountInWords ? { 'amountInWords': amountInWords } : {}),
+                ...(hasAmountPaidInWords ? { 'amountPaidInWords': amountPaidInWords } : {})
             },
         };
 
@@ -522,6 +620,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
         amountPaid,
         amountDue,
         amountInWords,
+        amountPaidInWords,
         notes,
         customValues: customFieldValues
     };
@@ -581,13 +680,31 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                         <h2 className="text-sm font-semibold text-[#2d3748] dark:text-white mb-4">Document Details</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Select
-                                label="Template"
-                                options={templateOptions}
-                                value={selectedTemplateId}
-                                onChange={setSelectedTemplateId}
-                                placeholder="Select a template..."
-                            />
+                            <div className="flex flex-col gap-1.5 md:col-span-2">
+                                <div className="flex items-end gap-3">
+                                    <div className="flex-1">
+                                        <Select
+                                            label="Template"
+                                            options={templateOptions}
+                                            value={selectedTemplateId}
+                                            onChange={setSelectedTemplateId}
+                                            placeholder="Select a template..."
+                                        />
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            setTempSelectedTemplateId(selectedTemplateId);
+                                            setIsVisualTemplatePickerOpen(true);
+                                        }}
+                                        className="h-10 px-4 shrink-0"
+                                        leftIcon={<Eye className="w-4 h-4" />}
+                                    >
+                                        View Templates
+                                    </Button>
+                                </div>
+                            </div>
 
                             <Input
                                 label="Document Number"
@@ -706,6 +823,47 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                 >
                                     Add Item
                                 </Button>
+                            </div>
+
+                            {/* Quick POS Barcode Scan Bar */}
+                            <div className="px-6 py-3 bg-blue-50/70 dark:bg-blue-950/30 border-b border-blue-100 dark:border-blue-900/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                                <div className="flex items-center gap-2 text-xs font-semibold text-blue-900 dark:text-blue-200 shrink-0">
+                                    <BarcodeIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                    <span>POS Quick Scan</span>
+                                </div>
+                                <div className="flex items-center gap-2 w-full sm:w-auto flex-1 max-w-md">
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            if (quickBarcodeQuery.trim()) {
+                                                handleBarcodeScan(quickBarcodeQuery.trim());
+                                                setQuickBarcodeQuery('');
+                                            }
+                                        }}
+                                        className="flex-1 flex gap-1.5"
+                                    >
+                                        <Input
+                                            placeholder="Scan barcode or USB scanner input..."
+                                            value={quickBarcodeQuery}
+                                            onChange={(e) => setQuickBarcodeQuery(e.target.value)}
+                                            className="h-9 text-xs"
+                                            leftIcon={<BarcodeIcon className="w-3.5 h-3.5" />}
+                                        />
+                                        <Button type="submit" size="sm" variant="secondary" className="h-9 px-3 shrink-0 text-xs">
+                                            Scan
+                                        </Button>
+                                    </form>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => setIsBarcodeModalOpen(true)}
+                                        leftIcon={<ScanLine className="w-3.5 h-3.5 text-blue-600" />}
+                                        className="h-9 px-3 shrink-0 text-xs border-blue-200 dark:border-blue-800 bg-white dark:bg-neutral-900"
+                                    >
+                                        Camera Scanner
+                                    </Button>
+                                </div>
                             </div>
 
                             {/* Table Header - Desktop Only */}
@@ -830,35 +988,77 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             </div>
 
                             {/* Mobile Card View (md:hidden) */}
-                            <div className="md:hidden flex flex-col gap-4 p-4">
-                                {lineItems.map((item, index) => (
-                                    <div key={item.id} className="bg-neutral-50 dark:bg-neutral-700/30 border border-neutral-100 dark:border-neutral-700 rounded-xl p-4 relative">
-                                        {/* Header with Delete */}
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className="text-xs font-bold text-neutral-400 uppercase">Item #{index + 1}</span>
-                                            <button
-                                                onClick={() => removeLineItem(item.id)}
-                                                className="p-1.5 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                                title="Remove Item"
-                                                disabled={lineItems.length === 1}
+                            <div className="md:hidden flex flex-col gap-2 p-2">
+                                {lineItems.map((item, index) => {
+                                    const isExpanded = expandedLineItemId === item.id;
+                                    const product = products.find(p => p.id === item.productId);
+                                    const displayName = product ? product.name : 'Select item...';
+
+                                    return (
+                                        <div 
+                                            key={item.id} 
+                                            className={`
+                                                border rounded-xl transition-all duration-200 bg-white dark:bg-neutral-800 overflow-hidden
+                                                ${isExpanded 
+                                                    ? 'border-blue-500 shadow-sm ring-1 ring-blue-500/20' 
+                                                    : 'border-neutral-200 dark:border-neutral-700'
+                                                }
+                                            `}
+                                        >
+                                            {/* Accordion Header / Collapsed Summary */}
+                                            <div 
+                                                onClick={() => setExpandedLineItemId(isExpanded ? null : item.id)}
+                                                className="flex items-center justify-between p-3 cursor-pointer select-none hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors"
                                             >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
+                                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                    <span className="text-xs font-bold text-neutral-500 dark:text-neutral-400 shrink-0">#{index + 1}</span>
+                                                    <span className={`text-xs font-semibold truncate ${product ? 'text-[#2d3748] dark:text-white' : 'text-neutral-400 dark:text-neutral-500'}`}>
+                                                        {displayName}
+                                                    </span>
+                                                    <span className="text-[10px] bg-neutral-100 dark:bg-neutral-700 px-1.5 py-0.5 rounded text-neutral-500 dark:text-neutral-400 shrink-0">
+                                                        Qty: {item.quantity}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2 ml-3 shrink-0">
+                                                    <span className="text-xs font-bold text-[#2d3748] dark:text-white">
+                                                        {formatCurrency(item.subtotal, currency)}
+                                                    </span>
+                                                    {isExpanded ? (
+                                                        <ChevronUp className="w-4 h-4 text-neutral-400" />
+                                                    ) : (
+                                                        <ChevronDown className="w-4 h-4 text-neutral-400" />
+                                                    )}
+                                                </div>
+                                            </div>
 
-                                        <div className="space-y-4">
-                                            {tableColumns.map((col: any) => {
-                                                if (col.key === 'sn') return null; // Skip S/N in body
+                                            {/* Accordion Content (Edit Fields) */}
+                                            {isExpanded && (
+                                                <div className="p-3.5 border-t border-neutral-100 dark:border-neutral-700/60 bg-neutral-50/50 dark:bg-neutral-900/10 space-y-3">
+                                                    {/* Top Row: Title & Delete */}
+                                                    <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-neutral-800/60">
+                                                        <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Editing Item #{index + 1}</span>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                removeLineItem(item.id);
+                                                            }}
+                                                            className="p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors flex items-center gap-1 text-[10px] font-semibold"
+                                                            title="Remove Item"
+                                                            disabled={lineItems.length === 1}
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                            Delete
+                                                        </button>
+                                                    </div>
 
-                                                // 2. Product Selection
-                                                if (col.key === 'product' || col.key === 'productName' || col.key === 'description') {
-                                                    return (
-                                                        <div key={col.id} className="space-y-1">
-                                                            <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{col.header}</label>
+                                                    {/* 1. Product select dropdown (Full width) */}
+                                                    {tableColumns.some((col: any) => col.key === 'product' || col.key === 'productName' || col.key === 'description') && (
+                                                        <div className="space-y-1">
+                                                            <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase">Item Description</label>
                                                             <select
                                                                 value={item.productId}
                                                                 onChange={(e) => updateLineItem(item.id, 'productId', e.target.value)}
-                                                                className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                                className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
                                                             >
                                                                 <option value="">Select item...</option>
                                                                 {products.map(p => (
@@ -866,77 +1066,75 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                 ))}
                                                             </select>
                                                         </div>
-                                                    );
-                                                }
-                                                // 3. Quantity
-                                                if (col.key === 'quantity') {
-                                                    return (
-                                                        <div key={col.id} className="space-y-1">
-                                                            <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{col.header}</label>
-                                                            <input
-                                                                type="number"
-                                                                min="1"
-                                                                value={item.quantity}
-                                                                onChange={(e) => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                                                                className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
-                                                            />
-                                                        </div>
-                                                    );
-                                                }
-                                                // 4. Unit Price
-                                                if (col.key === 'unitPrice') {
-                                                    return (
-                                                        <div key={col.id} className="space-y-1">
-                                                            <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{col.header}</label>
-                                                            <input
-                                                                type="number"
-                                                                step="0.01"
-                                                                min="0"
-                                                                value={item.unitPrice || ''}
-                                                                onChange={(e) => updateLineItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
-                                                                className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
-                                                            />
-                                                        </div>
-                                                    );
-                                                }
-                                                // 5. Subtotal
-                                                if (col.key === 'subtotal') {
-                                                    return (
-                                                        <div key={col.id} className="flex justify-between items-center pt-2 border-t border-neutral-100 dark:border-neutral-700 mt-2">
-                                                            <span className="text-sm font-medium text-neutral-500 dark:text-neutral-400">{col.header}</span>
-                                                            <span className="text-base font-bold text-[#2d3748] dark:text-white">
-                                                                {formatCurrency(item.subtotal, currency)}
-                                                            </span>
-                                                        </div>
-                                                    );
-                                                }
+                                                    )}
 
-                                                // 6. Custom Columns
-                                                return (
-                                                    <div key={col.id} className="space-y-1">
-                                                        <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{col.header}</label>
-                                                        <input
-                                                            type={col.type === 'number' || col.type === 'currency' ? 'number' : 'text'}
-                                                            value={item.customValues?.[col.key] || ''}
-                                                            onChange={(e) => {
-                                                                const newVal = e.target.value;
-                                                                setLineItems(prev => prev.map(pi => {
-                                                                    if (pi.id !== item.id) return pi;
-                                                                    return {
-                                                                        ...pi,
-                                                                        customValues: { ...(pi.customValues || {}), [col.key]: newVal }
-                                                                    };
-                                                                }));
-                                                            }}
-                                                            className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
-                                                            placeholder={col.header}
-                                                        />
+                                                    {/* 2. Quantity, Price, Custom Columns grid (Compact 2 columns) */}
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        {tableColumns.map((col: any) => {
+                                                            if (col.key === 'sn' || col.key === 'product' || col.key === 'productName' || col.key === 'description' || col.key === 'subtotal') {
+                                                                return null;
+                                                            }
+
+                                                            if (col.key === 'quantity') {
+                                                                return (
+                                                                    <div key={col.id} className="space-y-1">
+                                                                        <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase">{col.header}</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            min="1"
+                                                                            value={item.quantity}
+                                                                            onChange={(e) => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                                                                            className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                                        />
+                                                                    </div>
+                                                                );
+                                                            }
+
+                                                            if (col.key === 'unitPrice') {
+                                                                return (
+                                                                    <div key={col.id} className="space-y-1">
+                                                                        <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase">{col.header}</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            step="0.01"
+                                                                            min="0"
+                                                                            value={item.unitPrice || ''}
+                                                                            onChange={(e) => updateLineItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                                                                            className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                                        />
+                                                                    </div>
+                                                                );
+                                                            }
+
+                                                            // Custom Columns
+                                                            return (
+                                                                <div key={col.id} className="space-y-1">
+                                                                    <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase">{col.header}</label>
+                                                                    <input
+                                                                        type={col.type === 'number' || col.type === 'currency' ? 'number' : 'text'}
+                                                                        value={item.customValues?.[col.key] || ''}
+                                                                        onChange={(e) => {
+                                                                            const newVal = e.target.value;
+                                                                            setLineItems(prev => prev.map(pi => {
+                                                                                if (pi.id !== item.id) return pi;
+                                                                                return {
+                                                                                    ...pi,
+                                                                                    customValues: { ...(pi.customValues || {}), [col.key]: newVal }
+                                                                                };
+                                                                            }));
+                                                                        }}
+                                                                        className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                                        placeholder={col.header}
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
-                                                );
-                                            })}
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
 
                             {/* Add Row Button */}
@@ -1260,6 +1458,260 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                     </DocumentPreviewWrapper>
                 )}
             </Modal>
+
+            {/* Visual Template Picker Modal */}
+            <Modal
+                isOpen={isVisualTemplatePickerOpen}
+                onClose={() => setIsVisualTemplatePickerOpen(false)}
+                title="Select Document Template"
+                size="full"
+                footer={
+                    <ModalFooter className="w-full flex items-center justify-between">
+                        <Link href="/templates">
+                            <Button variant="outline" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
+                                Create New
+                            </Button>
+                        </Link>
+                        <div className="flex gap-2">
+                            <Button variant="ghost" onClick={() => setIsVisualTemplatePickerOpen(false)}>
+                                Cancel
+                            </Button>
+                            {templates.length > 0 && (
+                                <Button
+                                    onClick={() => {
+                                        if (tempSelectedTemplateId) {
+                                            setSelectedTemplateId(tempSelectedTemplateId);
+                                            setIsVisualTemplatePickerOpen(false);
+                                            toast.success("Template selected!");
+                                        }
+                                    }}
+                                    disabled={!tempSelectedTemplateId}
+                                >
+                                    Proceed
+                                </Button>
+                            )}
+                        </div>
+                    </ModalFooter>
+                }
+            >
+                {(() => {
+                    if (templates.length === 0) {
+                        return (
+                            <div className="text-center py-16">
+                                <div className="w-16 h-16 mx-auto bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mb-4">
+                                    <FileText className="w-8 h-8 text-neutral-400 dark:text-neutral-500" />
+                                </div>
+                                <h3 className="text-lg font-semibold text-[#2d3748] dark:text-white mb-2">No Templates Found</h3>
+                                <p className="text-neutral-600 dark:text-neutral-400 mb-6 max-w-md mx-auto">
+                                    You don't have any templates set up yet. Upload or create a template to get started.
+                                </p>
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <div className="flex flex-col gap-4">
+                            {/* Toggle view mode */}
+                            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-700/60">
+                                <span className="text-xs font-semibold text-neutral-500 dark:text-neutral-400">View Preference</span>
+                                <div className="flex rounded-lg bg-neutral-100 dark:bg-neutral-800 p-0.5 border border-neutral-200/50 dark:border-neutral-700/50">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPickerViewMode('grid')}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                                            pickerViewMode === 'grid'
+                                                ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-white shadow-sm'
+                                                : 'text-neutral-600 dark:text-neutral-400 hover:text-[#2d3748] dark:hover:text-white'
+                                        }`}
+                                    >
+                                        <LayoutGrid className="w-3.5 h-3.5" />
+                                        Grid
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPickerViewMode('list')}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                                            pickerViewMode === 'list'
+                                                ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-white shadow-sm'
+                                                : 'text-neutral-600 dark:text-neutral-400 hover:text-[#2d3748] dark:hover:text-white'
+                                        }`}
+                                    >
+                                        <List className="w-3.5 h-3.5" />
+                                        List
+                                    </button>
+                                </div>
+                            </div>
+
+                            {pickerViewMode === 'grid' ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-1 max-h-[60vh] overflow-y-auto">
+                                    {templates.map((t) => {
+                                        const isVariant = t.mode === 'connected' && t.variants?.[type];
+                                        const imageUrl = isVariant ? t.variants?.[type]?.imageUrl : t.imageUrl;
+                                        const isSelected = tempSelectedTemplateId === t.id;
+
+                                        // Format display names beautifully: e.g. "Connected Template" or "Invoice"
+                                        const formattedType = t.mode === 'connected'
+                                            ? 'Connected Template'
+                                            : (t.type === 'delivery-note' ? 'Delivery Note' : `${t.type.charAt(0).toUpperCase() + t.type.slice(1)}`);
+
+                                        return (
+                                            <div
+                                                key={t.id}
+                                                onClick={() => setTempSelectedTemplateId(t.id)}
+                                                className={`
+                                                    cursor-pointer rounded-xl border-2 p-2 transition-all duration-200 bg-white dark:bg-neutral-800 flex flex-col group/picker
+                                                    ${isSelected
+                                                        ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-md'
+                                                        : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 hover:shadow-sm'
+                                                    }
+                                                `}
+                                            >
+                                                <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-neutral-50 dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-700/80 mb-2">
+                                                    {imageUrl ? (
+                                                        <img
+                                                            src={imageUrl}
+                                                            alt={t.name}
+                                                            className="w-full h-full object-cover group-hover/picker:scale-105 transition-transform duration-200"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center">
+                                                            <FileText className="w-10 h-10 text-neutral-300 dark:text-neutral-600" />
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* Format Indicators (badges on top left) */}
+                                                    <div className="absolute top-2 left-2 flex gap-1 bg-black/60 backdrop-blur-sm p-1 rounded-lg z-10">
+                                                        {(t.type === 'invoice' || t.variants?.['invoice']) && (
+                                                            <span title="Invoice format supported">
+                                                                <FileText className="w-3.5 h-3.5 text-blue-400" />
+                                                            </span>
+                                                        )}
+                                                        {(t.type === 'receipt' || t.variants?.['receipt']) && (
+                                                            <span title="Receipt format supported">
+                                                                <Receipt className="w-3.5 h-3.5 text-emerald-400" />
+                                                            </span>
+                                                        )}
+                                                        {(t.type === 'delivery-note' || t.variants?.['delivery-note']) && (
+                                                            <span title="Delivery Note format supported">
+                                                                <Truck className="w-3.5 h-3.5 text-amber-400" />
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {isSelected && (
+                                                        <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1 shadow z-10">
+                                                            <Check className="w-4 h-4" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="px-1 py-0.5">
+                                                    <p className="font-semibold text-xs text-neutral-900 dark:text-white truncate">
+                                                        {t.name}
+                                                    </p>
+                                                    <p className="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase mt-0.5 font-bold tracking-tight">
+                                                        {formattedType}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-2 p-1 max-h-[60vh] overflow-y-auto">
+                                    {templates.map((t) => {
+                                        const isVariant = t.mode === 'connected' && t.variants?.[type];
+                                        const imageUrl = isVariant ? t.variants?.[type]?.imageUrl : t.imageUrl;
+                                        const isSelected = tempSelectedTemplateId === t.id;
+
+                                        const formattedType = t.mode === 'connected'
+                                            ? 'Connected Template'
+                                            : (t.type === 'delivery-note' ? 'Delivery Note' : `${t.type.charAt(0).toUpperCase() + t.type.slice(1)}`);
+
+                                        return (
+                                            <div
+                                                key={t.id}
+                                                onClick={() => setTempSelectedTemplateId(t.id)}
+                                                className={`
+                                                    cursor-pointer rounded-xl border-2 p-3 transition-all duration-200 bg-white dark:bg-neutral-800 flex items-center justify-between gap-4 group/picker
+                                                    ${isSelected
+                                                        ? 'border-blue-500 bg-blue-50/10 dark:bg-blue-900/10 ring-2 ring-blue-500/20 shadow-sm'
+                                                        : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 hover:shadow-xs'
+                                                    }
+                                                `}
+                                            >
+                                                <div className="flex items-center gap-4 min-w-0">
+                                                    {/* Thumbnail */}
+                                                    <div className="relative w-12 h-16 rounded-lg overflow-hidden bg-neutral-50 dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-700/80 shrink-0">
+                                                        {imageUrl ? (
+                                                            <img
+                                                                src={imageUrl}
+                                                                alt={t.name}
+                                                                className="w-full h-full object-cover group-hover/picker:scale-105 transition-transform duration-200"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center">
+                                                                <FileText className="w-6 h-6 text-neutral-300 dark:text-neutral-600" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {/* Text details */}
+                                                    <div className="min-w-0 flex-1">
+                                                        <h4 className="font-semibold text-sm text-neutral-900 dark:text-white truncate">
+                                                            {t.name}
+                                                        </h4>
+                                                        <p className="text-xs text-neutral-500 dark:text-neutral-400 uppercase font-bold tracking-tight mt-0.5">
+                                                            {formattedType}
+                                                        </p>
+                                                        {/* Supported Format Icons Inline */}
+                                                        <div className="flex gap-2 mt-1 flex-wrap">
+                                                            {(t.type === 'invoice' || t.variants?.['invoice']) && (
+                                                                <span className="flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 font-medium">
+                                                                    <FileText className="w-3 h-3" /> Invoice
+                                                                </span>
+                                                            )}
+                                                            {(t.type === 'receipt' || t.variants?.['receipt']) && (
+                                                                <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                                                                    <Receipt className="w-3 h-3" /> Receipt
+                                                                </span>
+                                                            )}
+                                                            {(t.type === 'delivery-note' || t.variants?.['delivery-note']) && (
+                                                                <span className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                                                                    <Truck className="w-3 h-3" /> Delivery
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {/* Selection Status */}
+                                                <div className="shrink-0 flex items-center justify-center">
+                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                        isSelected
+                                                            ? 'border-blue-500 bg-blue-500 text-white'
+                                                            : 'border-neutral-300 dark:border-neutral-600'
+                                                    }`}>
+                                                        {isSelected && <Check className="w-3 h-3" />}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
+            </Modal>
+
+            {/* Barcode Camera Scanner Modal */}
+            <BarcodeScannerModal
+                isOpen={isBarcodeModalOpen}
+                onClose={() => setIsBarcodeModalOpen(false)}
+                onScan={(scannedCode) => {
+                    handleBarcodeScan(scannedCode);
+                }}
+                mode="continuous"
+                title="POS Camera Barcode Scanner"
+            />
         </div>
     );
 }

@@ -103,6 +103,11 @@ export const FINANCIAL_TERMS: Record<string, FinancialTermDefinition> = {
         definition: 'The grand total written out in words for clarity and fraud prevention.',
         example: 'One Hundred Forty-Eight Dollars and Fifty Cents'
     },
+    'amount-paid-in-words': {
+        term: 'Amount Paid in Words',
+        definition: 'The paid/payment amount written out in words for receipts.',
+        example: 'Fifty Dollars and Zero Cents'
+    },
     'document-number': {
         term: 'Document Number',
         definition: 'A unique identifier for this document, used for tracking and reference.',

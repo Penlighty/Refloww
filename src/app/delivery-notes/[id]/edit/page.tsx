@@ -1,18 +1,12 @@
-"use client";
+import EditDeliveryNoteClient from './EditDeliveryNoteClient';
 
-import DocumentForm from '@/components/DocumentForm';
-import { useParams } from 'next/navigation';
-
-export default function EditDeliveryNotePage() {
-    const params = useParams();
-    const id = params.id as string;
-
-    return (
-        <DocumentForm
-            type="delivery-note"
-            title="Edit Delivery Note"
-            backUrl={`/delivery-notes/${id}`}
-            documentId={id}
-        />
-    );
+export function generateStaticParams() {
+  return [{ id: '1' }];
 }
+
+export default async function EditDeliveryNotePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <EditDeliveryNoteClient id={id} />;
+}
+
+
