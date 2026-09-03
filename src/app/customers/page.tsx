@@ -784,7 +784,7 @@ export default function CustomersPage() {
                         </div>
                         <div className="text-right">
                             <span className="text-[11px] text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800 px-2.5 py-1 rounded-lg border border-neutral-200/80 dark:border-neutral-700 font-medium shadow-2xs">
-                                🔒 Permanent & Locked
+                                ⚡ Auto-generated
                             </span>
                         </div>
                     </div>
@@ -799,7 +799,7 @@ export default function CustomersPage() {
                     />
                     <div className="pointer-events-none select-none opacity-80">
                         <Input
-                            label="Customer ID (Locked)"
+                            label="Customer ID (Auto-generated)"
                             value={editingCustomer ? (editingCustomer.customerNumber || '') : predictedCustomerId}
                             readOnly
                             disabled

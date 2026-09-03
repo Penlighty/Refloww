@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { compressImageToWebP } from '@/lib/utils/imageCompressor';
 import { uploadToCloudinary } from '@/lib/utils/cloudinary';
-import { Upload, Image as ImageIcon, X, Link as LinkIcon, Loader2, Sparkles } from 'lucide-react';
+import { Upload, Image as ImageIcon, X, Link as LinkIcon, Loader2, Sparkles, Camera } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface ImageUploaderProps {
@@ -28,6 +28,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     const [isCompressing, setIsCompressing] = useState(false);
     const [mode, setMode] = useState<'upload' | 'url'>('upload');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const cameraInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -76,6 +77,17 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                     <div className="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-800 p-0.5 rounded-lg shrink-0">
                         <button
                             type="button"
+                            onClick={() => {
+                                setMode('upload');
+                                cameraInputRef.current?.click();
+                            }}
+                            className="p-1 rounded-md transition-colors text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+                            title="Take Photo"
+                        >
+                            <Camera className="w-3 h-3" />
+                        </button>
+                        <button
+                            type="button"
                             onClick={() => setMode('upload')}
                             className={`p-1 rounded-md transition-colors ${mode === 'upload' ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-xs font-medium' : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'}`}
                             title="Upload File"
@@ -100,6 +112,14 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                    />
+                    <input
+                        ref={cameraInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
                         onChange={handleFileSelect}
                         className="hidden"
                     />
@@ -144,7 +164,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                     </div>
                                     <div>
                                         <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-200">Click to upload photo</span>
-                                        <p className="text-[10px] text-neutral-400">PNG, JPG, WebP supported</p>
+                                        <p className="text-[10px] text-neutral-400">Use the camera icon above to take a picture</p>
                                     </div>
                                 </div>
                             )}

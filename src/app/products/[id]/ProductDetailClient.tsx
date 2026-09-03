@@ -702,10 +702,10 @@ export default function ProductDetailClient() {
                         leftIcon={<Package className="w-4 h-4" />}
                     />
 
-                    {/* SKU (Locked) */}
+                    {/* SKU (Auto-generated) */}
                     <div className="pointer-events-none select-none opacity-80">
                         <Input
-                            label="SKU / Code (Locked)"
+                            label="SKU / Code (Auto-generated)"
                             value={product.sku || ''}
                             readOnly
                             disabled

@@ -113,6 +113,7 @@ export default function ProductsPage() {
     const [sortField, setSortField] = useState<SortField>('name');
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isScannerOpen, setIsScannerOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
@@ -1429,10 +1430,10 @@ export default function ProductsPage() {
                         leftIcon={<Package className="w-4 h-4" />}
                     />
 
-                    {/* SKU (Locked) */}
+                    {/* SKU (Auto-generated) */}
                     <div className="pointer-events-none select-none opacity-80">
                         <Input
-                            label="SKU / Code (Locked)"
+                            label="SKU / Code (Auto-generated)"
                             value={formData.sku || (editingProduct ? editingProduct.sku : 'SKU-Auto')}
                             readOnly
                             disabled
@@ -1443,13 +1444,25 @@ export default function ProductsPage() {
                     </div>
 
                     {/* Barcode */}
-                    <Input
-                        label="Barcode / Service Code"
-                        placeholder="Scan or enter..."
-                        value={formData.barcode || ''}
-                        onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                        leftIcon={<BarcodeIcon className="w-4 h-4" />}
-                    />
+                    <div className="flex items-end gap-2">
+                        <div className="flex-1">
+                            <Input
+                                label="Barcode / Service Code"
+                                placeholder="Scan or enter..."
+                                value={formData.barcode || ''}
+                                onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                                leftIcon={<BarcodeIcon className="w-4 h-4" />}
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setIsScannerOpen(true)}
+                            className="h-10 px-4 rounded-lg bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition-colors border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0"
+                            title="Scan Barcode"
+                        >
+                            <ScanLine className="w-4 h-4" />
+                        </button>
+                    </div>
 
                     {/* Unit Selling Price */}
                     <Input
@@ -1615,6 +1628,15 @@ export default function ProductsPage() {
                     <Button variant="danger" onClick={handleBulkDelete}>Delete All Selected ({selectedProductIds.length})</Button>
                 </ModalFooter>
             </Modal>
+            {/* Barcode Scanner Modal */}
+            <BarcodeScannerModal
+                isOpen={isScannerOpen}
+                onClose={() => setIsScannerOpen(false)}
+                onScan={(barcode) => {
+                    setFormData({ ...formData, barcode });
+                    setIsScannerOpen(false);
+                }}
+            />
         </div>
     );
 }

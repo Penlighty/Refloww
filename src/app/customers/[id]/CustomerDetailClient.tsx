@@ -398,7 +398,7 @@ export default function CustomerDetailComponent() {
                     />
                     <div className="pointer-events-none select-none opacity-80">
                         <Input
-                            label="Customer ID (Locked)"
+                            label="Customer ID (Auto-generated)"
                             value={customer.customerNumber || ''}
                             readOnly
                             disabled
