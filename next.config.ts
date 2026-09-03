@@ -1,13 +1,14 @@
 import type { NextConfig } from "next";
 
-const isBuild = process.env.NODE_ENV === 'production' || process.env.CAPACITOR_BUILD === 'true';
+// Disable static export on Vercel so dynamic routes (like /[id]) work correctly.
+const isVercel = process.env.VERCEL === '1';
+const isCapacitorBuild = process.env.CAPACITOR_BUILD === 'true' || (process.env.NODE_ENV === 'production' && !isVercel);
 
 const nextConfig: NextConfig = {
-  ...(isBuild ? { output: 'export' } : {}),
+  ...(isCapacitorBuild ? { output: 'export' } : {}),
   images: {
     unoptimized: true,
   }
 };
 
 export default nextConfig;
-
