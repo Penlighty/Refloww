@@ -16,7 +16,8 @@ export interface PaystackPaymentParams {
     subaccount?: string;
     platformCommissionPercentage?: number; // e.g. 2.4%
     onSuccess: (response: any) => void;
-    onClose: () => void;
+    onClose?: () => void;
+    onCancel?: () => void;
 }
 
 /**
@@ -91,7 +92,8 @@ export async function payWithPaystack(params: PaystackPaymentParams): Promise<vo
                 params.onSuccess(response);
             },
             onClose: function () {
-                params.onClose();
+                if (params.onClose) params.onClose();
+                if (params.onCancel) params.onCancel();
             }
         });
 
@@ -110,7 +112,8 @@ export async function payWithPaystack(params: PaystackPaymentParams): Promise<vo
                 message: 'Approved',
             });
         } else {
-            params.onClose();
+            if (params.onClose) params.onClose();
+            if (params.onCancel) params.onCancel();
         }
     }
 }

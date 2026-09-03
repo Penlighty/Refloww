@@ -214,11 +214,15 @@ export interface StorefrontSettings {
     organizationId?: string;
     storeName: string;
     storeSlug: string;
+    tagline?: string;
     description: string;
+    storeDescription?: string;
+    announcement?: string;
     bannerUrl?: string;
     logoUrl?: string;
     contactEmail: string;
     contactPhone: string;
+    contactAddress?: string;
     websiteUrl?: string;
     address: string;
     currency: string;

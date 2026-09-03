@@ -6,7 +6,7 @@ import { useProductStore, useStorefrontStore, useSettingsStore, useDiscountStore
 import { Button, Input, Textarea, Modal, ModalFooter, ImageUploader, Select, PageHelpModal } from '@/components/ui';
 import { formatCurrency, formatDate, NIGERIAN_BANKS, autoGenerateVendorSubaccounts } from '@/lib/utils';
 import { Product } from '@/lib/types';
-import { StorefrontCatalogContent } from '@/app/storefront/catalog/page';
+import { StorefrontCatalogContent } from '@/components/storefront/StorefrontCatalogContent';
 import { validateContentPolicy } from '@/lib/utils/contentPolicy';
 import {
     Store,

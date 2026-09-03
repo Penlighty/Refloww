@@ -130,9 +130,9 @@ export interface MonnifyPaymentParams {
     amount: number;
     customerName: string;
     customerEmail: string;
-    customerPhone: string;
+    customerPhone?: string;
     paymentReference: string;
-    paymentDescription: string;
+    paymentDescription?: string;
     apiKey?: string;
     contractCode?: string;
     subAccountCode?: string;
@@ -140,7 +140,8 @@ export interface MonnifyPaymentParams {
     environment?: 'sandbox' | 'live';
     platformProfitPercentage?: number;
     onSuccess: (response: any) => void;
-    onClose: (data: any) => void;
+    onClose?: (data?: any) => void;
+    onCancel?: () => void;
 }
 
 /**
@@ -195,7 +196,8 @@ export async function payWithMonnify(params: MonnifyPaymentParams): Promise<void
                 }
             },
             onClose: function (data: any) {
-                params.onClose(data);
+                if (params.onClose) params.onClose(data);
+                if (params.onCancel) params.onCancel();
             },
         });
     } catch (err) {
@@ -212,7 +214,8 @@ export async function payWithMonnify(params: MonnifyPaymentParams): Promise<void
                 amountPaid: params.amount,
             });
         } else {
-            params.onClose({ status: 'USER_CANCELLED' });
+            if (params.onClose) params.onClose({ status: 'USER_CANCELLED' });
+            if (params.onCancel) params.onCancel();
         }
     }
 }
