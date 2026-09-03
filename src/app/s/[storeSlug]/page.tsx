@@ -2,6 +2,10 @@ import { Suspense } from 'react';
 import { Store } from 'lucide-react';
 import { StorefrontCatalogContent } from '@/components/storefront/StorefrontCatalogContent';
 
+export function generateStaticParams() {
+    return [];
+}
+
 export default async function DedicatedStorefrontPage({ params }: { params: Promise<{ storeSlug: string }> }) {
     const resolvedParams = await params;
 
