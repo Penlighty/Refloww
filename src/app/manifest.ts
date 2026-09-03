@@ -9,8 +9,8 @@ export default function manifest(): MetadataRoute.Manifest {
         description: 'Create professional invoices, receipts, and delivery notes with custom templates',
         start_url: '/',
         display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#fc6d2d',
+        background_color: '#f8fafc',
+        theme_color: '#f8fafc',
         icons: [
             {
                 src: '/icons/icon-192.png',

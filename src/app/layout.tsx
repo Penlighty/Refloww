@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from 'react-hot-toast';
 import ThemeProvider from "@/components/ThemeProvider";
@@ -19,6 +19,13 @@ export const metadata: Metadata = {
     shortcut: '/logo/refloww-icon-orange.svg',
     apple: '/logo/refloww-icon-orange-bg.png',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#121519" },
+  ],
 };
 
 export default function RootLayout({
