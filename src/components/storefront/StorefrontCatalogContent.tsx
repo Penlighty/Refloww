@@ -506,18 +506,39 @@ export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undef
             <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6">
                 
                 {/* Store Header Banner */}
-                <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-neutral-900 via-neutral-850 to-neutral-900 border border-neutral-800/80 p-6 sm:p-10 shadow-2xl">
+                <div 
+                    className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-neutral-900 via-neutral-850 to-neutral-900 border border-neutral-800/80 p-6 sm:p-10 shadow-2xl"
+                    style={{
+                        ...(settings.bannerUrl ? {
+                            backgroundImage: `linear-gradient(to right, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.7)), url(${settings.bannerUrl})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                        } : {})
+                    }}
+                >
                     <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
                     
-                    <div className="relative z-10 max-w-2xl space-y-3">
-                        <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 inline-block">
-                            STOREFRONT CATALOG
-                        </span>
-                        <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-                            {settings.storeName || company.name || 'Digital Storefront'}
-                        </h2>
-                        <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
-                            {settings.storeDescription || 'Browse available products, add items to cart, and checkout instantly with split payments or pay on delivery.'}
+                    <div className="relative z-10 max-w-2xl space-y-4">
+                        <div className="flex items-center gap-4 mb-2">
+                            {settings.logoUrl ? (
+                                <img src={settings.logoUrl} alt={settings.storeName || 'Store Logo'} className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain bg-neutral-900 p-1.5 shadow-xl border border-neutral-700/60 shrink-0" />
+                            ) : (
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shadow-xl shrink-0">
+                                    <Store className="w-8 h-8" />
+                                </div>
+                            )}
+                            <div>
+                                <span className="px-3 py-1 rounded-full text-[10px] sm:text-xs font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 inline-block mb-1.5">
+                                    STOREFRONT CATALOG
+                                </span>
+                                <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                                    {settings.storeName || company.name || 'Digital Storefront'}
+                                </h2>
+                            </div>
+                        </div>
+                        
+                        <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed max-w-xl">
+                            {settings.storeDescription || 'Browse available products, add items to cart, and checkout instantly.'}
                         </p>
 
                         {/* Contact details */}
