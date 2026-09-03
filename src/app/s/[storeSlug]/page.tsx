@@ -3,7 +3,7 @@ import { Store } from 'lucide-react';
 import { StorefrontCatalogContent } from '@/components/storefront/StorefrontCatalogContent';
 
 export function generateStaticParams() {
-    return [];
+    return [{ storeSlug: 'demo' }];
 }
 
 export default async function DedicatedStorefrontPage({ params }: { params: Promise<{ storeSlug: string }> }) {
