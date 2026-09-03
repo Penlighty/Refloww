@@ -45,9 +45,9 @@ import {
     ShieldCheck
 } from 'lucide-react';
 
-export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: boolean }) {
+export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undefined }: { isEmbedded?: boolean, storeSlug?: string }) {
     const searchParams = useSearchParams();
-    const storeSlugParam = searchParams.get('store');
+    const storeSlugParam = storeSlug || searchParams.get('store');
     const { user, profile } = useAuth();
 
     const { products } = useProductStore();

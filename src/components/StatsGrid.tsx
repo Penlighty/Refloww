@@ -184,10 +184,6 @@ export default function StatsGrid() {
                         <BarChart2 className="w-4 h-4" strokeWidth={2} />
                         <span>Analytics</span>
                     </Link>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-sm font-medium text-neutral-600 dark:text-neutral-300">
-                        <TrendingUp className="w-4 h-4" strokeWidth={2} />
-                        <span>Real-time</span>
-                    </div>
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

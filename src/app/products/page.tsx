@@ -7,7 +7,7 @@ import { useProductStore, useSettingsStore, useDiscountStore, useDocumentStore, 
 import { Product, ProductFormData, StockBatch, StockMovement, ProductType } from '@/lib/types';
 import { formatCurrency, formatDate, parseCSV, generateCSV, downloadCSV, readFileAsText } from '@/lib/utils';
 import { calculateReorderMetrics, getBatchExpiryStatus, generateAutoBatchNumber } from '@/lib/utils/inventoryUtils';
-import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea, Select, PageHelpModal, HelpTooltip } from '@/components/ui';
+import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea, Select, PageHelpModal, HelpTooltip, ImageUploader } from '@/components/ui';
 import { toast } from 'react-hot-toast';
 import { generateSkuFromCategory } from '@/lib/utils/productUtils';
 import { validateContentPolicy } from '@/lib/utils/contentPolicy';
@@ -1418,6 +1418,18 @@ export default function ProductsPage() {
                                 )}
                             </div>
                         )}
+                    </div>
+
+                    {/* Product Image */}
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
+                            Product Image
+                        </label>
+                        <ImageUploader
+                            value={formData.imageUrl || ''}
+                            onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                            aspectRatio="square"
+                        />
                     </div>
 
                     {/* Product Name */}

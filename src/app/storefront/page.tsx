@@ -134,8 +134,8 @@ export default function StorefrontAdminPage() {
     });
 
     const storeUrl = typeof window !== 'undefined'
-        ? `${window.location.origin}/storefront/catalog?store=${settings.storeSlug}`
-        : `/storefront/catalog?store=${settings.storeSlug}`;
+        ? `${window.location.origin}/s/${settings.storeSlug}`
+        : `/s/${settings.storeSlug}`;
 
     const slugIsAvailable = useMemo(() => {
         return isSlugAvailable(slugInput);
@@ -282,7 +282,7 @@ export default function StorefrontAdminPage() {
                         >
                             {copiedLink ? 'Copied Catalog Link!' : 'Copy Catalog Link'}
                         </Button>
-                        <Link href="/storefront/catalog" target="_blank">
+                        <Link href={`/s/${settings.storeSlug}`} target="_blank">
                             <Button variant="primary" leftIcon={<ExternalLink className="w-4 h-4" />} iconOnlyMobile className="shadow-lg shadow-blue-500/20">
                                 Open Storefront
                             </Button>

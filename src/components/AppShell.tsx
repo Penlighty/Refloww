@@ -46,7 +46,7 @@ export default function AppShell({ children }: AppShellProps) {
     const pathname = usePathname();
     const { user, loading } = useAuth();
 
-    const isPublicPage = PUBLIC_PATHS.includes(pathname);
+    const isPublicPage = PUBLIC_PATHS.includes(pathname) || pathname.startsWith('/s/');
     const isAdminPage = pathname.startsWith('/admin');
 
     // Dynamic browser tab header title
