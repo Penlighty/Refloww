@@ -1,9 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { StorefrontSettings, StorefrontOrder, StorefrontCartItem, Product } from '@/lib/types';
+import { getActiveOrgId, filterByActiveOrg } from '@/lib/utils/orgIsolation';
+import { useOrganizationStore } from './organizationStore';
+import { useTransactionStore } from './transactionStore';
 
 interface StorefrontState {
     settings: StorefrontSettings;
+    settingsMap: Record<string, StorefrontSettings>;
     orders: StorefrontOrder[];
     cart: StorefrontCartItem[];
     registeredSlugs: string[];
@@ -15,6 +19,9 @@ interface StorefrontState {
     clearCart: () => void;
     addOrder: (order: StorefrontOrder) => void;
     updateOrderStatus: (orderId: string, status: 'pending' | 'completed' | 'cancelled') => void;
+    syncSettingsForActiveOrg: (activeOrgId: string) => void;
+    getSettingsForSlug: (slug: string) => StorefrontSettings | undefined;
+    getFilteredOrders: () => StorefrontOrder[];
 }
 
 const defaultSettings: StorefrontSettings = {
@@ -47,35 +54,59 @@ const defaultSettings: StorefrontSettings = {
     feeBearer: 'storefront'
 };
 
+const initialSettingsMap: Record<string, StorefrontSettings> = {
+    'org-primary-default': {
+        ...defaultSettings,
+        organizationId: 'org-primary-default'
+    }
+};
+
 const reservedSlugs = ['admin', 'api', 'dashboard', 'settings', 'auth', 'login', 'signup', 'catalog', 'checkout'];
 
 export const useStorefrontStore = create<StorefrontState>()(
     persist(
         (set, get) => ({
             settings: defaultSettings,
+            settingsMap: initialSettingsMap,
             orders: [],
             cart: [],
             registeredSlugs: ['my-store', 'acme-tech', 'nexus-goods'],
 
             updateSettings: (newSettings) =>
                 set((state) => {
-                    const updatedSettings = { ...state.settings, ...newSettings };
-                    let updatedSlugs = state.registeredSlugs;
+                    const activeOrgId = getActiveOrgId();
+                    const currentMap = state.settingsMap || {};
+                    const currentSettingsForOrg = currentMap[activeOrgId] || { ...defaultSettings, organizationId: activeOrgId };
+                    
+                    const updatedSettings = { ...currentSettingsForOrg, ...newSettings, organizationId: activeOrgId };
+                    const updatedMap = { ...currentMap, [activeOrgId]: updatedSettings };
+                    
+                    let updatedSlugs = state.registeredSlugs || [];
                     if (newSettings.storeSlug && !updatedSlugs.includes(newSettings.storeSlug)) {
                         updatedSlugs = [...updatedSlugs, newSettings.storeSlug];
                     }
                     return {
                         settings: updatedSettings,
+                        settingsMap: updatedMap,
                         registeredSlugs: updatedSlugs
                     };
                 }),
 
             isSlugAvailable: (slug: string) => {
                 const state = get();
+                const activeOrgId = getActiveOrgId();
                 const normalized = slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
                 if (!normalized || reservedSlugs.includes(normalized)) return false;
-                if (state.settings.storeSlug === normalized) return true; // current store owns it
-                return !state.registeredSlugs.includes(normalized);
+                
+                const currentSettingsForOrg = (state.settingsMap || {})[activeOrgId] || state.settings;
+                if (currentSettingsForOrg.storeSlug === normalized) return true;
+                
+                const isUsedInMap = Object.values(state.settingsMap || {}).some(
+                    s => s.organizationId !== activeOrgId && s.storeSlug === normalized
+                );
+                if (isUsedInMap) return false;
+                
+                return !(state.registeredSlugs || []).includes(normalized);
             },
 
             addToCart: (product, quantity = 1) =>
@@ -111,20 +142,64 @@ export const useStorefrontStore = create<StorefrontState>()(
 
             clearCart: () => set({ cart: [] }),
 
-            addOrder: (order) =>
+            addOrder: (order) => {
+                const activeOrgId = getActiveOrgId();
+                const orderWithOrg = { ...order, organizationId: order.organizationId || activeOrgId };
                 set((state) => ({
-                    orders: [order, ...state.orders]
-                })),
+                    orders: [orderWithOrg, ...state.orders]
+                }));
+                try {
+                    useTransactionStore.getState().syncOrderToTransaction(orderWithOrg);
+                } catch (e) {
+                    console.error('Error syncing order to transaction:', e);
+                }
+            },
 
-            updateOrderStatus: (orderId, status) =>
-                set((state) => ({
-                    orders: state.orders.map(order =>
+            updateOrderStatus: (orderId, status) => {
+                set((state) => {
+                    const updatedOrders = state.orders.map(order =>
                         order.id === orderId ? { ...order, status } : order
-                    )
-                })),
+                    );
+                    const updatedOrder = updatedOrders.find(o => o.id === orderId);
+                    if (updatedOrder) {
+                        try {
+                            useTransactionStore.getState().syncOrderToTransaction(updatedOrder);
+                        } catch (e) {
+                            console.error('Error syncing updated order to transaction:', e);
+                        }
+                    }
+                    return { orders: updatedOrders };
+                });
+            },
+
+            syncSettingsForActiveOrg: (activeOrgId) => {
+                set((state) => {
+                    const map = state.settingsMap || {};
+                    const currentSettings = map[activeOrgId] || { ...defaultSettings, organizationId: activeOrgId };
+                    return {
+                        settings: currentSettings
+                    };
+                });
+            },
+
+            getSettingsForSlug: (slug) => {
+                const map = get().settingsMap || {};
+                return Object.values(map).find(s => s.storeSlug === slug);
+            },
+
+            getFilteredOrders: () => {
+                return filterByActiveOrg(get().orders);
+            },
         }),
         {
             name: 'inflow-storefront-storage',
         }
     )
 );
+
+// Auto-sync storefront settings when active organization switches
+if (typeof window !== 'undefined') {
+    useOrganizationStore.subscribe((state) => {
+        useStorefrontStore.getState().syncSettingsForActiveOrg(state.activeOrganizationId);
+    });
+}

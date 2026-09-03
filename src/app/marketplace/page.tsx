@@ -28,6 +28,7 @@ import {
     MarketplaceTemplate
 } from '@/lib/firebase/admin';
 import { useTemplateStore } from '@/lib/store';
+import { getActiveOrgId } from '@/lib/utils/orgIsolation';
 import { Template, MappedField } from '@/lib/types';
 import { toast } from 'react-hot-toast';
 import TemplateSheetSlider, { extractTemplateSheets } from '@/components/TemplateSheetSlider';
@@ -77,11 +78,13 @@ export default function MarketplacePage() {
                 throw new Error('No template data available');
             }
 
-            // Create a new template from the marketplace template
+            // Create a new template from the marketplace template explicitly bound to active org
             const newTemplateId = uuidv4();
+            const activeOrgId = getActiveOrgId();
             const newTemplate: Template = {
                 ...templateData,
                 id: newTemplateId,
+                organizationId: activeOrgId,
                 name: templateData.name || template.name,
                 type: templateData.type || template.type,
                 imageUrl: templateData.imageUrl || '',
@@ -182,12 +185,12 @@ export default function MarketplacePage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-blue-50/30 dark:from-neutral-900 dark:via-neutral-900 dark:to-blue-900/10">
+        <div className="w-full max-w-full overflow-x-hidden min-h-screen bg-gradient-to-br from-neutral-50 via-white to-blue-50/30 dark:from-neutral-900 dark:via-neutral-900 dark:to-blue-900/10">
             {/* Hero Section */}
             <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-pink-600/5 dark:from-blue-600/10 dark:via-purple-600/10 dark:to-pink-600/10" />
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <button
@@ -206,7 +209,7 @@ export default function MarketplacePage() {
                                 </div>
                                 <div>
                                     <h1 className="text-3xl font-bold text-[#2d3748] dark:text-white">
-                                        Template Marketplace
+                                        Marketplace
                                     </h1>
                                     <p className="text-neutral-500 dark:text-neutral-400">
                                         Browse and download professional templates
@@ -215,7 +218,11 @@ export default function MarketplacePage() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-xl text-sm font-medium text-neutral-600 dark:text-neutral-300 border border-neutral-200/50 dark:border-neutral-700/50">
+                                <Store className="w-4 h-4 text-blue-500" />
+                                Global Store for All Organizations
+                            </span>
                             <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-xl text-sm font-medium text-neutral-600 dark:text-neutral-300 border border-neutral-200/50 dark:border-neutral-700/50">
                                 <Sparkles className="w-4 h-4 text-amber-500" />
                                 {templates.length} Templates Available
@@ -241,15 +248,15 @@ export default function MarketplacePage() {
                             />
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3">
-                            {/* Category Pills */}
-                            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto min-w-0 flex-1 justify-end">
+                            {/* Category Pills - Scrollable along X-axis */}
+                            <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1.5 min-w-0 flex-1 sm:flex-initial touch-pan-x scroll-smooth no-scrollbar">
                                 {categories.map(cat => (
                                     <button
                                         key={cat}
                                         onClick={() => setSelectedCategory(cat)}
-                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${selectedCategory === cat
-                                            ? 'bg-[#2d3748] dark:bg-white text-white dark:text-neutral-900 shadow-md'
+                                        className={`px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 cursor-pointer ${selectedCategory === cat
+                                            ? 'bg-[#2d3748] dark:bg-white text-white dark:text-neutral-900 shadow-md scale-[1.02]'
                                             : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700'
                                             }`}
                                     >
@@ -258,32 +265,34 @@ export default function MarketplacePage() {
                                 ))}
                             </div>
 
-                            {/* Type Filter */}
-                            <select
-                                value={selectedType}
-                                onChange={(e) => setSelectedType(e.target.value)}
-                                className="px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm text-neutral-700 dark:text-neutral-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                            >
-                                <option value="all">All Types</option>
-                                <option value="invoice">Invoices</option>
-                                <option value="receipt">Receipts</option>
-                                <option value="delivery-note">Delivery Notes</option>
-                            </select>
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                                {/* Type Filter */}
+                                <select
+                                    value={selectedType}
+                                    onChange={(e) => setSelectedType(e.target.value)}
+                                    className="px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm text-neutral-700 dark:text-neutral-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                >
+                                    <option value="all">All Types</option>
+                                    <option value="invoice">Invoices</option>
+                                    <option value="receipt">Receipts</option>
+                                    <option value="delivery-note">Delivery Notes</option>
+                                </select>
 
-                            {/* View Toggle */}
-                            <div className="hidden sm:flex items-center bg-neutral-100 dark:bg-neutral-800 rounded-lg p-1">
-                                <button
-                                    onClick={() => setViewMode('grid')}
-                                    className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white dark:bg-neutral-700 shadow-sm' : ''}`}
-                                >
-                                    <LayoutGrid className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-neutral-700 shadow-sm' : ''}`}
-                                >
-                                    <List className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
-                                </button>
+                                {/* View Toggle */}
+                                <div className="hidden sm:flex items-center bg-neutral-100 dark:bg-neutral-800 rounded-lg p-1">
+                                    <button
+                                        onClick={() => setViewMode('grid')}
+                                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white dark:bg-neutral-700 shadow-sm' : ''}`}
+                                    >
+                                        <LayoutGrid className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('list')}
+                                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-neutral-700 shadow-sm' : ''}`}
+                                    >
+                                        <List className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

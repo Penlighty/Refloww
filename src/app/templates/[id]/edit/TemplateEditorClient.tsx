@@ -278,9 +278,9 @@ export default function TemplateEditorPage() {
     const router = useRouter();
     const templateId = params.id as string;
 
-    const { templates, updateField, deleteField, addField, updateTemplate } = useTemplateStore();
+    const { getTemplateById, updateField, deleteField, addField, updateTemplate } = useTemplateStore();
     const { getNextDocumentNumber, numbering, company } = useSettingsStore();
-    const template = templates.find(t => t.id === templateId);
+    const template = getTemplateById(templateId);
 
     // Connected Template State
     const [activeVariant, setActiveVariant] = useState<DocumentType>(

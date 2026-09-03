@@ -344,9 +344,9 @@ export default function MarketplaceAdminPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Template Marketplace</h1>
-                    <p className="text-neutral-500 dark:text-neutral-400 mt-1">
-                        Manage public templates available to all users.
+                    <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Marketplace</h1>
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                        Manage global marketplace templates available to all users across all organizations.
                         <span className="ml-2 text-sm">
                             <span className="text-emerald-600 font-medium">{publishedCount} Published</span>
                             {' · '}
@@ -510,9 +510,9 @@ export default function MarketplaceAdminPage() {
                                     onChange={e => setFormData({ ...formData, type: e.target.value as DocumentType })}
                                     className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white transition-all"
                                 >
-                                    <option value="invoice">📄 Invoice</option>
-                                    <option value="receipt">🧾 Receipt</option>
-                                    <option value="delivery-note">📦 Delivery Note</option>
+                                    <option value="invoice">Invoice</option>
+                                    <option value="receipt">Receipt</option>
+                                    <option value="delivery-note">Delivery Note</option>
                                 </select>
                             </div>
                         </div>

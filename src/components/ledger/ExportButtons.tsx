@@ -15,6 +15,7 @@ export default function ExportButtons({ onExportExcel, onExportCSV }: ExportButt
                 variant="secondary"
                 size="sm"
                 leftIcon={<FileSpreadsheet className="w-4 h-4" />}
+                iconOnlyMobile
                 onClick={onExportExcel}
             >
                 Excel
@@ -23,6 +24,7 @@ export default function ExportButtons({ onExportExcel, onExportCSV }: ExportButt
                 variant="outline"
                 size="sm"
                 leftIcon={<FileText className="w-4 h-4" />}
+                iconOnlyMobile
                 onClick={onExportCSV}
             >
                 CSV

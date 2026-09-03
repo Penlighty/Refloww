@@ -74,7 +74,14 @@ export default function ForgotPasswordPage() {
                 </Link>
 
                 {/* Header */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-8 flex flex-col items-center">
+                    <div className="h-10 mb-3 flex items-center justify-center">
+                        <img
+                            src="/logo/refloww-full-orange.svg"
+                            alt="Refloww Logo"
+                            className="h-8 w-auto object-contain"
+                        />
+                    </div>
                     <h1 className="text-3xl font-bold text-[#2d3748] dark:text-white">
                         Reset Password
                     </h1>

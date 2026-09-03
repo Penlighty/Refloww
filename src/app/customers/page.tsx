@@ -3,10 +3,11 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useCustomerStore } from '@/lib/store';
+import { useCustomerStore, useSettingsStore, useDocumentStore, useOrganizationStore } from '@/lib/store';
 import { Customer, CustomerFormData } from '@/lib/types';
 import { formatDate, formatPhone, parseCSV, generateCSV, downloadCSV, readFileAsText } from '@/lib/utils';
-import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea } from '@/components/ui';
+import { calculateCustomerSegmentMetrics } from '@/lib/utils/customerSegmentation';
+import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea, PageHelpModal } from '@/components/ui';
 import { toast } from 'react-hot-toast';
 import {
     Plus,
@@ -25,10 +26,18 @@ import {
     AlertCircle,
     Check,
     Eye,
-    Building
+    Building,
+    Hash,
+    CheckSquare,
+    Square,
+    Lock,
+    AlertTriangle,
+    Award,
+    RotateCcw,
+    Clock
 } from 'lucide-react';
 
-type SortField = 'name' | 'email' | 'createdAt';
+type SortField = 'name' | 'email' | 'address' | 'createdAt';
 type SortOrder = 'asc' | 'desc';
 
 // Generate avatar color based on name
@@ -60,7 +69,9 @@ const customerCSVMapping = {
 };
 
 export default function CustomersPage() {
-    const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomerStore();
+    const { customers, getFilteredCustomers, addCustomer, updateCustomer, deleteCustomer, reformatAllCustomers } = useCustomerStore();
+    const activeOrgId = useOrganizationStore((state) => state.activeOrganizationId);
+    const displayCustomers = useMemo(() => getFilteredCustomers(), [customers, activeOrgId, getFilteredCustomers]);
     const searchParams = useSearchParams();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -70,10 +81,25 @@ export default function CustomersPage() {
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+    const [selectedCustomerIds, setSelectedCustomerIds] = useState<string[]>([]);
+    const [isSelectMode, setIsSelectMode] = useState<boolean>(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
     const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+    // Auto-repair missing or duplicate Customer IDs for records
+    useEffect(() => {
+        if (customers.length > 0) {
+            const numbers = customers.map(c => c.customerNumber).filter(Boolean);
+            const hasDuplicates = new Set(numbers).size !== numbers.length;
+            const hasMissing = customers.some(c => !c.customerNumber);
+            if (hasMissing || hasDuplicates) {
+                reformatAllCustomers();
+            }
+        }
+    }, [customers, reformatAllCustomers]);
 
     // Dynamic browser tab title
     useEffect(() => {
@@ -96,7 +122,11 @@ export default function CustomersPage() {
     const [importSuccess, setImportSuccess] = useState(false);
 
     // Form State
+    const { getNextDocumentNumber } = useSettingsStore();
+    const [isCustomIdEdited, setIsCustomIdEdited] = useState(false);
+
     const [formData, setFormData] = useState<CustomerFormData>({
+        customerNumber: '',
         name: '',
         companyName: '',
         email: '',
@@ -104,29 +134,103 @@ export default function CustomersPage() {
         address: '',
         notes: '',
     });
-    const [formErrors, setFormErrors] = useState<Partial<CustomerFormData>>({});
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+    const predictedCustomerId = useMemo(() => {
+        if (formData.customerNumber) return formData.customerNumber;
+        if (editingCustomer && editingCustomer.customerNumber) {
+            return editingCustomer.customerNumber;
+        }
+        return getNextDocumentNumber('customer', {
+            details: {
+                customerName: formData.name || ''
+            }
+        });
+    }, [editingCustomer, formData.customerNumber, formData.name, getNextDocumentNumber]);
+
+    const duplicateWarning = useMemo(() => {
+        if (!formData.name && !formData.email && !formData.phone) return null;
+
+        const currentId = editingCustomer?.id;
+        const cleanEmail = formData.email?.trim().toLowerCase();
+        const cleanPhone = formData.phone?.replace(/\D/g, '');
+        const cleanName = formData.name?.trim().toLowerCase();
+
+        const emailMatch = cleanEmail ? displayCustomers.find(c => c.id !== currentId && c.email?.trim().toLowerCase() === cleanEmail) : null;
+        const phoneMatch = cleanPhone ? displayCustomers.find(c => c.id !== currentId && c.phone?.replace(/\D/g, '') && c.phone.replace(/\D/g, '') === cleanPhone) : null;
+        const fullDuplicate = cleanName ? displayCustomers.find(c => 
+            c.id !== currentId && 
+            c.name.trim().toLowerCase() === cleanName && 
+            (
+                (cleanEmail && c.email?.trim().toLowerCase() === cleanEmail) ||
+                (cleanPhone && c.phone?.replace(/\D/g, '') === cleanPhone)
+            )
+        ) : null;
+
+        if (fullDuplicate) {
+            return `Exact customer details match "${fullDuplicate.name}" (${fullDuplicate.customerNumber || 'Existing'}). Please verify if this is a duplicate entry.`;
+        }
+        if (emailMatch) {
+            return `A customer with email "${formData.email}" already exists (${emailMatch.name} - ${emailMatch.customerNumber || ''}).`;
+        }
+        if (phoneMatch) {
+            return `A customer with phone number "${formData.phone}" already exists (${phoneMatch.name} - ${phoneMatch.phone}).`;
+        }
+
+        return null;
+    }, [formData.name, formData.email, formData.phone, displayCustomers, editingCustomer]);
+
+    const handleNameChange = (newName: string) => {
+        const updated = { ...formData, name: newName };
+        if (!isCustomIdEdited && !editingCustomer) {
+            updated.customerNumber = getNextDocumentNumber('customer', {
+                details: { customerName: newName }
+            });
+        }
+        setFormData(updated);
+    };
+
+    const { documents } = useDocumentStore();
+    const [segmentFilter, setSegmentFilter] = useState<'all' | 'high_value' | 'repeat' | 'dormant'>('all');
 
     // Filter and sort customers
     const filteredCustomers = useMemo(() => {
-        let result = customers.filter((customer) => {
+        let result = displayCustomers.filter((customer) => {
             const query = searchQuery.toLowerCase();
-            return (
+            const matchesSearch = (
                 customer.name.toLowerCase().includes(query) ||
-                customer.email.toLowerCase().includes(query) ||
-                customer.phone.includes(query) ||
-                customer.address.toLowerCase().includes(query)
+                (customer.customerNumber && customer.customerNumber.toLowerCase().includes(query)) ||
+                (customer.email && customer.email.toLowerCase().includes(query)) ||
+                (customer.phone && customer.phone.includes(query)) ||
+                (customer.address && customer.address.toLowerCase().includes(query))
             );
+            if (!matchesSearch) return false;
+
+            if (segmentFilter !== 'all') {
+                const metrics = calculateCustomerSegmentMetrics(customer, documents, customers);
+                if (segmentFilter === 'high_value' && !metrics.isHighValue) return false;
+                if (segmentFilter === 'repeat' && !metrics.isRepeat) return false;
+                if (segmentFilter === 'dormant' && !metrics.isDormant) return false;
+            }
+
+            return true;
         });
 
         result.sort((a, b) => {
-            const aVal = a[sortField];
-            const bVal = b[sortField];
+            let aVal: any = a[sortField];
+            let bVal: any = b[sortField];
+            if (sortField === 'createdAt') {
+                aVal = new Date(a.createdAt || 0).getTime();
+                bVal = new Date(b.createdAt || 0).getTime();
+            }
+            if (aVal === undefined) aVal = '';
+            if (bVal === undefined) bVal = '';
             const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
             return sortOrder === 'asc' ? comparison : -comparison;
         });
 
         return result;
-    }, [customers, searchQuery, sortField, sortOrder]);
+    }, [displayCustomers, customers, documents, searchQuery, segmentFilter, sortField, sortOrder]);
 
     // Handlers
     const handleSort = (field: SortField) => {
@@ -140,14 +244,26 @@ export default function CustomersPage() {
 
     const openCreateModal = () => {
         setEditingCustomer(null);
-        setFormData({ name: '', companyName: '', email: '', phone: '', address: '', notes: '' });
+        setIsCustomIdEdited(false);
+        const initialId = getNextDocumentNumber('customer', { details: { customerName: '' } });
+        setFormData({
+            customerNumber: initialId,
+            name: '',
+            companyName: '',
+            email: '',
+            phone: '',
+            address: '',
+            notes: ''
+        });
         setFormErrors({});
         setIsModalOpen(true);
     };
 
     const openEditModal = (customer: Customer) => {
         setEditingCustomer(customer);
+        setIsCustomIdEdited(true);
         setFormData({
+            customerNumber: customer.customerNumber || getNextDocumentNumber('customer', { details: { customerName: customer.name } }),
             name: customer.name,
             companyName: customer.companyName || '',
             email: customer.email,
@@ -271,6 +387,30 @@ export default function CustomersPage() {
         toast.success(`Exported ${customers.length} customers to CSV`);
     };
 
+    const isAllSelected = filteredCustomers.length > 0 && selectedCustomerIds.length === filteredCustomers.length;
+
+    const toggleSelectAll = () => {
+        if (isAllSelected) {
+            setSelectedCustomerIds([]);
+        } else {
+            setSelectedCustomerIds(filteredCustomers.map(c => c.id));
+        }
+    };
+
+    const toggleSelectRow = (id: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        setSelectedCustomerIds(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    };
+
+    const handleBulkDelete = () => {
+        selectedCustomerIds.forEach(id => deleteCustomer(id));
+        toast.success(`Deleted ${selectedCustomerIds.length} customer(s)`);
+        setSelectedCustomerIds([]);
+        setIsBulkDeleteModalOpen(false);
+    };
+
     return (
         <div className="w-full">
             {/* Hidden file input */}
@@ -285,36 +425,138 @@ export default function CustomersPage() {
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Customers</h1>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Customers</h1>
+                        <PageHelpModal
+                            title="Customer Directory Overview"
+                            description="Centralized directory of all client profiles, contact information, billing addresses, and historical transaction documents."
+                            terms={[
+                                { term: 'Customer Profile', definition: 'Stores client contact info, company name, email, phone number, and delivery address.' },
+                                { term: 'CSV Import / Export', definition: 'Bulk import client spreadsheets or export customer lists to CSV files.' }
+                            ]}
+                            tips={[
+                                "Click any customer row to view their full document history, issue new invoices, or update contact info."
+                            ]}
+                        />
+                    </div>
                     <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                         Manage your client database
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" leftIcon={<Download className="w-4 h-4" />} onClick={handleExportCSV}>
+                    <Button variant="ghost" leftIcon={<Download className="w-4 h-4" />} iconOnlyMobile onClick={handleExportCSV}>
                         Export
                     </Button>
-                    <Button variant="outline" leftIcon={<Upload className="w-4 h-4" />} onClick={() => fileInputRef.current?.click()}>
+                    <Button variant="outline" leftIcon={<Upload className="w-4 h-4" />} iconOnlyMobile onClick={() => fileInputRef.current?.click()}>
                         Import CSV
                     </Button>
-                    <Button leftIcon={<Plus className="w-4 h-4" />} onClick={openCreateModal}>
+                    <Button leftIcon={<Plus className="w-4 h-4" />} iconOnlyMobile onClick={openCreateModal}>
                         Add Customer
                     </Button>
                 </div>
             </div>
 
-            {/* Search and Stats */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            {/* Search, Filter Segment Tabs and Stats */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <SearchInput
                     value={searchQuery}
                     onChange={setSearchQuery}
                     placeholder="Search customers by name, email, phone..."
                     className="flex-1 max-w-md"
                 />
-                <div className="flex items-center gap-2">
-                    <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300">
-                        {customers.length} {customers.length === 1 ? 'customer' : 'customers'}
-                    </span>
+                
+                {/* Segment Filter Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
+                    <button
+                        onClick={() => setSegmentFilter('all')}
+                        className={`px-3 py-1.5 rounded-xl font-medium transition-colors cursor-pointer ${
+                            segmentFilter === 'all'
+                                ? 'bg-blue-600 text-white shadow-sm'
+                                : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700'
+                        }`}
+                    >
+                        All ({customers.length})
+                    </button>
+                    <button
+                        onClick={() => setSegmentFilter('high_value')}
+                        className={`px-3 py-1.5 rounded-xl font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                            segmentFilter === 'high_value'
+                                ? 'bg-amber-600 text-white shadow-sm'
+                                : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700'
+                        }`}
+                    >
+                        <Award className="w-3.5 h-3.5" />
+                        <span>High Value</span>
+                    </button>
+                    <button
+                        onClick={() => setSegmentFilter('repeat')}
+                        className={`px-3 py-1.5 rounded-xl font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                            segmentFilter === 'repeat'
+                                ? 'bg-blue-600 text-white shadow-sm'
+                                : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700'
+                        }`}
+                    >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Repeat</span>
+                    </button>
+                    <button
+                        onClick={() => setSegmentFilter('dormant')}
+                        className={`px-3 py-1.5 rounded-xl font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                            segmentFilter === 'dormant'
+                                ? 'bg-rose-600 text-white shadow-sm'
+                                : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700'
+                        }`}
+                    >
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Dormant</span>
+                    </button>
+
+                    {/* Select Mode Toolbar Controls */}
+                    <div className="ml-auto flex items-center gap-2">
+                        {!isSelectMode ? (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                leftIcon={<CheckSquare className="w-4 h-4 text-neutral-500" />}
+                                onClick={() => setIsSelectMode(true)}
+                            >
+                                Select
+                            </Button>
+                        ) : (
+                            <>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    leftIcon={isAllSelected ? <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" /> : <Square className="w-4 h-4" />}
+                                    onClick={toggleSelectAll}
+                                >
+                                    {isAllSelected ? `Deselect All (${filteredCustomers.length})` : 'Select All'}
+                                </Button>
+
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setIsSelectMode(false);
+                                        setSelectedCustomerIds([]);
+                                    }}
+                                >
+                                    Done
+                                </Button>
+
+                                {selectedCustomerIds.length > 0 && (
+                                    <Button
+                                        variant="danger"
+                                        size="sm"
+                                        leftIcon={<Trash2 className="w-4 h-4" />}
+                                        onClick={() => setIsBulkDeleteModalOpen(true)}
+                                    >
+                                        Delete Selected ({selectedCustomerIds.length})
+                                    </Button>
+                                )}
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -349,7 +591,17 @@ export default function CustomersPage() {
                     <div className="overflow-x-auto min-h-[300px]">
                         <table className="w-full min-w-[700px] md:min-w-full">
                             <thead>
-                                <tr className="border-b border-neutral-100 dark:border-neutral-700">
+                                <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                                    {isSelectMode && (
+                                        <th className="px-4 py-4 w-10 text-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={isAllSelected}
+                                                onChange={toggleSelectAll}
+                                                className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                            />
+                                        </th>
+                                    )}
                                     <th className="text-left px-6 py-4">
                                         <button
                                             onClick={() => handleSort('name')}
@@ -369,9 +621,13 @@ export default function CustomersPage() {
                                         </button>
                                     </th>
                                     <th className="text-left px-6 py-4 hidden lg:table-cell">
-                                        <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                        <button
+                                            onClick={() => handleSort('address')}
+                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        >
                                             Address
-                                        </span>
+                                            <ArrowUpDown className="w-3 h-3" />
+                                        </button>
                                     </th>
                                     <th className="text-left px-6 py-4 hidden md:table-cell">
                                         <button
@@ -393,17 +649,40 @@ export default function CustomersPage() {
                                 {filteredCustomers.map((customer, index) => {
                                     const isNearBottom = index >= Math.max(0, filteredCustomers.length - 2) || filteredCustomers.length <= 2;
                                     const popupPosClass = isNearBottom ? 'bottom-full mb-1' : 'top-full mt-1';
+                                    const isRowSelected = selectedCustomerIds.includes(customer.id);
                                     return (
                                     <tr
                                         key={customer.id}
-                                        className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${openMenuId === customer.id ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}
+                                        className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${isRowSelected ? 'bg-blue-50/40 dark:bg-blue-900/20' : ''} ${openMenuId === customer.id ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}
                                     >
+                                        {isSelectMode && (
+                                            <td className="px-4 py-4 text-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isRowSelected}
+                                                    onChange={(e) => toggleSelectRow(customer.id, e as any)}
+                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                />
+                                            </td>
+                                        )}
                                         <td className="px-6 py-4">
                                             <Link href={`/customers/${customer.id}`} className="flex items-center gap-3 group">
                                                 <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(customer.name)} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0`}>
                                                     {customer.name.charAt(0).toUpperCase()}
                                                 </div>
-                                                <span className="font-medium text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{customer.name}</span>
+                                                <div className="flex flex-col">
+                                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                                        <span className="font-medium text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{customer.name}</span>
+                                                        {calculateCustomerSegmentMetrics(customer, documents, customers).badges.map((b) => (
+                                                            <span key={b.label} className={`px-1.5 py-0.5 text-[10px] font-bold rounded-md ${b.bgClass} ${b.textClass}`}>
+                                                                {b.icon} {b.label}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                    <code className="text-[11px] font-mono text-neutral-400 dark:text-neutral-500 font-medium">
+                                                        {customer.customerNumber || getNextDocumentNumber('customer', { details: { customerName: customer.name } })}
+                                                    </code>
+                                                </div>
                                             </Link>
                                         </td>
                                         <td className="px-6 py-4">
@@ -482,14 +761,53 @@ export default function CustomersPage() {
                 size="lg"
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Duplicate Customer Warning Banner */}
+                    {duplicateWarning && (
+                        <div className="md:col-span-2 bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 p-3.5 rounded-xl flex items-start gap-3 text-xs text-amber-800 dark:text-amber-300">
+                            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <span className="font-semibold block text-amber-900 dark:text-amber-200 mb-0.5">Potential Duplicate Customer</span>
+                                <span className="leading-relaxed">{duplicateWarning}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Auto-Assigned Customer ID Banner */}
+                    <div className="md:col-span-2 bg-gradient-to-r from-blue-50/70 to-indigo-50/70 dark:from-blue-900/20 dark:to-indigo-900/20 p-3.5 rounded-xl border border-blue-100 dark:border-blue-800/40 flex items-center justify-between">
+                        <div>
+                            <span className="text-[11px] font-semibold text-blue-600/80 dark:text-blue-400/80 uppercase tracking-wider block">
+                                {editingCustomer ? 'Assigned Customer ID' : 'Auto-Generated Customer ID'}
+                            </span>
+                            <span className="text-lg font-mono font-bold text-blue-700 dark:text-blue-300 tracking-tight mt-0.5 block">
+                                {predictedCustomerId}
+                            </span>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-[11px] text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800 px-2.5 py-1 rounded-lg border border-neutral-200/80 dark:border-neutral-700 font-medium shadow-2xs">
+                                🔒 Permanent & Locked
+                            </span>
+                        </div>
+                    </div>
+
                     <Input
                         label="Full Name"
-                        placeholder="e.g. John Smith"
+                        placeholder="e.g. Ayo Omotosho"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) => handleNameChange(e.target.value)}
                         error={formErrors.name}
                         leftIcon={<User className="w-4 h-4" />}
                     />
+                    <div className="pointer-events-none select-none opacity-80">
+                        <Input
+                            label="Customer ID (Locked)"
+                            value={editingCustomer ? (editingCustomer.customerNumber || '') : predictedCustomerId}
+                            readOnly
+                            disabled
+                            tabIndex={-1}
+                            className="bg-neutral-100 dark:bg-neutral-800 text-neutral-500 font-mono cursor-not-allowed border-neutral-200 dark:border-neutral-700"
+                            leftIcon={<Lock className="w-4 h-4 text-neutral-400" />}
+                        />
+                    </div>
                     <Input
                         label="Email Address"
                         type="email"
@@ -659,6 +977,22 @@ export default function CustomersPage() {
                             Import {importData.length} Customer{importData.length !== 1 ? 's' : ''}
                         </Button>
                     )}
+                </ModalFooter>
+            </Modal>
+
+            {/* Bulk Delete Modal */}
+            <Modal
+                isOpen={isBulkDeleteModalOpen}
+                onClose={() => setIsBulkDeleteModalOpen(false)}
+                title="Delete Selected Customers"
+                size="sm"
+            >
+                <p className="text-neutral-600">
+                    Are you sure you want to delete <strong>{selectedCustomerIds.length}</strong> selected customer(s)? This action cannot be undone.
+                </p>
+                <ModalFooter>
+                    <Button variant="ghost" onClick={() => setIsBulkDeleteModalOpen(false)}>Cancel</Button>
+                    <Button variant="danger" onClick={handleBulkDelete}>Delete All Selected ({selectedCustomerIds.length})</Button>
                 </ModalFooter>
             </Modal>
         </div>

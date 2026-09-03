@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useCustomerStore, useDocumentStore, useSettingsStore, useTemplateStore } from '@/lib/store';
 import { formatDate, formatPhone, formatCurrency, getEffectiveGrandTotal } from '@/lib/utils';
 import { Button, Card, Modal, ModalFooter, Input, Textarea, EmptyState } from '@/components/ui';
-import { DocumentStatus } from '@/lib/types';
+import { DocumentStatus, CustomerFormData } from '@/lib/types';
 import {
     ArrowLeft,
     User,
@@ -23,8 +23,12 @@ import {
     MoreVertical,
     Building,
     ChevronDown,
-    Plus
+    Plus,
+    Hash,
+    Lock,
+    Download
 } from 'lucide-react';
+import { generateCustomerStatementPdf } from '@/lib/utils/statementPdf';
 
 export default function CustomerDetailComponent() {
     const params = useParams();
@@ -33,7 +37,7 @@ export default function CustomerDetailComponent() {
 
     const { customers, updateCustomer, deleteCustomer } = useCustomerStore();
     const { documents } = useDocumentStore();
-    const { company } = useSettingsStore();
+    const { company, getNextDocumentNumber } = useSettingsStore();
     const { getTemplateById } = useTemplateStore();
     const currency = company.currency;
 
@@ -43,7 +47,8 @@ export default function CustomerDetailComponent() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDocMenuOpen, setIsDocMenuOpen] = useState(false);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<CustomerFormData>({
+        customerNumber: customer?.customerNumber || '',
         name: customer?.name || '',
         companyName: customer?.companyName || '',
         email: customer?.email || '',
@@ -61,7 +66,7 @@ export default function CustomerDetailComponent() {
     // Calculate stats
     const stats = useMemo(() => {
         const totalSpent = customerDocuments
-            .filter(d => d.status === 'paid')
+            .filter(d => d.status === 'paid' || d.type === 'receipt')
             .reduce((sum, d) => sum + getEffectiveGrandTotal(d, getTemplateById(d.templateId)), 0);
         const pendingAmount = customerDocuments
             .filter(d => d.status === 'sent' || d.status === 'overdue')
@@ -81,6 +86,7 @@ export default function CustomerDetailComponent() {
 
     const statusConfig = {
         'paid': { label: 'Paid', bgClass: 'bg-emerald-50', textClass: 'text-emerald-600', dotClass: 'bg-emerald-500' },
+        'partially_paid': { label: 'Partial', bgClass: 'bg-amber-50', textClass: 'text-amber-600', dotClass: 'bg-amber-500' },
         'draft': { label: 'Draft', bgClass: 'bg-neutral-100', textClass: 'text-neutral-600', dotClass: 'bg-neutral-400' },
         'sent': { label: 'Sent', bgClass: 'bg-blue-50', textClass: 'text-blue-600', dotClass: 'bg-blue-500' },
         'overdue': { label: 'Overdue', bgClass: 'bg-red-50', textClass: 'text-red-600', dotClass: 'bg-red-500' },
@@ -126,6 +132,7 @@ export default function CustomerDetailComponent() {
 
     const openEditModal = () => {
         setFormData({
+            customerNumber: customer.customerNumber || '',
             name: customer.name,
             companyName: customer.companyName || '',
             email: customer.email,
@@ -155,13 +162,25 @@ export default function CustomerDetailComponent() {
                         {customer.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">{customer.name}</h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">{customer.name}</h1>
+                            <code className="text-sm font-mono text-neutral-600 bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-300 px-2 py-0.5 rounded font-medium">
+                                {customer.customerNumber || getNextDocumentNumber('customer', { details: { customerName: customer.name } })}
+                            </code>
+                        </div>
                         <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                             Customer since {formatDate(customer.createdAt)}
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        leftIcon={<Download className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                        onClick={() => generateCustomerStatementPdf(customer, customerDocuments, company)}
+                    >
+                        Export Statement (PDF)
+                    </Button>
                     <Button variant="outline" leftIcon={<Edit2 className="w-4 h-4" />} onClick={openEditModal}>Edit</Button>
                     <Button variant="danger" leftIcon={<Trash2 className="w-4 h-4" />} onClick={() => setIsDeleteModalOpen(true)}>Delete</Button>
                 </div>
@@ -377,6 +396,17 @@ export default function CustomerDetailComponent() {
                         error={formErrors.name}
                         leftIcon={<User className="w-4 h-4" />}
                     />
+                    <div className="pointer-events-none select-none opacity-80">
+                        <Input
+                            label="Customer ID (Locked)"
+                            value={customer.customerNumber || ''}
+                            readOnly
+                            disabled
+                            tabIndex={-1}
+                            className="bg-neutral-100 dark:bg-neutral-800 text-neutral-500 font-mono cursor-not-allowed border-neutral-200 dark:border-neutral-700"
+                            leftIcon={<Lock className="w-4 h-4 text-neutral-400" />}
+                        />
+                    </div>
                     <Input
                         label="Email Address"
                         type="email"

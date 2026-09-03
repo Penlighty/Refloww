@@ -29,7 +29,8 @@ import {
     MapPin,
     Image,
     Plus,
-    Share2
+    Share2,
+    RotateCcw
 } from 'lucide-react';
 
 interface DocumentDetailProps {
@@ -42,18 +43,21 @@ const statusConfig = {
     'draft': { label: 'Draft', bgClass: 'bg-neutral-100', textClass: 'text-neutral-600', dotClass: 'bg-neutral-400' },
     'sent': { label: 'Sent', bgClass: 'bg-blue-50', textClass: 'text-blue-600', dotClass: 'bg-blue-500' },
     'paid': { label: 'Paid', bgClass: 'bg-emerald-50', textClass: 'text-emerald-600', dotClass: 'bg-emerald-500' },
+    'partially_paid': { label: 'Partial', bgClass: 'bg-amber-50', textClass: 'text-amber-600', dotClass: 'bg-amber-500' },
     'overdue': { label: 'Overdue', bgClass: 'bg-red-50', textClass: 'text-red-600', dotClass: 'bg-red-500' },
     'cancelled': { label: 'Cancelled', bgClass: 'bg-neutral-100', textClass: 'text-neutral-500', dotClass: 'bg-neutral-400' },
 };
 
 export default function DocumentDetail({ type, documentId, backUrl }: DocumentDetailProps) {
     const router = useRouter();
-    const { getDocumentById, updateDocument, deleteDocument, duplicateDocument, convertDocument } = useDocumentStore();
+    const { getDocumentById, updateDocument, deleteDocument, duplicateDocument, convertDocument, refundDocument } = useDocumentStore();
     const { getTemplateById } = useTemplateStore();
     const { getCustomerById } = useCustomerStore();
     const { company } = useSettingsStore();
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
+    const [refundReason, setRefundReason] = useState('');
     const [mounted, setMounted] = useState(false);
 
     // Loading states for actions
@@ -669,6 +673,11 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
                                     Mark as Sent
                                 </Button>
                             )}
+                            {doc.status !== 'cancelled' && (
+                                <Button fullWidth variant="outline" leftIcon={<RotateCcw className="w-4 h-4 text-amber-500" />} onClick={() => setIsRefundModalOpen(true)}>
+                                    Process Return / Refund
+                                </Button>
+                            )}
                             <Button fullWidth variant="outline" leftIcon={<Copy className="w-4 h-4" />} onClick={handleDuplicate}>
                                 Duplicate
                             </Button>
@@ -677,6 +686,47 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
                             </Button>
                         </div>
                     </div>
+
+                    {/* Refund Confirmation Modal */}
+                    <Modal
+                        isOpen={isRefundModalOpen}
+                        onClose={() => setIsRefundModalOpen(false)}
+                        title={`Process Return / Refund (${doc.documentNumber})`}
+                        size="md"
+                    >
+                        <div className="space-y-4 py-2">
+                            <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed">
+                                Processing a return will mark this {doc.type} as <strong>Cancelled/Refunded</strong> and automatically restore inventory stock for all returned line items.
+                            </p>
+                            <div>
+                                <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
+                                    Reason for Return / Notes (Optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={refundReason}
+                                    onChange={(e) => setRefundReason(e.target.value)}
+                                    placeholder="e.g. Customer returned damaged packaging, size exchange..."
+                                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs focus:outline-none focus:border-amber-500"
+                                />
+                            </div>
+                        </div>
+                        <ModalFooter>
+                            <Button variant="outline" onClick={() => setIsRefundModalOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="primary"
+                                onClick={() => {
+                                    refundDocument(doc.id, refundReason);
+                                    toast.success(`${doc.documentNumber} refunded and inventory restored`);
+                                    setIsRefundModalOpen(false);
+                                }}
+                            >
+                                Confirm Refund & Restore Stock
+                            </Button>
+                        </ModalFooter>
+                    </Modal>
 
                     {/* Details Card */}
                     <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">

@@ -6,6 +6,8 @@
 
 export type DocumentType = 'invoice' | 'receipt' | 'delivery-note';
 
+export type UserRole = 'admin' | 'inventory_manager' | 'cashier';
+
 export type FieldType =
     | 'text'
     | 'date'
@@ -63,6 +65,7 @@ export interface MappedField {
 
 export interface Template {
     id: string;
+    organizationId?: string;
     name: string;
     type: DocumentType;
     imageUrl: string;          // Base64 or blob URL
@@ -89,6 +92,8 @@ export interface Template {
 
 export interface Customer {
     id: string;
+    organizationId?: string;
+    customerNumber?: string;
     name: string;
     companyName?: string;
     email: string;
@@ -105,16 +110,93 @@ export interface Customer {
 
 export type StorefrontLabel = 'in-stock' | 'flash-sale' | 'low-stock' | 'new' | 'out-of-stock' | 'best-seller';
 
+export type InventoryStrategy = 'FIFO' | 'FEFO';
+
+export type BatchStatus = 'active' | 'depleted' | 'expired' | 'quarantined';
+
+export interface StockBatch {
+    id: string;
+    organizationId?: string;
+    productId: string;
+    batchNumber: string;
+    receivedDate: string;        // ISO date (YYYY-MM-DD)
+    expiryDate?: string;         // ISO date (YYYY-MM-DD)
+    initialQuantity: number;
+    remainingQuantity: number;
+    costPrice?: number;          // Purchase cost price per unit
+    supplier?: string;
+    notes?: string;
+    status: BatchStatus;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export type MovementType =
+    | 'purchase'        // Received new batch / stock
+    | 'sale'            // Fulfilled via invoice/receipt
+    | 'adjustment'      // Manual count adjustment
+    | 'wastage_expiry'  // Written off due to damage/expiry
+    | 'return'          // Customer or supplier return
+    | 'transfer';       // Internal transfer
+
+export interface StockMovement {
+    id: string;
+    organizationId?: string;
+    productId: string;
+    batchId?: string;
+    batchNumber?: string;
+    type: MovementType;
+    quantity: number;           // Positive for addition, negative for deduction
+    previousQuantity: number;
+    newQuantity: number;
+    date: string;               // ISO date string
+    reason: string;
+    referenceDocNumber?: string;
+    costPrice?: number;
+    performedBy?: string;
+}
+
+export type AlternativeMatchType = 'exact_equivalent' | 'similar_substitute';
+
+export interface ProductAlternative {
+    id: string;
+    organizationId?: string;
+    productId: string;
+    alternativeProductId: string;
+    matchType: AlternativeMatchType;
+    notes?: string;
+}
+
+export interface ReorderMetrics {
+    dailySalesVelocity: number;   // Average units sold per day
+    leadTimeDays: number;         // Supplier lead time in days
+    safetyStockDays: number;      // Safety buffer days
+    calculatedReorderPoint: number; // ROP threshold
+    suggestedReorderQuantity: number; // Recommended order size
+    estimatedDaysUntilStockout: number; // Days remaining at current velocity
+    isReorderNeeded: boolean;
+}
+
+export type ProductType = 'physical' | 'service' | 'digital';
+
 export interface Product {
     id: string;
+    organizationId?: string;
     name: string;
     sku: string;
+    productType?: ProductType;   // 'physical' | 'service' | 'digital' (default: 'physical')
     barcode?: string;
     description: string;
     unitPrice: number;
+    costPrice?: number;
     category?: string;
     inStock?: boolean;
     stockQuantity?: number;       // Optional — leave blank for services
+    minReorderPoint?: number;     // Fixed reorder point fallback
+    leadTimeDays?: number;        // Supplier lead time in days
+    safetyStockDays?: number;     // Buffer days
+    inventoryStrategy?: InventoryStrategy; // 'FIFO' or 'FEFO'
+    expiryWarningDays?: number;   // Days before expiry to trigger alert (default 30)
     imageUrl?: string;
     images?: string[];
     discountedPrice?: number;
@@ -129,6 +211,7 @@ export interface Product {
 // -------------------- Storefront Types --------------------
 
 export interface StorefrontSettings {
+    organizationId?: string;
     storeName: string;
     storeSlug: string;
     description: string;
@@ -175,6 +258,7 @@ export interface StorefrontCartItem {
 
 export interface StorefrontOrder {
     id: string;
+    organizationId?: string;
     orderNumber: string;
     customerName: string;
     customerEmail: string;
@@ -208,6 +292,7 @@ export interface StorefrontOrder {
 
 export interface Discount {
     id: string;
+    organizationId?: string;
     name: string;
     percentage: number;
     isActive: boolean;
@@ -223,7 +308,7 @@ export interface DiscountFormData {
 
 // -------------------- Document Types --------------------
 
-export type DocumentStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+export type DocumentStatus = 'draft' | 'sent' | 'paid' | 'partially_paid' | 'overdue' | 'cancelled';
 
 export interface LineItem {
     id: string;
@@ -238,6 +323,7 @@ export interface LineItem {
 
 export interface Document {
     id: string;
+    organizationId?: string;
     type: DocumentType;
     templateId: string;
     documentNumber: string;
@@ -250,6 +336,7 @@ export interface Document {
     discountPercent: number;
     discountAmount: number;
     discountName?: string;
+    discountId?: string;        // Back-reference to Discount entity for audit trail
     taxPercent: number;
     taxAmount: number;
     grandTotal: number;
@@ -260,6 +347,7 @@ export interface Document {
     customValues?: Record<string, string>;
     paidAt?: string;            // ISO date string
     sourceDocumentId?: string;  // ID of the document this was created from
+    storefrontOrderId?: string; // Back-reference to StorefrontOrder for bidirectional linkage
     createdAt: string;
     updatedAt: string;
 }
@@ -272,17 +360,23 @@ export interface DocumentFormData {
     lineItems: LineItem[];
     discountPercent: number;
     discountName?: string;
+    discountId?: string;
     taxPercent: number;
     amountPaid?: number;
     notes?: string;
     customValues?: Record<string, string>;
     sourceDocumentId?: string;
+    storefrontOrderId?: string;
+    organizationId?: string;
+    status?: DocumentStatus;
+    paidAt?: string;
 }
 
 // -------------------- Ledger Types --------------------
 
 export interface LedgerEntry {
     id: string;
+    organizationId?: string;
     documentId: string;
     documentType: DocumentType;
     documentNumber: string;
@@ -292,6 +386,48 @@ export interface LedgerEntry {
     amount: number;
     status: DocumentStatus;
     createdAt: string;
+}
+
+// -------------------- Transaction Types --------------------
+
+export type PaymentStatus = 'unpaid' | 'partially_paid' | 'paid' | 'refunded';
+export type FulfillmentStatus = 'unfulfilled' | 'partially_fulfilled' | 'fulfilled' | 'cancelled';
+export type TransactionSource = 'invoice' | 'receipt' | 'pos' | 'storefront';
+
+export interface Transaction {
+    id: string;
+    organizationId?: string;
+    transactionNumber: string; // e.g. TRX-1001
+    customerId: string;
+    customerName: string;
+    date: string; // ISO date string
+    source: TransactionSource;
+    
+    // Connected Document References
+    invoiceId?: string;
+    invoiceNumber?: string;
+    receiptIds?: string[];
+    receiptNumbers?: string[];
+    deliveryNoteIds?: string[];
+    deliveryNoteNumbers?: string[];
+    storefrontOrderId?: string;
+    
+    // Items & Financials
+    lineItems: LineItem[];
+    subtotal: number;
+    discountAmount: number;
+    taxAmount: number;
+    grandTotal: number;
+    amountPaid: number;
+    amountDue: number;
+    
+    // Statuses
+    paymentStatus: PaymentStatus;
+    fulfillmentStatus: FulfillmentStatus;
+    
+    notes?: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 // -------------------- UI Types --------------------
@@ -317,25 +453,36 @@ export interface FilterOption {
 
 // -------------------- Form Types --------------------
 
+
+
 export interface CustomerFormData {
+    customerNumber?: string;
     name: string;
     companyName?: string;
     email: string;
     phone: string;
     address: string;
     notes?: string;
+    organizationId?: string;
 }
 
 export interface ProductFormData {
     name: string;
     sku: string;
+    productType?: ProductType;
     barcode?: string;
     description: string;
     unitPrice: number;
+    costPrice?: number;
     category?: string;
     imageUrl?: string;
     images?: string[];
     stockQuantity?: number;
+    minReorderPoint?: number;
+    leadTimeDays?: number;
+    safetyStockDays?: number;
+    inventoryStrategy?: InventoryStrategy;
+    expiryWarningDays?: number;
     discountedPrice?: number;
     discountId?: string;
     storefrontLabel?: StorefrontLabel;

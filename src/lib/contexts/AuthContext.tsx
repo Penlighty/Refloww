@@ -121,15 +121,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logout = async () => {
         try {
             setError(null);
-            await signOut();
+            // Non-blocking sign out with 1.5s timeout fallback
+            await Promise.race([
+                signOut(),
+                new Promise((resolve) => setTimeout(resolve, 1500))
+            ]).catch((err) => console.warn('Firebase signOut non-fatal warning:', err));
+
+            setUser(null);
             setProfile(null);
+            
             // Clear encryption session marker
             if (typeof sessionStorage !== 'undefined') {
                 sessionStorage.removeItem('refloww_encryption_session');
             }
+
+            // Do NOT wipe persistent user stores (organizations, products, documents, etc.)
+            // User created organizations and business data remain safely preserved across login sessions.
+
+            // Reload browser to a clean login state
+            if (typeof window !== 'undefined') {
+                window.location.href = '/login';
+            }
         } catch (err: any) {
-            setError(getErrorMessage(err.code));
-            throw err;
+            console.error('Logout error:', err);
+            if (typeof window !== 'undefined') {
+                window.location.href = '/login';
+            }
         }
     };
 

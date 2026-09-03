@@ -12,5 +12,6 @@ export { SearchInput } from './SearchInput';
 export { default as DateRangePicker } from './DateRangePicker';
 export { Skeleton, SkeletonCard, SkeletonTable, SkeletonStats, SkeletonChart } from './Skeleton';
 export { HelpTooltip, LabelWithHelp } from './HelpTooltip';
+export { PageHelpModal } from './PageHelpModal';
 export { ImageUploader } from './ImageUploader';
 

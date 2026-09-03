@@ -298,10 +298,10 @@ export default function NotificationsPage() {
                                         onChange={e => setFormData({ ...formData, type: e.target.value as any })}
                                         className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white transition-all"
                                     >
-                                        <option value="announcement">📢 Announcement</option>
-                                        <option value="promotion">🎁 Promotion</option>
-                                        <option value="greeting">👋 Greeting</option>
-                                        <option value="warning">⚠️ Warning</option>
+                                        <option value="announcement">Announcement</option>
+                                        <option value="promotion">Promotion</option>
+                                        <option value="greeting">Greeting</option>
+                                        <option value="warning">Warning</option>
                                     </select>
                                 </div>
                             </div>

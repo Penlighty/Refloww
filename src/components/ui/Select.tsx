@@ -4,10 +4,12 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
 import { ChevronDown, Check, Search } from 'lucide-react';
 
-interface SelectOption {
+export interface SelectOption {
     value: string;
     label: string;
     description?: string;
+    icon?: React.ReactNode;
+    imageUrl?: string;
 }
 
 interface SelectProps {
@@ -18,6 +20,7 @@ interface SelectProps {
     label?: string;
     error?: string;
     searchable?: boolean;
+    searchPlaceholder?: string;
     searchMatcher?: (option: SelectOption, query: string) => boolean;
     disabled?: boolean;
     className?: string;
@@ -31,6 +34,7 @@ export function Select({
     label,
     error,
     searchable = false,
+    searchPlaceholder = 'Search here...',
     searchMatcher,
     disabled = false,
     className,
@@ -99,28 +103,22 @@ export function Select({
             return;
         }
 
-        // Arrow keys for navigation if we added that, but for now just Type-Ahead
         // Only capture single characters, not special keys
         if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-            // If searchable is on and open, don't hijack typing from the input
             if (searchable && isOpen) return;
 
-            e.preventDefault(); // Prevent default if necessary, though mostly for page scroll on Space
+            e.preventDefault();
 
-            // Append char
             typeSearchRef.current += e.key.toLowerCase();
 
-            // Clear previous timeout
             if (typeTimeoutRef.current) {
                 clearTimeout(typeTimeoutRef.current);
             }
 
-            // Set new timeout to clear buffer
             typeTimeoutRef.current = setTimeout(() => {
                 typeSearchRef.current = '';
-            }, 500); // 500ms delay to consider typing "finished"
+            }, 500);
 
-            // Find match
             const match = options.find(opt =>
                 opt.label.toLowerCase().startsWith(typeSearchRef.current)
             );
@@ -128,7 +126,6 @@ export function Select({
             if (match) {
                 onChange(match.value);
 
-                // Optional: Scroll into view if open
                 if (isOpen) {
                     const el = document.getElementById(`select-option-${match.value}`);
                     el?.scrollIntoView({ block: 'nearest' });
@@ -140,7 +137,7 @@ export function Select({
     return (
         <div className={clsx('flex flex-col gap-1.5', className, isOpen && 'relative z-50')} ref={containerRef}>
             {label && (
-                <label className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
                     {label}
                 </label>
             )}
@@ -151,31 +148,35 @@ export function Select({
                     onKeyDown={handleKeyDown}
                     disabled={disabled}
                     className={clsx(
-                        'w-full h-10 px-4 text-xs text-left rounded-xl border transition-all duration-200 flex items-center justify-between',
-                        'bg-white dark:bg-neutral-800/50',
-                        'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
-                        error
-                            ? 'border-red-300 dark:border-red-500/50 focus:border-red-500'
-                            : 'border-neutral-200 dark:border-neutral-700/80 focus:border-blue-500',
-                        disabled && 'opacity-50 cursor-not-allowed bg-neutral-50 dark:bg-neutral-800',
-                        !disabled && 'cursor-pointer'
+                        'dropdown-trigger',
+                        isOpen && 'dropdown-trigger-open',
+                        error && '!border-red-500 !ring-red-500/20',
+                        disabled && 'opacity-50 cursor-not-allowed'
                     )}
                 >
-                    <span className={selectedOption ? 'text-neutral-900 dark:text-white' : 'text-neutral-400'}>
-                        {selectedOption?.label || placeholder}
-                    </span>
+                    <div className="flex items-center gap-2.5 truncate">
+                        {selectedOption?.icon && (
+                            <span className="shrink-0 flex items-center justify-center">{selectedOption.icon}</span>
+                        )}
+                        {selectedOption?.imageUrl && (
+                            <img src={selectedOption.imageUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
+                        )}
+                        <span className={selectedOption ? 'text-neutral-900 dark:text-white font-medium' : 'text-neutral-400'}>
+                            {selectedOption?.label || placeholder}
+                        </span>
+                    </div>
                     <ChevronDown
                         className={clsx(
-                            'w-4 h-4 text-neutral-400 transition-transform duration-200',
-                            isOpen && 'rotate-180'
+                            'w-4 h-4 text-neutral-400 transition-transform duration-200 shrink-0 ml-2',
+                            isOpen && 'rotate-180 text-[#fc6d2d]'
                         )}
                     />
                 </button>
 
                 {isOpen && (
-                    <div className="absolute z-[100] w-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-2xl overflow-hidden">
+                    <div className="dropdown-menu-panel">
                         {searchable && (
-                            <div className="p-2 border-b border-neutral-100 dark:border-neutral-700">
+                            <div className="dropdown-search-container">
                                 <div className="relative">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                                     <input
@@ -183,44 +184,53 @@ export function Select({
                                         type="text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="Search..."
-                                        className="w-full h-9 pl-9 pr-3 text-xs rounded-lg border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                        placeholder={searchPlaceholder}
+                                        className="dropdown-search-input"
                                     />
                                 </div>
                             </div>
                         )}
-                        <div className="max-h-60 overflow-y-auto py-1">
+                        <div className="dropdown-options-list max-h-60 overflow-y-auto py-1">
                             {filteredOptions.length === 0 ? (
-                                <div className="px-4 py-3 text-xs text-neutral-500 text-center">
+                                <div className="px-4 py-3.5 text-xs text-neutral-400 dark:text-neutral-500 text-center">
                                     No options found
                                 </div>
                             ) : (
-                                filteredOptions.map((option) => (
-                                    <button
-                                        key={option.value}
-                                        id={`select-option-${option.value}`}
-                                        type="button"
-                                        onClick={() => handleSelect(option.value)}
-                                        className={clsx(
-                                            'w-full px-4 py-2.5 text-left text-xs flex items-center justify-between transition-colors',
-                                            option.value === value
-                                                ? 'bg-[#A4F5A6]/30 dark:bg-[#A4F5A6]/20 text-neutral-900 dark:text-neutral-100 font-medium'
-                                                : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/50'
-                                        )}
-                                    >
-                                        <div>
-                                            <div className="font-medium">{option.label}</div>
-                                            {option.description && (
-                                                <div className="text-xs text-neutral-500 mt-0.5">
-                                                    {option.description}
-                                                </div>
+                                filteredOptions.map((option) => {
+                                    const isSelected = option.value === value;
+                                    return (
+                                        <button
+                                            key={option.value}
+                                            id={`select-option-${option.value}`}
+                                            type="button"
+                                            onClick={() => handleSelect(option.value)}
+                                            className={clsx(
+                                                'dropdown-option-item',
+                                                isSelected && 'dropdown-option-item-selected'
                                             )}
-                                        </div>
-                                        {option.value === value && (
-                                            <Check className="w-4 h-4 text-neutral-900 dark:text-neutral-100" />
-                                        )}
-                                    </button>
-                                ))
+                                        >
+                                            <div className="flex items-center gap-3 truncate">
+                                                {option.icon && (
+                                                    <span className="shrink-0 flex items-center justify-center text-base">{option.icon}</span>
+                                                )}
+                                                {option.imageUrl && (
+                                                    <img src={option.imageUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
+                                                )}
+                                                <div className="truncate">
+                                                    <div className="font-medium text-xs">{option.label}</div>
+                                                    {option.description && (
+                                                        <div className="text-[11px] text-neutral-400 mt-0.5 font-normal">
+                                                            {option.description}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {isSelected && (
+                                                <Check className="w-4 h-4 text-[#fc6d2d] shrink-0 ml-2" />
+                                            )}
+                                        </button>
+                                    );
+                                })
                             )}
                         </div>
                     </div>

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import { Template, MappedField, DocumentType } from '@/lib/types';
+import { getActiveOrgId, filterByActiveOrg, belongsToActiveOrg } from '@/lib/utils/orgIsolation';
 
 interface TemplateState {
     templates: Template[];
@@ -28,6 +29,7 @@ interface TemplateState {
     deleteTemplate: (id: string) => void;
     getTemplateById: (id: string) => Template | undefined;
     getTemplatesByType: (type: DocumentType) => Template[];
+    getFilteredTemplates: () => Template[];
 
     // Field mapping
     addField: (templateId: string, field: Omit<MappedField, 'id'>) => void;
@@ -47,8 +49,10 @@ export const useTemplateStore = create<TemplateState>()(
 
             addTemplate: (data) => {
                 const now = new Date().toISOString();
+                const activeOrgId = getActiveOrgId();
                 const newTemplate: Template = {
                     id: uuidv4(),
+                    organizationId: activeOrgId,
                     name: data.name,
                     type: data.type,
                     imageUrl: data.imageUrl,
@@ -79,21 +83,26 @@ export const useTemplateStore = create<TemplateState>()(
             },
 
             importTemplate: (template) => {
-                // Check if template with same ID already exists
-                const existing = get().templates.find((t) => t.id === template.id);
+                const activeOrgId = getActiveOrgId();
+                const templateWithOrg = {
+                    ...template,
+                    organizationId: activeOrgId
+                };
+                // Check if template with same ID already exists in the active organization
+                const existing = get().templates.find((t) => t.id === templateWithOrg.id && belongsToActiveOrg(t.organizationId));
                 if (existing) {
                     // Update existing template instead
                     set((state) => ({
                         templates: state.templates.map((t) =>
-                            t.id === template.id
-                                ? { ...template, updatedAt: new Date().toISOString() }
+                            t.id === templateWithOrg.id && belongsToActiveOrg(t.organizationId)
+                                ? { ...templateWithOrg, updatedAt: new Date().toISOString() }
                                 : t
                         ),
                     }));
                 } else {
                     // Add new template
                     set((state) => ({
-                        templates: [...state.templates, template],
+                        templates: [...state.templates, templateWithOrg],
                     }));
                 }
             },
@@ -101,7 +110,7 @@ export const useTemplateStore = create<TemplateState>()(
             updateTemplate: (id, data) => {
                 set((state) => ({
                     templates: state.templates.map((template) =>
-                        template.id === id
+                        template.id === id && belongsToActiveOrg(template.organizationId)
                             ? {
                                 ...template,
                                 ...data,
@@ -114,16 +123,23 @@ export const useTemplateStore = create<TemplateState>()(
 
             deleteTemplate: (id) => {
                 set((state) => ({
-                    templates: state.templates.filter((template) => template.id !== id),
+                    templates: state.templates.filter((template) => !(template.id === id && belongsToActiveOrg(template.organizationId))),
                 }));
             },
 
             getTemplateById: (id) => {
-                return get().templates.find((template) => template.id === id);
+                const template = get().templates.find((t) => t.id === id);
+                if (!template || !belongsToActiveOrg(template.organizationId)) return undefined;
+                return template;
+            },
+
+            getFilteredTemplates: () => {
+                return filterByActiveOrg<Template>(get().templates);
             },
 
             getTemplatesByType: (type) => {
-                return get().templates.filter((template) => template.type === type);
+                const activeTemplates = get().getFilteredTemplates();
+                return activeTemplates.filter((template) => template.type === type);
             },
 
             addField: (templateId, fieldData) => {
@@ -133,7 +149,7 @@ export const useTemplateStore = create<TemplateState>()(
                 };
                 set((state) => ({
                     templates: state.templates.map((template) =>
-                        template.id === templateId
+                        template.id === templateId && belongsToActiveOrg(template.organizationId)
                             ? {
                                 ...template,
                                 fields: [...template.fields, newField],
@@ -147,7 +163,7 @@ export const useTemplateStore = create<TemplateState>()(
             updateField: (templateId, fieldId, data) => {
                 set((state) => ({
                     templates: state.templates.map((template) =>
-                        template.id === templateId
+                        template.id === templateId && belongsToActiveOrg(template.organizationId)
                             ? {
                                 ...template,
                                 fields: template.fields.map((field) =>
@@ -163,7 +179,7 @@ export const useTemplateStore = create<TemplateState>()(
             deleteField: (templateId, fieldId) => {
                 set((state) => ({
                     templates: state.templates.map((template) =>
-                        template.id === templateId
+                        template.id === templateId && belongsToActiveOrg(template.organizationId)
                             ? {
                                 ...template,
                                 fields: template.fields.filter((field) => field.id !== fieldId),
@@ -176,15 +192,21 @@ export const useTemplateStore = create<TemplateState>()(
 
             setDefaultTemplate: (id, type) => {
                 set((state) => ({
-                    templates: state.templates.map((template) => ({
-                        ...template,
-                        isDefault: template.type === type ? template.id === id : template.isDefault,
-                        updatedAt: template.id === id || (template.type === type && template.isDefault)
-                            ? new Date().toISOString()
-                            : template.updatedAt,
-                    })),
+                    templates: state.templates.map((template) => {
+                        const isOrgMatch = belongsToActiveOrg(template.organizationId);
+                        if (!isOrgMatch) return template;
+
+                        return {
+                            ...template,
+                            isDefault: template.type === type ? template.id === id : template.isDefault,
+                            updatedAt: template.id === id || (template.type === type && template.isDefault)
+                                ? new Date().toISOString()
+                                : template.updatedAt,
+                        };
+                    }),
                 }));
             },
+
         }),
         {
             name: 'inflow-templates',

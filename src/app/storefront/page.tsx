@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { useProductStore, useStorefrontStore, useSettingsStore, useDiscountStore } from '@/lib/store';
-import { Button, Input, Textarea, Modal, ModalFooter, ImageUploader, Select } from '@/components/ui';
+import { useProductStore, useStorefrontStore, useSettingsStore, useDiscountStore, useOrganizationStore } from '@/lib/store';
+import { Button, Input, Textarea, Modal, ModalFooter, ImageUploader, Select, PageHelpModal } from '@/components/ui';
 import { formatCurrency, formatDate, NIGERIAN_BANKS, autoGenerateVendorSubaccounts } from '@/lib/utils';
 import { Product } from '@/lib/types';
 import { StorefrontCatalogContent } from '@/app/storefront/catalog/page';
@@ -93,8 +93,11 @@ const THEME_PRESETS = [
 ];
 
 export default function StorefrontAdminPage() {
-    const { products, updateProduct } = useProductStore();
-    const { settings, updateSettings, orders, isSlugAvailable } = useStorefrontStore();
+    const { products, getFilteredProducts, updateProduct } = useProductStore();
+    const { settings, updateSettings, orders, isSlugAvailable, getFilteredOrders } = useStorefrontStore();
+    const activeOrgId = useOrganizationStore((state) => state.activeOrganizationId);
+    const displayProducts = useMemo(() => getFilteredProducts(), [products, activeOrgId, getFilteredProducts]);
+    const displayOrders = useMemo(() => getFilteredOrders(), [orders, activeOrgId, getFilteredOrders]);
     const { company } = useSettingsStore();
 
     const activeCurrency = company.currency || settings.currency || 'USD';
@@ -107,6 +110,10 @@ export default function StorefrontAdminPage() {
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [slugInput, setSlugInput] = useState(settings.storeSlug || 'my-store');
     const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+    useEffect(() => {
+        setSlugInput(settings.storeSlug || 'my-store');
+    }, [settings.storeSlug]);
 
     const showToast = (message: string, type: 'success' | 'error' = 'success') => {
         setToastMessage({ message, type });
@@ -141,30 +148,30 @@ export default function StorefrontAdminPage() {
     };
 
     const publishedCount = useMemo(() => {
-        return products.filter(p => p.isPublishedToStore !== false).length;
-    }, [products]);
+        return displayProducts.filter(p => p.isPublishedToStore !== false).length;
+    }, [displayProducts]);
 
     const totalStorefrontRevenue = useMemo(() => {
-        return orders.reduce((acc, order) => acc + (order.grandTotal || 0), 0);
-    }, [orders]);
+        return displayOrders.reduce((acc, order) => acc + (order.grandTotal || 0), 0);
+    }, [displayOrders]);
 
     const categories = useMemo(() => {
         const set = new Set<string>();
-        products.forEach(p => {
+        displayProducts.forEach(p => {
             if (p.category) set.add(p.category);
         });
         return Array.from(set);
-    }, [products]);
+    }, [displayProducts]);
 
     const filteredProducts = useMemo(() => {
-        return products.filter(p => {
+        return displayProducts.filter(p => {
             const matchesSearch = !searchQuery.trim() ||
                 p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.sku.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
             return matchesSearch && matchesCategory;
         });
-    }, [products, searchQuery, selectedCategory]);
+    }, [displayProducts, searchQuery, selectedCategory]);
 
     const openEditModal = (product: Product) => {
         setEditingProduct(product);
@@ -249,7 +256,17 @@ export default function StorefrontAdminPage() {
                                 )}
                             </div>
                             <div className="space-y-1">
-                                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{settings.storeName || company.name}</h1>
+                                <div className="flex items-center gap-2">
+                                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{settings.storeName || company.name}</h1>
+                                    <PageHelpModal
+                                        title="Storefront & E-Commerce Hub"
+                                        description="Public online store catalog allowing buyers to browse your products, place orders online, and generate instant invoice receipts."
+                                        terms={[
+                                            { term: 'Custom Store Slug', definition: 'Unique URL link to share on social media or WhatsApp for customer orders.' },
+                                            { term: 'Automated Merchant Payouts', definition: 'Direct bank settlement subaccounts (Paystack / Monnify) for online customer payments.' }
+                                        ]}
+                                    />
+                                </div>
                                 <p className="text-sm text-neutral-300 max-w-xl leading-relaxed">Share your custom storefront link with customers to showcase products and take orders.</p>
                             </div>
                         </div>
@@ -260,12 +277,13 @@ export default function StorefrontAdminPage() {
                             variant="secondary"
                             onClick={handleCopyLink}
                             leftIcon={copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                            iconOnlyMobile
                             className="bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md"
                         >
                             {copiedLink ? 'Copied Catalog Link!' : 'Copy Catalog Link'}
                         </Button>
                         <Link href="/storefront/catalog" target="_blank">
-                            <Button variant="primary" leftIcon={<ExternalLink className="w-4 h-4" />} className="shadow-lg shadow-blue-500/20">
+                            <Button variant="primary" leftIcon={<ExternalLink className="w-4 h-4" />} iconOnlyMobile className="shadow-lg shadow-blue-500/20">
                                 Open Storefront
                             </Button>
                         </Link>
@@ -283,11 +301,11 @@ export default function StorefrontAdminPage() {
                     </div>
                     <div>
                         <p className="text-xs text-neutral-400 font-medium">Store Products</p>
-                        <p className="text-lg font-bold mt-0.5">{publishedCount} of {products.length} Published</p>
+                        <p className="text-lg font-bold mt-0.5">{publishedCount} of {displayProducts.length} Published</p>
                     </div>
                     <div>
                         <p className="text-xs text-neutral-400 font-medium">Storefront Orders</p>
-                        <p className="text-lg font-bold mt-0.5">{orders.length} Orders</p>
+                        <p className="text-lg font-bold mt-0.5">{displayOrders.length} Orders</p>
                     </div>
                     <div>
                         <p className="text-xs text-neutral-400 font-medium">Total Store Revenue</p>
@@ -299,46 +317,76 @@ export default function StorefrontAdminPage() {
             {/* Navigation Tabs */}
             <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700 pb-2 overflow-x-auto">
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setActiveTab('products')}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'products'
-                                ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
-                                : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                            }`}
-                    >
-                        <Package className="w-4 h-4" />
-                        <span>Storefront Products ({products.length})</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('orders')}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'orders'
-                                ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
-                                : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                            }`}
-                    >
-                        <ShoppingBag className="w-4 h-4" />
-                        <span>Orders ({orders.length})</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('preview')}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'preview'
-                                ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
-                                : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                            }`}
-                    >
-                        <Eye className="w-4 h-4" />
-                        <span>Store Preview</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('settings')}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'settings'
-                                ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
-                                : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                            }`}
-                    >
-                        <Settings className="w-4 h-4" />
-                        <span>Store Settings</span>
-                    </button>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => setActiveTab('products')}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'products'
+                                    ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
+                                    : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                                }`}
+                        >
+                            <Package className="w-4 h-4" />
+                            <span>Storefront Products ({displayProducts.length})</span>
+                        </button>
+                        <PageHelpModal
+                            title="Storefront Catalog Products"
+                            description="Select which catalog items are published online, apply discounts/sale tags, and edit public descriptions."
+                            terms={[
+                                { term: 'Publish Toggle', definition: 'Eye icon button to make a product visible or hidden from your public online catalog.' }
+                            ]}
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => setActiveTab('orders')}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'orders'
+                                    ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
+                                    : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                                }`}
+                        >
+                            <ShoppingBag className="w-4 h-4" />
+                            <span>Orders ({displayOrders.length})</span>
+                        </button>
+                        <PageHelpModal
+                            title="Storefront Orders Log"
+                            description="Track incoming web orders placed by customers through your public catalog link."
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => setActiveTab('preview')}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'preview'
+                                    ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
+                                    : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                                }`}
+                        >
+                            <Eye className="w-4 h-4" />
+                            <span>Store Preview</span>
+                        </button>
+                        <PageHelpModal
+                            title="Interactive Storefront Preview"
+                            description="Real-time interactive preview of your public store catalog on desktop, tablet, and mobile displays."
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => setActiveTab('settings')}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'settings'
+                                    ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
+                                    : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                                }`}
+                        >
+                            <Settings className="w-4 h-4" />
+                            <span>Store Settings</span>
+                        </button>
+                        <PageHelpModal
+                            title="Storefront Configuration"
+                            description="Customize store branding, logo, banner image, custom URL slug, contact details, and payment payout bank details."
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -498,7 +546,7 @@ export default function StorefrontAdminPage() {
                         </div>
                     </div>
 
-                    {orders.length === 0 ? (
+                    {displayOrders.length === 0 ? (
                         <div className="p-12 text-center space-y-3">
                             <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-700 text-neutral-400 rounded-full flex items-center justify-center mx-auto">
                                 <ShoppingBag className="w-6 h-6" />
@@ -523,7 +571,7 @@ export default function StorefrontAdminPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {orders.map(order => (
+                                    {displayOrders.map(order => (
                                         <tr key={order.id} className="border-b border-neutral-50 dark:border-neutral-700/50 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30">
                                             <td className="px-6 py-4 font-mono text-sm font-semibold text-[#2d3748] dark:text-white">{order.orderNumber}</td>
                                             <td className="px-6 py-4">

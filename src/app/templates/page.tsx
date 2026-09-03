@@ -2,10 +2,10 @@
 
 import { useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { useTemplateStore } from '@/lib/store';
+import { useTemplateStore, useOrganizationStore } from '@/lib/store';
 import { DocumentType } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
-import { Button, Card, EmptyState, SearchInput, Modal, ModalFooter, Input, Select, Badge } from '@/components/ui';
+import { Button, Card, EmptyState, SearchInput, Modal, ModalFooter, Input, Select, Badge, PageHelpModal } from '@/components/ui';
 import { toast } from 'react-hot-toast';
 import {
     Plus,
@@ -25,7 +25,8 @@ import {
     Grid,
     List,
     ArrowUpDown,
-    Lock
+    Lock,
+    Building
 } from 'lucide-react';
 import TemplateImportExport, { downloadTemplate } from '@/components/TemplateImportExport';
 import { v4 as uuidv4 } from 'uuid';
@@ -47,7 +48,10 @@ const typeConfig = {
 };
 
 export default function TemplatesPage() {
-    const { templates, addTemplate, deleteTemplate, setDefaultTemplate } = useTemplateStore();
+    const { getFilteredTemplates, addTemplate, deleteTemplate, setDefaultTemplate } = useTemplateStore();
+    const { activeOrganizationId, getActiveOrganization } = useOrganizationStore();
+    const activeOrg = getActiveOrganization();
+    const templates = getFilteredTemplates();
 
     // UI State
     const [searchQuery, setSearchQuery] = useState('');
@@ -338,15 +342,33 @@ export default function TemplatesPage() {
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Templates</h1>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-                        Upload and manage your document templates
-                    </p>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Templates</h1>
+                        <PageHelpModal
+                            title="Design Templates Marketplace & Customizer"
+                            description="Upload custom document designs (PDF/images) or use pre-built template layouts for invoices, receipts, and delivery notes."
+                            terms={[
+                                { term: 'Visual Field Mapping', definition: 'Drag-and-drop overlay fields (Total, Customer Name, Line Items) directly onto your template image.' },
+                                { term: 'Connected Mode', definition: 'Single master template that automatically maps variants for invoices, receipts, and delivery notes.' },
+                                { term: '.rfw Template Export', definition: 'Export or import complete template designs with all mapped field coordinates.' }
+                            ]}
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                            Upload and manage document templates for
+                        </p>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700">
+                            <Building className="w-3 h-3 text-blue-500" />
+                            {activeOrg?.name || 'Active Organization'}
+                        </span>
+                    </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <TemplateImportExport />
                     <Button
                         leftIcon={<Plus className="w-4 h-4" />}
+                        iconOnlyMobile
                         onClick={() => fileInputRef.current?.click()}
                     >
                         New Template

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useTemplateStore, useCustomerStore, useProductStore, useDocumentStore, useSettingsStore, useDiscountStore } from '@/lib/store';
+import { useTemplateStore, useCustomerStore, useProductStore, useDocumentStore, useSettingsStore, useDiscountStore, useOrganizationStore } from '@/lib/store';
 import { formatCurrency, formatDate, downloadPdf, downloadPng, printDocument, formatAmountInWords } from '@/lib/utils';
 import { Button, Modal, ModalFooter, Input, Select, Textarea, HelpTooltip } from '@/components/ui';
 import { LineItem, DocumentType } from '@/lib/types';
@@ -21,6 +21,7 @@ import {
     Printer,
     Check,
     Hash,
+    Lock,
     Percent,
     Tag,
     Truck,
@@ -48,13 +49,19 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     const searchParams = useSearchParams();
 
     // Stores
-    const { templates, getTemplateById } = useTemplateStore();
-    const { customers } = useCustomerStore();
-    const { products, getProductByBarcode } = useProductStore();
-    const { discounts } = useDiscountStore();
+    const { templates, getFilteredTemplates, getTemplateById } = useTemplateStore();
+    const { customers, getFilteredCustomers } = useCustomerStore();
+    const { products, getFilteredProducts, getProductByBarcode } = useProductStore();
+    const { discounts, getFilteredDiscounts } = useDiscountStore();
     const { company, getNextDocumentNumber, incrementDocumentNumber, updateNumbering } = useSettingsStore();
+    const activeOrgId = useOrganizationStore(state => state.activeOrganizationId);
     const currency = company.currency;
     const { addDocument, updateDocument, getDocumentById, getDocumentsByType, getTotalPaidForInvoice } = useDocumentStore();
+
+    const displayTemplates = useMemo(() => getFilteredTemplates(), [templates, activeOrgId, getFilteredTemplates]);
+    const displayCustomers = useMemo(() => getFilteredCustomers(), [customers, activeOrgId, getFilteredCustomers]);
+    const displayProducts = useMemo(() => getFilteredProducts(), [products, activeOrgId, getFilteredProducts]);
+    const displayDiscounts = useMemo(() => getFilteredDiscounts(), [discounts, activeOrgId, getFilteredDiscounts]);
 
     // State
     const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
@@ -80,6 +87,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     const [discountPercent, setDiscountPercent] = useState(0);
     const [taxPercent, setTaxPercent] = useState(0);
     const [discountName, setDiscountName] = useState('');
+    const [discountId, setDiscountId] = useState<string | undefined>(undefined);
     const [manualSubtotal, setManualSubtotal] = useState(0);
     const [amountInWords, setAmountInWords] = useState('');
     const [amountPaidInWords, setAmountPaidInWords] = useState('');
@@ -112,11 +120,11 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     useEffect(() => {
         if (documentId || searchParams.get('sourceId') || selectedTemplateId) return;
  
-        const defaultTemp = templates.find(t => t.isDefault && (t.type === type || (t.mode === 'connected' && t.variants?.[type])));
+        const defaultTemp = displayTemplates.find(t => t.isDefault && (t.type === type || (t.mode === 'connected' && t.variants?.[type])));
         if (defaultTemp) {
             setSelectedTemplateId(defaultTemp.id);
         }
-    }, [templates, type, documentId, searchParams, selectedTemplateId]);
+    }, [displayTemplates, type, documentId, searchParams, selectedTemplateId]);
 
     // --- INITIALIZATION ---
     useEffect(() => {
@@ -137,6 +145,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                 setDiscountPercent(doc.discountPercent);
                 setTaxPercent(doc.taxPercent);
                 if (doc.discountName) setDiscountName(doc.discountName);
+                if (doc.discountId) setDiscountId(doc.discountId);
                 setNotes(doc.notes || '');
                 setCustomFieldValues(doc.customValues || {});
                 setAmountPaid(doc.amountPaid || 0);
@@ -159,6 +168,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                     setDiscountPercent(sourceDoc.discountPercent);
                     setTaxPercent(sourceDoc.taxPercent);
                     setDiscountName(sourceDoc.discountName || '');
+                    setDiscountId(sourceDoc.discountId);
 
                     if (type === 'receipt') {
                         // IMPORTANT: Recalculate the proper grand total based on source template capabilities
@@ -282,7 +292,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
             orientation: rawTemplate.variants[type]!.orientation
         }
         : rawTemplate;
-    const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+    const selectedCustomer = displayCustomers.find(c => c.id === selectedCustomerId);
 
     // Feature Flags based on Template
     // Default to false when no template selected - fields only show if explicitly mapped in template
@@ -406,7 +416,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
         });
     }, [grandTotal, amountPaid, amountDue, selectedTemplate, currency, hasLineItems, hasAmountPaid]);
 
-    const templateOptions = templates
+    const templateOptions = displayTemplates
         .map(t => ({ value: t.id, label: t.name }));
 
     // Get Line Items Configuration
@@ -421,7 +431,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     ];
 
     // Customer options
-    const customerOptions = customers.map(c => ({ value: c.id, label: c.name }));
+    const customerOptions = displayCustomers.map(c => ({ value: c.id, label: c.name }));
 
     // --- POS BARCODE SCANNING HANDLER ---
     const handleBarcodeScan = (scannedCode: string) => {
@@ -506,7 +516,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
 
             // If product changed, update price and name
             if (field === 'productId') {
-                const product = products.find(p => p.id === value);
+                const product = displayProducts.find(p => p.id === value);
                 if (product) {
                     updated.productName = product.name;
                     updated.description = product.description;
@@ -539,6 +549,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
             discountPercent,
             discountAmount,
             discountName,
+            discountId,
             taxPercent,
             taxAmount,
             grandTotal,
@@ -645,6 +656,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                     <Button
                         variant="outline"
                         leftIcon={<Eye className="w-4 h-4" />}
+                        iconOnlyMobile
                         onClick={() => setShowPreview(true)}
                         disabled={!selectedTemplateId}
                     >
@@ -652,6 +664,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                     </Button>
                     <Button
                         leftIcon={<Save className="w-4 h-4" />}
+                        iconOnlyMobile
                         onClick={handleSubmit}
                         disabled={!selectedTemplateId || !selectedCustomerId || isSubmitting}
                         isLoading={isSubmitting}
@@ -700,18 +713,24 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                         }}
                                         className="h-10 px-4 shrink-0"
                                         leftIcon={<Eye className="w-4 h-4" />}
+                                        iconOnlyMobile
                                     >
                                         View Templates
                                     </Button>
                                 </div>
                             </div>
 
-                            <Input
-                                label="Document Number"
-                                value={documentNumber}
-                                onChange={(e) => setDocumentNumber(e.target.value)}
-                                leftIcon={<Hash className="w-4 h-4" />}
-                            />
+                            <div className="pointer-events-none select-none opacity-80">
+                                <Input
+                                    label="Document Number (Auto-Generated)"
+                                    value={documentNumber}
+                                    readOnly
+                                    disabled
+                                    tabIndex={-1}
+                                    className="bg-neutral-100 dark:bg-neutral-800 text-neutral-500 font-mono cursor-not-allowed border-neutral-200 dark:border-neutral-700"
+                                    leftIcon={<Lock className="w-4 h-4 text-neutral-400" />}
+                                />
+                            </div>
 
                             <Input
                                 label="Date"
@@ -903,7 +922,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                 className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
                                                             >
                                                                 <option value="">Select item...</option>
-                                                                {products.map(p => (
+                                                                {displayProducts.map(p => (
                                                                     <option key={p.id} value={p.id}>{p.name}</option>
                                                                 ))}
                                                             </select>
@@ -991,7 +1010,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             <div className="md:hidden flex flex-col gap-2 p-2">
                                 {lineItems.map((item, index) => {
                                     const isExpanded = expandedLineItemId === item.id;
-                                    const product = products.find(p => p.id === item.productId);
+                                    const product = displayProducts.find(p => p.id === item.productId);
                                     const displayName = product ? product.name : 'Select item...';
 
                                     return (
@@ -1061,7 +1080,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                 className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
                                                             >
                                                                 <option value="">Select item...</option>
-                                                                {products.map(p => (
+                                                                {displayProducts.map(p => (
                                                                     <option key={p.id} value={p.id}>{p.name}</option>
                                                                 ))}
                                                             </select>
@@ -1227,21 +1246,23 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                     <Select
                                         options={[
                                             { label: 'No Discount', value: '' },
-                                            ...discounts
+                                            ...displayDiscounts
                                                 .filter(d => d.isActive)
                                                 .map(d => ({ label: `${d.name} (${d.percentage}%)`, value: d.id }))
                                         ]}
-                                        value={discounts.find(d => d.isActive && d.percentage === discountPercent && d.name === discountName)?.id || ''}
+                                        value={discountId || displayDiscounts.find(d => d.isActive && d.percentage === discountPercent && d.name === discountName)?.id || ''}
                                         onChange={(v) => {
                                             if (!v) {
                                                 setDiscountPercent(0);
                                                 setDiscountName('');
+                                                setDiscountId(undefined);
                                                 return;
                                             }
-                                            const d = discounts.find(d => d.id === v);
+                                            const d = displayDiscounts.find(d => d.id === v);
                                             if (d) {
                                                 setDiscountPercent(d.percentage);
                                                 setDiscountName(d.name);
+                                                setDiscountId(d.id);
                                             }
                                         }}
                                         className="text-sm"
@@ -1476,7 +1497,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             <Button variant="ghost" onClick={() => setIsVisualTemplatePickerOpen(false)}>
                                 Cancel
                             </Button>
-                            {templates.length > 0 && (
+                            {displayTemplates.length > 0 && (
                                 <Button
                                     onClick={() => {
                                         if (tempSelectedTemplateId) {
@@ -1495,7 +1516,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                 }
             >
                 {(() => {
-                    if (templates.length === 0) {
+                    if (displayTemplates.length === 0) {
                         return (
                             <div className="text-center py-16">
                                 <div className="w-16 h-16 mx-auto bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mb-4">
@@ -1544,7 +1565,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
 
                             {pickerViewMode === 'grid' ? (
                                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-1 max-h-[60vh] overflow-y-auto">
-                                    {templates.map((t) => {
+                                    {displayTemplates.map((t) => {
                                         const isVariant = t.mode === 'connected' && t.variants?.[type];
                                         const imageUrl = isVariant ? t.variants?.[type]?.imageUrl : t.imageUrl;
                                         const isSelected = tempSelectedTemplateId === t.id;
@@ -1618,7 +1639,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                 </div>
                             ) : (
                                 <div className="flex flex-col gap-2 p-1 max-h-[60vh] overflow-y-auto">
-                                    {templates.map((t) => {
+                                    {displayTemplates.map((t) => {
                                         const isVariant = t.mode === 'connected' && t.variants?.[type];
                                         const imageUrl = isVariant ? t.variants?.[type]?.imageUrl : t.imageUrl;
                                         const isSelected = tempSelectedTemplateId === t.id;

@@ -238,19 +238,22 @@ export function useFirebaseSync() {
         if (!user || !hasSynced || isLoadingFromFirestore.current) return;
 
         try {
-            const settings = {
+            const settings = JSON.parse(JSON.stringify({
                 company,
                 numbering,
-            };
+            }));
             await updateUserSettings(settings);
             console.log('[Firebase Sync] Settings synced successfully');
         } catch (error: any) {
             console.error('[Firebase Sync] Error syncing settings:', error);
-            const { toast } = await import('react-hot-toast');
-            toast.error(`Failed to sync settings with cloud: ${error?.message || 'Unknown error'}`, {
-                id: 'settings-sync-error',
-                duration: 5000
-            });
+            const errMsg = error?.message || '';
+            if (!errMsg.includes('FIRESTORE') && !errMsg.includes('UNHANDLED EXCEPTION')) {
+                const { toast } = await import('react-hot-toast');
+                toast.error(`Failed to sync settings with cloud: ${errMsg}`, {
+                    id: 'settings-sync-error',
+                    duration: 5000
+                });
+            }
         }
     }, [user, company, numbering]);
 
@@ -333,12 +336,12 @@ export function useFirebaseSync() {
 
     // Customers
     useEffect(() => {
-        const unsubscribe = useCustomerStore.subscribe((state, prevState) => {
+        const unsubscribe = useCustomerStore.subscribe((state: any, prevState: any) => {
             // Don't sync until initial load is complete
             if (!hasSynced) return;
 
-            state.customers.forEach(customer => {
-                const existed = prevState.customers.find(c => c.id === customer.id);
+            (state.customers || []).forEach((customer: Customer) => {
+                const existed = (prevState.customers || []).find((c: Customer) => c.id === customer.id);
                 if (!existed) {
                     syncToFirestore('customers', 'create', customer);
                 } else if (JSON.stringify(existed) !== JSON.stringify(customer)) {
@@ -346,8 +349,8 @@ export function useFirebaseSync() {
                 }
             });
 
-            prevState.customers.forEach(customer => {
-                const stillExists = state.customers.find(c => c.id === customer.id);
+            (prevState.customers || []).forEach((customer: Customer) => {
+                const stillExists = (state.customers || []).find((c: Customer) => c.id === customer.id);
                 if (!stillExists) {
                     syncToFirestore('customers', 'delete', customer);
                 }
@@ -359,12 +362,12 @@ export function useFirebaseSync() {
 
     // Products
     useEffect(() => {
-        const unsubscribe = useProductStore.subscribe((state, prevState) => {
+        const unsubscribe = useProductStore.subscribe((state: any, prevState: any) => {
             // Don't sync until initial load is complete
             if (!hasSynced) return;
 
-            state.products.forEach(product => {
-                const existed = prevState.products.find(p => p.id === product.id);
+            (state.products || []).forEach((product: Product) => {
+                const existed = (prevState.products || []).find((p: Product) => p.id === product.id);
                 if (!existed) {
                     syncToFirestore('products', 'create', product);
                 } else if (JSON.stringify(existed) !== JSON.stringify(product)) {
@@ -372,8 +375,8 @@ export function useFirebaseSync() {
                 }
             });
 
-            prevState.products.forEach(product => {
-                const stillExists = state.products.find(p => p.id === product.id);
+            (prevState.products || []).forEach((product: Product) => {
+                const stillExists = (state.products || []).find((p: Product) => p.id === product.id);
                 if (!stillExists) {
                     syncToFirestore('products', 'delete', product);
                 }
@@ -385,12 +388,12 @@ export function useFirebaseSync() {
 
     // Documents
     useEffect(() => {
-        const unsubscribe = useDocumentStore.subscribe((state, prevState) => {
+        const unsubscribe = useDocumentStore.subscribe((state: any, prevState: any) => {
             // Don't sync until initial load is complete
             if (!hasSynced) return;
 
-            state.documents.forEach(doc => {
-                const existed = prevState.documents.find(d => d.id === doc.id);
+            (state.documents || []).forEach((doc: Document) => {
+                const existed = (prevState.documents || []).find((d: Document) => d.id === doc.id);
                 if (!existed) {
                     syncToFirestore('documents', 'create', doc);
                 } else if (JSON.stringify(existed) !== JSON.stringify(doc)) {
@@ -398,8 +401,8 @@ export function useFirebaseSync() {
                 }
             });
 
-            prevState.documents.forEach(doc => {
-                const stillExists = state.documents.find(d => d.id === doc.id);
+            (prevState.documents || []).forEach((doc: Document) => {
+                const stillExists = (state.documents || []).find((d: Document) => d.id === doc.id);
                 if (!stillExists) {
                     syncToFirestore('documents', 'delete', doc);
                 }
@@ -411,12 +414,12 @@ export function useFirebaseSync() {
 
     // Discounts
     useEffect(() => {
-        const unsubscribe = useDiscountStore.subscribe((state, prevState) => {
+        const unsubscribe = useDiscountStore.subscribe((state: any, prevState: any) => {
             // Don't sync until initial load is complete
             if (!hasSynced) return;
 
-            state.discounts.forEach(discount => {
-                const existed = prevState.discounts.find(d => d.id === discount.id);
+            (state.discounts || []).forEach((discount: Discount) => {
+                const existed = (prevState.discounts || []).find((d: Discount) => d.id === discount.id);
                 if (!existed) {
                     syncToFirestore('discounts', 'create', discount);
                 } else if (JSON.stringify(existed) !== JSON.stringify(discount)) {
@@ -424,8 +427,8 @@ export function useFirebaseSync() {
                 }
             });
 
-            prevState.discounts.forEach(discount => {
-                const stillExists = state.discounts.find(d => d.id === discount.id);
+            (prevState.discounts || []).forEach((discount: Discount) => {
+                const stillExists = (state.discounts || []).find((d: Discount) => d.id === discount.id);
                 if (!stillExists) {
                     syncToFirestore('discounts', 'delete', discount);
                 }

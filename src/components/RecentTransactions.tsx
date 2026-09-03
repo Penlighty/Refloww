@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { useDocumentStore, useSettingsStore } from '@/lib/store';
+import { useDocumentStore, useSettingsStore, useOrganizationStore } from '@/lib/store';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { DocumentStatus } from '@/lib/types';
+import { useMemo } from 'react';
 
 const statusConfig: Record<string, { label: string; bgClass: string; textClass: string; dotClass: string }> = {
     'paid': { label: 'Paid', bgClass: 'bg-emerald-50 dark:bg-emerald-900/30', textClass: 'text-emerald-600 dark:text-emerald-400', dotClass: 'bg-emerald-500' },
+    'partially_paid': { label: 'Partially Paid', bgClass: 'bg-amber-50 dark:bg-amber-900/30', textClass: 'text-amber-600 dark:text-amber-400', dotClass: 'bg-amber-500' },
     'sent': { label: 'Sent', bgClass: 'bg-blue-50 dark:bg-blue-900/30', textClass: 'text-blue-600 dark:text-blue-400', dotClass: 'bg-blue-500' },
     'draft': { label: 'Draft', bgClass: 'bg-neutral-100 dark:bg-neutral-700', textClass: 'text-neutral-600 dark:text-neutral-300', dotClass: 'bg-neutral-400' },
     'overdue': { label: 'Overdue', bgClass: 'bg-red-50 dark:bg-red-900/30', textClass: 'text-red-600 dark:text-red-400', dotClass: 'bg-red-500' },
@@ -32,19 +34,24 @@ function getAvatarColor(name: string) {
 
 export default function RecentTransactions() {
     const [mounted, setMounted] = useState(false);
-    const { documents } = useDocumentStore();
+    const { documents, getFilteredDocuments } = useDocumentStore();
+    const activeOrgId = useOrganizationStore((state) => state.activeOrganizationId);
     const { company } = useSettingsStore();
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
+    const displayDocuments = useMemo(() => getFilteredDocuments(), [documents, activeOrgId, getFilteredDocuments]);
     const currency = company.currency;
 
-    // Get 5 most recent documents
-    const recentDocs = mounted ? [...documents]
-        .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime())
-        .slice(0, 50) : [];
+    // Get 50 most recent documents
+    const recentDocs = useMemo(() => {
+        if (!mounted) return [];
+        return [...displayDocuments]
+            .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime())
+            .slice(0, 50);
+    }, [displayDocuments, mounted]);
 
     if (!mounted) {
         return (
@@ -70,13 +77,12 @@ export default function RecentTransactions() {
         );
     }
 
-    // ... (imports remain)
     return (
         <div className="xl:col-span-2 flex flex-col gap-4">
             <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-[#2d3748] dark:text-white">Recent Transactions</h3>
                 <Link
-                    href="/ledger"
+                    href="/transactions"
                     className="group flex items-center gap-1.5 text-sm font-medium text-neutral-500 dark:text-neutral-400 hover:text-[#2d3748] dark:hover:text-white transition-colors"
                 >
                     View all
@@ -90,44 +96,60 @@ export default function RecentTransactions() {
                     <table className="w-full whitespace-nowrap relative">
                         <thead className="sticky top-0 z-10 bg-white dark:bg-neutral-800 shadow-sm">
                             <tr className="border-b border-neutral-100 dark:border-neutral-700">
-                                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider bg-white dark:bg-neutral-800">Client</th>
+                                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider bg-white dark:bg-neutral-800">Client & Document</th>
                                 <th className="text-left px-6 py-4 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider bg-white dark:bg-neutral-800">Date</th>
                                 <th className="text-left px-6 py-4 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider bg-white dark:bg-neutral-800">Status</th>
                                 <th className="text-right px-6 py-4 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider bg-white dark:bg-neutral-800">Amount</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {recentDocs.map((doc) => (
-                                <tr
-                                    key={doc.id}
-                                    className="border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors"
-                                >
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(doc.customerName || '')} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0`}>
-                                                {doc.customerName ? doc.customerName.charAt(0) : (doc as any)._isLocked ? '🔒' : '?'}
+                            {recentDocs.map((doc) => {
+                                const statusKey = doc.status || 'draft';
+                                const statusStyle = statusConfig[statusKey] || statusConfig['draft'];
+                                const docTypeLabel = doc.type === 'receipt' ? 'Receipt' : doc.type === 'invoice' ? 'Invoice' : doc.type === 'delivery-note' ? 'Delivery Note' : 'Estimate';
+                                const docTypeBadgeColor = doc.type === 'receipt' ? 'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300' : doc.type === 'invoice' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300';
+                                const displayAmount = doc.type === 'receipt' ? (doc.amountPaid || doc.grandTotal) : doc.grandTotal;
+
+                                return (
+                                    <tr
+                                        key={doc.id}
+                                        className="border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors"
+                                    >
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(doc.customerName || '')} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0`}>
+                                                    {doc.customerName ? doc.customerName.charAt(0) : (doc as any)._isLocked ? '🔒' : '?'}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-[#2d3748] dark:text-white">
+                                                        {doc.customerName || ((doc as any)._isLocked ? 'Encrypted' : 'Unknown')}
+                                                    </span>
+                                                    <div className="flex items-center gap-1.5 text-xs text-neutral-400">
+                                                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-semibold uppercase ${docTypeBadgeColor}`}>
+                                                            {docTypeLabel}
+                                                        </span>
+                                                        <span>• {doc.documentNumber}</span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <span className="font-medium text-[#2d3748] dark:text-white">
-                                                {doc.customerName || ((doc as any)._isLocked ? 'Encrypted' : 'Unknown')}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date)}</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusStyle.bgClass} ${statusStyle.textClass}`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dotClass}`}></span>
+                                                {statusStyle.label}
                                             </span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date)}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig[doc.status || 'draft'].bgClass} ${statusConfig[doc.status || 'draft'].textClass}`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[doc.status || 'draft'].dotClass}`}></span>
-                                            {statusConfig[doc.status || 'draft'].label}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <span className="text-sm font-medium text-[#2d3748] dark:text-white">
-                                            {doc.grandTotal !== undefined ? formatCurrency(doc.grandTotal, currency) : ((doc as any)._isLocked ? '🔒 Locked' : '-')}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <span className="text-sm font-medium text-[#2d3748] dark:text-white">
+                                                {displayAmount !== undefined ? formatCurrency(displayAmount, currency) : ((doc as any)._isLocked ? '🔒 Locked' : '-')}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

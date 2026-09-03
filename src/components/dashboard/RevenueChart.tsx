@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from 'react';
-import { useDocumentStore, useSettingsStore, useTemplateStore } from '@/lib/store';
+import { useDocumentStore, useSettingsStore, useTemplateStore, useOrganizationStore, useTransactionStore } from '@/lib/store';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { formatCurrency, getEffectiveGrandTotal } from '@/lib/utils';
 
@@ -12,10 +12,14 @@ interface ChartDataPoint {
 }
 
 export default function RevenueChart() {
-    const { documents } = useDocumentStore();
+    const { documents, getFilteredDocuments } = useDocumentStore();
+    const { transactions, getFilteredTransactions } = useTransactionStore();
     const { company } = useSettingsStore();
-    const { getTemplateById } = useTemplateStore();
+    const activeOrgId = useOrganizationStore(state => state.activeOrganizationId);
     const currency = company.currency;
+
+    const displayDocuments = useMemo(() => getFilteredDocuments(), [documents, activeOrgId, getFilteredDocuments]);
+    const activeTransactions = useMemo(() => getFilteredTransactions(), [transactions, activeOrgId, getFilteredTransactions]);
 
     // Calculate last 7 days revenue data
     const chartData = useMemo(() => {
@@ -27,13 +31,10 @@ export default function RevenueChart() {
             date.setDate(date.getDate() - i);
             const dateStr = date.toISOString().split('T')[0];
 
-            // Get revenue for this day (paid invoices only)
-            const dayRevenue = documents
-                .filter(doc =>
-                    doc.status === 'paid' &&
-                    doc.date.split('T')[0] === dateStr
-                )
-                .reduce((sum, doc) => sum + getEffectiveGrandTotal(doc, getTemplateById(doc.templateId)), 0);
+            // Get cash revenue for this day from transactions
+            const dayRevenue = activeTransactions
+                .filter(t => t.date && t.date.split('T')[0] === dateStr)
+                .reduce((sum, t) => sum + (t.amountPaid || 0), 0);
 
             data.push({
                 date: dateStr,
@@ -43,7 +44,7 @@ export default function RevenueChart() {
         }
 
         return data;
-    }, [documents, getTemplateById]);
+    }, [activeTransactions]);
 
     // Calculate stats
     const stats = useMemo(() => {

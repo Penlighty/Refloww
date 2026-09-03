@@ -99,6 +99,7 @@ export default function TemplateImportExport({ onImportSuccess }: TemplateImport
             <Button
                 variant="outline"
                 leftIcon={isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                iconOnlyMobile
                 onClick={handleImportClick}
                 disabled={isImporting}
             >

@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { Bell, Check, AlertCircle, Sparkles, ArrowRight, X } from 'lucide-react';
-import { useDocumentStore } from '@/lib/store';
+import { useDocumentStore, useOrganizationStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { DocumentType } from '@/lib/types';
 import Link from 'next/link';
@@ -32,11 +32,14 @@ const priorityConfig = {
 };
 
 export default function TasksDropdown() {
-    const { documents } = useDocumentStore();
+    const { documents, getFilteredDocuments } = useDocumentStore();
+    const activeOrgId = useOrganizationStore(state => state.activeOrganizationId);
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [notifications, setNotifications] = useState<Announcement[]>([]);
+
+    const displayDocuments = useMemo(() => getFilteredDocuments(), [documents, activeOrgId, getFilteredDocuments]);
 
     useEffect(() => {
         const unsubscribe = subscribeToActiveAnnouncements((data) => {
@@ -66,7 +69,7 @@ export default function TasksDropdown() {
         const generatedTasks: Task[] = [];
 
         // Overdue Invoices
-        const overdue = documents.filter(d => d.status === 'overdue');
+        const overdue = displayDocuments.filter(d => d.status === 'overdue');
         overdue.forEach(doc => {
             generatedTasks.push({
                 id: `overdue-${doc.id}`,
@@ -79,7 +82,7 @@ export default function TasksDropdown() {
         });
 
         // Drafts
-        const drafts = documents.filter(d => d.status === 'draft');
+        const drafts = displayDocuments.filter(d => d.status === 'draft');
         drafts.forEach(doc => {
             generatedTasks.push({
                 id: `draft-${doc.id}`,
@@ -104,7 +107,7 @@ export default function TasksDropdown() {
         });
 
         return generatedTasks;
-    }, [documents, notifications]);
+    }, [displayDocuments, notifications]);
 
     const pendingCount = tasks.length;
 

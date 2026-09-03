@@ -31,12 +31,16 @@ export function AdminSidebar() {
         <aside className="w-64 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 flex flex-col border-r border-slate-200 dark:border-slate-800 z-50 flex-shrink-0 transition-colors">
             {/* Logo */}
             <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-xl">
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
-                        R
-                    </div>
-                    Reflow Admin
-                </div>
+                <Link href="/admin" className="flex items-center gap-3.5 group">
+                    <img
+                        src="/logo/refloww-full-orange.svg"
+                        alt="Refloww Admin"
+                        className="h-8 w-auto max-w-[130px] object-contain transition-transform group-hover:scale-105"
+                    />
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#fc6d2d] border border-[#fc6d2d]/30">
+                        Admin
+                    </span>
+                </Link>
             </div>
 
             {/* Navigation */}

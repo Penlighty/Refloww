@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { useSidebarStore } from '@/lib/sidebar-store';
 import { useAuth } from '@/lib/contexts/AuthContext';
+import { useSettingsStore } from '@/lib/store';
 import {
     LayoutDashboard,
     FileText,
@@ -26,13 +27,15 @@ import {
     ShoppingBag,
     LayoutGrid,
     Briefcase,
-    Shield
+    Shield,
+    Zap,
+    ArrowLeftRight
 } from 'lucide-react';
 
 export default function Sidebar() {
     const pathname = usePathname();
     const { isCollapsed, setCollapsed, toggleCollapsed, isMobileOpen, setMobileOpen, toggleMobile } = useSidebarStore();
-    const { profile } = useAuth();
+    const { profile, logout } = useAuth();
     const [mounted, setMounted] = useState(false);
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
         'Documents': true,
@@ -109,8 +112,12 @@ export default function Sidebar() {
         return false;
     };
 
+    const staffRole = useSettingsStore(state => state.staffRole);
+
     const navigation = [
         { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+        { path: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
+        { path: '/pos', label: 'POS Register', icon: Zap },
         {
             label: 'Documents',
             icon: FileText,
@@ -130,7 +137,7 @@ export default function Sidebar() {
                 { path: '/products', label: 'Products', icon: Package },
                 { path: '/storefront', label: 'Storefront', icon: ShoppingBag },
                 { path: '/discounts', label: 'Discounts', icon: Percent },
-                { path: '/ledger', label: 'Ledger', icon: BookOpen },
+                ...(staffRole !== 'cashier' ? [{ path: '/ledger', label: 'Ledger', icon: BookOpen }] : []),
             ]
         },
 
@@ -169,28 +176,24 @@ export default function Sidebar() {
                 `}
             >
                 {/* Logo Section */}
-                <div className={`h-16 flex items-center ${isCollapsed ? 'md:justify-center px-2' : 'px-5'} justify-start border-b border-neutral-100 dark:border-neutral-700`}>
-                    <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-9 h-9 bg-[#2d3748] dark:bg-secondary rounded-xl flex items-center justify-center text-white dark:text-neutral-900 flex-shrink-0">
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="w-5 h-5"
-                            >
-                                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                                <path d="M2 17l10 5 10-5" />
-                                <path d="M2 12l10 5 10-5" />
-                            </svg>
+                <div className={`h-16 flex items-center ${isCollapsed ? 'md:justify-center px-3' : 'px-5'} justify-start border-b border-neutral-100 dark:border-neutral-700`}>
+                    <Link href="/" className="flex items-center group">
+                        {/* Collapsed view (Desktop icon-only mode) */}
+                        <div className={`${isCollapsed ? 'hidden md:flex' : 'hidden'} w-9 h-9 items-center justify-center flex-shrink-0`}>
+                            <img
+                                src="/logo/refloww-icon-orange.svg"
+                                alt="Refloww"
+                                className="w-8 h-8 object-contain transition-transform group-hover:scale-105"
+                            />
                         </div>
-                        {/* Always show text on mobile, or check collapsed logic for desktop */}
-                        <div className={`${isCollapsed ? 'md:hidden' : 'block'}`}>
-                            <span className="text-lg font-bold text-[#2d3748] dark:text-white tracking-tight text-nowrap">
-                                Refloww
-                            </span>
+
+                        {/* Expanded view (Desktop full sidebar & Mobile extended drawer) */}
+                        <div className={`${isCollapsed ? 'block md:hidden' : 'block'} h-9 flex items-center`}>
+                            <img
+                                src="/logo/refloww-full-orange.svg"
+                                alt="Refloww Logo"
+                                className="h-8 w-auto max-w-[140px] object-contain transition-transform group-hover:scale-105"
+                            />
                         </div>
                     </Link>
                 </div>
@@ -299,8 +302,19 @@ export default function Sidebar() {
 
                     {/* Logout */}
                     <button
+                        type="button"
+                        onClick={async () => {
+                            try {
+                                await logout();
+                            } catch (e) {
+                                console.error('Logout error:', e);
+                                if (typeof window !== 'undefined') {
+                                    window.location.href = '/login';
+                                }
+                            }
+                        }}
                         title={isCollapsed ? 'Log out' : undefined}
-                        className={`w-full flex items-center gap-3 ${isCollapsed ? 'md:justify-center md:px-2' : 'px-3'} py-2.5 rounded-xl transition-all duration-200 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 hover:text-[#2d3748] dark:hover:text-white group`}
+                        className={`w-full flex items-center gap-3 ${isCollapsed ? 'md:justify-center md:px-2' : 'px-3'} py-2.5 rounded-xl transition-all duration-200 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 hover:text-[#2d3748] dark:hover:text-white group cursor-pointer`}
                     >
                         <LogOut className="w-5 h-5 flex-shrink-0 text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300" strokeWidth={1.75} />
                         <span className={`text-sm font-medium text-nowrap ${isCollapsed ? 'md:hidden' : 'block'}`}>Log out</span>

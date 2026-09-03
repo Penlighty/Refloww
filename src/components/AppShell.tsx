@@ -57,6 +57,22 @@ export default function AppShell({ children }: AppShellProps) {
         document.title = matchedKey ? PAGE_TITLES[matchedKey] : 'Refloww';
     }, [pathname]);
 
+    // Sync settings store active organization on switch (client-side only, avoids SSR evaluation-order errors)
+    useEffect(() => {
+        const { useOrganizationStore, useSettingsStore } = require('@/lib/store');
+        const unsubscribe = useOrganizationStore.subscribe((state: any) => {
+            useSettingsStore.getState().syncSettingsForActiveOrg(state.activeOrganizationId);
+        });
+        
+        // Initial sync on mount
+        const activeOrgId = useOrganizationStore.getState().activeOrganizationId;
+        if (activeOrgId) {
+            useSettingsStore.getState().syncSettingsForActiveOrg(activeOrgId);
+        }
+
+        return () => unsubscribe();
+    }, []);
+
     // Redirect logic
     useEffect(() => {
         if (loading) return;

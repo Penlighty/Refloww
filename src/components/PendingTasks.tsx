@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo, useState } from 'react';
 import { Plus, Check, AlertCircle, Sparkles, ListTodo, X, ArrowRight } from 'lucide-react';
-import { useDocumentStore } from '@/lib/store';
+import { useDocumentStore, useOrganizationStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { DocumentType } from '@/lib/types';
 
@@ -21,15 +21,18 @@ const priorityConfig = {
 };
 
 export default function PendingTasks() {
-    const { documents } = useDocumentStore();
+    const { documents, getFilteredDocuments } = useDocumentStore();
+    const activeOrgId = useOrganizationStore(state => state.activeOrganizationId);
     const router = useRouter();
     const [isExpanded, setIsExpanded] = useState(false);
+
+    const displayDocuments = useMemo(() => getFilteredDocuments(), [documents, activeOrgId, getFilteredDocuments]);
 
     const tasks = useMemo(() => {
         const generatedTasks: Task[] = [];
 
         // Overdue Invoices
-        const overdue = documents.filter(d => d.status === 'overdue');
+        const overdue = displayDocuments.filter(d => d.status === 'overdue');
         overdue.forEach(doc => {
             generatedTasks.push({
                 id: `overdue-${doc.id}`,
@@ -42,7 +45,7 @@ export default function PendingTasks() {
         });
 
         // Drafts
-        const drafts = documents.filter(d => d.status === 'draft');
+        const drafts = displayDocuments.filter(d => d.status === 'draft');
         drafts.slice(0, 5).forEach(doc => {
             generatedTasks.push({
                 id: `draft-${doc.id}`,
@@ -55,7 +58,7 @@ export default function PendingTasks() {
         });
 
         return generatedTasks;
-    }, [documents]);
+    }, [displayDocuments]);
 
     const pendingCount = tasks.length;
 

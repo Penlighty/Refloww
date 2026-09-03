@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import { TrendingUp, Clock, FileText, DollarSign, ArrowUpRight, ArrowDownRight, BarChart2 } from 'lucide-react';
-import { useDocumentStore, useSettingsStore, useTemplateStore } from '@/lib/store';
+import { useDocumentStore, useSettingsStore, useTemplateStore, useOrganizationStore, useTransactionStore } from '@/lib/store';
 import { useMemo, useState, useEffect } from 'react';
 import { formatCurrency, sumEffectiveGrandTotals } from '@/lib/utils';
+
+import { PageHelpModal } from '@/components/ui';
 
 interface StatCardProps {
     title: string;
@@ -78,49 +80,61 @@ function StatCard({ title, value, subValue, change, note, icon, variant = 'defau
 
 export default function StatsGrid() {
     const [mounted, setMounted] = useState(false);
-    const { documents } = useDocumentStore();
+    const { documents, getFilteredDocuments } = useDocumentStore();
+    const { transactions, getFilteredTransactions, backfillTransactionsFromDocuments } = useTransactionStore();
+    const activeOrgId = useOrganizationStore((state) => state.activeOrganizationId);
     const { company } = useSettingsStore();
-    const { getTemplateById } = useTemplateStore();
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
+    const displayDocuments = useMemo(() => getFilteredDocuments(), [documents, activeOrgId, getFilteredDocuments]);
+    const activeTransactions = useMemo(() => getFilteredTransactions(), [transactions, activeOrgId, getFilteredTransactions]);
     const currency = company.currency;
+
+    // Ensure transactions are backfilled from documents
+    useEffect(() => {
+        if (mounted && displayDocuments.length > 0) {
+            backfillTransactionsFromDocuments(displayDocuments);
+        }
+    }, [mounted, displayDocuments, backfillTransactionsFromDocuments]);
 
     const stats = useMemo(() => {
         if (!mounted) return [];
-        // Total Revenue (Paid Invoices)
-        const paidInvoices = documents.filter(d => d.type === 'invoice' && d.status === 'paid');
-        const totalRevenue = sumEffectiveGrandTotals(paidInvoices, getTemplateById);
+        
+        // Total Billed Volume vs Total Realized Cash Revenue
+        const totalBilled = activeTransactions.reduce((sum, t) => sum + (t.grandTotal || 0), 0);
+        const totalPaid = activeTransactions.reduce((sum, t) => sum + (t.amountPaid || 0), 0);
 
-        // Outstanding Invoices (Sent or Overdue)
-        const outstandingInvoices = documents.filter(d => d.type === 'invoice' && (d.status === 'sent' || d.status === 'overdue'));
-        const outstandingAmount = sumEffectiveGrandTotals(outstandingInvoices, getTemplateById);
-        const overdueCount = outstandingInvoices.filter(d => d.status === 'overdue').length;
+        // Outstanding Amount (Actual balance due on unpaid/partially paid invoices/transactions)
+        const pendingTransactions = activeTransactions.filter(t => t.paymentStatus === 'unpaid' || t.paymentStatus === 'partially_paid');
+        const outstandingAmount = pendingTransactions.reduce((sum, t) => sum + (t.amountDue || 0), 0);
+        
+        const overdueCount = displayDocuments.filter(d => d.type === 'invoice' && d.status === 'overdue').length;
 
-        // Total Documents
-        const totalDocs = documents.length;
-        // Find most recent doc date
-        const lastDoc = documents.length > 0
-            ? documents.reduce((latest, doc) => new Date(doc.createdAt) > new Date(latest.createdAt) ? doc : latest)
+        // Total Documents Count
+        const totalDocs = displayDocuments.length;
+        const lastDoc = displayDocuments.length > 0
+            ? displayDocuments.reduce((latest, doc) => new Date(doc.createdAt) > new Date(latest.createdAt) ? doc : latest)
             : null;
 
         const lastActivity = lastDoc ? `Last: ${new Date(lastDoc.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'No documents yet';
 
         return [
             {
-                title: 'Total Revenue',
-                value: formatCurrency(totalRevenue, currency),
+                title: 'Total Revenue (Collected)',
+                value: formatCurrency(totalPaid, currency),
+                subValue: totalBilled > 0 ? `of ${formatCurrency(totalBilled, currency)} billed` : undefined,
                 change: { value: '0%', positive: true },
-                note: 'Lifetime earnings',
+                note: 'Actual payments received',
                 icon: <DollarSign className="w-5 h-5" strokeWidth={2} />,
                 variant: 'featured',
                 hideChange: true,
             },
             {
                 title: 'Outstanding Invoices',
-                value: outstandingInvoices.length.toString(),
+                value: pendingTransactions.length.toString(),
                 subValue: `(${formatCurrency(outstandingAmount, currency)})`,
                 note: `${overdueCount} overdue`,
                 icon: <Clock className="w-5 h-5" strokeWidth={2} />,
@@ -135,7 +149,7 @@ export default function StatsGrid() {
                 variant: 'default',
             },
         ] as StatCardProps[];
-    }, [documents, currency, mounted]);
+    }, [displayDocuments, activeTransactions, currency, mounted]);
 
     if (!mounted) {
         return <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-h-[140px]">
@@ -149,7 +163,17 @@ export default function StatsGrid() {
         <section>
             <div className="flex items-end justify-between mb-5">
                 <div>
-                    <h2 className="text-xl font-bold text-neutral-900 dark:text-white">Overview</h2>
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-xl font-bold text-neutral-900 dark:text-white">Overview</h2>
+                        <PageHelpModal
+                            title="Dashboard Overview & Financial Summary"
+                            description="Real-time financial breakdown of total revenue earned, pending/overdue invoices, and total document activity."
+                            terms={[
+                                { term: 'Total Revenue', definition: 'Sum of all paid invoice totals.' },
+                                { term: 'Outstanding Invoices', definition: 'Invoices sent to customers that are pending payment or overdue.' }
+                            ]}
+                        />
+                    </div>
                     <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">Your financial summary</p>
                 </div>
                 <div className="flex items-center gap-2">

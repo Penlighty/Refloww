@@ -2,14 +2,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { useSettingsStore } from '@/lib/store';
+import { useSettingsStore, useOrganizationStore } from '@/lib/store';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { Button, Input, Select } from '@/components/ui';
+import { Button, Input, Select, PageHelpModal } from '@/components/ui';
 import { currencies } from '@/lib/constants/currencies';
 import DocumentNumbering from '@/components/settings/DocumentNumbering';
 import EncryptionSettings from '@/components/settings/EncryptionSettings';
-import { Save, Building, Globe, Mail, Phone, Palette, Upload, X, Image, Sun, Moon, DollarSign, Percent, Hash, Calendar, HelpCircle, Shield } from 'lucide-react';
+import { Save, Building, Globe, Mail, Phone, Palette, Upload, X, Image, Sun, Moon, DollarSign, Percent, Hash, Calendar, HelpCircle, Shield, Users, UserPlus, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { UserRole } from '@/lib/types';
 
 type TabId = 'general' | 'financial' | 'documents' | 'appearance' | 'security';
 
@@ -22,7 +23,10 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
 ];
 
 export default function SettingsPage() {
-    const { company, updateCompany, theme, setTheme, numbering, updateNumbering } = useSettingsStore();
+    const { company, updateCompany, theme, setTheme, numbering, updateNumbering, staffRole, setStaffRole } = useSettingsStore();
+    const { getActiveOrganization, inviteStaffMember, removeStaffMember, updateStaffRole } = useOrganizationStore();
+    const activeOrg = getActiveOrganization();
+
     const { user, updateUserProfile } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [activeTab, setActiveTab] = useState<TabId>('general');
@@ -31,6 +35,20 @@ export default function SettingsPage() {
     const [formData, setFormData] = useState(company);
     const [numberingData, setNumberingData] = useState(numbering);
     const [isDirty, setIsDirty] = useState(false);
+
+    // Staff Invite State
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [inviteRole, setInviteRole] = useState<UserRole>('cashier');
+
+    const handleSendInvite = () => {
+        if (!inviteEmail.trim() || !inviteEmail.includes('@')) {
+            toast.error('Please enter a valid email address');
+            return;
+        }
+        inviteStaffMember(inviteEmail, inviteRole);
+        toast.success(`Invitation sent to ${inviteEmail}!`);
+        setInviteEmail('');
+    };
 
     // Sync form data if store updates externally
     useEffect(() => {
@@ -107,11 +125,21 @@ export default function SettingsPage() {
     return (
         <div className="max-w-6xl mx-auto h-[calc(100vh-100px)] md:h-[calc(100vh-140px)] flex flex-col overflow-hidden">
             {/* Header & Tabs Container (Static, doesn't scroll) */}
-            <div className="bg-background-light dark:bg-background-dark pt-4 pb-3 flex-shrink-0 border-b border-neutral-200/50 dark:border-neutral-750 md:border-b-0">
+            <div className="bg-background-light dark:bg-background-dark pt-4 pb-3 flex-shrink-0 border-b border-neutral-200/50 dark:border-neutral-700 md:border-b-0">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 md:mb-6">
                     <div>
-                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white font-sans tracking-tight">Settings</h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white font-sans tracking-tight">Settings</h1>
+                            <PageHelpModal
+                                title="Application Settings & Configuration"
+                                description="Configure your business profile, default currency, document numbering formats, theme appearance, and security encryption."
+                                terms={[
+                                    { term: 'Document Numbering', definition: 'Customize invoice, receipt, and delivery note ID formats (e.g. INV-{YYYY}-{0001}).' },
+                                    { term: 'Show Page & Tab Help Icons (i)', definition: 'Toggle visibility of all help icons across the application.' }
+                                ]}
+                            />
+                        </div>
                         <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 hidden sm:block">Manage your company profile and application preferences.</p>
                     </div>
                     <div className="hidden sm:block">
@@ -174,6 +202,174 @@ export default function SettingsPage() {
                     {/* General Tab */}
                     {activeTab === 'general' && (
                         <div className="space-y-6 max-w-3xl animate-in fade-in slide-in-from-right-4 duration-300">
+                            {/* Organization Staff & Team Invites Card */}
+                            <section className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
+                                            <Users className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">
+                                                Team & Staff Invitations ({activeOrg?.name})
+                                            </h2>
+                                            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                                As the Organization Owner, you can invite staff members and assign their role permissions.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Owner Role Status Badge */}
+                                    <div className="flex items-center gap-2 self-start sm:self-auto bg-purple-50 dark:bg-purple-950/40 px-3 py-1.5 rounded-xl border border-purple-200/60 dark:border-purple-800">
+                                        <Shield className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                                        <span className="text-xs font-bold text-purple-900 dark:text-purple-300">
+                                            Your Role: Organization Owner (Admin)
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Send Staff Invite Form */}
+                                <div className="p-5 bg-neutral-50/70 dark:bg-neutral-700/50 rounded-2xl border border-neutral-200/60 dark:border-neutral-700/60 mb-6 space-y-3">
+                                    <h3 className="text-xs font-bold text-neutral-900 dark:text-white">
+                                        Invite New Staff Member
+                                    </h3>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                                        <div className="sm:col-span-6">
+                                            <input
+                                                type="email"
+                                                value={inviteEmail}
+                                                onChange={(e) => setInviteEmail(e.target.value)}
+                                                placeholder="Enter staff email address (e.g. attendant@store.com)..."
+                                                className="w-full px-3.5 py-2.5 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-blue-500"
+                                            />
+                                        </div>
+                                        <div className="sm:col-span-4">
+                                            <select
+                                                value={inviteRole}
+                                                onChange={(e) => setInviteRole(e.target.value as UserRole)}
+                                                className="w-full px-3.5 py-2.5 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs font-semibold text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500 cursor-pointer"
+                                            >
+                                                <option value="cashier">Cashier / Sales Attendant</option>
+                                                <option value="inventory_manager">Inventory Manager</option>
+                                                <option value="admin">Co-Admin / Owner</option>
+                                            </select>
+                                        </div>
+                                        <div className="sm:col-span-2">
+                                            <button
+                                                type="button"
+                                                onClick={handleSendInvite}
+                                                className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                                            >
+                                                <UserPlus className="w-4 h-4" />
+                                                <span>Send Invite</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Read-Only Informational Staff Role Permissions Guide */}
+                                <div className="mb-6">
+                                    <h3 className="text-xs font-bold text-neutral-900 dark:text-white mb-2 flex items-center gap-1.5">
+                                        <Shield className="w-3.5 h-3.5 text-neutral-400" />
+                                        <span>Staff Role Permissions Guide</span>
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                        <div className="p-3 rounded-xl bg-neutral-50 dark:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700">
+                                            <div className="font-bold text-xs text-emerald-700 dark:text-emerald-400 mb-1">
+                                                Cashier
+                                            </div>
+                                            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                                                Fast receipt issuing & POS checkout. Hides General Ledger, cost prices, & store settings.
+                                            </p>
+                                        </div>
+
+                                        <div className="p-3 rounded-xl bg-neutral-50 dark:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700">
+                                            <div className="font-bold text-xs text-blue-700 dark:text-blue-400 mb-1">
+                                                Inventory Manager
+                                            </div>
+                                            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                                                Manage product catalog, stock batches, inventory movements, & POS register.
+                                            </p>
+                                        </div>
+
+                                        <div className="p-3 rounded-xl bg-neutral-50 dark:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700">
+                                            <div className="font-bold text-xs text-purple-700 dark:text-purple-400 mb-1">
+                                                Owner / Admin
+                                            </div>
+                                            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                                                Full administrative access to store ledgers, settings, payouts, & team management.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Active Organization Team Table */}
+                                <div>
+                                    <h3 className="text-xs font-bold text-neutral-900 dark:text-white mb-2">
+                                        Active & Pending Staff Members ({activeOrg?.members?.length || 0})
+                                    </h3>
+
+                                    <div className="space-y-2">
+                                        {activeOrg?.members?.map((member) => (
+                                            <div
+                                                key={member.id}
+                                                className="flex items-center justify-between p-3 rounded-xl bg-neutral-50/50 dark:bg-neutral-700/30 border border-neutral-100 dark:border-neutral-700/60"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                                        {member.email.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs font-bold text-neutral-900 dark:text-white">
+                                                                {member.name || member.email}
+                                                            </span>
+                                                            <span className={`px-1.5 py-0.2 text-[10px] font-bold rounded-md ${
+                                                                member.status === 'active'
+                                                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                                                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+                                                            }`}>
+                                                                {member.status === 'active' ? 'Active' : 'Pending Invite'}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                                                            {member.email}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <select
+                                                        value={member.role}
+                                                        onChange={(e) => updateStaffRole(member.id, e.target.value as UserRole)}
+                                                        className="px-2 py-1 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-lg text-xs font-medium text-neutral-800 dark:text-neutral-200"
+                                                    >
+                                                        <option value="admin">Admin</option>
+                                                        <option value="inventory_manager">Manager</option>
+                                                        <option value="cashier">Cashier</option>
+                                                    </select>
+
+                                                    {member.role !== 'admin' && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                removeStaffMember(member.id);
+                                                                toast.success('Revoked staff access');
+                                                            }}
+                                                            className="p-1 text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
+                                                            title="Revoke access"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
+
                             {/* Logo Section */}
                             <section className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-6">
@@ -461,21 +657,22 @@ export default function SettingsPage() {
                                         </p>
                                     </div>
 
-                                    {/* Field Help Toggle */}
+                                    {/* Field Help & Info Icons Toggle */}
                                     <div className="pt-6 border-t border-neutral-100 dark:border-neutral-700">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <HelpCircle className="w-4 h-4 text-blue-500" />
-                                                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Show Field Help</label>
+                                                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Show Page & Tab Help Icons (?)</label>
                                                 </div>
                                                 <p className="text-xs text-neutral-500 dark:text-neutral-400 pr-4">
-                                                    Display help tooltips next to financial terms (Subtotal, Tax, Amount Due, etc.) to explain their meaning and calculation. Great for learning!
+                                                    Display subtle, faint encircled (?) help buttons next to page titles, tabs, modals, and terms to explain their purpose and definitions. Toggle off for a pure minimalist interface.
                                                 </p>
                                             </div>
                                             <button
+                                                type="button"
                                                 onClick={() => handleChange('showFieldHelp', !formData.showFieldHelp)}
-                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.showFieldHelp
+                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${formData.showFieldHelp
                                                     ? 'bg-blue-500'
                                                     : 'bg-neutral-300 dark:bg-neutral-600'
                                                     }`}

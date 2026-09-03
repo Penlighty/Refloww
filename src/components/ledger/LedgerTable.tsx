@@ -3,18 +3,24 @@
 import Link from 'next/link';
 import { Document } from '@/lib/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { FileText, Receipt, Truck, ArrowUpDown } from 'lucide-react';
+import { FileText, Receipt, Truck, ArrowUpDown, CheckSquare, Square } from 'lucide-react';
 
 interface LedgerTableProps {
     documents: Document[];
     sortField: keyof Document;
     sortOrder: 'asc' | 'desc';
     onSort: (field: keyof Document) => void;
+    isSelectMode?: boolean;
+    selectedDocIds?: string[];
+    onToggleSelectDoc?: (id: string) => void;
+    onToggleSelectAll?: () => void;
+    isAllSelected?: boolean;
 }
 
 const statusConfig = {
     'draft': { label: 'Draft', bgClass: 'bg-neutral-100 dark:bg-neutral-700', textClass: 'text-neutral-600 dark:text-neutral-300', dotClass: 'bg-neutral-400' },
     'sent': { label: 'Sent', bgClass: 'bg-blue-50 dark:bg-blue-900/30', textClass: 'text-blue-600 dark:text-blue-400', dotClass: 'bg-blue-500' },
+    'partially_paid': { label: 'Partially Paid', bgClass: 'bg-amber-50 dark:bg-amber-900/30', textClass: 'text-amber-600 dark:text-amber-400', dotClass: 'bg-amber-500' },
     'paid': { label: 'Paid', bgClass: 'bg-emerald-50 dark:bg-emerald-900/30', textClass: 'text-emerald-600 dark:text-emerald-400', dotClass: 'bg-emerald-500' },
     'overdue': { label: 'Overdue', bgClass: 'bg-red-50 dark:bg-red-900/30', textClass: 'text-red-600 dark:text-red-400', dotClass: 'bg-red-500' },
     'cancelled': { label: 'Cancelled', bgClass: 'bg-neutral-100 dark:bg-neutral-700', textClass: 'text-neutral-500 dark:text-neutral-400', dotClass: 'bg-neutral-400' },
@@ -28,7 +34,17 @@ const typeConfig = {
 
 import { useSettingsStore } from '@/lib/store';
 
-export default function LedgerTable({ documents, sortField, sortOrder, onSort }: LedgerTableProps) {
+export default function LedgerTable({
+    documents,
+    sortField,
+    sortOrder,
+    onSort,
+    isSelectMode = false,
+    selectedDocIds = [],
+    onToggleSelectDoc,
+    onToggleSelectAll,
+    isAllSelected = false,
+}: LedgerTableProps) {
     const { company } = useSettingsStore();
     const currency = company.currency;
 
@@ -46,6 +62,20 @@ export default function LedgerTable({ documents, sortField, sortOrder, onSort }:
                 <table className="w-full whitespace-nowrap">
                     <thead>
                         <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                            {isSelectMode && (
+                                <th className="px-6 py-4 w-10">
+                                    <button
+                                        onClick={onToggleSelectAll}
+                                        className="p-1 rounded-md text-neutral-400 hover:text-[#2d3748] dark:hover:text-neutral-200 transition-colors"
+                                    >
+                                        {isAllSelected ? (
+                                            <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                        ) : (
+                                            <Square className="w-4 h-4" />
+                                        )}
+                                    </button>
+                                </th>
+                            )}
                             <th className="text-left px-6 py-4">
                                 <button
                                     onClick={() => onSort('date')}
@@ -74,7 +104,13 @@ export default function LedgerTable({ documents, sortField, sortOrder, onSort }:
                                 </button>
                             </th>
                             <th className="text-left px-6 py-4">
-                                <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Customer</span>
+                                <button
+                                    onClick={() => onSort('customerName' as keyof Document)}
+                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                >
+                                    Customer
+                                    <ArrowUpDown className="w-3 h-3" />
+                                </button>
                             </th>
                             <th className="text-left px-6 py-4">
                                 <button
@@ -103,9 +139,24 @@ export default function LedgerTable({ documents, sortField, sortOrder, onSort }:
                             const TypeIcon = TypeConfig.icon;
                             const isLocked = (doc as any)._isLocked === true;
                             const customerName = doc.customerName || (isLocked ? 'Encrypted' : '-');
+                            const rowAmount = doc.type === 'receipt' ? (doc.amountPaid || doc.grandTotal || 0) : (doc.grandTotal || 0);
 
                             return (
                                 <tr key={doc.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors group">
+                                    {isSelectMode && (
+                                        <td className="px-6 py-4 w-10">
+                                            <button
+                                                onClick={() => onToggleSelectDoc?.(doc.id)}
+                                                className="p-1 rounded-md text-neutral-400 hover:text-[#2d3748] dark:hover:text-neutral-200 transition-colors"
+                                            >
+                                                {selectedDocIds.includes(doc.id) ? (
+                                                    <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                                ) : (
+                                                    <Square className="w-4 h-4" />
+                                                )}
+                                            </button>
+                                        </td>
+                                    )}
                                     <td className="px-6 py-4">
                                         <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date || '')}</span>
                                     </td>
@@ -145,7 +196,7 @@ export default function LedgerTable({ documents, sortField, sortOrder, onSort }:
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <span className={`text-sm font-medium ${doc.status === 'cancelled' ? 'text-neutral-400 dark:text-neutral-500 line-through' : 'text-[#2d3748] dark:text-white'}`}>
-                                            {formatCurrency(doc.grandTotal || 0, currency)}
+                                            {formatCurrency(rowAmount, currency)}
                                         </span>
                                     </td>
                                 </tr>

@@ -3,6 +3,9 @@ import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import { Document, DocumentType, DocumentStatus, LineItem, DocumentFormData } from '@/lib/types';
 import { useCustomerStore } from './customerStore';
+import { useSettingsStore } from './settingsStore';
+import { useTransactionStore } from './transactionStore';
+import { getActiveOrgId, filterByActiveOrg, belongsToActiveOrg } from '@/lib/utils/orgIsolation';
 
 interface DocumentState {
     documents: Document[];
@@ -16,6 +19,7 @@ interface DocumentState {
 
     // Actions
     setActiveDocument: (id: string | null) => void;
+    getFilteredDocuments: () => Document[];
     generateDocumentNumber: (type: DocumentType) => string;
     addDocument: (data: Omit<Document, 'id' | 'createdAt' | 'updatedAt'>) => Document;
     createDocument: (type: DocumentType, data: DocumentFormData) => Document;
@@ -43,9 +47,10 @@ interface DocumentState {
     // Calculations
     recalculateTotals: (documentId: string) => void;
 
-    // Payment tracking helpers
+    // Payment tracking & Refund helpers
     getPaymentsForInvoice: (invoiceId: string) => Document[];
     getTotalPaidForInvoice: (invoiceId: string) => number;
+    refundDocument: (documentId: string, reason?: string) => void;
 }
 
 export const useDocumentStore = create<DocumentState>()(
@@ -61,46 +66,106 @@ export const useDocumentStore = create<DocumentState>()(
             setActiveDocument: (id) => set({ activeDocumentId: id }),
 
             generateDocumentNumber: (type) => {
-                const state = get();
-                const prefixes = {
-                    'invoice': 'INV',
-                    'receipt': 'RCP',
-                    'delivery-note': 'DN',
-                };
-                const counterKey = {
-                    'invoice': 'invoiceCounter',
-                    'receipt': 'receiptCounter',
-                    'delivery-note': 'deliveryNoteCounter',
-                }[type] as 'invoiceCounter' | 'receiptCounter' | 'deliveryNoteCounter';
+                const { getNextDocumentNumber, incrementDocumentNumber } = useSettingsStore.getState();
+                const numberingKey = type === 'invoice' ? 'invoice' : type === 'receipt' ? 'receipt' : 'deliveryNote';
+                const docNum = getNextDocumentNumber(numberingKey);
+                incrementDocumentNumber(numberingKey);
+                return docNum;
+            },
 
-                const counter = state[counterKey];
-                const paddedNumber = counter.toString().padStart(5, '0');
-                const documentNumber = `${prefixes[type]}-${paddedNumber}`;
-
-                // Increment counter
-                set({ [counterKey]: counter + 1 });
-
-                return documentNumber;
+            getFilteredDocuments: () => {
+                const rawDocs = filterByActiveOrg(get().documents);
+                return rawDocs.map(doc => {
+                    if (doc.type === 'receipt' && doc.status !== 'paid' && doc.status !== 'cancelled') {
+                        return { ...doc, status: 'paid' as DocumentStatus };
+                    }
+                    if (doc.type === 'invoice') {
+                        const receipts = rawDocs.filter(r => 
+                            r.type === 'receipt' && r.status !== 'cancelled' &&
+                            (r.sourceDocumentId === doc.id || r.sourceDocumentId === doc.documentNumber)
+                        );
+                        if (receipts.length > 0) {
+                            const totalPaid = receipts.reduce((sum, r) => sum + (r.amountPaid ?? r.grandTotal ?? 0), 0);
+                            const newStatus: DocumentStatus = totalPaid >= doc.grandTotal ? 'paid' : totalPaid > 0 ? 'partially_paid' : doc.status;
+                            const newAmountPaid = Math.min(doc.grandTotal, totalPaid);
+                            const newAmountDue = Math.max(0, doc.grandTotal - newAmountPaid);
+                            return {
+                                ...doc,
+                                amountPaid: newAmountPaid,
+                                amountDue: newAmountDue,
+                                status: newStatus
+                            };
+                        }
+                    }
+                    return doc;
+                });
             },
 
             addDocument: (data) => {
                 const now = new Date().toISOString();
+                const activeOrgId = getActiveOrgId();
+                const finalDocStatus: DocumentStatus = data.type === 'receipt' ? 'paid' : (data.status || 'draft');
                 const newDocument: Document = {
                     ...data,
                     id: uuidv4(),
+                    organizationId: data.organizationId || activeOrgId,
+                    status: finalDocStatus,
                     createdAt: now,
                     updatedAt: now,
                 };
 
-                set((state) => ({
-                    documents: [...state.documents, newDocument],
-                }));
+                set((state) => {
+                    let updatedDocs = [...state.documents, newDocument];
+                    if (newDocument.type === 'receipt' && newDocument.sourceDocumentId) {
+                        const parentDoc = updatedDocs.find(d => 
+                            d.id === newDocument.sourceDocumentId || d.documentNumber === newDocument.sourceDocumentId
+                        );
+                        if (parentDoc) {
+                            const allReceipts = updatedDocs.filter(d => 
+                                d.type === 'receipt' && 
+                                (d.sourceDocumentId === parentDoc.id || d.sourceDocumentId === parentDoc.documentNumber)
+                            );
+                            const totalPaid = allReceipts.reduce((sum, r) => sum + (r.amountPaid ?? r.grandTotal ?? 0), 0);
+                            const updatedParentStatus: DocumentStatus = totalPaid >= parentDoc.grandTotal ? 'paid' : totalPaid > 0 ? 'partially_paid' : parentDoc.status;
+                            updatedDocs = updatedDocs.map(d => d.id === parentDoc.id ? {
+                                ...d,
+                                amountPaid: Math.min(d.grandTotal, totalPaid),
+                                amountDue: Math.max(0, d.grandTotal - Math.min(d.grandTotal, totalPaid)),
+                                status: updatedParentStatus,
+                                updatedAt: now
+                            } : d);
+                        }
+                    }
+                    return { documents: updatedDocs };
+                });
+
+                try {
+                    useTransactionStore.getState().syncDocumentToTransaction(newDocument);
+                } catch (e) {
+                    console.error('Error syncing document to transaction:', e);
+                }
+
+                // Auto deduct stock if document is marked paid or is a receipt
+                if (newDocument.status === 'paid' || newDocument.type === 'receipt') {
+                    try {
+                        const { useProductStore } = require('./productStore');
+                        const productStore = useProductStore.getState();
+                        newDocument.lineItems?.forEach((item) => {
+                            if (item.productId) {
+                                productStore.deductStockForSale(item.productId, item.quantity, newDocument.documentNumber);
+                            }
+                        });
+                    } catch (e) {
+                        console.error('Error deducting stock on addDocument:', e);
+                    }
+                }
 
                 return newDocument;
             },
 
             createDocument: (type, data) => {
                 const now = new Date().toISOString();
+                const activeOrgId = getActiveOrgId();
                 const customer = useCustomerStore.getState().getCustomerById(data.customerId);
 
                 // Calculate totals
@@ -110,8 +175,17 @@ export const useDocumentStore = create<DocumentState>()(
                 const taxAmount = taxableAmount * (data.taxPercent / 100);
                 const grandTotal = taxableAmount + taxAmount;
 
+                // Determine initial status & payment timestamps
+                const isPaidType = type === 'receipt';
+                const initialStatus: DocumentStatus = isPaidType ? 'paid' : (data.status || 'draft');
+                const isPaid = initialStatus === 'paid';
+                const paidAt = data.paidAt || (isPaid ? now : undefined);
+                const amountPaid = data.amountPaid ?? (isPaid ? grandTotal : 0);
+                const amountDue = isPaid ? 0 : Math.max(0, grandTotal - amountPaid);
+
                 const newDocument: Document = {
                     id: uuidv4(),
+                    organizationId: data.organizationId || activeOrgId,
                     type,
                     templateId: data.templateId,
                     documentNumber: get().generateDocumentNumber(type),
@@ -124,14 +198,19 @@ export const useDocumentStore = create<DocumentState>()(
                     discountPercent: data.discountPercent,
                     discountAmount,
                     discountName: data.discountName,
+                    discountId: data.discountId,
                     taxPercent: data.taxPercent,
                     taxAmount,
                     grandTotal,
+                    amountPaid,
+                    amountDue,
 
-                    status: 'draft',
+                    status: initialStatus,
+                    paidAt,
                     notes: data.notes,
                     customValues: data.customValues,
                     sourceDocumentId: data.sourceDocumentId,
+                    storefrontOrderId: data.storefrontOrderId,
                     createdAt: now,
                     updatedAt: now,
                 };
@@ -140,16 +219,43 @@ export const useDocumentStore = create<DocumentState>()(
                     documents: [...state.documents, newDocument],
                 }));
 
+                try {
+                    useTransactionStore.getState().syncDocumentToTransaction(newDocument);
+                } catch (e) {
+                    console.error('Error syncing document to transaction:', e);
+                }
+
+                // Auto deduct stock if document is created as paid or is a receipt
+                if (isPaid || isPaidType) {
+                    try {
+                        const { useProductStore } = require('./productStore');
+                        const productStore = useProductStore.getState();
+                        data.lineItems.forEach((item) => {
+                            if (item.productId) {
+                                productStore.deductStockForSale(item.productId, item.quantity, newDocument.documentNumber);
+                            }
+                        });
+                    } catch (e) {
+                        console.error('Error deducting stock on createDocument:', e);
+                    }
+                }
+
                 return newDocument;
             },
 
+
             updateDocument: (id, data) => {
                 set((state) => ({
-                    documents: state.documents.map((doc) =>
-                        doc.id === id
-                            ? { ...doc, ...data, updatedAt: new Date().toISOString() }
-                            : doc
-                    ),
+                    documents: state.documents.map((doc) => {
+                        if (doc.id !== id) return doc;
+                        // Prevent changing documentNumber once created
+                        const { documentNumber, ...restData } = data;
+                        return {
+                            ...doc,
+                            ...restData,
+                            updatedAt: new Date().toISOString(),
+                        };
+                    }),
                 }));
 
                 // Recalculate totals if line items changed
@@ -159,25 +265,30 @@ export const useDocumentStore = create<DocumentState>()(
             },
 
             deleteDocument: (id) => {
-                set((state) => ({
-                    documents: state.documents.filter((doc) => doc.id !== id),
-                }));
+                const newDocs = get().documents.filter((doc) => doc.id !== id);
+                set({ documents: newDocs });
+                useTransactionStore.getState().backfillTransactionsFromDocuments(newDocs);
             },
 
             getDocumentById: (id) => {
-                return get().documents.find((doc) => doc.id === id);
+                const doc = get().documents.find((doc) => doc.id === id);
+                if (!doc || !belongsToActiveOrg(doc.organizationId)) return undefined;
+                return doc;
             },
 
             getDocumentsByType: (type) => {
-                return get().documents.filter((doc) => doc.type === type);
+                const activeDocs = filterByActiveOrg(get().documents);
+                return activeDocs.filter((doc) => doc.type === type);
             },
 
             getDocumentsByStatus: (status) => {
-                return get().documents.filter((doc) => doc.status === status);
+                const activeDocs = filterByActiveOrg(get().documents);
+                return activeDocs.filter((doc) => doc.status === status);
             },
 
             getDocumentsByCustomer: (customerId) => {
-                return get().documents.filter((doc) => doc.customerId === customerId);
+                const activeDocs = filterByActiveOrg(get().documents);
+                return activeDocs.filter((doc) => doc.customerId === customerId);
             },
 
             addLineItem: (documentId, item) => {
@@ -235,6 +346,20 @@ export const useDocumentStore = create<DocumentState>()(
             },
 
             markAsPaid: (id) => {
+                const doc = get().getDocumentById(id);
+                if (doc && doc.status !== 'paid') {
+                    try {
+                        const { useProductStore } = require('./productStore');
+                        const productStore = useProductStore.getState();
+                        doc.lineItems?.forEach((item) => {
+                            if (item.productId) {
+                                productStore.deductStockForSale(item.productId, item.quantity, doc.documentNumber);
+                            }
+                        });
+                    } catch (e) {
+                        console.error('Error deducting stock on markAsPaid:', e);
+                    }
+                }
                 get().updateDocument(id, {
                     status: 'paid',
                     paidAt: new Date().toISOString()
@@ -272,6 +397,12 @@ export const useDocumentStore = create<DocumentState>()(
                 set((state) => ({
                     documents: [...state.documents, convertedDoc],
                 }));
+
+                try {
+                    useTransactionStore.getState().syncDocumentToTransaction(convertedDoc);
+                } catch (e) {
+                    console.error('Error syncing converted document to transaction:', e);
+                }
 
                 return convertedDoc;
             },
@@ -334,6 +465,45 @@ export const useDocumentStore = create<DocumentState>()(
             getTotalPaidForInvoice: (invoiceId) => {
                 const payments = get().getPaymentsForInvoice(invoiceId);
                 return payments.reduce((sum, receipt) => sum + (receipt.amountPaid || receipt.grandTotal), 0);
+            },
+
+            refundDocument: (documentId, reason) => {
+                const doc = get().documents.find(d => d.id === documentId);
+                if (!doc || doc.status === 'cancelled') return;
+
+                // Dynamically import product store to prevent circular dependency
+                const { useProductStore } = require('./productStore');
+                const productStore = useProductStore.getState();
+
+                // Restore inventory stock for returned line items
+                doc.lineItems?.forEach((item: LineItem) => {
+                    if (!item.productId) return;
+                    const prod = productStore.getProductById(item.productId);
+                    if (prod) {
+                        const newStock = (prod.stockQuantity || 0) + (item.quantity || 0);
+                        productStore.adjustStock(
+                            item.productId,
+                            undefined,
+                            newStock,
+                            `Refund for ${doc.documentNumber}: ${reason || 'Customer Return'}`,
+                            'adjustment'
+                        );
+                    }
+                });
+
+                // Update document status to cancelled/refunded
+                set((state) => ({
+                    documents: state.documents.map(d =>
+                        d.id === documentId
+                            ? {
+                                ...d,
+                                status: 'cancelled',
+                                notes: d.notes ? `${d.notes}\n[REFUNDED: ${reason || 'Customer Return'}]` : `[REFUNDED: ${reason || 'Customer Return'}]`,
+                                updatedAt: new Date().toISOString()
+                            }
+                            : d
+                    )
+                }));
             },
         }),
         {

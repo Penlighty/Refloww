@@ -71,9 +71,9 @@ const getUserDoc = (collectionName: CollectionName, docId: string) => {
  * Firestore does not accept undefined values
  */
 const sanitizeData = (data: any): any => {
-    if (data === null) return null;
-    if (data === undefined) return null; // Convert undefined in arrays to null
-    if (data instanceof Date) return data;
+    if (data === null || data === undefined) return null;
+    if (typeof data === 'function') return null;
+    if (data instanceof Date) return data.toISOString();
     if (Array.isArray(data)) {
         return data.map(item => sanitizeData(item));
     }
@@ -81,7 +81,7 @@ const sanitizeData = (data: any): any => {
         const sanitized: any = {};
         Object.keys(data).forEach(key => {
             const value = data[key];
-            if (value !== undefined) {
+            if (value !== undefined && typeof value !== 'function') {
                 sanitized[key] = sanitizeData(value);
             }
         });

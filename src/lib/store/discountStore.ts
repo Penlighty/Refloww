@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import { Discount, DiscountFormData } from '@/lib/types';
+import { getActiveOrgId, filterByActiveOrg, belongsToActiveOrg } from '@/lib/utils/orgIsolation';
 
 interface DiscountState {
     discounts: Discount[];
@@ -10,6 +11,7 @@ interface DiscountState {
 
     // Actions
     setSearchQuery: (query: string) => void;
+    getFilteredDiscounts: () => Discount[];
     addDiscount: (data: DiscountFormData) => Discount;
     updateDiscount: (id: string, data: Partial<DiscountFormData>) => void;
     deleteDiscount: (id: string) => void;
@@ -27,10 +29,16 @@ export const useDiscountStore = create<DiscountState>()(
 
             setSearchQuery: (query) => set({ searchQuery: query }),
 
+            getFilteredDiscounts: () => {
+                return filterByActiveOrg<Discount>(get().discounts);
+            },
+
             addDiscount: (data) => {
                 const now = new Date().toISOString();
+                const activeOrgId = getActiveOrgId();
                 const newDiscount: Discount = {
                     id: uuidv4(),
+                    organizationId: activeOrgId,
                     ...data,
                     createdAt: now,
                     updatedAt: now,
@@ -62,19 +70,23 @@ export const useDiscountStore = create<DiscountState>()(
             },
 
             getDiscountById: (id) => {
-                return get().discounts.find((discount) => discount.id === id);
+                const discount = get().discounts.find((d) => d.id === id);
+                if (!discount || !belongsToActiveOrg(discount.organizationId)) return undefined;
+                return discount;
             },
 
             searchDiscounts: (query) => {
                 const lowerQuery = query.toLowerCase();
-                return get().discounts.filter(
+                const activeDiscounts = filterByActiveOrg(get().discounts);
+                return activeDiscounts.filter(
                     (discount) =>
                         discount.name.toLowerCase().includes(lowerQuery)
                 );
             },
 
             getActiveDiscounts: () => {
-                return get().discounts.filter(d => d.isActive);
+                const activeDiscounts = filterByActiveOrg(get().discounts);
+                return activeDiscounts.filter(d => d.isActive);
             }
         }),
         {

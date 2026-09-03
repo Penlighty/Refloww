@@ -98,7 +98,14 @@ export default function SignupPage() {
         <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900 p-4">
             <div className="w-full max-w-md">
                 {/* Logo/Brand */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-8 flex flex-col items-center">
+                    <div className="h-12 mb-3 flex items-center justify-center">
+                        <img
+                            src="/logo/refloww-full-orange.svg"
+                            alt="Refloww Logo"
+                            className="h-10 w-auto object-contain"
+                        />
+                    </div>
                     <h1 className="text-3xl font-bold text-[#2d3748] dark:text-white">
                         Create Account
                     </h1>

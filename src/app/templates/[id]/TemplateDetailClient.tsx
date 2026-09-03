@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { Modal, ModalFooter } from '@/components/ui';
+import { toast } from 'react-hot-toast';
 
 import TemplateSheetSlider, { extractTemplateSheets } from '@/components/TemplateSheetSlider';
 
@@ -34,10 +35,29 @@ export default function TemplateDetailClient() {
     const router = useRouter();
     const templateId = params.id as string;
 
-    const { templates, deleteTemplate, setDefaultTemplate } = useTemplateStore();
-    const template = templates.find(t => t.id === templateId);
+    const { getTemplateById, deleteTemplate, setDefaultTemplate, addTemplate } = useTemplateStore();
+    const template = getTemplateById(templateId);
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const handleDuplicate = () => {
+        if (!template) return;
+        addTemplate({
+            name: `${template.name} (Copy)`,
+            type: template.type,
+            imageUrl: template.imageUrl,
+            originalFileName: template.originalFileName,
+            orientation: template.orientation,
+            width: template.width,
+            height: template.height,
+            mode: template.mode,
+            fields: template.fields,
+            variants: template.variants,
+            coverImage: template.coverImage,
+        });
+        toast.success(`Template "${template.name}" duplicated successfully!`);
+        router.push('/templates');
+    };
 
     if (!template) {
         return (
@@ -148,7 +168,7 @@ export default function TemplateDetailClient() {
                             </Button>
                         )}
 
-                        <Button variant="ghost" fullWidth leftIcon={<Copy className="w-4 h-4" />}>
+                        <Button variant="ghost" fullWidth leftIcon={<Copy className="w-4 h-4" />} onClick={handleDuplicate}>
                             Duplicate Template
                         </Button>
 

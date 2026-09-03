@@ -2,10 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { useDocumentStore, useCustomerStore, useSettingsStore, useTemplateStore } from '@/lib/store';
+import { useDocumentStore, useCustomerStore, useSettingsStore, useTemplateStore, useOrganizationStore, useTransactionStore } from '@/lib/store';
 import { formatCurrency, formatDate, sumEffectiveGrandTotals, downloadPdf, shareDocument, formatAmountInWords } from '@/lib/utils';
-import { Button, EmptyState, SearchInput, Select, Modal, ModalFooter } from '@/components/ui';
-import { DocumentType } from '@/lib/types';
+import { Button, EmptyState, SearchInput, Select, Modal, ModalFooter, PageHelpModal } from '@/components/ui';
+import { DocumentType, Document } from '@/lib/types';
 import { toast } from 'react-hot-toast';
 import DocumentRenderer from '@/components/DocumentRenderer';
 import {
@@ -24,7 +24,10 @@ import {
     Truck,
     Edit2,
     Copy,
-    Share2
+    Share2,
+    Hash,
+    CheckSquare,
+    Square
 } from 'lucide-react';
 
 interface DocumentListProps {
@@ -39,22 +42,36 @@ const statusConfig = {
     'draft': { label: 'Draft', bgClass: 'bg-neutral-100 dark:bg-neutral-700', textClass: 'text-neutral-600 dark:text-neutral-300', dotClass: 'bg-neutral-400', icon: FileText },
     'sent': { label: 'Sent', bgClass: 'bg-blue-50 dark:bg-blue-900/30', textClass: 'text-blue-600 dark:text-blue-400', dotClass: 'bg-blue-500', icon: Send },
     'paid': { label: 'Paid', bgClass: 'bg-emerald-50 dark:bg-emerald-900/30', textClass: 'text-emerald-600 dark:text-emerald-400', dotClass: 'bg-emerald-500', icon: Check },
+    'partially_paid': { label: 'Partial', bgClass: 'bg-amber-50 dark:bg-amber-900/30', textClass: 'text-amber-600 dark:text-amber-400', dotClass: 'bg-amber-500', icon: Clock },
     'overdue': { label: 'Overdue', bgClass: 'bg-red-50 dark:bg-red-900/30', textClass: 'text-red-600 dark:text-red-400', dotClass: 'bg-red-500', icon: AlertCircle },
     'cancelled': { label: 'Cancelled', bgClass: 'bg-neutral-100 dark:bg-neutral-700', textClass: 'text-neutral-500 dark:text-neutral-400', dotClass: 'bg-neutral-400', icon: Trash2 },
 };
 
-type SortField = 'documentNumber' | 'date' | 'grandTotal' | 'status';
+type SortField = 'documentNumber' | 'transactionNumber' | 'customerName' | 'date' | 'status' | 'grandTotal';
 type SortOrder = 'asc' | 'desc';
 
 export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDescription }: DocumentListProps) {
-    const { documents, updateDocument, deleteDocument, duplicateDocument } = useDocumentStore();
+    const { documents, getFilteredDocuments, updateDocument, deleteDocument, duplicateDocument } = useDocumentStore();
+    const { transactions } = useTransactionStore();
+    const activeOrgId = useOrganizationStore((state) => state.activeOrganizationId);
+    const displayDocuments = useMemo(() => getFilteredDocuments(), [documents, activeOrgId, getFilteredDocuments]);
     const { company } = useSettingsStore();
     const { getTemplateById } = useTemplateStore();
     const { getCustomerById } = useCustomerStore();
     const currency = company.currency;
 
-    // Filter by type
-    const typedDocuments = documents.filter(d => d.type === type);
+    // Helper lookup for transaction number corresponding to a document
+    const getTrxForDoc = (doc: Document) => {
+        return transactions.find(t =>
+            (doc.type === 'invoice' && (t.invoiceId === doc.id || t.invoiceNumber === doc.documentNumber)) ||
+            (doc.type === 'receipt' && (t.receiptIds?.includes(doc.id) || t.receiptNumbers?.includes(doc.documentNumber))) ||
+            (doc.type === 'delivery-note' && (t.deliveryNoteIds?.includes(doc.id) || t.deliveryNoteNumbers?.includes(doc.documentNumber))) ||
+            (doc.sourceDocumentId && (t.invoiceId === doc.sourceDocumentId || t.invoiceNumber === doc.sourceDocumentId))
+        );
+    };
+
+    // Filter by type & active organization
+    const typedDocuments = useMemo(() => displayDocuments.filter(d => d.type === type), [displayDocuments, type]);
 
     // UI State
     const [searchQuery, setSearchQuery] = useState('');
@@ -64,7 +81,10 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [openStatusMenuId, setOpenStatusMenuId] = useState<string | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
     const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+    const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
+    const [isSelectMode, setIsSelectMode] = useState<boolean>(false);
     const [activePdfDoc, setActivePdfDoc] = useState<any | null>(null);
 
     // PDF and Share helpers for document list items
@@ -146,48 +166,75 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
     const filteredDocuments = useMemo(() => {
         let result = typedDocuments.filter((doc) => {
             const query = searchQuery.toLowerCase();
-            // Handle potentially undefined fields (encrypted documents may have partial data)
             const docNumber = doc.documentNumber || '';
             const customerName = doc.customerName || '';
+            const linkedTrx = getTrxForDoc(doc);
+            const trxNum = linkedTrx?.transactionNumber || '';
             const matchesSearch =
                 docNumber.toLowerCase().includes(query) ||
-                customerName.toLowerCase().includes(query);
+                customerName.toLowerCase().includes(query) ||
+                trxNum.toLowerCase().includes(query);
             const matchesStatus = statusFilter === 'all' || doc.status === statusFilter;
             return matchesSearch && matchesStatus;
         });
 
         result.sort((a, b) => {
-            let aVal: any = a[sortField];
-            let bVal: any = b[sortField];
+            let aVal: any = a[sortField as keyof Document];
+            let bVal: any = b[sortField as keyof Document];
 
-            // Handle undefined values for encrypted documents
-            if (aVal === undefined) aVal = '';
-            if (bVal === undefined) bVal = '';
-
-            if (sortField === 'date') {
+            if (sortField === 'transactionNumber') {
+                aVal = getTrxForDoc(a)?.transactionNumber || '';
+                bVal = getTrxForDoc(b)?.transactionNumber || '';
+            } else if (sortField === 'customerName') {
+                aVal = (a.customerName || '').toLowerCase();
+                bVal = (b.customerName || '').toLowerCase();
+            } else if (sortField === 'date') {
                 aVal = new Date(a.date || 0).getTime();
                 bVal = new Date(b.date || 0).getTime();
             }
+
+            if (aVal === undefined) aVal = '';
+            if (bVal === undefined) bVal = '';
 
             const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
             return sortOrder === 'asc' ? comparison : -comparison;
         });
 
         return result;
-    }, [typedDocuments, searchQuery, statusFilter, sortField, sortOrder]);
+    }, [typedDocuments, searchQuery, statusFilter, sortField, sortOrder, transactions]);
+
+    // Multi-select handlers
+    const isAllSelected = filteredDocuments.length > 0 && selectedDocIds.length === filteredDocuments.length;
+
+    const toggleSelectAll = () => {
+        if (isAllSelected) {
+            setSelectedDocIds([]);
+        } else {
+            setSelectedDocIds(filteredDocuments.map(d => d.id));
+        }
+    };
+
+    const toggleSelectRow = (id: string) => {
+        setSelectedDocIds(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    };
+
+    const handleBulkDelete = () => {
+        selectedDocIds.forEach(id => deleteDocument(id));
+        toast.success(`Deleted ${selectedDocIds.length} ${title.toLowerCase()}`);
+        setSelectedDocIds([]);
+        setIsBulkDeleteModalOpen(false);
+    };
 
     // Stats
     const stats = useMemo(() => {
-        // Exclude cancelled documents from the total amount
         const activeDocs = typedDocuments.filter(doc => doc.status !== 'cancelled');
         const total = sumEffectiveGrandTotals(activeDocs, getTemplateById);
-
         const paidDocs = typedDocuments.filter(doc => doc.status === 'paid');
         const paid = sumEffectiveGrandTotals(paidDocs, getTemplateById);
-
         const pendingDocs = typedDocuments.filter(doc => doc.status === 'sent' || doc.status === 'draft');
         const pending = sumEffectiveGrandTotals(pendingDocs, getTemplateById);
-
         const count = typedDocuments.length;
         return { total, paid, pending, count };
     }, [typedDocuments, getTemplateById]);
@@ -219,7 +266,6 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
     const handleStatusChange = (id: string, newStatus: string) => {
         const doc = documents.find(d => d.id === id);
         updateDocument(id, { status: newStatus as any });
-        // If changing to paid, set paidAt
         if (newStatus === 'paid') {
             updateDocument(id, { paidAt: new Date().toISOString() });
         }
@@ -248,13 +294,28 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">{title}</h1>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">{title}</h1>
+                        <PageHelpModal
+                            title={`${title} Overview`}
+                            description={`Create, manage, track status, download PDFs, and share ${title.toLowerCase()} with your clients.`}
+                            terms={[
+                                { term: 'Draft', definition: 'Saved document not yet sent or finalized.' },
+                                { term: 'Sent', definition: 'Document sent to customer, awaiting payment or delivery confirmation.' },
+                                { term: 'Paid', definition: 'Transaction complete and full payment received.' },
+                                { term: 'Overdue', definition: 'Payment due date has passed without recorded payment.' }
+                            ]}
+                            tips={[
+                                "Click the 3-dots actions menu on any row to download PDF, share via WhatsApp, or duplicate the document."
+                            ]}
+                        />
+                    </div>
                     <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                         Manage your {title.toLowerCase()}
                     </p>
                 </div>
                 <Link href={newUrl}>
-                    <Button leftIcon={<Plus className="w-4 h-4" />}>
+                    <Button leftIcon={<Plus className="w-4 h-4" />} iconOnlyMobile>
                         New {title.slice(0, -1)}
                     </Button>
                 </Link>
@@ -286,16 +347,19 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                 </div>
             )}
 
-            {/* Filters */}
+            {/* Filters & Selection Toolbar */}
             {typedDocuments.length > 0 && (
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <SearchInput
-                        value={searchQuery}
-                        onChange={setSearchQuery}
-                        placeholder="Search by number or customer..."
-                        className="flex-1 max-w-md"
-                    />
-                    <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
+                    <div className="flex flex-1 items-center gap-3 max-w-md">
+                        <SearchInput
+                            value={searchQuery}
+                            onChange={setSearchQuery}
+                            placeholder="Search by doc number, TRX ID or customer..."
+                            className="w-full"
+                        />
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
                         <Select
                             options={
                                 type === 'invoice'
@@ -318,6 +382,54 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                             onChange={setStatusFilter}
                             className="w-36"
                         />
+
+                        {/* Select Mode Toolbar Controls */}
+                        {!isSelectMode ? (
+                            <Button
+                                variant="outline"
+                                size="md"
+                                leftIcon={<CheckSquare className="w-4 h-4 text-neutral-500" />}
+                                iconOnlyMobile
+                                onClick={() => setIsSelectMode(true)}
+                            >
+                                Select
+                            </Button>
+                        ) : (
+                            <>
+                                <Button
+                                    variant="secondary"
+                                    size="md"
+                                    leftIcon={isAllSelected ? <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" /> : <Square className="w-4 h-4" />}
+                                    iconOnlyMobile
+                                    onClick={toggleSelectAll}
+                                >
+                                    {isAllSelected ? `Deselect All (${filteredDocuments.length})` : 'Select All'}
+                                </Button>
+
+                                <Button
+                                    variant="ghost"
+                                    size="md"
+                                    onClick={() => {
+                                        setIsSelectMode(false);
+                                        setSelectedDocIds([]);
+                                    }}
+                                >
+                                    Done
+                                </Button>
+
+                                {selectedDocIds.length > 0 && (
+                                    <Button
+                                        variant="danger"
+                                        size="md"
+                                        leftIcon={<Trash2 className="w-4 h-4" />}
+                                        iconOnlyMobile
+                                        onClick={() => setIsBulkDeleteModalOpen(true)}
+                                    >
+                                        Delete ({selectedDocIds.length})
+                                    </Button>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
             )}
@@ -350,7 +462,17 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                     <div className="overflow-x-auto min-h-[300px]">
                         <table className="w-full min-w-[700px] md:min-w-full">
                         <thead>
-                            <tr className="border-b border-neutral-100 dark:border-neutral-700">
+                            <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                                {isSelectMode && (
+                                    <th className="px-4 py-4 w-10 text-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={isAllSelected}
+                                            onChange={toggleSelectAll}
+                                            className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                        />
+                                    </th>
+                                )}
                                 <th className="text-left px-6 py-4">
                                     <button
                                         onClick={() => handleSort('documentNumber')}
@@ -361,7 +483,22 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                     </button>
                                 </th>
                                 <th className="text-left px-6 py-4">
-                                    <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Customer</span>
+                                    <button
+                                        onClick={() => handleSort('transactionNumber')}
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                    >
+                                        Transaction ID
+                                        <ArrowUpDown className="w-3 h-3" />
+                                    </button>
+                                </th>
+                                <th className="text-left px-6 py-4">
+                                    <button
+                                        onClick={() => handleSort('customerName')}
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                    >
+                                        Customer
+                                        <ArrowUpDown className="w-3 h-3" />
+                                    </button>
                                 </th>
                                 <th className="text-left px-6 py-4">
                                     <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Links</span>
@@ -404,11 +541,22 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                 const isLocked = (doc as any)._isLocked === true;
                                 const isNearBottom = index >= Math.max(0, filteredDocuments.length - 2) || filteredDocuments.length <= 2;
                                 const popupPosClass = isNearBottom ? 'bottom-full mb-1' : 'top-full mt-1';
-
+                                const linkedTrx = getTrxForDoc(doc);
                                 const isMenuOpen = openMenuId === doc.id || openStatusMenuId === doc.id;
+                                const isRowSelected = selectedDocIds.includes(doc.id);
 
                                 return (
-                                    <tr key={doc.id} className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${isMenuOpen ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}>
+                                    <tr key={doc.id} className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${isRowSelected ? 'bg-blue-50/40 dark:bg-blue-900/20' : ''} ${isMenuOpen ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}>
+                                        {isSelectMode && (
+                                            <td className="px-4 py-4 text-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isRowSelected}
+                                                    onChange={() => toggleSelectRow(doc.id)}
+                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                />
+                                            </td>
+                                        )}
                                         <td className="px-6 py-4">
                                             <Link href={`/${type}s/${doc.id}`} className="flex items-center gap-3 group">
                                                 <div className={`w-10 h-10 rounded-xl ${isLocked ? 'bg-gradient-to-br from-amber-400 to-amber-600' : 'bg-gradient-to-br from-blue-400 to-blue-600'} flex items-center justify-center text-white flex-shrink-0`}>
@@ -418,6 +566,15 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                     {doc.documentNumber || (isLocked ? '🔒 Encrypted' : 'Untitled')}
                                                 </span>
                                             </Link>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {linkedTrx ? (
+                                                <span className="inline-flex items-center gap-1 font-mono text-xs font-bold text-[#2d3748] dark:text-neutral-200 bg-neutral-100 dark:bg-neutral-700/60 px-2.5 py-1 rounded-lg border border-neutral-200/60 dark:border-neutral-600/50">
+                                                    {linkedTrx.transactionNumber}
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs text-neutral-400 dark:text-neutral-500 font-mono">-</span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="text-sm text-neutral-600 dark:text-neutral-300">
@@ -654,6 +811,22 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                 <ModalFooter>
                     <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
                     <Button variant="danger" onClick={handleDelete}>Delete</Button>
+                </ModalFooter>
+            </Modal>
+
+            {/* Bulk Delete Modal */}
+            <Modal
+                isOpen={isBulkDeleteModalOpen}
+                onClose={() => setIsBulkDeleteModalOpen(false)}
+                title={`Delete Selected ${title}`}
+                size="sm"
+            >
+                <p className="text-neutral-600">
+                    Are you sure you want to delete <strong>{selectedDocIds.length}</strong> selected {title.toLowerCase()}? This action cannot be undone.
+                </p>
+                <ModalFooter>
+                    <Button variant="ghost" onClick={() => setIsBulkDeleteModalOpen(false)}>Cancel</Button>
+                    <Button variant="danger" onClick={handleBulkDelete}>Delete All Selected ({selectedDocIds.length})</Button>
                 </ModalFooter>
             </Modal>
         </div>

@@ -17,13 +17,13 @@ function QuickActionPill({ href, icon, label, variant = 'secondary' }: QuickActi
         <Link
             href={href}
             className={`inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${isPrimary
-                ? 'bg-secondary text-neutral-900 hover:brightness-95 shadow-sm'
+                ? 'bg-[#fc6d2d] hover:bg-[#ea500d] text-white shadow-sm shadow-orange-500/25 active:scale-[0.98]'
                 : 'bg-neutral-100 dark:bg-neutral-800 text-[#2d3748] dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-700'
                 }`}
         >
             <span className={`flex items-center justify-center ${isPrimary
-                ? ''
-                : 'w-7 h-7 bg-[#2d3748] dark:bg-secondary rounded-full text-white dark:text-neutral-900'
+                ? 'text-white'
+                : 'w-7 h-7 bg-[#2d3748] dark:bg-neutral-700 rounded-full text-white dark:text-neutral-200'
                 }`}>
                 {icon}
             </span>
@@ -39,12 +39,12 @@ function QuickActionTile({ href, icon, label, variant = 'secondary' }: QuickActi
         <Link
             href={href}
             className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 text-center border group ${isPrimary
-                ? 'bg-secondary/15 dark:bg-secondary/10 border-secondary/35 dark:border-secondary/20 text-neutral-900 dark:text-neutral-100 hover:bg-secondary/25'
+                ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500/30 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20'
                 : 'bg-neutral-50/50 dark:bg-neutral-800/40 border-neutral-100/80 dark:border-neutral-700/50 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/70'
                 } shadow-sm active:scale-95`}
         >
             <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-2 transition-transform duration-200 group-hover:scale-105 group-active:scale-95 ${isPrimary
-                ? 'bg-secondary text-neutral-900'
+                ? 'bg-[#fc6d2d] text-white shadow-sm shadow-orange-500/25'
                 : 'bg-white dark:bg-neutral-800 text-[#2d3748] dark:text-neutral-200 shadow-sm'
                 } [&_svg]:w-5 [&_svg]:h-5 [&_svg]:stroke-[2]`}
             >

@@ -15,7 +15,9 @@ import {
     Trash2,
     ArrowUpDown,
     CheckCircle,
-    XCircle
+    XCircle,
+    CheckSquare,
+    Square
 } from 'lucide-react';
 
 type SortField = 'name' | 'percentage' | 'isActive';
@@ -30,6 +32,9 @@ export default function DiscountsPage() {
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+    const [selectedDiscountIds, setSelectedDiscountIds] = useState<string[]>([]);
+    const [isSelectMode, setIsSelectMode] = useState<boolean>(false);
     const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
     const [discountToDelete, setDiscountToDelete] = useState<Discount | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -40,7 +45,7 @@ export default function DiscountsPage() {
         percentage: 0,
         isActive: true,
     });
-    const [formErrors, setFormErrors] = useState<Partial<DiscountFormData>>({}); // Note: keyof DiscountFormData might be number, so manual error handling
+    const [formErrors, setFormErrors] = useState<Partial<DiscountFormData>>({});
 
     // Filter and sort discounts
     const filteredDiscounts = useMemo(() => {
@@ -54,9 +59,7 @@ export default function DiscountsPage() {
         result.sort((a, b) => {
             const aVal = a[sortField];
             const bVal = b[sortField];
-            // Handle boolean comparison for isActive
             if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
-                // true > false?
                 return sortOrder === 'asc' ? (aVal === bVal ? 0 : aVal ? -1 : 1) : (aVal === bVal ? 0 : aVal ? 1 : -1);
             }
             const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
@@ -65,6 +68,30 @@ export default function DiscountsPage() {
 
         return result;
     }, [discounts, searchQuery, sortField, sortOrder]);
+
+    const isAllSelected = filteredDiscounts.length > 0 && selectedDiscountIds.length === filteredDiscounts.length;
+
+    const toggleSelectAll = () => {
+        if (isAllSelected) {
+            setSelectedDiscountIds([]);
+        } else {
+            setSelectedDiscountIds(filteredDiscounts.map(d => d.id));
+        }
+    };
+
+    const toggleSelectRow = (id: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        setSelectedDiscountIds(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    };
+
+    const handleBulkDelete = () => {
+        selectedDiscountIds.forEach(id => deleteDiscount(id));
+        toast.success(`Deleted ${selectedDiscountIds.length} discount(s)`);
+        setSelectedDiscountIds([]);
+        setIsBulkDeleteModalOpen(false);
+    };
 
     // Handlers
     const handleSort = (field: SortField) => {
@@ -108,7 +135,6 @@ export default function DiscountsPage() {
             errors.name = 'Name is required';
         }
         if (formData.percentage < 0 || formData.percentage > 100) {
-            // We might want to allow 0?
             errors.percentage = 'Percentage must be between 0 and 100';
         }
 
@@ -157,8 +183,8 @@ export default function DiscountsPage() {
                 </div>
             </div>
 
-            {/* Search and Stats */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            {/* Search and Selection Toolbar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
                 <SearchInput
                     value={searchQuery}
                     onChange={setSearchQuery}
@@ -169,6 +195,51 @@ export default function DiscountsPage() {
                     <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300">
                         {discounts.length} {discounts.length === 1 ? 'discount' : 'discounts'}
                     </span>
+
+                    {/* Select Mode Toolbar Controls */}
+                    {!isSelectMode ? (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            leftIcon={<CheckSquare className="w-4 h-4 text-neutral-500" />}
+                            onClick={() => setIsSelectMode(true)}
+                        >
+                            Select
+                        </Button>
+                    ) : (
+                        <>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                leftIcon={isAllSelected ? <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" /> : <Square className="w-4 h-4" />}
+                                onClick={toggleSelectAll}
+                            >
+                                {isAllSelected ? `Deselect All (${filteredDiscounts.length})` : 'Select All'}
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setIsSelectMode(false);
+                                    setSelectedDiscountIds([]);
+                                }}
+                            >
+                                Done
+                            </Button>
+
+                            {selectedDiscountIds.length > 0 && (
+                                <Button
+                                    variant="danger"
+                                    size="sm"
+                                    leftIcon={<Trash2 className="w-4 h-4" />}
+                                    onClick={() => setIsBulkDeleteModalOpen(true)}
+                                >
+                                    Delete Selected ({selectedDiscountIds.length})
+                                </Button>
+                            )}
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -198,7 +269,17 @@ export default function DiscountsPage() {
                     <div className="overflow-x-auto min-h-[300px]">
                         <table className="w-full min-w-[600px] md:min-w-full">
                             <thead>
-                            <tr className="border-b border-neutral-100 dark:border-neutral-700">
+                            <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                                {isSelectMode && (
+                                    <th className="px-4 py-4 w-10 text-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={isAllSelected}
+                                            onChange={toggleSelectAll}
+                                            className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                        />
+                                    </th>
+                                )}
                                 <th className="text-left px-6 py-4">
                                     <button
                                         onClick={() => handleSort('name')}
@@ -237,11 +318,22 @@ export default function DiscountsPage() {
                             {filteredDiscounts.map((discount, index) => {
                                 const isNearBottom = index >= Math.max(0, filteredDiscounts.length - 2) || filteredDiscounts.length <= 2;
                                 const popupPosClass = isNearBottom ? 'bottom-full mb-1' : 'top-full mt-1';
+                                const isRowSelected = selectedDiscountIds.includes(discount.id);
                                 return (
                                 <tr
                                     key={discount.id}
-                                    className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${openMenuId === discount.id ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}
+                                    className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${isRowSelected ? 'bg-blue-50/40 dark:bg-blue-900/20' : ''} ${openMenuId === discount.id ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}
                                 >
+                                    {isSelectMode && (
+                                        <td className="px-4 py-4 text-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={isRowSelected}
+                                                onChange={(e) => toggleSelectRow(discount.id, e as any)}
+                                                className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                            />
+                                        </td>
+                                    )}
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
@@ -376,8 +468,8 @@ export default function DiscountsPage() {
                 title="Delete Discount"
                 size="sm"
             >
-                <p className="text-neutral-600">
-                    Are you sure you want to delete <strong className="text-[#2d3748]">{discountToDelete?.name}</strong>?
+                <p className="text-neutral-600 dark:text-neutral-300">
+                    Are you sure you want to delete <strong className="text-neutral-900 dark:text-white">{discountToDelete?.name}</strong>?
                     This action cannot be undone.
                 </p>
                 <ModalFooter>
@@ -387,6 +479,22 @@ export default function DiscountsPage() {
                     <Button variant="danger" onClick={handleDelete}>
                         Delete Discount
                     </Button>
+                </ModalFooter>
+            </Modal>
+
+            {/* Bulk Delete Modal */}
+            <Modal
+                isOpen={isBulkDeleteModalOpen}
+                onClose={() => setIsBulkDeleteModalOpen(false)}
+                title="Delete Selected Discounts"
+                size="sm"
+            >
+                <p className="text-neutral-600 dark:text-neutral-300">
+                    Are you sure you want to delete <strong>{selectedDiscountIds.length}</strong> selected discount(s)? This action cannot be undone.
+                </p>
+                <ModalFooter>
+                    <Button variant="ghost" onClick={() => setIsBulkDeleteModalOpen(false)}>Cancel</Button>
+                    <Button variant="danger" onClick={handleBulkDelete}>Delete All Selected ({selectedDiscountIds.length})</Button>
                 </ModalFooter>
             </Modal>
         </div>

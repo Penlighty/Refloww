@@ -144,6 +144,13 @@ export const FINANCIAL_TERMS: Record<string, FinancialTermDefinition> = {
         term: 'Customer Address',
         definition: 'The billing or shipping address of the customer.',
     },
+
+    // Inventory Terms
+    'simple-vs-batch-mode': {
+        term: 'Simple Mode vs. Batch Mode',
+        definition: 'Simple Mode lets you type total stock count directly into the field (e.g. 50 units). Batch Mode tracks stock via specific lot batches and OCR packaging scans. Whenever batches exist, total stock is calculated automatically from active batch totals.',
+        example: 'Simple Mode: 50 units directly. Batch Mode: Batch A (20) + Batch B (30) = 50 total.'
+    },
 };
 
 // Get a term definition by key

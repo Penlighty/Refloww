@@ -440,7 +440,10 @@ export default function HelpPage() {
                                 </ul>
 
                                 <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
-                                    <h5 className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-2">⚠️ Important Warning for E2EE</h5>
+                                    <h5 className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-2 flex items-center gap-1.5">
+                                        <Shield className="w-4 h-4 text-amber-600" />
+                                        <span>Important Warning for E2EE</span>
+                                    </h5>
                                     <ul className="text-xs text-amber-600 dark:text-amber-400 space-y-1">
                                         <li>• If you lose your encryption password, your data <strong>cannot be recovered</strong></li>
                                         <li>• There is no password reset option for encrypted data</li>
@@ -653,7 +656,7 @@ export default function HelpPage() {
 
                                 <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 rounded-xl p-4">
                                     <p className="text-sm text-amber-700 dark:text-amber-300">
-                                        <strong>⚡ Power User Tip:</strong> Use the convert feature to turn a paid invoice into a receipt instantly!
+                                        <strong>Power User Tip:</strong> Use the convert feature to turn a paid invoice into a receipt instantly!
                                     </p>
                                 </div>
 

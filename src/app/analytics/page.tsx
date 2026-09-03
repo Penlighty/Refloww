@@ -3,11 +3,13 @@
 
 
 import React, { useMemo, useState } from 'react';
-import { useDocumentStore, useSettingsStore, useTemplateStore } from '@/lib/store';
-import { formatCurrency, getEffectiveGrandTotal } from '@/lib/utils';
+import { useDocumentStore, useSettingsStore, useTemplateStore, useOrganizationStore, useTransactionStore } from '@/lib/store';
+import { formatCurrency, getEffectiveGrandTotal, calculatePaymentSpeedDistribution } from '@/lib/utils';
 import { X, Lightbulb } from 'lucide-react';
 import { DocumentStatus } from '@/lib/types';
 import RevenueChart from "@/components/dashboard/RevenueChart";
+import ProductVelocityWidget from "@/components/ProductVelocityWidget";
+import { PageHelpModal } from '@/components/ui';
 
 // ==========================================
 // Types & Interfaces
@@ -38,11 +40,12 @@ function SummaryCard({ metric }: { metric: SummaryMetric }) {
 
 function StatusDonut({ counts }: { counts: Record<DocumentStatus, number> }) {
     const total = Object.values(counts).reduce((a, b) => a + b, 0);
-    const statuses: DocumentStatus[] = ['draft', 'sent', 'paid', 'overdue', 'cancelled'];
-    const colors = {
+    const statuses: DocumentStatus[] = ['draft', 'sent', 'paid', 'partially_paid', 'overdue', 'cancelled'];
+    const colors: Record<DocumentStatus, string> = {
         draft: '#e5e5e5',   // neutral-200
         sent: '#3b82f6',    // blue-500
         paid: '#10b981',    // emerald-500
+        partially_paid: '#f59e0b', // amber-500
         overdue: '#ef4444', // red-500
         cancelled: '#737373' // neutral-500
     };
@@ -141,35 +144,43 @@ function HintCard({ title, description, badge, onClose }: { title: string, descr
 // ==========================================
 
 export default function AnalyticsPage() {
-    const { documents } = useDocumentStore();
+    const { documents, getFilteredDocuments } = useDocumentStore();
+    const { transactions, getFilteredTransactions } = useTransactionStore();
     const { company } = useSettingsStore();
     const { getTemplateById } = useTemplateStore();
+    const activeOrgId = useOrganizationStore((state) => state.activeOrganizationId);
     const [hiddenHints, setHiddenHints] = useState<string[]>([]);
+
+    const displayDocuments = useMemo(() => getFilteredDocuments(), [documents, activeOrgId, getFilteredDocuments]);
+    const activeTransactions = useMemo(() => getFilteredTransactions(), [transactions, activeOrgId, getFilteredTransactions]);
 
     // ------------------------------------------
     // Logic extraction
     // ------------------------------------------
+    const paymentSpeed = useMemo(() => {
+        return calculatePaymentSpeedDistribution(displayDocuments);
+    }, [displayDocuments]);
+
     const metrics = useMemo(() => {
-        const invoices = documents.filter(d => d.type === 'invoice');
+        const invoices = displayDocuments.filter(d => d.type === 'invoice');
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        // 1. Money Received (This Month)
-        const paidThisMonth = invoices.filter(d =>
-            d.status === 'paid' &&
-            d.paidAt &&
-            new Date(d.paidAt) >= startOfMonth
-        ).reduce((acc, d) => acc + getEffectiveGrandTotal(d, getTemplateById(d.templateId)), 0);
+        // 1. Money Received (This Month) - collected cash across all transactions
+        const paidThisMonth = activeTransactions.filter(t => {
+            const dateStr = t.date;
+            return dateStr && new Date(dateStr) >= startOfMonth;
+        }).reduce((acc, t) => acc + (t.amountPaid || 0), 0);
 
-        // 2. Money Waiting
-        const waiting = invoices.filter(d =>
-            ['sent', 'overdue'].includes(d.status)
-        ).reduce((acc, d) => acc + getEffectiveGrandTotal(d, getTemplateById(d.templateId)), 0);
+        // 2. Money Waiting (Unpaid & Partially Paid Balance Due)
+        const waiting = activeTransactions.filter(t =>
+            t.paymentStatus === 'unpaid' || t.paymentStatus === 'partially_paid'
+        ).reduce((acc, t) => acc + (t.amountDue || 0), 0);
 
-        // 3. Invoices Sent (Active, not draft)
-        const sentCount = invoices.filter(d => d.status !== 'draft').length;
+        // 3. Invoices Sent / Issued (Active, not draft)
+        const sentCount = displayDocuments.filter(d => d.type === 'invoice' && d.status !== 'draft').length;
 
-        // 4. Avg Time to Pay
+        // 4. Avg Time to Pay (Invoices)
         const paidInvoices = invoices.filter(d => d.status === 'paid' && d.paidAt);
         let updatedAvgDays = 0;
         if (paidInvoices.length > 0) {
@@ -187,21 +198,20 @@ export default function AnalyticsPage() {
             sentCount,
             avgDays: updatedAvgDays
         };
-    }, [documents, getTemplateById]);
+    }, [displayDocuments, activeTransactions]);
 
     const statusCounts = useMemo(() => {
-        const invoices = documents.filter(d => d.type === 'invoice');
-        return invoices.reduce((acc, d) => {
-            acc[d.status] = (acc[d.status] || 0) + 1;
+        return displayDocuments.reduce((acc, d) => {
+            const effectiveStatus = (d.type === 'receipt' && d.status === 'draft') ? 'paid' : d.status;
+            acc[effectiveStatus] = (acc[effectiveStatus] || 0) + 1;
             return acc;
         }, {} as Record<DocumentStatus, number>);
-    }, [documents]);
+    }, [displayDocuments]);
 
     const customerInsights = useMemo(() => {
-        const invoices = documents.filter(d => d.type === 'invoice');
         const customerMap: Record<string, { name: string, total: number, count: number }> = {};
 
-        invoices.forEach(d => {
+        displayDocuments.forEach(d => {
             if (d.status === 'paid') {
                 if (!customerMap[d.customerId]) {
                     customerMap[d.customerId] = { name: d.customerName, total: 0, count: 0 };
@@ -215,30 +225,40 @@ export default function AnalyticsPage() {
 
         // Late payers
         const latePayersCount = new Set(
-            invoices
-                .filter(d => d.status === 'overdue' || (d.paidAt && d.dueDate && new Date(d.paidAt) > new Date(d.dueDate)))
+            displayDocuments
+                .filter(d => {
+                    if (d.type !== 'invoice') return false;
+                    if (d.status === 'overdue') return true;
+                    if (d.paidAt && d.dueDate) {
+                        const dueEnd = new Date(d.dueDate.includes('T') ? d.dueDate : `${d.dueDate}T23:59:59`).getTime();
+                        const paidTime = new Date(d.paidAt).getTime();
+                        return paidTime > dueEnd;
+                    }
+                    return false;
+                })
                 .map(d => d.customerId)
         ).size;
 
         return { top: sorted, lateCount: latePayersCount };
-    }, [documents, getTemplateById]);
+    }, [displayDocuments, getTemplateById]);
 
     const productInsights = useMemo(() => {
-        const invoices = documents.filter(d => d.type === 'invoice');
         const productStats: Record<string, { name: string, count: number, prices: number[] }> = {};
 
-        invoices.forEach(d => {
-            d.lineItems.forEach(item => {
-                // Use productName or description as key
-                const key = item.productName || item.description;
-                if (!key) return;
+        displayDocuments.forEach(d => {
+            if (d.status === 'paid') {
+                d.lineItems.forEach(item => {
+                    // Use productName or description as key
+                    const key = item.productName || item.description;
+                    if (!key) return;
 
-                if (!productStats[key]) {
-                    productStats[key] = { name: key, count: 0, prices: [] };
-                }
-                productStats[key].count += item.quantity;
-                productStats[key].prices.push(item.unitPrice);
-            });
+                    if (!productStats[key]) {
+                        productStats[key] = { name: key, count: 0, prices: [] };
+                    }
+                    productStats[key].count += item.quantity;
+                    productStats[key].prices.push(item.unitPrice);
+                });
+            }
         });
 
         const topProducts = Object.values(productStats)
@@ -252,14 +272,14 @@ export default function AnalyticsPage() {
             }));
 
         return topProducts;
-    }, [documents]);
+    }, [displayDocuments]);
 
     // Hints Logic
     const generatedHints = useMemo(() => {
         const hints = [];
 
         // Hint 1: Overdue
-        const overdueCount = documents.filter(d => d.type === 'invoice' && d.status === 'overdue').length;
+        const overdueCount = displayDocuments.filter(d => d.type === 'invoice' && d.status === 'overdue').length;
         if (overdueCount > 0) {
             hints.push({
                 id: 'overdue-hint',
@@ -270,7 +290,7 @@ export default function AnalyticsPage() {
         }
 
         // Hint 2: Drafts
-        const draftCount = documents.filter(d => d.type === 'invoice' && d.status === 'draft').length;
+        const draftCount = displayDocuments.filter(d => d.type === 'invoice' && d.status === 'draft').length;
         if (draftCount > 2) {
             hints.push({
                 id: 'draft-hint',
@@ -295,14 +315,25 @@ export default function AnalyticsPage() {
         }
 
         return hints.filter(h => !hiddenHints.includes(h.id)).slice(0, 3);
-    }, [documents, metrics, hiddenHints, company.currency]);
+    }, [displayDocuments, metrics, hiddenHints, company.currency]);
 
     return (
         <main className="max-w-6xl mx-auto pb-20">
             {/* Header */}
             <header className="mb-10">
-                <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Analytics</h1>
-                <p className="text-neutral-500 dark:text-neutral-400">Quiet insights to help you invoice better.</p>
+                <div className="flex items-center gap-2">
+                    <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">Analytics</h1>
+                    <PageHelpModal
+                        title="Revenue & Cashflow Analytics"
+                        description="Detailed insights into monthly revenue streams, pending payments, payment speed trends, top customers, and best-selling products."
+                        terms={[
+                            { term: 'Money Received', definition: 'Total paid invoice revenue collected this month.' },
+                            { term: 'Money Waiting', definition: 'Sum of active invoices currently pending payment or overdue.' },
+                            { term: 'Average Payment Time', definition: 'Average number of days clients take to pay from the date an invoice is issued.' }
+                        ]}
+                    />
+                </div>
+                <p className="text-neutral-500 dark:text-neutral-400 mt-1">Quiet insights to help you invoice better.</p>
             </header>
 
             {/* 1. Top Summary */}
@@ -343,6 +374,11 @@ export default function AnalyticsPage() {
                 <RevenueChart />
             </section>
 
+            {/* Product Velocity: Top Bestsellers & Slow Moving */}
+            <section className="mb-12">
+                <ProductVelocityWidget />
+            </section>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                 {/* 2. Invoice Flow */}
                 <section className="lg:col-span-2 bg-white dark:bg-neutral-800 p-6 rounded-2xl border border-neutral-100 dark:border-neutral-700">
@@ -362,34 +398,50 @@ export default function AnalyticsPage() {
                             <div className="space-y-4">
                                 <div>
                                     <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-neutral-600 dark:text-neutral-300">Fast (&lt; 7 days)</span>
-                                        {/* Simplified logic for bar width */}
-                                        <span className="font-medium">--</span>
+                                        <span className="text-neutral-600 dark:text-neutral-300">Fast (&le; 7 days)</span>
+                                        <span className="font-medium text-neutral-900 dark:text-white">
+                                            {paymentSpeed.fastCount} ({paymentSpeed.fastPercent}%)
+                                        </span>
                                     </div>
                                     <div className="h-2 w-full bg-neutral-100 dark:bg-neutral-700 rounded-full overflow-hidden">
-                                        <div className="h-full bg-emerald-400 w-0"></div>
+                                        <div
+                                            className="h-full bg-emerald-400 transition-all duration-500"
+                                            style={{ width: `${paymentSpeed.fastPercent}%` }}
+                                        />
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-neutral-600 dark:text-neutral-300">Average (8-30 days)</span>
-                                        <span className="font-medium">{metrics.avgDays}d avg</span>
+                                        <span className="text-neutral-600 dark:text-neutral-300">Average (8–30 days)</span>
+                                        <span className="font-medium text-neutral-900 dark:text-white">
+                                            {paymentSpeed.avgCount} ({paymentSpeed.avgPercent}%)
+                                        </span>
                                     </div>
                                     <div className="h-2 w-full bg-neutral-100 dark:bg-neutral-700 rounded-full overflow-hidden">
-                                        <div className="h-full bg-blue-400 w-1/2"></div>
+                                        <div
+                                            className="h-full bg-blue-400 transition-all duration-500"
+                                            style={{ width: `${paymentSpeed.avgPercent}%` }}
+                                        />
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex justify-between text-sm mb-1">
                                         <span className="text-neutral-600 dark:text-neutral-300">Slow (&gt; 30 days)</span>
-                                        <span className="font-medium">--</span>
+                                        <span className="font-medium text-neutral-900 dark:text-white">
+                                            {paymentSpeed.slowCount} ({paymentSpeed.slowPercent}%)
+                                        </span>
                                     </div>
                                     <div className="h-2 w-full bg-neutral-100 dark:bg-neutral-700 rounded-full overflow-hidden">
-                                        <div className="h-full bg-orange-400 w-0"></div>
+                                        <div
+                                            className="h-full bg-orange-400 transition-all duration-500"
+                                            style={{ width: `${paymentSpeed.slowPercent}%` }}
+                                        />
                                     </div>
                                 </div>
-                                <p className="text-xs text-neutral-400 mt-2 italic">
-                                    More data needed to calculate speed distribution.
+                                <p className="text-xs text-neutral-400 mt-2">
+                                    {paymentSpeed.totalPaidInvoices > 0
+                                        ? `Based on ${paymentSpeed.totalPaidInvoices} paid invoice(s). Overall avg payment time: ${paymentSpeed.avgDaysOverall} day(s).`
+                                        : 'No paid invoice history yet to calculate payment speeds.'}
                                 </p>
                             </div>
                         </div>

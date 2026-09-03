@@ -16,6 +16,7 @@ import { Button, Input, Textarea, Modal, ModalFooter } from '@/components/ui';
 import { formatCurrency, formatDate, calculateMonnifySplitFee, payWithMonnify, payWithPaystack } from '@/lib/utils';
 import { Product, StorefrontOrder } from '@/lib/types';
 import { validateContentPolicy } from '@/lib/utils/contentPolicy';
+import { getActiveOrgId, belongsToActiveOrg } from '@/lib/utils/orgIsolation';
 import {
     ShoppingBag,
     Search,
@@ -50,7 +51,38 @@ export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: 
     const { user, profile } = useAuth();
 
     const { products } = useProductStore();
-    const { settings, cart, addToCart, removeFromCart, updateCartQuantity, clearCart, addOrder, orders } = useStorefrontStore();
+    const { 
+        settings: globalSettings, 
+        cart, 
+        addToCart, 
+        removeFromCart, 
+        updateCartQuantity, 
+        clearCart, 
+        addOrder, 
+        orders,
+        getSettingsForSlug 
+    } = useStorefrontStore();
+
+    const settings = useMemo(() => {
+        if (storeSlugParam) {
+            const matched = getSettingsForSlug(storeSlugParam);
+            if (matched) return matched;
+        }
+        return globalSettings;
+    }, [storeSlugParam, globalSettings, getSettingsForSlug]);
+
+    const storeOrgId = useMemo(() => {
+        return settings.organizationId || getActiveOrgId();
+    }, [settings]);
+
+    const displayProducts = useMemo(() => {
+        return products.filter(p => belongsToActiveOrg(p.organizationId, storeOrgId));
+    }, [products, storeOrgId]);
+
+    const displayOrders = useMemo(() => {
+        return orders.filter(o => belongsToActiveOrg(o.organizationId, storeOrgId));
+    }, [orders, storeOrgId]);
+
     const { addCustomer, customers } = useCustomerStore();
     const { createDocument, markAsPaid } = useDocumentStore();
     const { company } = useSettingsStore();
@@ -93,7 +125,7 @@ export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: 
         };
         Object.assign(salesMap, seedSales);
 
-        orders.forEach(order => {
+        displayOrders.forEach(order => {
             if (order.items) {
                 order.items.forEach(item => {
                     salesMap[item.productId] = (salesMap[item.productId] || 0) + item.quantity;
@@ -101,20 +133,20 @@ export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: 
             }
         });
 
-        const activeProductsWithSales = products.filter(p => (salesMap[p.id] || 0) > 0);
+        const activeProductsWithSales = displayProducts.filter(p => (salesMap[p.id] || 0) > 0);
         const sortedSales = activeProductsWithSales.map(p => salesMap[p.id]).sort((a, b) => b - a);
         const thresholdIndex = Math.floor(sortedSales.length * 0.25);
         const minBestSellerQty = sortedSales[thresholdIndex] || 5;
 
         const badgeData: Record<string, { text: string; bg: string }[]> = {};
 
-        products.forEach(p => {
+        displayProducts.forEach(p => {
             const badges: { text: string; bg: string }[] = [];
 
             if (p.stockQuantity === 0) {
                 badges.push({ text: '✕ Out of Stock', bg: '#ef4444' });
             } else if (p.stockQuantity !== undefined && p.stockQuantity !== null && p.stockQuantity > 0 && p.stockQuantity <= 5) {
-                badges.push({ text: '⚡ Low Stock', bg: '#f59e0b' });
+                badges.push({ text: 'Low Stock', bg: '#f59e0b' });
             } else if (p.stockQuantity !== undefined && p.stockQuantity !== null && p.stockQuantity > 5) {
                 badges.push({ text: '✓ In Stock', bg: '#10b981' });
             }
@@ -138,7 +170,7 @@ export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: 
         });
 
         return badgeData;
-    }, [products, orders]);
+    }, [displayProducts, displayOrders]);
 
     const handleAddToCartWithFeedback = (product: Product, count = 1) => {
         addToCart(product, count);
@@ -187,7 +219,7 @@ export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: 
 
     // Filter storefront published products and enforce Content Safety Policy
     const publishedProducts = useMemo(() => {
-        return products.filter(p => {
+        return displayProducts.filter(p => {
             if (p.isPublishedToStore === false) return false;
             const policyCheck = validateContentPolicy({
                 name: p.name,
@@ -197,7 +229,7 @@ export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: 
             });
             return policyCheck.isValid;
         });
-    }, [products]);
+    }, [displayProducts]);
 
     const categories = useMemo(() => {
         const cats = new Set<string>();
@@ -259,6 +291,7 @@ export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: 
                     phone: customerForm.phone.trim(),
                     address: customerForm.address.trim() || 'Online Storefront Order',
                     notes: `Registered via Storefront Order`,
+                    organizationId: storeOrgId,
                 });
                 customerId = newCustomer.id;
             }
@@ -276,10 +309,13 @@ export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: 
                 };
             });
 
-            const invoiceTemplate = templates.find(t => t.type === 'invoice' && t.isDefault) || templates.find(t => t.type === 'invoice') || templates[0];
-            const receiptTemplate = templates.find(t => t.type === 'receipt' && t.isDefault) || templates.find(t => t.type === 'receipt') || templates[0];
+            const storeTemplates = templates.filter(t => t.organizationId === storeOrgId);
+            const invoiceTemplate = storeTemplates.find(t => t.type === 'invoice' && t.isDefault) || storeTemplates.find(t => t.type === 'invoice') || storeTemplates[0];
+            const receiptTemplate = storeTemplates.find(t => t.type === 'receipt' && t.isDefault) || storeTemplates.find(t => t.type === 'receipt') || storeTemplates[0];
 
             const todayIso = new Date().toISOString().split('T')[0];
+
+            const orderId = `order-${Date.now()}`;
 
             const newInvoice = createDocument('invoice', {
                 templateId: invoiceTemplate?.id || '',
@@ -290,6 +326,8 @@ export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: 
                 discountPercent: 0,
                 taxPercent: 0,
                 notes: `Storefront Order (${paymentMethod === 'monnify' ? 'Paid via Monnify' : 'Pay on Delivery'}). ${customerForm.notes || ''}`.trim(),
+                organizationId: storeOrgId,
+                storefrontOrderId: orderId,
             });
             if (status === 'paid') markAsPaid(newInvoice.id);
 
@@ -304,13 +342,16 @@ export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: 
                     taxPercent: 0,
                     notes: `Paid via Monnify Online Payment. Payment Ref: ${paymentRef || newInvoice.documentNumber}`,
                     sourceDocumentId: newInvoice.id,
+                    organizationId: storeOrgId,
+                    storefrontOrderId: orderId,
                 });
                 markAsPaid(newReceipt.id);
                 receiptId = newReceipt.id;
             }
 
             const orderRecord: StorefrontOrder = {
-                id: `order-${Date.now()}`,
+                id: orderId,
+                organizationId: storeOrgId,
                 orderNumber: `ORD-${Math.floor(100000 + Math.random() * 900000)}`,
                 customerName: customerForm.name.trim(),
                 customerEmail: customerForm.email.trim(),
@@ -340,7 +381,7 @@ export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: 
 
             addOrder(orderRecord);
             setCompletedOrder(orderRecord);
-            clearCart();
+            // Items remain in cart until user manually removes them
             setIsCheckoutOpen(false);
             setIsCartOpen(false);
             setIsProcessingPayment(false);

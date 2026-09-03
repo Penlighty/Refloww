@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { NumberingSettings, useSettingsStore } from '@/lib/store/settingsStore';
+import { useCustomerStore } from '@/lib/store/customerStore';
 import { generateDocumentNumber, parseFormat, getFormatPreview } from '@/lib/utils/numbering';
 import { Input, Button } from '@/components/ui';
-import { Hash, Calendar, Users, HelpCircle, Check, AlertTriangle, Trash2, Plus, Box, UserSquare, FileText } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { Hash, Calendar, Users, HelpCircle, Check, AlertTriangle, Trash2, Plus, Box, UserSquare, FileText, RefreshCw } from 'lucide-react';
 
 interface DocumentNumberingProps {
     value: NumberingSettings;
@@ -234,6 +236,28 @@ export default function DocumentNumbering({ value, onChange }: DocumentNumbering
                         </p>
                     </div>
                 </div>
+
+                {activeTab === 'customer' && (
+                    <div className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 dark:from-blue-950/30 dark:to-indigo-950/30 p-4 rounded-xl border border-blue-100 dark:border-blue-900/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div>
+                            <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-200">Re-format Existing Customer IDs?</h4>
+                            <p className="text-xs text-blue-700/80 dark:text-blue-300/70 mt-0.5">
+                                Apply this newly selected ID format pattern to all existing customers in your database.
+                            </p>
+                        </div>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+                            onClick={() => {
+                                useCustomerStore.getState().reformatAllCustomers();
+                                toast.success('All existing customer IDs reformatted to match current pattern!');
+                            }}
+                        >
+                            Update All Customer IDs
+                        </Button>
+                    </div>
+                )}
 
                 {/* Recommended Presets */}
                 <div>

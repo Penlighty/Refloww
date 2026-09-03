@@ -3,37 +3,58 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
-  /* Primary palette - softer, more professional */
-  /* Primary palette - Green/Secondary Theme */
-  --color-primary: #A4F5A6;
-  --color-primary-50: #F2FDF4;
-  /* Very light green tint */
-  --color-primary-100: #DCFCE7;
-  /* Light green tint */
-  --color-primary-500: #22c55e;
-  /* Standard green for logic */
-  --color-primary-600: #16a34a;
-  /* Darker green for hover */
-  --color-primary-700: #15803d;
-  /* Even darker green */
+/* ============================================================
+   REFLOWW GLOBAL UI STYLE GUIDE
+   ============================================================
+   
+   PRIMARY BRAND COLOR:
+     Orange: #fc6d2d (Hover: #ea500d)
+     Use for primary actions, CTA buttons, active highlights, focus rings, brand badges.
 
-  /* Charcoal palette - softer than rich black */
+   ACCENT / SECONDARY COLOR:
+     Slate Charcoal: #2d3748 (Hover: #1a202c)
+     Warm Slate Grey: #64748b
+     Use for dark cards, headers, secondary buttons, structural accents.
+   ============================================================ */
+
+@theme {
+  /* Refloww Primary Brand Orange Palette (#fc6d2d) */
+  --color-primary: #fc6d2d;
+  --color-primary-50: #fff7f2;
+  --color-primary-100: #ffeadd;
+  --color-primary-200: #ffd3be;
+  --color-primary-300: #ffb594;
+  --color-primary-400: #fe8855;
+  --color-primary-500: #fc6d2d;
+  --color-primary-600: #ea500d;
+  --color-primary-700: #c33b09;
+  --color-primary-800: #9c300f;
+  --color-primary-900: #7e2b10;
+  --color-primary-950: #441306;
+
+  /* Brand Specific Aliases */
+  --color-brand-orange: #fc6d2d;
+  --color-brand-orange-hover: #ea500d;
+
+  /* Accent & Secondary Palette - Slate Charcoal & Grey (#2d3748 / #64748b) */
+  --color-secondary: #2d3748;
+  --color-secondary-hover: #1a202c;
+  --color-accent: #64748b;
+
+  /* Charcoal palette */
   --color-charcoal-900: #2d3748;
   --color-charcoal-800: #3d4a5c;
   --color-charcoal-700: #4a5568;
   --color-charcoal-600: #5a6778;
 
   /* Neutral palette */
-  --color-background-light: #f1f5f9;
-  --color-background-dark: #1a1d21;
+  --color-background-light: #f8fafc;
+  --color-background-dark: #121519;
   --color-surface-light: #ffffff;
-  --color-surface-dark: #22262b;
+  --color-surface-dark: #1e2228;
 
-  /* Accent colors */
-  --color-secondary: #A4F5A6;
-  --color-accent: #B2A2FB;
-  --color-success: #22c55e;
+  /* Status feedback colors */
+  --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
 
@@ -110,21 +131,53 @@ html {
 }
 
 .action-pill-primary {
-  background-color: #3b82f6;
+  background-color: #fc6d2d;
   color: white;
 }
 
 .action-pill-primary:hover {
-  background-color: #2563eb;
+  background-color: #ea500d;
 }
 
 .action-pill-secondary {
-  background-color: #f5f5f5;
-  color: #2d3748;
+  background-color: #2d3748;
+  color: white;
 }
 
 .action-pill-secondary:hover {
-  background-color: #e5e5e5;
+  background-color: #1a202c;
+}
+
+/* ============================================================
+   RESPONSIVE MINIMALISTIC MOBILE ACTION BUTTONS
+   ============================================================ */
+
+/* Hide text label on small mobile screens (< sm: 640px) while keeping intuitive icon */
+.btn-mobile-icon-only > span:not(.btn-icon-wrapper):not(:first-child),
+.btn-mobile-icon-only .btn-label,
+.mobile-text-hide {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .btn-mobile-icon-only > span:not(.btn-icon-wrapper):not(:first-child),
+  .btn-mobile-icon-only .btn-label,
+  .mobile-text-hide {
+    display: inline;
+  }
+}
+
+/* Hide text label on tablet/mobile screens (< md: 768px) */
+.btn-md-icon-only > span:not(.btn-icon-wrapper):not(:first-child),
+.btn-md-icon-only .btn-label {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .btn-md-icon-only > span:not(.btn-icon-wrapper):not(:first-child),
+  .btn-md-icon-only .btn-label {
+    display: inline;
+  }
 }
 
 /* Avatar styles */
@@ -136,7 +189,7 @@ html {
   font-weight: 600;
   font-size: 0.75rem;
   color: white;
-  background: linear-gradient(135deg, #B2A2FB 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #fc6d2d 0%, #ea500d 100%);
 }
 
 /* Status dot */
@@ -192,6 +245,161 @@ html {
 .dark .canvas-grid-bg {
   background-color: #0f172a;
   background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 H40 M0 0 V40' fill='none' stroke='%23334155' stroke-width='1' stroke-dasharray='4 4'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   GLOBAL PREMIUM DROPDOWN & SELECT STYLING SYSTEM
+   ============================================================ */
+
+/* Global Custom Scrollbar for Dropdown Menu lists */
+.dropdown-options-list::-webkit-scrollbar {
+  width: 6px;
+}
+.dropdown-options-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dropdown-options-list::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.4);
+  border-radius: 9999px;
+}
+.dark .dropdown-options-list::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+.dropdown-options-list::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(252, 109, 45, 0.6);
+}
+
+/* Dropdown Trigger Button */
+.dropdown-trigger {
+  width: 100%;
+  height: 2.625rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 0.8125rem;
+  text-align: left;
+  border-radius: 0.75rem; /* 12px rounded */
+  border-width: 1px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  color: #1e293b;
+}
+
+.dark .dropdown-trigger {
+  background-color: #18181c;
+  border-color: #334155;
+  color: #ffffff;
+}
+
+.dropdown-trigger:hover:not(:disabled) {
+  border-color: #cbd5e1;
+}
+.dark .dropdown-trigger:hover:not(:disabled) {
+  border-color: #475569;
+}
+
+/* Focus and Open active state - Refloww Orange Outline matching screenshot */
+.dropdown-trigger:focus-visible,
+.dropdown-trigger.dropdown-trigger-open {
+  outline: none;
+  border-color: #fc6d2d !important;
+  box-shadow: 0 0 0 3px rgba(252, 109, 45, 0.25);
+}
+
+/* Floating Dropdown Panel */
+.dropdown-menu-panel {
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+  margin-top: 0.375rem;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem; /* 16px */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.dark .dropdown-menu-panel {
+  background-color: #1e1f26;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+}
+
+/* Search input container inside dropdown header */
+.dropdown-search-container {
+  padding: 0.625rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+.dark .dropdown-search-container {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.dropdown-search-input {
+  width: 100%;
+  height: 2.375rem;
+  padding-left: 2.25rem;
+  padding-right: 0.75rem;
+  font-size: 0.8125rem;
+  border-radius: 0.625rem;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #0f172a;
+  transition: all 0.15s ease;
+}
+
+.dark .dropdown-search-input {
+  border-color: #334155;
+  background-color: #141519;
+  color: #ffffff;
+}
+
+.dropdown-search-input:focus {
+  outline: none;
+  border-color: #fc6d2d;
+  box-shadow: 0 0 0 2px rgba(252, 109, 45, 0.2);
+}
+
+/* Option List Row Items */
+.dropdown-option-item {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  text-align: left;
+  font-size: 0.8125rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  color: #334155;
+}
+
+.dark .dropdown-option-item {
+  color: #f1f5f9;
+}
+
+.dropdown-option-item:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.dark .dropdown-option-item:hover {
+  background-color: #2a2b34;
+  color: #ffffff;
+}
+
+.dropdown-option-item-selected {
+  background-color: rgba(252, 109, 45, 0.12);
+  color: #fc6d2d;
+  font-weight: 600;
+}
+
+.dark .dropdown-option-item-selected {
+  background-color: rgba(252, 109, 45, 0.2);
+  color: #fc6d2d;
+  font-weight: 600;
 }
 
 /* Safe area for mobile devices */

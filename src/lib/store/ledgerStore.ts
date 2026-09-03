@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { LedgerEntry, DocumentType, DocumentStatus } from '@/lib/types';
+import { LedgerEntry, DocumentType, DocumentStatus, Document } from '@/lib/types';
 import { useDocumentStore } from './documentStore';
 
 interface LedgerFilters {
@@ -72,10 +72,11 @@ export const useLedgerStore = create<LedgerState>()(
             },
 
             getLedgerEntries: () => {
-                const documents = useDocumentStore.getState().documents;
+                const documents = useDocumentStore.getState().getFilteredDocuments();
 
-                return documents.map((doc): LedgerEntry => ({
+                return documents.map((doc: Document): LedgerEntry => ({
                     id: doc.id,
+                    organizationId: doc.organizationId,
                     documentId: doc.id,
                     documentType: doc.type,
                     documentNumber: doc.documentNumber,
@@ -83,7 +84,7 @@ export const useLedgerStore = create<LedgerState>()(
                     customerName: doc.customerName,
                     date: doc.date,
                     amount: doc.grandTotal,
-                    status: doc.status,
+                    status: doc.type === 'receipt' && doc.status === 'draft' ? 'paid' : doc.status,
                     createdAt: doc.createdAt,
                 }));
             },

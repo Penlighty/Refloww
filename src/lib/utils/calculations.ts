@@ -83,7 +83,14 @@ export const getGrowthPercentage = (current: number, previous: number): number =
  * @returns The correctly calculated grand total
  */
 export const getEffectiveGrandTotal = (doc: Document, template: Template | null | undefined): number => {
-    // If no template info, fall back to stored value (best we can do)
+    if (!doc) return 0;
+
+    // Primary ground truth: If doc has a valid positive grandTotal stored, use it directly
+    if (typeof doc.grandTotal === 'number' && !isNaN(doc.grandTotal) && doc.grandTotal > 0) {
+        return doc.grandTotal;
+    }
+
+    // If no template info, fall back to doc.grandTotal or 0
     if (!template) {
         return doc.grandTotal || 0;
     }
@@ -108,7 +115,8 @@ export const getEffectiveGrandTotal = (doc: Document, template: Template | null 
         ? taxableAmount * ((doc.taxPercent || 0) / 100)
         : 0;
 
-    return Math.round((taxableAmount + taxAmount) * 100) / 100;
+    const calculated = Math.round((taxableAmount + taxAmount) * 100) / 100;
+    return calculated || doc.grandTotal || 0;
 };
 
 /**
@@ -127,4 +135,63 @@ export const sumEffectiveGrandTotals = (
         const template = getTemplate(doc.templateId);
         return sum + getEffectiveGrandTotal(doc, template);
     }, 0);
+};
+
+export interface PaymentSpeedDistribution {
+    fastCount: number;
+    fastPercent: number;
+    avgCount: number;
+    avgPercent: number;
+    slowCount: number;
+    slowPercent: number;
+    avgDaysOverall: number;
+    totalPaidInvoices: number;
+}
+
+export const calculatePaymentSpeedDistribution = (documents: Document[]): PaymentSpeedDistribution => {
+    const paidInvoices = documents.filter(d => d.type === 'invoice' && d.status === 'paid' && d.paidAt);
+    if (paidInvoices.length === 0) {
+        return {
+            fastCount: 0,
+            fastPercent: 0,
+            avgCount: 0,
+            avgPercent: 0,
+            slowCount: 0,
+            slowPercent: 0,
+            avgDaysOverall: 0,
+            totalPaidInvoices: 0
+        };
+    }
+
+    let fastCount = 0;
+    let avgCount = 0;
+    let slowCount = 0;
+    let totalDays = 0;
+
+    paidInvoices.forEach(d => {
+        const created = new Date(d.createdAt).getTime();
+        const paid = new Date(d.paidAt!).getTime();
+        const days = Math.max(0, Math.round((paid - created) / (1000 * 60 * 60 * 24)));
+        totalDays += days;
+
+        if (days <= 7) {
+            fastCount++;
+        } else if (days <= 30) {
+            avgCount++;
+        } else {
+            slowCount++;
+        }
+    });
+
+    const total = paidInvoices.length;
+    return {
+        fastCount,
+        fastPercent: Math.round((fastCount / total) * 100),
+        avgCount,
+        avgPercent: Math.round((avgCount / total) * 100),
+        slowCount,
+        slowPercent: Math.round((slowCount / total) * 100),
+        avgDaysOverall: Math.round(totalDays / total),
+        totalPaidInvoices: total
+    };
 };
