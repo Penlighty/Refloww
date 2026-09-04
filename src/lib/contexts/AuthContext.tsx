@@ -34,6 +34,7 @@ interface AuthContextType {
     forgotPassword: (email: string) => Promise<void>;
     clearError: () => void;
     updateUserProfile: (data: { displayName?: string; photoURL?: string }) => Promise<void>;
+    deleteAccount: () => Promise<void>;
 }
 
 // ============================================
@@ -61,6 +62,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 // Fetch user profile from Firestore
                 try {
                     const userProfile = await getUserProfile(firebaseUser.uid);
+                    
+                    if (userProfile?.disabled) {
+                        // FORCE LOGOUT if suspended
+                        await signOut();
+                        setUser(null);
+                        setProfile(null);
+                        setError('This account has been suspended by an administrator.');
+                        setLoading(false);
+                        return;
+                    }
+
                     setProfile(userProfile);
                 } catch (err) {
                     console.error('Error fetching user profile:', err);
@@ -193,6 +205,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const deleteAccount = async () => {
+        try {
+            setError(null);
+            setLoading(true);
+            const { deleteUserAccount } = await import('@/lib/firebase/auth');
+            await deleteUserAccount();
+
+            setUser(null);
+            setProfile(null);
+
+            if (typeof window !== 'undefined') {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '/login';
+            }
+        } catch (err: any) {
+            setError(getErrorMessage(err.code));
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // ============================================
     // CONTEXT VALUE
     // ============================================
@@ -209,6 +244,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         forgotPassword,
         clearError,
         updateUserProfile,
+        deleteAccount,
     };
 
     return (
@@ -236,6 +272,8 @@ export function useAuth() {
 
 function getErrorMessage(code: string): string {
     switch (code) {
+        case 'auth/requires-recent-login':
+            return 'This operation is sensitive. Please log out and log back in before deleting your account.';
         case 'auth/invalid-email':
             return 'Invalid email address.';
         case 'auth/user-disabled':

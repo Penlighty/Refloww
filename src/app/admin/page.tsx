@@ -61,7 +61,7 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-8 max-w-7xl mx-auto pb-10">
             {/* Page Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-gradient-to-r from-neutral-900 to-neutral-800 dark:from-neutral-800 dark:to-neutral-900 p-8 rounded-3xl text-white shadow-xl shadow-neutral-900/10 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-gradient-to-r from-neutral-900 to-neutral-800 dark:from-neutral-800 dark:to-neutral-900 p-8 rounded-3xl text-white shadow-xl shadow-neutral-900/10 relative overflow-hidden admin-card !bg-none">
                 <div className="relative z-10">
                     <h1 className="text-3xl font-bold text-white mb-2">Platform Overview</h1>
                     <p className="text-neutral-300 text-lg">
@@ -133,8 +133,8 @@ export default function AdminDashboard() {
             {/* Secondary Section - Feedback & Alerts */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Feedback Summary */}
-                <div className="lg:col-span-2 bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden flex flex-col h-full">
-                    <div className="p-6 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-between">
+                <div className="lg:col-span-2 bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden flex flex-col h-full admin-card">
+                    <div className="p-6 border-b border-neutral-100 dark:border-neutral-700/0 admin-header-glass flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
                                 <MessageSquare className="w-5 h-5" />
@@ -164,9 +164,9 @@ export default function AdminDashboard() {
                                 <p>When users submit feedback, it will appear here.</p>
                             </div>
                         ) : (
-                            <div className="divide-y divide-neutral-100 dark:divide-neutral-700">
+                            <div className="divide-y divide-neutral-100 dark:divide-neutral-700/0">
                                 {recentFeedback.map((item) => (
-                                    <div key={item.id} className="p-5 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors group">
+                                    <div key={item.id} className="p-5 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors group admin-table-row">
                                         <div className="flex items-start gap-4">
                                             <div className={`mt-1 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shadow-sm ${item.sentiment === 'positive'
                                                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
@@ -216,7 +216,7 @@ export default function AdminDashboard() {
 
                 {/* System Health / Quick Status */}
                 <div className="space-y-6">
-                    <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-sm p-6">
+                    <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-sm p-6 admin-card">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
                                 <Activity className="w-5 h-5" />
@@ -260,7 +260,7 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-neutral-900 to-neutral-800 dark:from-neutral-800 dark:to-neutral-900 rounded-2xl p-6 text-white shadow-lg">
+                    <div className="bg-gradient-to-br from-neutral-900 to-neutral-800 dark:from-neutral-800 dark:to-neutral-900 rounded-2xl p-6 text-white shadow-lg admin-card !bg-none">
                         <h3 className="text-lg font-bold mb-4">Quick Actions</h3>
                         <div className="space-y-3">
                             <Link

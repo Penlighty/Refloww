@@ -21,9 +21,11 @@ import {
     onSnapshot,
     Timestamp,
     increment,
-    writeBatch
+    writeBatch,
+    collectionGroup
 } from 'firebase/firestore';
 import { db } from './config';
+import { resolveAdminRole } from './adminPermissions';
 
 // ============================================
 // TYPES
@@ -45,7 +47,7 @@ export interface UserSummary {
     photoURL?: string;
     lastLogin?: string;
     createdAt?: string;
-    role: 'admin' | 'free' | 'pro' | 'premium' | 'enterprise';
+    role: 'admin' | 'free' | 'pro' | 'premium' | 'enterprise' | string;
     metadata?: {
         documentCount?: number;
         templateCount?: number;
@@ -126,27 +128,33 @@ const formatFirestoreDate = (dateVal: any): string | undefined => {
 };
 
 /**
- * Check if a user has admin role
+ * Check if a user has any admin access and return their specific role
  */
-export const isUserAdmin = async (userId: string): Promise<boolean> => {
+export const checkAdminAccess = async (userId: string): Promise<{ isAdmin: boolean, role: string }> => {
     try {
         const userDoc = await getDoc(doc(db, 'users', userId));
-        if (!userDoc.exists()) return false;
+        if (!userDoc.exists()) return { isAdmin: false, role: 'user' };
+        
         const data = userDoc.data();
-        return data?.role === 'admin' || data?.isAdmin === true;
+        const role = resolveAdminRole(data?.role, data?.isAdmin);
+        
+        return { isAdmin: role !== 'user', role };
     } catch (error) {
         console.error('Error checking admin status:', error);
-        return false;
+        return { isAdmin: false, role: 'user' };
     }
 };
 
 /**
- * Set user as admin
+ * Set user as admin with specific role
  */
-export const setUserAsAdmin = async (userId: string, isAdmin: boolean): Promise<void> => {
+export const setUserAsAdmin = async (userId: string, role: string = 'super_admin'): Promise<void> => {
+    const isAdminRole = role !== 'user' && role !== 'free' && role !== 'pro' && role !== 'premium' && role !== 'enterprise';
+    
     await updateDoc(doc(db, 'users', userId), {
-        role: isAdmin ? 'admin' : 'free',
-        isAdmin: isAdmin
+        role: role,
+        isAdmin: isAdminRole, // Keep for backward compatibility
+        updatedAt: serverTimestamp()
     });
 };
 
@@ -188,43 +196,23 @@ export const getPlatformStats = async (): Promise<AdminStats> => {
 
 async function calculateUserAggregates(): Promise<{ activeUsers30Days: number; totalDocuments: number; totalTemplates: number }> {
     try {
-        const usersSnap = await getDocs(query(collection(db, 'users'), limit(100))); // Limit for performance
         const now = new Date();
         const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
 
-        let activeUsers30Days = 0;
-        let totalDocuments = 0;
-        let totalTemplates = 0;
+        const [activeUsersSnap, docsSnap, templatesSnap] = await Promise.all([
+            // Active users in last 30 days
+            getCountFromServer(query(collection(db, 'users'), where('lastLoginAt', '>', thirtyDaysAgo))).catch(() => ({ data: () => ({ count: 0 }) })),
+            // Total documents across all users
+            getCountFromServer(collectionGroup(db, 'documents')).catch(() => ({ data: () => ({ count: 0 }) })),
+            // Total templates across all users
+            getCountFromServer(collectionGroup(db, 'templates')).catch(() => ({ data: () => ({ count: 0 }) }))
+        ]);
 
-        const countPromises = usersSnap.docs.map(async (userDoc) => {
-            const userData = userDoc.data();
-
-            // Check if user was active in last 30 days
-            if (userData.lastLoginAt) {
-                const lastLogin = typeof userData.lastLoginAt.toDate === 'function'
-                    ? userData.lastLoginAt.toDate()
-                    : new Date(userData.lastLoginAt);
-                if (lastLogin > thirtyDaysAgo) {
-                    activeUsers30Days++;
-                }
-            }
-
-            // Get subcollection counts
-            const [docsCount, templatesCount] = await Promise.all([
-                getCountFromServer(collection(db, 'users', userDoc.id, 'documents')).then(s => s.data().count).catch(() => 0),
-                getCountFromServer(collection(db, 'users', userDoc.id, 'templates')).then(s => s.data().count).catch(() => 0)
-            ]);
-
-            return { docsCount, templatesCount };
-        });
-
-        const results = await Promise.all(countPromises);
-        results.forEach(r => {
-            totalDocuments += r.docsCount;
-            totalTemplates += r.templatesCount;
-        });
-
-        return { activeUsers30Days, totalDocuments, totalTemplates };
+        return { 
+            activeUsers30Days: activeUsersSnap.data().count, 
+            totalDocuments: docsSnap.data().count, 
+            totalTemplates: templatesSnap.data().count 
+        };
     } catch (error) {
         console.error('Error calculating aggregates:', error);
         return { activeUsers30Days: 0, totalDocuments: 0, totalTemplates: 0 };
@@ -647,4 +635,235 @@ export const incrementTemplateDownload = async (id: string): Promise<void> => {
     await updateDoc(doc(db, 'marketplace_templates', id), {
         downloads: increment(1)
     });
+};
+
+// ============================================
+// ORGANIZATIONS (ADMIN VIEWS)
+// ============================================
+
+export interface OrganizationSummary {
+    id: string;
+    name: string;
+    ownerId: string;
+    tier: 'free' | 'pro' | 'enterprise';
+    status: 'active' | 'suspended';
+    createdAt: string;
+    memberCount: number;
+}
+
+export const getAllOrganizations = async (
+    limitCount: number = 20,
+    lastDoc: any = null
+): Promise<{ organizations: OrganizationSummary[], lastDoc: any, hasMore: boolean }> => {
+    const coll = collection(db, 'organizations');
+
+    let q = query(coll, orderBy('createdAt', 'desc'), limit(limitCount + 1));
+    if (lastDoc) {
+        q = query(coll, orderBy('createdAt', 'desc'), startAfter(lastDoc), limit(limitCount + 1));
+    }
+
+    let snapshot;
+    try {
+        snapshot = await getDocs(q);
+    } catch (error: any) {
+        if (error?.code === 'failed-precondition' || error?.message?.includes('index')) {
+            console.warn('Organizations index missing, falling back to unordered query.');
+            const fallbackQ = lastDoc ? query(coll, startAfter(lastDoc), limit(limitCount + 1)) : query(coll, limit(limitCount + 1));
+            snapshot = await getDocs(fallbackQ);
+        } else {
+            throw error;
+        }
+    }
+
+    const hasMore = snapshot.docs.length > limitCount;
+    const docsToProcess = hasMore ? snapshot.docs.slice(0, limitCount) : snapshot.docs;
+
+    const organizations: OrganizationSummary[] = await Promise.all(docsToProcess.map(async (docSnap) => {
+        const data = docSnap.data();
+        
+        let memberCount = 0;
+        try {
+            const membersSnap = await getCountFromServer(collection(db, 'organizations', docSnap.id, 'members'));
+            memberCount = membersSnap.data().count;
+        } catch (e) {
+            // Silently continue
+        }
+
+        return {
+            id: docSnap.id,
+            name: data.name || 'Unnamed Org',
+            ownerId: data.ownerId,
+            tier: data.tier || 'free',
+            status: data.status || 'active',
+            createdAt: formatFirestoreDate(data.createdAt) || new Date().toISOString(),
+            memberCount
+        };
+    }));
+
+    return {
+        organizations,
+        lastDoc: docsToProcess[docsToProcess.length - 1] || null,
+        hasMore
+    };
+};
+
+export const updateOrganizationStatus = async (orgId: string, status: 'active' | 'suspended', reason?: string): Promise<void> => {
+    await updateDoc(doc(db, 'organizations', orgId), {
+        status,
+        statusReason: reason,
+        updatedAt: serverTimestamp()
+    });
+};
+
+export const updateOrganizationTier = async (orgId: string, tier: 'free' | 'pro' | 'enterprise'): Promise<void> => {
+    await updateDoc(doc(db, 'organizations', orgId), {
+        tier,
+        updatedAt: serverTimestamp()
+    });
+};
+
+// ============================================
+// SYSTEM SETTINGS
+// ============================================
+
+export interface SystemSettings {
+    maintenanceMode: boolean;
+    maintenanceMessage?: string;
+    allowSignups: boolean;
+    features: {
+        aiReceipts: boolean;
+        marketplace: boolean;
+        premiumTemplates: boolean;
+    };
+    updatedAt: string;
+    updatedBy: string;
+}
+
+export const getSystemSettings = async (): Promise<SystemSettings> => {
+    const docSnap = await getDoc(doc(db, 'system_settings', 'global'));
+    
+    // Default settings if none exist
+    if (!docSnap.exists()) {
+        return {
+            maintenanceMode: false,
+            allowSignups: true,
+            features: {
+                aiReceipts: true,
+                marketplace: true,
+                premiumTemplates: true
+            },
+            updatedAt: new Date().toISOString(),
+            updatedBy: 'system'
+        };
+    }
+    
+    return {
+        ...docSnap.data(),
+        updatedAt: formatFirestoreDate(docSnap.data().updatedAt) || new Date().toISOString()
+    } as SystemSettings;
+};
+
+export const updateSystemSettings = async (updates: Partial<SystemSettings>, adminId: string): Promise<void> => {
+    await setDoc(doc(db, 'system_settings', 'global'), {
+        ...updates,
+        updatedAt: serverTimestamp(),
+        updatedBy: adminId
+    }, { merge: true });
+};
+
+// ============================================
+// AUDIT LOGS
+// ============================================
+
+export interface AuditLogEntry {
+    id: string;
+    adminId: string;
+    adminEmail?: string;
+    action: string;
+    resourceType: 'user' | 'organization' | 'settings' | 'marketplace' | 'announcement';
+    resourceId?: string;
+    details: any;
+    timestamp: string;
+}
+
+export const logAdminAction = async (
+    adminId: string,
+    action: string,
+    resourceType: AuditLogEntry['resourceType'],
+    resourceId?: string,
+    details?: any
+): Promise<void> => {
+    const coll = collection(db, 'audit_logs');
+    
+    // Try to get admin email for context
+    let adminEmail = 'Unknown Admin';
+    try {
+        const adminDoc = await getDoc(doc(db, 'users', adminId));
+        if (adminDoc.exists()) {
+            adminEmail = adminDoc.data().email;
+        }
+    } catch (e) {
+        // Silently continue
+    }
+
+    await setDoc(doc(coll), {
+        adminId,
+        adminEmail,
+        action,
+        resourceType,
+        resourceId: resourceId || null,
+        details: details || {},
+        timestamp: serverTimestamp()
+    });
+};
+
+export const getAuditLogs = async (
+    limitCount: number = 50,
+    lastDoc: any = null
+): Promise<{ logs: AuditLogEntry[], lastDoc: any, hasMore: boolean }> => {
+    const coll = collection(db, 'audit_logs');
+
+    try {
+        let q = query(coll, orderBy('timestamp', 'desc'), limit(limitCount + 1));
+        if (lastDoc) {
+            q = query(coll, orderBy('timestamp', 'desc'), startAfter(lastDoc), limit(limitCount + 1));
+        }
+
+        const snapshot = await getDocs(q);
+        const hasMore = snapshot.docs.length > limitCount;
+        const docsToProcess = hasMore ? snapshot.docs.slice(0, limitCount) : snapshot.docs;
+
+        const logs = docsToProcess.map(docSnap => {
+            const data = docSnap.data();
+            return {
+                id: docSnap.id,
+                ...data,
+                timestamp: formatFirestoreDate(data.timestamp) || new Date().toISOString()
+            } as AuditLogEntry;
+        });
+
+        return {
+            logs,
+            lastDoc: docsToProcess[docsToProcess.length - 1] || null,
+            hasMore
+        };
+    } catch (error: any) {
+        // Fallback for missing index
+        if (error?.code === 'failed-precondition' || error?.message?.includes('index')) {
+            console.warn('Audit logs index not ready, using client-side filtering');
+            const snapshot = await getDocs(coll);
+            let results = snapshot.docs.map(docSnap => {
+                const data = docSnap.data();
+                return {
+                    id: docSnap.id,
+                    ...data,
+                    timestamp: formatFirestoreDate(data.timestamp) || new Date().toISOString()
+                } as AuditLogEntry;
+            });
+            
+            results.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+            return { logs: results.slice(0, limitCount), lastDoc: null, hasMore: false };
+        }
+        throw error;
+    }
 };

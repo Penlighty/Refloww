@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminHeader } from '@/components/admin/AdminHeader';
-import { isUserAdmin } from '@/lib/firebase/admin';
+import { checkAdminAccess } from '@/lib/firebase/admin';
 import { ShieldAlert, RefreshCw } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        async function checkAdminAccess() {
+        async function verifyAdminAccess() {
             if (authLoading) return;
 
             if (!user) {
@@ -28,10 +28,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             setError(null);
 
             try {
-                // Check if user has admin role in Firestore
-                const hasAccess = await isUserAdmin(user.uid);
+                // Check if user has admin role in Firestore using new granular check
+                const { isAdmin, role } = await checkAdminAccess(user.uid);
 
-                if (hasAccess) {
+                if (isAdmin) {
+                    // We could store the role in context if needed globally
                     setIsAuthorized(true);
                 } else {
                     router.push('/');
@@ -44,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             }
         }
 
-        checkAdminAccess();
+        verifyAdminAccess();
     }, [user, authLoading, router]);
 
     // Loading state
@@ -99,7 +100,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     return (
-        <div className="flex h-screen w-full bg-neutral-50 dark:bg-neutral-900 font-sans overflow-hidden">
+        <div className="flex h-screen w-full bg-neutral-50 dark:bg-neutral-900 font-sans overflow-hidden admin-layout">
             <AdminSidebar />
 
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">

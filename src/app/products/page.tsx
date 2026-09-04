@@ -1386,7 +1386,7 @@ export default function ProductsPage() {
                         />
 
                         {isCategoryListOpen && (
-                            <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-2xl z-50 max-h-36 overflow-y-auto p-1.5 text-xs divide-y divide-neutral-100 dark:divide-neutral-700/50">
+                            <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-2xl z-50 max-h-72 overflow-y-auto p-1.5 text-xs divide-y divide-neutral-100 dark:divide-neutral-700/50">
                                 <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                                     Product Categories ({allCategories.length})
                                 </div>

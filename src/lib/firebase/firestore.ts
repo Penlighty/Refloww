@@ -303,3 +303,74 @@ export const subscribeToUserSettings = (
         }
     });
 };
+
+// ============================================
+// ORGANIZATION INVITATIONS
+// ============================================
+
+export interface OrgInvitationData {
+    id?: string;
+    orgId: string;
+    orgName: string;
+    inviterEmail: string;
+    inviterName?: string;
+    inviteeEmail: string;
+    role: string;
+    status: 'pending' | 'accepted' | 'declined';
+    createdAt: string;
+}
+
+/**
+ * Send an organization invitation
+ */
+export const sendOrgInvitation = async (invitation: Omit<OrgInvitationData, 'id' | 'createdAt' | 'status'>): Promise<string> => {
+    const inviteId = `inv-${Date.now()}`;
+    const inviteRef = doc(db, 'org_invitations', inviteId);
+    const timestamp = new Date().toISOString();
+
+    const data = sanitizeData({
+        ...invitation,
+        id: inviteId,
+        inviteeEmail: invitation.inviteeEmail.trim().toLowerCase(),
+        status: 'pending',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        syncedAt: serverTimestamp(),
+    });
+
+    await setDoc(inviteRef, data);
+    return inviteId;
+};
+
+/**
+ * Subscribe to pending invitations for a specific email
+ */
+export const subscribeToUserInvitations = (
+    userEmail: string,
+    callback: (invitations: OrgInvitationData[]) => void
+): Unsubscribe => {
+    if (!userEmail) return () => {};
+    const normalizedEmail = userEmail.trim().toLowerCase();
+    const invCol = collection(db, 'org_invitations');
+    const q = query(invCol, where('inviteeEmail', '==', normalizedEmail), where('status', '==', 'pending'));
+
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => doc.data() as OrgInvitationData);
+        callback(data);
+    }, (error) => {
+        console.error('Error subscribing to invitations:', error);
+    });
+};
+
+/**
+ * Respond to an organization invitation (accept or decline)
+ */
+export const respondToOrgInvitation = async (inviteId: string, status: 'accepted' | 'declined'): Promise<void> => {
+    const inviteRef = doc(db, 'org_invitations', inviteId);
+    await updateDoc(inviteRef, sanitizeData({
+        status,
+        updatedAt: new Date().toISOString(),
+        syncedAt: serverTimestamp(),
+    }));
+};
+

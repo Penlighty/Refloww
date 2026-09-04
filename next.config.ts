@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
   ...(isCapacitorBuild ? { output: 'export' } : {}),
   images: {
     unoptimized: true,
-  }
+  },
+  serverExternalPackages: ['firebase', '@grpc/proto-loader', 'protobufjs']
 };
 
 export default nextConfig;

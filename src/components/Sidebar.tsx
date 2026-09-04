@@ -170,13 +170,13 @@ export default function Sidebar() {
                     ${isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0 md:shadow-none'}
                     ${isCollapsed ? 'md:w-[72px]' : 'md:w-64'} 
                     w-64 
-                    bg-white dark:bg-neutral-800 border-r border-neutral-100 dark:border-neutral-700 
+                    bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 
                     flex flex-col flex-shrink-0 
                     transition-all duration-300 ease-in-out
                 `}
             >
                 {/* Logo Section */}
-                <div className={`h-16 flex items-center ${isCollapsed ? 'md:justify-center px-3' : 'px-5'} justify-start border-b border-neutral-100 dark:border-neutral-700`}>
+                <div className={`h-16 flex items-center ${isCollapsed ? 'md:justify-center px-3' : 'px-5'} justify-start border-b border-neutral-200 dark:border-neutral-700`}>
                     <Link href="/" className="flex items-center group">
                         {/* Collapsed view (Desktop icon-only mode) */}
                         <div className={`${isCollapsed ? 'hidden md:flex' : 'hidden'} w-9 h-9 items-center justify-center flex-shrink-0`}>
@@ -225,7 +225,7 @@ export default function Sidebar() {
                                     </button>
 
                                     {(!isCollapsed || isMobileOpen) && isExpanded && (
-                                        <div className="flex flex-col gap-1 ml-4 pl-4 border-l border-neutral-100 dark:border-neutral-700 mt-1">
+                                        <div className="flex flex-col gap-1 ml-4 pl-4 border-l border-neutral-200 dark:border-neutral-700 mt-1">
                                             {item.children.map((child) => {
                                                 const ChildIcon = child.icon;
                                                 const active = isActive(child.path);
@@ -277,7 +277,7 @@ export default function Sidebar() {
 
 
                 {/* Bottom Navigation */}
-                <div className={`${isCollapsed ? 'md:px-2' : 'px-3'} px-3 pb-3 border-t border-neutral-100 dark:border-neutral-700 pt-3`}>
+                <div className={`${isCollapsed ? 'md:px-2' : 'px-3'} px-3 pb-3 border-t border-neutral-200 dark:border-neutral-700 pt-3`}>
                     {bottomNavItems.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.path);

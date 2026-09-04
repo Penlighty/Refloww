@@ -24,6 +24,7 @@ interface SelectProps {
     searchMatcher?: (option: SelectOption, query: string) => boolean;
     disabled?: boolean;
     className?: string;
+    maxHeightClass?: string;
 }
 
 export function Select({
@@ -38,6 +39,7 @@ export function Select({
     searchMatcher,
     disabled = false,
     className,
+    maxHeightClass = 'max-h-72',
 }: SelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -190,7 +192,7 @@ export function Select({
                                 </div>
                             </div>
                         )}
-                        <div className="dropdown-options-list max-h-60 overflow-y-auto py-1">
+                        <div className={clsx("dropdown-options-list overflow-y-auto py-1", maxHeightClass)}>
                             {filteredOptions.length === 0 ? (
                                 <div className="px-4 py-3.5 text-xs text-neutral-400 dark:text-neutral-500 text-center">
                                     No options found

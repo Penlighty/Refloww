@@ -14,4 +14,4 @@ export { Skeleton, SkeletonCard, SkeletonTable, SkeletonStats, SkeletonChart } f
 export { HelpTooltip, LabelWithHelp } from './HelpTooltip';
 export { PageHelpModal } from './PageHelpModal';
 export { ImageUploader } from './ImageUploader';
-
+export { FixedDropdownMenu } from './FixedDropdownMenu';

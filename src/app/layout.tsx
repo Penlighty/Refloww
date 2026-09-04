@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { Toaster } from 'react-hot-toast';
 import ThemeProvider from "@/components/ThemeProvider";
 import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
@@ -28,6 +27,8 @@ export const viewport: Viewport = {
   ],
 };
 
+import { SwipeableToaster } from "@/components/ui/SwipeableToaster";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -47,16 +48,7 @@ export default function RootLayout({
               <EncryptionUnlockModal />
             </EncryptionProvider>
           </AuthProvider>
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: 'var(--toast-bg, #fff)',
-                color: 'var(--toast-color, #1a1a1a)',
-              },
-            }}
-          />
+          <SwipeableToaster />
         </ThemeProvider>
       </body>
     </html>

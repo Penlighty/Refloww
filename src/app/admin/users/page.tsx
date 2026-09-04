@@ -4,7 +4,9 @@
 import { useEffect, useState } from 'react';
 import {
     getAllUsers,
-    UserSummary
+    UserSummary,
+    setUserAsAdmin,
+    updateUserStatus
 } from '@/lib/firebase/admin';
 import {
     Search,
@@ -15,9 +17,15 @@ import {
     Users as UsersIcon,
     ChevronLeft,
     ChevronRight,
-    RefreshCw
+    RefreshCw,
+    Shield,
+    ActivitySquare,
+    Ban,
+    CheckCircle2
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
 
 export default function UserManagementPage() {
     const [users, setUsers] = useState<UserSummary[]>([]);
@@ -25,6 +33,11 @@ export default function UserManagementPage() {
     const [lastDoc, setLastDoc] = useState<any>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
+
+    // Modal State
+    const [selectedUser, setSelectedUser] = useState<UserSummary | null>(null);
+    const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+    const [actionLoading, setActionLoading] = useState(false);
 
     // Initial fetch
     useEffect(() => {
@@ -61,6 +74,34 @@ export default function UserManagementPage() {
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (user.displayName && user.displayName.toLowerCase().includes(searchQuery.toLowerCase()))
     );
+
+    const handleUpdateRole = async (role: string) => {
+        if (!selectedUser) return;
+        try {
+            setActionLoading(true);
+            await setUserAsAdmin(selectedUser.id, role);
+            await loadUsers(true);
+            setIsActionModalOpen(false);
+        } catch (error) {
+            console.error("Error updating role:", error);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleUpdateStatus = async (disabled: boolean) => {
+        if (!selectedUser) return;
+        try {
+            setActionLoading(true);
+            await updateUserStatus(selectedUser.id, disabled);
+            await loadUsers(true);
+            setIsActionModalOpen(false);
+        } catch (error) {
+            console.error("Error updating status:", error);
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto">
@@ -171,42 +212,14 @@ export default function UserManagementPage() {
                                         <td className="px-6 py-4 text-right">
                                             <div className="relative inline-block text-left">
                                                 <button
-                                                    onClick={() => setActionMenuOpen(actionMenuOpen === user.id ? null : user.id)}
+                                                    onClick={() => {
+                                                        setSelectedUser(user);
+                                                        setIsActionModalOpen(true);
+                                                    }}
                                                     className="p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                                                 >
                                                     <MoreHorizontal className="w-5 h-5" />
                                                 </button>
-
-                                                {/* Dropdown Menu */}
-                                                {actionMenuOpen === user.id && (
-                                                    <>
-                                                        <div
-                                                            className="fixed inset-0 z-10"
-                                                            onClick={() => setActionMenuOpen(null)}
-                                                        />
-                                                        <div className="absolute right-0 mt-2 w-48 rounded-xl shadow-xl bg-white dark:bg-neutral-800 ring-1 ring-black/5 dark:ring-white/10 z-20 py-1 origin-top-right border border-neutral-100 dark:border-neutral-700">
-                                                            <button
-                                                                className="block w-full text-left px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
-                                                                onClick={() => { /* Handle View Details */ setActionMenuOpen(null); }}
-                                                            >
-                                                                View Details
-                                                            </button>
-                                                            <button
-                                                                className="block w-full text-left px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
-                                                                onClick={() => { /* Handle Reset Password */ setActionMenuOpen(null); }}
-                                                            >
-                                                                Send Password Reset
-                                                            </button>
-                                                            <div className="h-px bg-neutral-100 dark:bg-neutral-700 my-1" />
-                                                            <button
-                                                                className="block w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                                                onClick={() => { /* Handle Deactivate */ setActionMenuOpen(null); }}
-                                                            >
-                                                                Deactivate User
-                                                            </button>
-                                                        </div>
-                                                    </>
-                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -238,6 +251,93 @@ export default function UserManagementPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Action Modal */}
+            <Modal
+                isOpen={isActionModalOpen}
+                onClose={() => setIsActionModalOpen(false)}
+                title="Manage User"
+            >
+                {selectedUser && (
+                    <div className="p-6 space-y-6">
+                        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700 flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center font-bold text-neutral-500 overflow-hidden shrink-0">
+                                {selectedUser.photoURL ? (
+                                    <img src={selectedUser.photoURL} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                    (selectedUser.displayName || selectedUser.email).charAt(0).toUpperCase()
+                                )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <h3 className="font-semibold text-slate-900 dark:text-white truncate">
+                                    {selectedUser.displayName || 'Unnamed User'}
+                                </h3>
+                                <p className="text-sm text-slate-500 truncate">{selectedUser.email}</p>
+                                <p className="text-xs text-slate-400 font-mono mt-1">ID: {selectedUser.id}</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <h4 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                                <Shield className="w-4 h-4 text-blue-500" />
+                                Administrative Role
+                            </h4>
+                            <div className="grid grid-cols-2 gap-2">
+                                {['user', 'support_admin', 'content_admin', 'super_admin'].map((role) => (
+                                    <button
+                                        key={role}
+                                        onClick={() => handleUpdateRole(role as any)}
+                                        disabled={actionLoading || selectedUser.role === role}
+                                        className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors text-left ${
+                                            selectedUser.role === role
+                                                ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300'
+                                                : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700/50'
+                                        }`}
+                                    >
+                                        <div className="font-semibold mb-0.5">{role.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</div>
+                                        <div className="text-[10px] opacity-70 font-normal">
+                                            {role === 'super_admin' && 'Full access'}
+                                            {role === 'support_admin' && 'Read-only + Support'}
+                                            {role === 'content_admin' && 'Marketplace + Announcements'}
+                                            {role === 'user' && 'No admin access'}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <h4 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                                <ActivitySquare className="w-4 h-4 text-orange-500" />
+                                Account Status
+                            </h4>
+                            {selectedUser.accountStatus === 'active' ? (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => handleUpdateStatus(true)}
+                                    isLoading={actionLoading}
+                                    className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                                >
+                                    <Ban className="w-4 h-4 mr-2" />
+                                    Deactivate User
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={() => handleUpdateStatus(false)}
+                                    isLoading={actionLoading}
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                                >
+                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                    Reactivate User
+                                </Button>
+                            )}
+                            <p className="text-xs text-slate-500 text-center mt-2">
+                                Deactivating a user prevents them from logging in and accessing their organizations.
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 }

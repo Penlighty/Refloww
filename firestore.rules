@@ -15,11 +15,25 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      // Check if user document has admin role
-      // This requires the user document to have role: 'admin' or isAdmin: true
+      // Check if user document has an admin role
       return isAuthenticated() && 
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true);
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'super_admin', 'support_admin', 'content_admin']);
+    }
+
+    function isNotSuspended() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.disabled != true;
+    }
+
+    // ============================================
+    // GLOBAL ADMIN ACCESS FOR COLLECTION GROUPS
+    // ============================================
+    // Needed for collectionGroup queries like collectionGroup('documents')
+    match /{path=**}/documents/{docId} {
+      allow read: if isAdmin();
+    }
+    match /{path=**}/templates/{docId} {
+      allow read: if isAdmin();
     }
 
     // ============================================
@@ -40,10 +54,34 @@ service cloud.firestore {
       allow update: if isAdmin();
       
       // SUBCOLLECTIONS (documents, customers, templates, products, discounts)
-      // These remain strictly private to the user
       match /{collection}/{docId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if (isOwner(userId) && isNotSuspended()) || isAdmin();
       }
+    }
+
+    // ============================================
+    // ORGANIZATIONS
+    // ============================================
+    match /organizations/{orgId} {
+      // Users who are members can read, admins can read all
+      allow read: if isAuthenticated() && isNotSuspended(); 
+      allow write: if isAuthenticated() && isNotSuspended(); 
+      
+      match /{collection}/{docId} {
+        allow read, write: if isAuthenticated() && isNotSuspended();
+      }
+    }
+
+    // ============================================
+    // SYSTEM SETTINGS & AUDIT LOGS
+    // ============================================
+    match /system_settings/{document=**} {
+      allow read: if true; // Used to check maintenance mode before login
+      allow write: if isAdmin();
+    }
+    
+    match /audit_logs/{document=**} {
+      allow read, write: if isAdmin();
     }
 
     // ============================================
@@ -88,7 +126,7 @@ service cloud.firestore {
     // ============================================
     match /user_notifications/{userId}/notifications/{notificationId} {
       // Users can read/write their own notification status
-      allow read, write: if isOwner(userId);
+      allow read, write: if isOwner(userId) && isNotSuspended();
     }
   }
 }

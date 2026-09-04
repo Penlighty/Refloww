@@ -47,6 +47,7 @@ import { useSettingsStore, useDocumentStore, useCustomerStore, useProductStore, 
 import { formatCurrency } from '@/lib/utils';
 import { LineItem } from '@/lib/types';
 import { subscribeToActiveAnnouncements, Announcement } from '@/lib/firebase/admin';
+import { respondToOrgInvitation } from '@/lib/firebase/firestore';
 import FeedbackModal from './FeedbackModal';
 
 const typeConfig = {
@@ -72,7 +73,15 @@ export default function Header() {
     const { products, getFilteredProducts } = useProductStore();
     const { cart, updateCartQuantity, removeFromCart, clearCart } = useStorefrontStore();
     const company = useSettingsStore(state => state.company);
-    const { organizations, activeOrganizationId, setActiveOrganization, createOrganization } = useOrganizationStore();
+    const {
+        organizations,
+        activeOrganizationId,
+        setActiveOrganization,
+        createOrganization,
+        pendingInvitations,
+        acceptInvitation,
+        declineInvitation
+    } = useOrganizationStore();
     const router = useRouter();
 
     const displayDocuments = useMemo(() => getFilteredDocuments(), [documents, activeOrganizationId, getFilteredDocuments]);
@@ -373,7 +382,7 @@ export default function Header() {
     };
 
     return (
-        <header className="h-16 bg-white dark:bg-neutral-800 border-b border-neutral-100 dark:border-neutral-700 sticky top-0 z-40 transition-colors">
+        <header className="h-16 bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-40 transition-colors">
             <div className="h-full px-4 md:px-6 max-w-[1400px] mx-auto w-full flex items-center justify-between">
                 {/* Mobile Menu Button & Brand Logo */}
                 <div className="flex items-center gap-2 md:hidden mr-3">
@@ -766,6 +775,69 @@ export default function Header() {
                                             </p>
                                         </div>
 
+                                        {/* Pending Organization Invitations Banner */}
+                                        {pendingInvitations && pendingInvitations.length > 0 && (
+                                            <div className="px-3 py-2 border-b border-amber-200 dark:border-amber-900 bg-amber-50/90 dark:bg-amber-950/40">
+                                                <div className="flex items-center justify-between px-1 mb-1.5">
+                                                    <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1">
+                                                        <Building className="w-3 h-3 text-amber-600" />
+                                                        Pending Org Invites ({pendingInvitations.length})
+                                                    </span>
+                                                </div>
+
+                                                <div className="space-y-2 max-h-40 overflow-y-auto">
+                                                    {pendingInvitations.map((invite) => (
+                                                        <div
+                                                            key={invite.id}
+                                                            className="p-2 rounded-xl bg-white dark:bg-neutral-800 border border-amber-200/80 dark:border-amber-800/80 shadow-sm"
+                                                        >
+                                                            <div className="flex items-center justify-between gap-1 mb-1">
+                                                                <span className="text-xs font-bold text-neutral-900 dark:text-white truncate">
+                                                                    {invite.orgName}
+                                                                </span>
+                                                                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 capitalize">
+                                                                    {invite.role === 'admin' ? 'Co-Admin' : invite.role === 'inventory_manager' ? 'Manager' : 'Cashier'}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mb-2 truncate">
+                                                                From: {invite.inviterEmail}
+                                                            </p>
+
+                                                            <div className="flex items-center gap-1.5">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={async () => {
+                                                                        try {
+                                                                            await respondToOrgInvitation(invite.id, 'accepted');
+                                                                        } catch (e) {}
+                                                                        acceptInvitation(invite);
+                                                                        setIsUserMenuOpen(false);
+                                                                        toast.success(`Joined ${invite.orgName} as ${invite.role}!`);
+                                                                    }}
+                                                                    className="flex-1 py-1 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                                                >
+                                                                    <Check className="w-3 h-3" /> Accept
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={async () => {
+                                                                        try {
+                                                                            await respondToOrgInvitation(invite.id, 'declined');
+                                                                        } catch (e) {}
+                                                                        declineInvitation(invite.id);
+                                                                        toast.success(`Declined invite to ${invite.orgName}`);
+                                                                    }}
+                                                                    className="py-1 px-2.5 rounded-lg bg-neutral-200 dark:bg-neutral-700 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950/40 font-bold text-[11px] text-neutral-700 dark:text-neutral-300 transition-colors cursor-pointer"
+                                                                >
+                                                                    Decline
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* Organization Switcher Section */}
                                         <div className="px-3 py-2 border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/70 dark:bg-neutral-900">
                                             <div className="flex items-center justify-between px-1 mb-1.5">
@@ -812,7 +884,7 @@ export default function Header() {
                                             </div>
 
                                             <Link
-                                                href="/settings?tab=general"
+                                                href="/settings?tab=team"
                                                 onClick={() => setIsUserMenuOpen(false)}
                                                 className="mt-2 w-full py-1.5 px-2 rounded-xl bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 text-xs font-semibold text-neutral-700 dark:text-neutral-200 flex items-center justify-center gap-1.5 hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors"
                                             >

@@ -7,7 +7,7 @@ import { useCustomerStore, useSettingsStore, useDocumentStore, useOrganizationSt
 import { Customer, CustomerFormData } from '@/lib/types';
 import { formatDate, formatPhone, parseCSV, generateCSV, downloadCSV, readFileAsText } from '@/lib/utils';
 import { calculateCustomerSegmentMetrics } from '@/lib/utils/customerSegmentation';
-import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea, PageHelpModal } from '@/components/ui';
+import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea, PageHelpModal, FixedDropdownMenu } from '@/components/ui';
 import { toast } from 'react-hot-toast';
 import {
     Plus,
@@ -67,6 +67,77 @@ const customerCSVMapping = {
     'address': 'address' as const,
     'notes': 'notes' as const,
 };
+
+function CustomerRowMenu({
+    customer,
+    onEdit,
+    onDelete,
+}: {
+    customer: Customer;
+    onEdit: (c: Customer) => void;
+    onDelete: (c: Customer) => void;
+}) {
+    const [isOpen, setIsOpen] = useState(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+
+    return (
+        <>
+            <button
+                ref={triggerRef}
+                onClick={() => setIsOpen(!isOpen)}
+                className="p-2 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
+                title="Actions"
+            >
+                <MoreVertical className="w-4 h-4" />
+            </button>
+
+            <FixedDropdownMenu
+                isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                triggerRef={triggerRef}
+                align="right"
+            >
+                <Link
+                    href={`/customers/${customer.id}`}
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+                >
+                    <Eye className="w-4 h-4 text-blue-500" />
+                    <span>View Details</span>
+                </Link>
+                <button
+                    onClick={() => {
+                        setIsOpen(false);
+                        onEdit(customer);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors text-left cursor-pointer"
+                >
+                    <Edit2 className="w-4 h-4 text-amber-500" />
+                    <span>Edit Customer</span>
+                </button>
+                <Link
+                    href={`/customers/${customer.id}`}
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+                >
+                    <FileText className="w-4 h-4 text-emerald-500" />
+                    <span>View Documents</span>
+                </Link>
+                <div className="h-px bg-neutral-100 dark:bg-neutral-700 my-1" />
+                <button
+                    onClick={() => {
+                        setIsOpen(false);
+                        onDelete(customer);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors text-left cursor-pointer"
+                >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete</span>
+                </button>
+            </FixedDropdownMenu>
+        </>
+    );
+}
 
 export default function CustomersPage() {
     const { customers, getFilteredCustomers, addCustomer, updateCustomer, deleteCustomer, reformatAllCustomers } = useCustomerStore();
@@ -646,14 +717,12 @@ export default function CustomersPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredCustomers.map((customer, index) => {
-                                    const isNearBottom = index >= Math.max(0, filteredCustomers.length - 2) || filteredCustomers.length <= 2;
-                                    const popupPosClass = isNearBottom ? 'bottom-full mb-1' : 'top-full mt-1';
+                                {filteredCustomers.map((customer) => {
                                     const isRowSelected = selectedCustomerIds.includes(customer.id);
                                     return (
                                     <tr
                                         key={customer.id}
-                                        className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${isRowSelected ? 'bg-blue-50/40 dark:bg-blue-900/20' : ''} ${openMenuId === customer.id ? 'relative z-30 bg-neutral-50/80 dark:bg-neutral-700/50' : ''}`}
+                                        className={`border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors ${isRowSelected ? 'bg-blue-50/40 dark:bg-blue-900/20' : ''}`}
                                     >
                                         {isSelectMode && (
                                             <td className="px-4 py-4 text-center">
@@ -704,44 +773,11 @@ export default function CustomersPage() {
                                             <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(customer.createdAt)}</span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <div className="relative inline-block">
-                                                <button
-                                                    onClick={() => setOpenMenuId(openMenuId === customer.id ? null : customer.id)}
-                                                    className="p-2 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
-                                                >
-                                                    <MoreVertical className="w-4 h-4" />
-                                                </button>
-                                                {openMenuId === customer.id && (
-                                                    <div className={`absolute right-0 ${popupPosClass} w-44 bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 py-1 z-[100]`}>
-                                                        <Link
-                                                            href={`/customers/${customer.id}`}
-                                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
-                                                        >
-                                                            <Eye className="w-4 h-4" />
-                                                            View Details
-                                                        </Link>
-                                                        <button
-                                                            onClick={() => openEditModal(customer)}
-                                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
-                                                        >
-                                                            <Edit2 className="w-4 h-4" />
-                                                            Edit Customer
-                                                        </button>
-                                                        <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors">
-                                                            <FileText className="w-4 h-4" />
-                                                            View Documents
-                                                        </button>
-                                                        <div className="h-px bg-neutral-100 dark:bg-neutral-700 my-1" />
-                                                        <button
-                                                            onClick={() => openDeleteModal(customer)}
-                                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                            Delete
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
+                                            <CustomerRowMenu
+                                                customer={customer}
+                                                onEdit={openEditModal}
+                                                onDelete={openDeleteModal}
+                                            />
                                         </td>
                                     </tr>
                                     );

@@ -14,6 +14,7 @@ import {
     batchWrite,
     getUserSettings,
     updateUserSettings,
+    subscribeToUserInvitations,
     CollectionName,
     hasLockedDocuments
 } from '@/lib/firebase'; // Use encrypted Firestore exports
@@ -23,7 +24,9 @@ import {
     useProductStore,
     useDocumentStore,
     useDiscountStore,
-    useSettingsStore
+    useSettingsStore,
+    useOrganizationStore,
+    useStorefrontStore
 } from '@/lib/store';
 import { Template, Customer, Product, Document, Discount } from '@/lib/types';
 
@@ -123,8 +126,6 @@ export function useFirebaseSync() {
                 console.log('[Firebase Sync] Some data is encrypted and locked. Unlock required for full access.');
             }
 
-            // Update stores with loaded data (including locked documents with partial info)
-            // The UI can display basic info (IDs, dates) even for locked documents
             // Update stores with loaded data, merging with local changes
             useTemplateStore.setState({ templates: mergeData(useTemplateStore.getState().templates, templates) });
             useCustomerStore.setState({ customers: mergeData(useCustomerStore.getState().customers, customers) });
@@ -133,17 +134,71 @@ export function useFirebaseSync() {
             useDiscountStore.setState({ discounts: mergeData(useDiscountStore.getState().discounts, discounts) });
 
             if (settings) {
-                // Merge settings (simple merge for now, prioritizing server unless we track settings update time)
-                // Settings usually don't have partial migrations, so server win is safer,
-                // BUT if we just updated settings, we might lose it.
-                // However, settings writes are debounced 1s, less likely to conflict.
-                if (settings.company) {
-                    const current = useSettingsStore.getState().company;
-                    useSettingsStore.setState({ company: { ...current, ...settings.company } });
+                // 1. Merge Organizations
+                if (settings.organizations && Array.isArray(settings.organizations)) {
+                    const localOrgs = useOrganizationStore.getState().organizations;
+                    const serverOrgs = settings.organizations;
+                    const mergedOrgs = mergeData(localOrgs, serverOrgs);
+                    const activeOrgId = settings.activeOrganizationId || useOrganizationStore.getState().activeOrganizationId;
+                    useOrganizationStore.setState({
+                        organizations: mergedOrgs,
+                        activeOrganizationId: activeOrgId
+                    });
+
+                    // --- MIGRATION: Push all local/legacy orgs to global organizations collection ---
+                    try {
+                        const { db } = await import('@/lib/firebase/config');
+                        const { doc, setDoc, writeBatch } = await import('firebase/firestore');
+                        for (const org of mergedOrgs) {
+                            const orgRef = doc(db, 'organizations', org.id);
+                            await setDoc(orgRef, {
+                                name: org.name,
+                                ownerEmail: org.ownerEmail,
+                                createdAt: org.createdAt
+                            }, { merge: true });
+                            
+                            if (org.members && org.members.length > 0) {
+                                const batch = writeBatch(db);
+                                for (const member of org.members) {
+                                    batch.set(doc(db, 'organizations', org.id, 'members', member.id), member, { merge: true });
+                                }
+                                await batch.commit();
+                            }
+                        }
+                        console.log('[Firebase Sync] Synced local organizations to global collection');
+                    } catch (err) {
+                        console.error('[Firebase Sync] Failed to sync orgs to global collection:', err);
+                    }
                 }
-                if (settings.numbering) {
-                    const current = useSettingsStore.getState().numbering;
-                    useSettingsStore.setState({ numbering: { ...current, ...settings.numbering } });
+
+                // 2. Merge SettingsStore (company, numbering, companyMap, numberingMap, customNumberingFormatsMap)
+                const settingsState = useSettingsStore.getState();
+                const updatedCompanyMap = { ...settingsState.companyMap, ...(settings.companyMap || {}) };
+                const updatedNumberingMap = { ...settingsState.numberingMap, ...(settings.numberingMap || {}) };
+                const updatedFormatsMap = { ...settingsState.customNumberingFormatsMap, ...(settings.customNumberingFormatsMap || {}) };
+
+                useSettingsStore.setState({
+                    companyMap: updatedCompanyMap,
+                    numberingMap: updatedNumberingMap,
+                    customNumberingFormatsMap: updatedFormatsMap,
+                    ...(settings.company ? { company: { ...settingsState.company, ...settings.company } } : {}),
+                    ...(settings.numbering ? { numbering: { ...settingsState.numbering, ...settings.numbering } } : {})
+                });
+
+                const currentOrgId = useOrganizationStore.getState().activeOrganizationId;
+                useSettingsStore.getState().syncSettingsForActiveOrg(currentOrgId);
+
+                // 3. Merge StorefrontStore (settingsMap, registeredSlugs)
+                if (settings.storefrontSettingsMap || settings.registeredSlugs) {
+                    const storefrontState = useStorefrontStore.getState();
+                    const updatedSfMap = { ...storefrontState.settingsMap, ...(settings.storefrontSettingsMap || {}) };
+                    const updatedSlugs = Array.from(new Set([...(storefrontState.registeredSlugs || []), ...(settings.registeredSlugs || [])]));
+
+                    useStorefrontStore.setState({
+                        settingsMap: updatedSfMap,
+                        registeredSlugs: updatedSlugs
+                    });
+                    useStorefrontStore.getState().syncSettingsForActiveOrg(currentOrgId);
                 }
             }
 
@@ -157,8 +212,6 @@ export function useFirebaseSync() {
             setIsSyncLoaded(true);
         } catch (error) {
             console.error('[Firebase Sync] Error loading data:', error);
-            // Even if load fails, mark as synced so we can start saving new changes
-            // Otherwise the app remains in "read-only" mode forever
             hasSynced = true;
             setIsSyncLoaded(true);
             isLoadingFromFirestore.current = false;
@@ -208,18 +261,15 @@ export function useFirebaseSync() {
 
                 // Check if error is due to encryption being locked
                 if (error?.message?.includes('not unlocked')) {
-                    // Import toast dynamically to avoid hook issues
                     const { toast } = await import('react-hot-toast');
                     toast.error('Unable to save: Please unlock encryption first', {
-                        id: 'encryption-locked-error', // Prevent duplicate toasts
+                        id: 'encryption-locked-error',
                         duration: 5000,
                         icon: '🔒',
                     });
 
-                    // Trigger the unlock prompt by dispatching an event
                     window.dispatchEvent(new CustomEvent('encryption-unlock-required'));
                 } else {
-                    // Show generic sync error for other issues (like validation/undefined)
                     const { toast } = await import('react-hot-toast');
                     toast.error(`Sync failed: ${error?.message || 'Unknown error'}`, {
                         id: `sync-error-${collectionName}`,
@@ -227,23 +277,35 @@ export function useFirebaseSync() {
                     });
                 }
             }
-        }, 1000); // 1000ms debounce (increased from 500ms) to prevent write exhaustion
+        }, 1000);
 
         pendingOperations.current.set(operationKey, timeout);
     }, [user]);
 
-    // Sync settings (special case - single document)
+    // Sync settings & organizations to Firestore
     const syncSettings = useCallback(async () => {
         // Don't sync during initial load or before sync is complete
         if (!user || !hasSynced || isLoadingFromFirestore.current) return;
 
         try {
+            const orgState = useOrganizationStore.getState();
+            const settingsState = useSettingsStore.getState();
+            const sfState = useStorefrontStore.getState();
+
             const settings = JSON.parse(JSON.stringify({
-                company,
-                numbering,
+                company: settingsState.company,
+                companyMap: settingsState.companyMap,
+                numbering: settingsState.numbering,
+                numberingMap: settingsState.numberingMap,
+                customNumberingFormatsMap: settingsState.customNumberingFormatsMap,
+                organizations: orgState.organizations,
+                activeOrganizationId: orgState.activeOrganizationId,
+                storefrontSettingsMap: sfState.settingsMap,
+                registeredSlugs: sfState.registeredSlugs
             }));
+
             await updateUserSettings(settings);
-            console.log('[Firebase Sync] Settings synced successfully');
+            console.log('[Firebase Sync] Settings & Organizations synced successfully to cloud');
         } catch (error: any) {
             console.error('[Firebase Sync] Error syncing settings:', error);
             const errMsg = error?.message || '';
@@ -255,7 +317,7 @@ export function useFirebaseSync() {
                 });
             }
         }
-    }, [user, company, numbering]);
+    }, [user]);
 
     // ============================================
     // INITIAL LOAD ON AUTH
@@ -268,8 +330,6 @@ export function useFirebaseSync() {
             return;
         }
 
-        // If encryption is enabled but not unlocked, don't load yet
-        // The data would come back as locked anyway
         if (encryptionContext?.isEnabled && !encryptionContext?.isUnlocked) {
             console.log('[Firebase Sync] Encryption is enabled but locked, waiting for unlock...');
             return;
@@ -290,7 +350,7 @@ export function useFirebaseSync() {
     useEffect(() => {
         const handleEncryptionUnlock = () => {
             console.log('[Firebase Sync] Encryption unlocked, refreshing data...');
-            loadFromFirestore(true); // Force refresh to bypass syncInProgress
+            loadFromFirestore(true);
         };
 
         window.addEventListener('encryption-unlocked', handleEncryptionUnlock);
@@ -306,13 +366,9 @@ export function useFirebaseSync() {
     // Templates
     useEffect(() => {
         const unsubscribe = useTemplateStore.subscribe((state, prevState) => {
-            // Don't sync until initial load is complete
             if (!hasSynced) return;
-
-            // Optimization: If array reference hasn't changed, skip expensive processing
             if (state.templates === prevState.templates) return;
 
-            // Detect added templates
             state.templates.forEach(template => {
                 const existed = prevState.templates.find(t => t.id === template.id);
                 if (!existed) {
@@ -322,7 +378,6 @@ export function useFirebaseSync() {
                 }
             });
 
-            // Detect deleted templates
             prevState.templates.forEach(template => {
                 const stillExists = state.templates.find(t => t.id === template.id);
                 if (!stillExists) {
@@ -337,7 +392,6 @@ export function useFirebaseSync() {
     // Customers
     useEffect(() => {
         const unsubscribe = useCustomerStore.subscribe((state: any, prevState: any) => {
-            // Don't sync until initial load is complete
             if (!hasSynced) return;
 
             (state.customers || []).forEach((customer: Customer) => {
@@ -363,7 +417,6 @@ export function useFirebaseSync() {
     // Products
     useEffect(() => {
         const unsubscribe = useProductStore.subscribe((state: any, prevState: any) => {
-            // Don't sync until initial load is complete
             if (!hasSynced) return;
 
             (state.products || []).forEach((product: Product) => {
@@ -389,7 +442,6 @@ export function useFirebaseSync() {
     // Documents
     useEffect(() => {
         const unsubscribe = useDocumentStore.subscribe((state: any, prevState: any) => {
-            // Don't sync until initial load is complete
             if (!hasSynced) return;
 
             (state.documents || []).forEach((doc: Document) => {
@@ -415,7 +467,6 @@ export function useFirebaseSync() {
     // Discounts
     useEffect(() => {
         const unsubscribe = useDiscountStore.subscribe((state: any, prevState: any) => {
-            // Don't sync until initial load is complete
             if (!hasSynced) return;
 
             (state.discounts || []).forEach((discount: Discount) => {
@@ -440,15 +491,59 @@ export function useFirebaseSync() {
 
     // Settings (debounced)
     useEffect(() => {
-        // Don't sync until initial load is complete
         if (!isSyncLoaded) return;
 
         const timeout = setTimeout(() => {
             syncSettings();
-        }, 1000); // 1 second debounce for settings
+        }, 1000);
 
         return () => clearTimeout(timeout);
     }, [company, numbering, syncSettings, isSyncLoaded]);
+
+    // Organization Store Subscription
+    useEffect(() => {
+        const unsubscribe = useOrganizationStore.subscribe(() => {
+            if (!isSyncLoaded) return;
+            const timeout = setTimeout(() => {
+                syncSettings();
+            }, 1000);
+            return () => clearTimeout(timeout);
+        });
+        return unsubscribe;
+    }, [syncSettings, isSyncLoaded]);
+
+    // Storefront Store Subscription
+    useEffect(() => {
+        const unsubscribe = useStorefrontStore.subscribe(() => {
+            if (!isSyncLoaded) return;
+            const timeout = setTimeout(() => {
+                syncSettings();
+            }, 1000);
+            return () => clearTimeout(timeout);
+        });
+        return unsubscribe;
+    }, [syncSettings, isSyncLoaded]);
+
+    // Real-time Organization Invitations Subscription
+    useEffect(() => {
+        if (!user?.email) return;
+
+        const unsubscribe = subscribeToUserInvitations(user.email, (invitations: any[]) => {
+            useOrganizationStore.getState().setPendingInvitations(invitations as any);
+
+            if (invitations.length > 0) {
+                import('react-hot-toast').then(({ toast }) => {
+                    toast.success(`You have ${invitations.length} pending organization invitation(s)!`, {
+                        id: 'pending-org-invite-alert',
+                        duration: 6000,
+                        icon: '🏢'
+                    });
+                });
+            }
+        });
+
+        return unsubscribe;
+    }, [user?.email]);
 
     return {
         isLoading: !isSyncLoaded && !!user,
@@ -456,3 +551,5 @@ export function useFirebaseSync() {
         refresh: loadFromFirestore,
     };
 }
+
+

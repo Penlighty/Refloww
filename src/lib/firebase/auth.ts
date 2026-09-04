@@ -12,9 +12,10 @@ import {
     updateProfile as firebaseUpdateProfile,
     onAuthStateChanged,
     User,
-    UserCredential
+    UserCredential,
+    deleteUser as firebaseDeleteUser
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './config';
 import { Capacitor } from '@capacitor/core';
 
@@ -29,6 +30,7 @@ export interface UserProfile {
     photoURL: string | null;
     role?: 'admin' | 'free' | 'pro' | 'premium' | 'enterprise';
     isAdmin?: boolean;
+    disabled?: boolean;
 }
 
 // ============================================
@@ -195,5 +197,25 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
         photoURL: data.photoURL,
         role: data.role,
         isAdmin: data.isAdmin,
+        disabled: data.disabled,
     };
 };
+
+/**
+ * Permanently delete current user account
+ */
+export const deleteUserAccount = async (): Promise<void> => {
+    const user = auth.currentUser;
+    if (!user) throw new Error('No user logged in');
+
+    // 1. Delete user profile document from Firestore
+    try {
+        await deleteDoc(doc(db, 'users', user.uid));
+    } catch (err) {
+        console.warn('Could not delete Firestore user profile document:', err);
+    }
+
+    // 2. Delete Firebase Auth user
+    await firebaseDeleteUser(user);
+};
+

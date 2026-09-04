@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import Link from 'next/link';
@@ -42,15 +42,12 @@ import {
     ChevronLeft,
     Globe,
     CreditCard,
-    ShieldCheck,
-    Clock,
-    History,
-    ExternalLink
+    ShieldCheck
 } from 'lucide-react';
 
-export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undefined }: { isEmbedded?: boolean, storeSlug?: string }) {
+export function StorefrontCatalogContent({ isEmbedded = false }: { isEmbedded?: boolean }) {
     const searchParams = useSearchParams();
-    const storeSlugParam = storeSlug || searchParams.get('store');
+    const storeSlugParam = searchParams.get('store');
     const { user, profile } = useAuth();
 
     const { products } = useProductStore();
@@ -114,35 +111,9 @@ export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undef
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-    const [isPurchaseHistoryOpen, setIsPurchaseHistoryOpen] = useState(false);
-    const [historySearchQuery, setHistorySearchQuery] = useState('');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [addedToastProduct, setAddedToastProduct] = useState<{ product: Product; qty: number } | null>(null);
     const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
-
-    const userOrders = useMemo(() => {
-        const userEmail = user?.email?.toLowerCase() || '';
-        const userPhone = (user as any)?.phoneNumber || '';
-        const q = historySearchQuery.trim().toLowerCase();
-
-        return displayOrders.filter(o => {
-            const matchesUser = Boolean(
-                (userEmail && o.customerEmail.toLowerCase() === userEmail) ||
-                (userPhone && o.customerPhone && o.customerPhone === userPhone)
-            );
-
-            if (!q) {
-                return user ? matchesUser : true;
-            }
-
-            return (
-                o.orderNumber.toLowerCase().includes(q) ||
-                o.customerEmail.toLowerCase().includes(q) ||
-                (o.customerPhone && o.customerPhone.includes(q)) ||
-                o.customerName.toLowerCase().includes(q)
-            );
-        });
-    }, [displayOrders, user, historySearchQuery]);
 
     const computedBadges = useMemo(() => {
         const salesMap: Record<string, number> = {};
@@ -173,26 +144,26 @@ export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undef
             const badges: { text: string; bg: string }[] = [];
 
             if (p.stockQuantity === 0) {
-                badges.push({ text: '❌ Out of Stock', bg: '#ef4444' });
+                badges.push({ text: 'Γ£ò Out of Stock', bg: '#ef4444' });
             } else if (p.stockQuantity !== undefined && p.stockQuantity !== null && p.stockQuantity > 0 && p.stockQuantity <= 5) {
                 badges.push({ text: 'Low Stock', bg: '#f59e0b' });
             } else if (p.stockQuantity !== undefined && p.stockQuantity !== null && p.stockQuantity > 5) {
-                badges.push({ text: '✅ In Stock', bg: '#10b981' });
+                badges.push({ text: 'Γ£ô In Stock', bg: '#10b981' });
             }
 
             if ((salesMap[p.id] || 0) >= minBestSellerQty) {
-                badges.push({ text: '🏆 Best Seller', bg: '#7c3aed' });
+                badges.push({ text: '≡ƒÅå Best Seller', bg: '#7c3aed' });
             }
 
             if (p.discountedPrice && p.discountedPrice < p.unitPrice) {
                 const percentOff = Math.round(((p.unitPrice - p.discountedPrice) / p.unitPrice) * 100);
-                badges.push({ text: `🔥 Flash Sale (${percentOff}% OFF)`, bg: '#e11d48' });
+                badges.push({ text: `≡ƒöÑ Flash Sale (${percentOff}% OFF)`, bg: '#e11d48' });
             }
 
             const isSeedNew = p.id === 'prod-4' || p.id === 'prod-9' || p.id === 'prod-12';
             const isCreatedRecently = p.createdAt ? (Date.now() - new Date(p.createdAt).getTime()) < 14 * 24 * 60 * 60 * 1000 : false;
             if (isSeedNew || isCreatedRecently) {
-                badges.push({ text: '⭐ New', bg: '#2563eb' });
+                badges.push({ text: 'Γÿà New', bg: '#2563eb' });
             }
 
             badgeData[p.id] = badges;
@@ -410,7 +381,7 @@ export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undef
 
             addOrder(orderRecord);
             setCompletedOrder(orderRecord);
-            clearCart(); // Empty shopping cart after successful checkout
+            // Items remain in cart until user manually removes them
             setIsCheckoutOpen(false);
             setIsCartOpen(false);
             setIsProcessingPayment(false);
@@ -471,7 +442,7 @@ export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undef
         : 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80';
 
     return (
-        <div className="w-full flex-1 overflow-y-auto overflow-x-hidden min-h-screen bg-neutral-50 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-100 font-sans pb-24">
+        <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-100 font-sans pb-24">
             {/* 1600x400 (4:1) Banner Cover Image */}
             <div className="relative w-full overflow-hidden shadow-sm bg-neutral-200 dark:bg-neutral-800" style={{ aspectRatio: '4 / 1' }}>
                 <img 
@@ -556,15 +527,6 @@ export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undef
                                 <span>{settings.websiteUrl}</span>
                             </a>
                         )}
-
-                        <button
-                            type="button"
-                            onClick={() => setIsPurchaseHistoryOpen(true)}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700/60 text-emerald-800 dark:text-emerald-300 shadow-sm font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/60 hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors cursor-pointer"
-                        >
-                            <Clock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                            <span>Purchase History ({userOrders.length})</span>
-                        </button>
                     </div>
                 </div>
             </header>
@@ -1221,100 +1183,6 @@ export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undef
                 </Modal>
             )}
 
-            {/* BUYER PURCHASE HISTORY MODAL */}
-            <Modal
-                isOpen={isPurchaseHistoryOpen}
-                onClose={() => setIsPurchaseHistoryOpen(false)}
-                title="My Purchase History"
-                size="lg"
-            >
-                <div className="space-y-4">
-                    {/* Search / Filter Orders Input */}
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
-                        <input
-                            type="text"
-                            placeholder="Search orders by order number, email, or phone..."
-                            value={historySearchQuery}
-                            onChange={(e) => setHistorySearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2.5 text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-[#2d3748] dark:text-white"
-                        />
-                    </div>
-
-                    {userOrders.length === 0 ? (
-                        <div className="p-8 text-center space-y-2 border border-neutral-100 dark:border-neutral-800 rounded-2xl bg-neutral-50/50 dark:bg-neutral-900/40">
-                            <History className="w-10 h-10 text-neutral-300 mx-auto" />
-                            <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">No purchase records found</p>
-                            <p className="text-xs text-neutral-400">
-                                {historySearchQuery ? `No orders matching "${historySearchQuery}".` : "You haven't placed any orders yet."}
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
-                            {userOrders.map((order) => (
-                                <div
-                                    key={order.id}
-                                    className="p-4 bg-white dark:bg-neutral-800 border border-neutral-200/80 dark:border-neutral-700 rounded-2xl space-y-3 shadow-xs"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-mono font-bold text-sm text-[#2d3748] dark:text-white">{order.orderNumber}</span>
-                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                                                order.status === 'completed' || order.paymentStatus === 'paid'
-                                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
-                                            }`}>
-                                                {order.status === 'completed' || order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
-                                            </span>
-                                        </div>
-                                        <span className="text-xs text-neutral-400">{formatDate(order.createdAt)}</span>
-                                    </div>
-
-                                    <div className="text-xs space-y-1 bg-neutral-50 dark:bg-neutral-900/60 p-2.5 rounded-xl">
-                                        {order.items.map((item, idx) => (
-                                            <div key={idx} className="flex justify-between text-neutral-600 dark:text-neutral-300">
-                                                <span>{item.quantity}x {item.productName}</span>
-                                                <span className="font-mono font-semibold">{formatCurrency(item.subtotal, currency)}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="flex items-center justify-between pt-1">
-                                        <div className="text-xs">
-                                            <span className="text-neutral-400">Total Paid: </span>
-                                            <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
-                                                {formatCurrency(order.grandTotal, currency)}
-                                            </span>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            {order.invoiceId && (
-                                                <Link href={`/invoices/${order.invoiceId}`} target="_blank">
-                                                    <Button size="sm" variant="outline" leftIcon={<FileText className="w-3.5 h-3.5 text-blue-500" />}>
-                                                        Invoice
-                                                    </Button>
-                                                </Link>
-                                            )}
-                                            {order.receiptId && (
-                                                <Link href={`/receipts/${order.receiptId}`} target="_blank">
-                                                    <Button size="sm" variant="primary" className="bg-emerald-600 hover:bg-emerald-700" leftIcon={<ReceiptIcon className="w-3.5 h-3.5" />}>
-                                                        Receipt
-                                                    </Button>
-                                                </Link>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <ModalFooter>
-                    <Button variant="ghost" onClick={() => setIsPurchaseHistoryOpen(false)}>Close</Button>
-                </ModalFooter>
-            </Modal>
-
             {/* PRODUCT QUICK VIEW MODAL WITH MULTI-IMAGE CAROUSEL */}
             {selectedProduct && (() => {
                 const productImages = selectedProduct.images && selectedProduct.images.length > 0
@@ -1421,5 +1289,20 @@ export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undef
                 );
             })()}
         </div>
+    );
+}
+
+export default function StorefrontCatalogPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-neutral-900 flex items-center justify-center text-white">
+                <div className="flex flex-col items-center gap-3">
+                    <Store className="w-8 h-8 animate-pulse text-blue-500" />
+                    <p className="text-sm font-medium">Loading Storefront Catalog...</p>
+                </div>
+            </div>
+        }>
+            <StorefrontCatalogContent />
+        </Suspense>
     );
 }

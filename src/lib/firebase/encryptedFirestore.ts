@@ -19,7 +19,11 @@ import {
     deleteAllDocuments,
     getUserSettings,
     updateUserSettings,
-    subscribeToUserSettings
+    subscribeToUserSettings,
+    sendOrgInvitation,
+    subscribeToUserInvitations,
+    respondToOrgInvitation,
+    OrgInvitationData
 } from './firestore';
 import { encryptionService, DataType } from '../crypto';
 import { DocumentData, QueryConstraint, Unsubscribe } from 'firebase/firestore';
@@ -302,11 +306,14 @@ export {
     deleteAllDocuments,
     getUserSettings,
     updateUserSettings,
-    subscribeToUserSettings
+    subscribeToUserSettings,
+    sendOrgInvitation,
+    subscribeToUserInvitations,
+    respondToOrgInvitation
 };
 
 // Re-export type separately for isolatedModules compatibility
-export type { CollectionName } from './firestore';
+export type { CollectionName, OrgInvitationData } from './firestore';
 
 // ============================================
 // ENCRYPTION STATE UTILITIES
