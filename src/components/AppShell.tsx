@@ -142,7 +142,7 @@ export default function AppShell({ children }: AppShellProps) {
                         <div className="hidden md:block flex-shrink-0">
                             <Header />
                         </div>
-                        <div className="flex-1 overflow-y-auto px-3.5 py-4 sm:p-6 pb-28 md:pb-8 scroll-smooth">
+                        <div className="flex-1 overflow-y-auto px-4.5 sm:px-6 py-4 pb-32 sm:pb-36 md:pb-8 scroll-smooth">
                             <div className="max-w-[1400px] mx-auto w-full">
                                 {children}
                             </div>

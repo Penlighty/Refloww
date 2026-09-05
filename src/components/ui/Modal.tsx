@@ -73,8 +73,8 @@ export function Modal({
             ref={overlayRef}
             onClick={handleOverlayClick}
             className={clsx(
-                'fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4',
-                'bg-black/50 backdrop-blur-sm',
+                'fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4',
+                'bg-black/60 backdrop-blur-xs',
                 'animate-in fade-in duration-200'
             )}
         >
@@ -85,8 +85,8 @@ export function Modal({
                 aria-labelledby={title ? 'modal-title' : undefined}
                 aria-describedby={description ? 'modal-description' : undefined}
                 className={clsx(
-                    'relative w-full bg-white dark:bg-neutral-800 rounded-t-3xl sm:rounded-2xl shadow-2xl border border-transparent dark:border-neutral-700',
-                    'animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200 flex flex-col max-h-[92vh] sm:max-h-[90vh]',
+                    'relative w-full bg-white dark:bg-[#161a24] rounded-t-[28px] sm:rounded-2xl shadow-2xl border border-neutral-200/80 dark:border-neutral-800',
+                    'animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200 flex flex-col max-h-[85vh] sm:max-h-[90vh] pb-3 sm:pb-0',
                     sizeStyles[size]
                 )}
             >
@@ -97,7 +97,7 @@ export function Modal({
                             {title && (
                                 <h2
                                     id="modal-title"
-                                    className="text-lg sm:text-xl font-semibold text-neutral-900 dark:text-white"
+                                    className="text-base sm:text-xl font-bold text-neutral-900 dark:text-white"
                                 >
                                     {title}
                                 </h2>
@@ -105,7 +105,7 @@ export function Modal({
                             {description && (
                                 <p
                                     id="modal-description"
-                                    className="mt-1 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400"
+                                    className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400"
                                 >
                                     {description}
                                 </p>
@@ -114,9 +114,9 @@ export function Modal({
                         {showCloseButton && (
                             <button
                                 onClick={onClose}
-                                className="p-2 -m-2 rounded-lg text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                                className="p-1.5 rounded-full text-neutral-400 dark:text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 bg-neutral-100 dark:bg-neutral-800 transition-colors"
                             >
-                                <X className="w-5 h-5" strokeWidth={2} />
+                                <X className="w-4 h-4" strokeWidth={2} />
                             </button>
                         )}
                     </div>

@@ -125,7 +125,7 @@ export default function StatsGrid() {
 
         return [
             {
-                title: 'Total Revenue (Collected)',
+                title: 'Total Revenue',
                 value: formatCurrency(totalPaid, currency),
                 subValue: totalBilled > 0 ? `of ${formatCurrency(totalBilled, currency)} billed` : undefined,
                 change: { value: '0%', positive: true },
@@ -135,7 +135,7 @@ export default function StatsGrid() {
                 hideChange: true,
             },
             {
-                title: 'Outstanding Invoices',
+                title: 'Unpaid Invoices',
                 value: pendingTransactions.length.toString(),
                 subValue: `(${formatCurrency(outstandingAmount, currency)})`,
                 note: `${overdueCount} overdue`,
@@ -143,7 +143,7 @@ export default function StatsGrid() {
                 variant: 'default',
             },
             {
-                title: 'Documents Created',
+                title: 'Documents',
                 value: totalDocs.toString(),
                 subValue: 'files',
                 note: lastActivity,

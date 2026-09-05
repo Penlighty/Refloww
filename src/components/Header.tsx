@@ -1043,7 +1043,7 @@ export default function Header() {
 
             {/* Create Organization Modal */}
             {isCreateOrgModalOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-neutral-800 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-neutral-100 dark:border-neutral-700 animate-in zoom-in-95">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">

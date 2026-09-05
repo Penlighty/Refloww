@@ -146,6 +146,10 @@ export default function POSPage() {
         const availableStock = product.stockQuantity || 0;
         const existingIndex = cart.findIndex(item => item.product.id === product.id);
 
+        const activeUnitPrice = (product.discountedPrice && product.discountedPrice > 0 && product.discountedPrice < product.unitPrice)
+            ? product.discountedPrice
+            : product.unitPrice;
+
         if (existingIndex > -1) {
             const currentQty = cart[existingIndex].quantity;
             if (product.productType === 'physical' && currentQty >= availableStock) {
@@ -154,13 +158,14 @@ export default function POSPage() {
             }
             const updated = [...cart];
             updated[existingIndex].quantity += 1;
+            updated[existingIndex].unitPrice = activeUnitPrice;
             setCart(updated);
         } else {
             if (product.productType === 'physical' && availableStock <= 0) {
                 toast.error('Product is currently out of stock!');
                 return;
             }
-            setCart([...cart, { product, quantity: 1, unitPrice: product.unitPrice }]);
+            setCart([...cart, { product, quantity: 1, unitPrice: activeUnitPrice }]);
         }
     };
 
@@ -463,7 +468,7 @@ export default function POSPage() {
                 </div>
 
                 {/* Product Catalog list (Internal scroll) */}
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-4 pb-36 lg:pb-4">
                     {filteredProducts.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center p-8 text-neutral-400 dark:text-neutral-500">
                             <Tag className="w-10 h-10 mb-2 opacity-50" strokeWidth={1.5} />
@@ -847,32 +852,11 @@ export default function POSPage() {
                 </div>
             </div>
 
-            {/* Sticky Mobile Floating Cart Bar */}
-            {mobileTab === 'products' && cartTotalCount > 0 && (
-                <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40 bg-neutral-900 text-white rounded-2xl p-3 shadow-2xl flex items-center justify-between border border-neutral-800 animate-in slide-in-from-bottom-3">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                            {cartTotalCount}
-                        </div>
-                        <div>
-                            <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Subtotal Due</p>
-                            <p className="text-sm font-bold text-emerald-400">{formatCurrency(grandTotal, company.currency)}</p>
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => setMobileTab('cart')}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-md active:scale-95 transition-transform cursor-pointer"
-                    >
-                        <span>Review & Pay</span>
-                        <ArrowRight className="w-4 h-4" />
-                    </button>
-                </div>
-            )}
+
 
             {/* Quick Add Customer Modal */}
             {isAddCustomerModalOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-neutral-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-neutral-100 dark:border-neutral-700 animate-in zoom-in-95">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-base font-bold text-[#2d3748] dark:text-white flex items-center gap-2">
@@ -958,7 +942,7 @@ export default function POSPage() {
 
             {/* Charge Order Modal */}
             {isChargeModalOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-neutral-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-neutral-100 dark:border-neutral-700 animate-in zoom-in-95 flex flex-col">
                         
                         {/* Header */}
@@ -1204,7 +1188,7 @@ export default function POSPage() {
 
             {/* Sale Completed Modal */}
             {isCompletedModalOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-neutral-800 rounded-3xl p-6 max-w-md w-full text-center space-y-4 shadow-2xl border border-neutral-100 dark:border-neutral-700 animate-in zoom-in-95">
                         <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center shadow-inner">
                             <CheckCircle2 className="w-10 h-10" />

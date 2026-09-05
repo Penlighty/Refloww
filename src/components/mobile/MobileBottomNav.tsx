@@ -25,11 +25,17 @@ import {
     BookOpen
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function MobileBottomNav() {
     const pathname = usePathname();
     const router = useRouter();
+    const [mounted, setMounted] = useState(false);
     const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Active Tab Logic
     const isHomeActive = pathname === '/';
@@ -118,17 +124,17 @@ export default function MobileBottomNav() {
                 </div>
             </nav>
 
-            {/* "More" Contextual Mobile Bottom Sheet */}
-            {isMoreSheetOpen && (
-                <div className="fixed inset-0 z-[100] md:hidden flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+            {/* Portaled "More" Contextual Mobile Bottom Sheet */}
+            {mounted && isMoreSheetOpen && createPortal(
+                <div className="fixed inset-0 z-[150] md:hidden flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
                     <div
                         className="fixed inset-0"
                         onClick={() => setIsMoreSheetOpen(false)}
                     />
                     
-                    <div className="relative bg-white dark:bg-[#161a24] rounded-t-[28px] p-6 space-y-4 max-h-[85vh] overflow-y-auto border-t border-neutral-200 dark:border-neutral-800 shadow-2xl animate-in slide-in-from-bottom duration-250 z-[101]">
+                    <div className="relative bg-white dark:bg-[#161a24] rounded-t-[28px] p-6 space-y-4 min-h-[50vh] max-h-[85vh] flex flex-col border-t border-neutral-200 dark:border-neutral-800 shadow-2xl animate-in slide-in-from-bottom duration-250 z-[151]">
                         {/* Sheet Handle */}
-                        <div className="w-12 h-1 bg-neutral-300 dark:bg-neutral-700 rounded-full mx-auto mb-2" />
+                        <div className="w-12 h-1 bg-neutral-300 dark:bg-neutral-700 rounded-full mx-auto mb-2 flex-shrink-0" />
 
                         <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-neutral-800">
                             <div>
@@ -366,7 +372,8 @@ export default function MobileBottomNav() {
 
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useProductStore, useDocumentStore, useSettingsStore, useOrganizationStore } from '@/lib/store';
 import { calculateReorderMetrics } from '@/lib/utils/inventoryUtils';
 import { formatCurrency } from '@/lib/utils';
-import { AlertTriangle, Clock, ArrowRight, Package, DollarSign, CheckCircle2, ChevronDown, ChevronUp, Zap } from 'lucide-react';
+import { AlertTriangle, Clock, ArrowRight, Package, DollarSign, CheckCircle2, ChevronDown, ChevronUp, Zap, X } from 'lucide-react';
 
 export default function DashboardActionBanner() {
     const { products, getFilteredProducts } = useProductStore();
@@ -13,6 +13,7 @@ export default function DashboardActionBanner() {
     const activeOrgId = useOrganizationStore((state) => state.activeOrganizationId);
     const company = useSettingsStore(state => state.company);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isDismissed, setIsDismissed] = useState(false);
 
     const displayProducts = useMemo(() => getFilteredProducts(), [products, activeOrgId, getFilteredProducts]);
     const displayDocuments = useMemo(() => getFilteredDocuments(), [documents, activeOrgId, getFilteredDocuments]);
@@ -44,21 +45,21 @@ export default function DashboardActionBanner() {
     const hasOverdue = overdueData.count > 0;
     const totalActions = (hasLowStock ? 1 : 0) + (hasOverdue ? 1 : 0);
 
-    if (!hasLowStock && !hasOverdue) {
-        return null; // Keep dashboard header clean when no actions needed
+    if (isDismissed || (!hasLowStock && !hasOverdue)) {
+        return null; // Keep dashboard header clean when dismissed or no actions needed
     }
 
     return (
-        <div className="bg-white dark:bg-neutral-800 border border-amber-200/80 dark:border-amber-900/60 rounded-2xl p-3.5 shadow-sm transition-all duration-200">
+        <div className="bg-amber-50/50 dark:bg-neutral-800/80 border border-amber-200/80 dark:border-amber-900/60 rounded-2xl p-2.5 sm:p-3.5 shadow-xs transition-all duration-200">
             {/* Header / Toggle Bar */}
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                    <div className="p-2 bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
-                        <Zap className="w-4 h-4" />
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                    <div className="p-1.5 sm:p-2 bg-amber-500/15 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
+                        <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                        <span className="text-xs font-bold text-neutral-900 dark:text-white">
-                            Operational Actions Needed
+                    <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                        <span className="text-xs font-bold text-neutral-900 dark:text-white truncate">
+                            Actions Needed
                         </span>
                         {hasLowStock && (
                             <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 flex items-center gap-1">
@@ -75,13 +76,24 @@ export default function DashboardActionBanner() {
                     </div>
                 </div>
 
-                <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-xl transition-colors shrink-0 cursor-pointer"
-                >
-                    <span>{isExpanded ? 'Hide Details' : `View Details (${totalActions})`}</span>
-                    {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                </button>
+                <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-100/60 dark:bg-amber-950/60 hover:bg-amber-200/60 dark:hover:bg-amber-900/60 rounded-xl transition-colors cursor-pointer"
+                    >
+                        <span className="text-[11px] sm:text-xs">{isExpanded ? 'Hide' : `Details (${totalActions})`}</span>
+                        {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setIsDismissed(true)}
+                        className="p-1.5 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50 rounded-xl transition-colors"
+                        title="Dismiss banner"
+                    >
+                        <X className="w-3.5 h-3.5" />
+                    </button>
+                </div>
             </div>
 
             {/* Expandable Decision Cards Container */}
