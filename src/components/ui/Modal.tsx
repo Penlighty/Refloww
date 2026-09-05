@@ -73,8 +73,8 @@ export function Modal({
             ref={overlayRef}
             onClick={handleOverlayClick}
             className={clsx(
-                'fixed inset-0 z-50 flex items-center justify-center p-4',
-                'bg-black/40 backdrop-blur-sm',
+                'fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4',
+                'bg-black/50 backdrop-blur-sm',
                 'animate-in fade-in duration-200'
             )}
         >
@@ -85,19 +85,19 @@ export function Modal({
                 aria-labelledby={title ? 'modal-title' : undefined}
                 aria-describedby={description ? 'modal-description' : undefined}
                 className={clsx(
-                    'relative w-full bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl border border-transparent dark:border-neutral-700',
-                    'animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]',
+                    'relative w-full bg-white dark:bg-neutral-800 rounded-t-3xl sm:rounded-2xl shadow-2xl border border-transparent dark:border-neutral-700',
+                    'animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200 flex flex-col max-h-[92vh] sm:max-h-[90vh]',
                     sizeStyles[size]
                 )}
             >
                 {/* Header */}
                 {(title || showCloseButton) && (
-                    <div className="flex items-start justify-between p-6 pb-0 flex-none">
+                    <div className="flex items-start justify-between p-4 sm:p-6 pb-0 flex-none">
                         <div>
                             {title && (
                                 <h2
                                     id="modal-title"
-                                    className="text-xl font-semibold text-neutral-900 dark:text-white"
+                                    className="text-lg sm:text-xl font-semibold text-neutral-900 dark:text-white"
                                 >
                                     {title}
                                 </h2>
@@ -105,7 +105,7 @@ export function Modal({
                             {description && (
                                 <p
                                     id="modal-description"
-                                    className="mt-1 text-sm text-neutral-500 dark:text-neutral-400"
+                                    className="mt-1 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400"
                                 >
                                     {description}
                                 </p>
@@ -123,11 +123,11 @@ export function Modal({
                 )}
 
                 {/* Content */}
-                <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">{children}</div>
+                <div className="p-4 sm:p-6 overflow-y-auto flex-1 custom-scrollbar">{children}</div>
 
                 {/* Footer */}
                 {footer && (
-                    <div className="px-6 pb-6 flex-none">
+                    <div className="px-4 pb-4 sm:px-6 sm:pb-6 flex-none">
                         {footer}
                     </div>
                 )}

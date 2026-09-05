@@ -41,7 +41,7 @@ interface DocumentListProps {
 const statusConfig = {
     'draft': { label: 'Draft', bgClass: 'bg-neutral-100 dark:bg-neutral-700', textClass: 'text-neutral-600 dark:text-neutral-300', dotClass: 'bg-neutral-400', icon: FileText },
     'sent': { label: 'Sent', bgClass: 'bg-blue-50 dark:bg-blue-900/30', textClass: 'text-blue-600 dark:text-blue-400', dotClass: 'bg-blue-500', icon: Send },
-    'paid': { label: 'Paid', bgClass: 'bg-emerald-50 dark:bg-emerald-900/30', textClass: 'text-emerald-600 dark:text-emerald-400', dotClass: 'bg-emerald-500', icon: Check },
+    'paid': { label: 'Paid', bgClass: 'bg-emerald-50 dark:bg-emerald-900/30', textClass: 'text-[#16A86B] dark:text-emerald-400', dotClass: 'bg-[#16A86B]', icon: Check },
     'partially_paid': { label: 'Partial', bgClass: 'bg-amber-50 dark:bg-amber-900/30', textClass: 'text-amber-600 dark:text-amber-400', dotClass: 'bg-amber-500', icon: Clock },
     'overdue': { label: 'Overdue', bgClass: 'bg-red-50 dark:bg-red-900/30', textClass: 'text-red-600 dark:text-red-400', dotClass: 'bg-red-500', icon: AlertCircle },
     'cancelled': { label: 'Cancelled', bgClass: 'bg-neutral-100 dark:bg-neutral-700', textClass: 'text-neutral-500 dark:text-neutral-400', dotClass: 'bg-neutral-400', icon: Trash2 },
@@ -315,7 +315,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                     </p>
                 </div>
                 <Link href={newUrl}>
-                    <Button leftIcon={<Plus className="w-4 h-4" />} iconOnlyMobile>
+                    <Button leftIcon={<Plus className="w-4 h-4" />} className="px-3 sm:px-4">
                         New {title.slice(0, -1)}
                     </Button>
                 </Link>
@@ -459,8 +459,85 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                 </div>
             ) : (
                 <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16">
-                    <div className="overflow-x-auto min-h-[300px]">
-                        <table className="w-full min-w-[700px] md:min-w-full">
+                    {/* Mobile Cards View (< md) */}
+                    <div className="block md:hidden space-y-3 p-3">
+                        {filteredDocuments.map((doc) => {
+                            const config = statusConfig[doc.status] || statusConfig['draft'];
+                            const isLocked = (doc as any)._isLocked === true;
+                            const isRowSelected = selectedDocIds.includes(doc.id);
+
+                            return (
+                                <div
+                                    key={`mobile-${doc.id}`}
+                                    className={`bg-white dark:bg-neutral-800/90 border border-neutral-100 dark:border-neutral-700/80 rounded-2xl p-4 shadow-sm transition-all ${
+                                        isRowSelected ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''
+                                    }`}
+                                >
+                                    {/* Header: Document Number & Status */}
+                                    <div className="flex items-center justify-between gap-2 mb-2">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            {isSelectMode && (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isRowSelected}
+                                                    onChange={() => toggleSelectRow(doc.id)}
+                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500"
+                                                />
+                                            )}
+                                            <Link href={`/${type}s/${doc.id}`} className="font-bold text-sm text-[#2d3748] dark:text-white truncate">
+                                                {doc.documentNumber || (isLocked ? '🔒 Encrypted' : 'Untitled')}
+                                            </Link>
+                                        </div>
+
+                                        <button
+                                            onClick={() => setOpenStatusMenuId(openStatusMenuId === doc.id ? null : doc.id)}
+                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${config.bgClass} ${config.textClass}`}
+                                        >
+                                            <span className={`w-1.5 h-1.5 rounded-full ${config.dotClass}`} />
+                                            {config.label}
+                                        </button>
+                                    </div>
+
+                                    {/* Customer & Date */}
+                                    <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 mb-3">
+                                        <span className="font-medium text-neutral-700 dark:text-neutral-300 truncate">
+                                            {doc.customerName || (isLocked ? '🔒 Unlock to view' : 'No customer')}
+                                        </span>
+                                        <span>{formatDate(doc.date)}</span>
+                                    </div>
+
+                                    {/* Footer: Amount & Quick Actions */}
+                                    <div className="flex items-center justify-between pt-2.5 border-t border-neutral-100 dark:border-neutral-700/60">
+                                        <div>
+                                            <span className="text-[10px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">Grand Total</span>
+                                            <span className="font-bold text-sm text-neutral-900 dark:text-white">
+                                                {doc.grandTotal !== undefined ? formatCurrency(doc.grandTotal, currency) : (isLocked ? '🔒 Locked' : '-')}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Link
+                                                href={`/${type}s/${doc.id}`}
+                                                className="px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 rounded-xl text-xs font-semibold hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                                            >
+                                                View
+                                            </Link>
+                                            <Link
+                                                href={`/${type}s/${doc.id}/edit`}
+                                                className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl text-xs font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                                            >
+                                                Edit
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Desktop Table View (>= md) */}
+                    <div className="hidden md:block overflow-x-auto min-h-[300px]">
+                        <table className="w-full min-w-full">
                         <thead>
                             <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
                                 {isSelectMode && (

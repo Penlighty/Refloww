@@ -368,7 +368,7 @@ export default function TemplatesPage() {
                     <TemplateImportExport />
                     <Button
                         leftIcon={<Plus className="w-4 h-4" />}
-                        iconOnlyMobile
+                        className="px-3 sm:px-4"
                         onClick={() => fileInputRef.current?.click()}
                     >
                         New Template

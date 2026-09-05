@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useProductStore, useStorefrontStore, useSettingsStore, useDiscountStore, useOrganizationStore } from '@/lib/store';
-import { Button, Input, Textarea, Modal, ModalFooter, ImageUploader, Select, PageHelpModal } from '@/components/ui';
+import { Button, Input, Textarea, Modal, ModalFooter, ImageUploader, Select, PageHelpModal, SubTabs } from '@/components/ui';
 import { formatCurrency, formatDate, NIGERIAN_BANKS, autoGenerateVendorSubaccounts } from '@/lib/utils';
 import { Product } from '@/lib/types';
 import { StorefrontCatalogContent } from '@/components/storefront/StorefrontCatalogContent';
@@ -274,16 +274,18 @@ export default function StorefrontAdminPage() {
 
                     <div className="flex flex-wrap items-center gap-3">
                         <Button
-                            variant="secondary"
+                            variant="outline"
                             onClick={handleCopyLink}
-                            leftIcon={copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                            leftIcon={copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-neutral-300" />}
                             iconOnlyMobile
+                            title={copiedLink ? 'Copied Catalog Link!' : 'Copy Catalog Link'}
+                            aria-label="Copy Catalog Link"
                             className="bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md"
                         >
-                            {copiedLink ? 'Copied Catalog Link!' : 'Copy Catalog Link'}
+                            {copiedLink ? 'Copied Link!' : 'Copy Link'}
                         </Button>
                         <Link href={`/s/${settings.storeSlug}`} target="_blank">
-                            <Button variant="primary" leftIcon={<ExternalLink className="w-4 h-4" />} iconOnlyMobile className="shadow-lg shadow-blue-500/20">
+                            <Button variant="primary" leftIcon={<ExternalLink className="w-4 h-4" />} className="shadow-lg shadow-blue-500/20 px-3 sm:px-4">
                                 Open Storefront
                             </Button>
                         </Link>
@@ -315,79 +317,54 @@ export default function StorefrontAdminPage() {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700 pb-2 overflow-x-auto">
-                <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={() => setActiveTab('products')}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'products'
-                                    ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
-                                    : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                                }`}
-                        >
-                            <Package className="w-4 h-4" />
-                            <span>Storefront Products ({displayProducts.length})</span>
-                        </button>
-                        <PageHelpModal
-                            title="Storefront Catalog Products"
-                            description="Select which catalog items are published online, apply discounts/sale tags, and edit public descriptions."
-                            terms={[
-                                { term: 'Publish Toggle', definition: 'Eye icon button to make a product visible or hidden from your public online catalog.' }
-                            ]}
-                        />
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={() => setActiveTab('orders')}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'orders'
-                                    ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
-                                    : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                                }`}
-                        >
-                            <ShoppingBag className="w-4 h-4" />
-                            <span>Orders ({displayOrders.length})</span>
-                        </button>
-                        <PageHelpModal
-                            title="Storefront Orders Log"
-                            description="Track incoming web orders placed by customers through your public catalog link."
-                        />
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={() => setActiveTab('preview')}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'preview'
-                                    ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
-                                    : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                                }`}
-                        >
-                            <Eye className="w-4 h-4" />
-                            <span>Store Preview</span>
-                        </button>
-                        <PageHelpModal
-                            title="Interactive Storefront Preview"
-                            description="Real-time interactive preview of your public store catalog on desktop, tablet, and mobile displays."
-                        />
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={() => setActiveTab('settings')}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-nowrap ${activeTab === 'settings'
-                                    ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md'
-                                    : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                                }`}
-                        >
-                            <Settings className="w-4 h-4" />
-                            <span>Store Settings</span>
-                        </button>
-                        <PageHelpModal
-                            title="Storefront Configuration"
-                            description="Customize store branding, logo, banner image, custom URL slug, contact details, and payment payout bank details."
-                        />
-                    </div>
-                </div>
+            <div className="border-b border-neutral-200 dark:border-neutral-700 pb-2">
+                <SubTabs
+                    activeTab={activeTab}
+                    onChangeTab={(tabId) => setActiveTab(tabId as any)}
+                    tabs={[
+                        {
+                            id: 'products',
+                            label: 'Storefront Products',
+                            icon: Package,
+                            count: displayProducts.length,
+                            helpModal: {
+                                title: 'Storefront Catalog Products',
+                                description: 'Select which catalog items are published online, apply discounts/sale tags, and edit public descriptions.',
+                                terms: [
+                                    { term: 'Publish Toggle', definition: 'Eye icon button to make a product visible or hidden from your public online catalog.' }
+                                ]
+                            }
+                        },
+                        {
+                            id: 'orders',
+                            label: 'Orders',
+                            icon: ShoppingBag,
+                            count: displayOrders.length,
+                            helpModal: {
+                                title: 'Storefront Orders Log',
+                                description: 'Track incoming web orders placed by customers through your public catalog link.'
+                            }
+                        },
+                        {
+                            id: 'preview',
+                            label: 'Store Preview',
+                            icon: Eye,
+                            helpModal: {
+                                title: 'Interactive Storefront Preview',
+                                description: 'Real-time interactive preview of your public store catalog on desktop, tablet, and mobile displays.'
+                            }
+                        },
+                        {
+                            id: 'settings',
+                            label: 'Store Settings',
+                            icon: Settings,
+                            helpModal: {
+                                title: 'Storefront Configuration',
+                                description: 'Customize store branding, logo, banner image, custom URL slug, contact details, and payment payout bank details.'
+                            }
+                        }
+                    ]}
+                />
             </div>
 
             {/* TAB 1: PRODUCTS MANAGER */}

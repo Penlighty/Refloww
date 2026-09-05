@@ -54,12 +54,78 @@
   --color-surface-dark: #1e2228;
 
   /* Status feedback colors */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
+  --color-success: #16a86b;
+  --color-warning: #d99020;
+  --color-danger: #e5484d;
+  --color-info: #4b7bec;
+
+  /* Refloww Mobile Design System Tokens */
+  --refloww-orange: #fc6d2d;
+  --refloww-orange-dark: #d9531d;
+  --refloww-orange-tint: #fff0e9;
+  --refloww-orange-soft: #fff8f5;
+
+  --refloww-bg-app: #f4f5f3;
+  --refloww-surface: #ffffff;
+  --refloww-surface-sec: #f8f9f8;
+  --refloww-divider: #e7e9e8;
+
+  --refloww-semantic-green: #16a86b;
+  --refloww-semantic-green-light: #e5f7ef;
+  --refloww-semantic-red: #e5484d;
+  --refloww-semantic-red-light: #fdebec;
+  --refloww-semantic-amber: #d99020;
+  --refloww-semantic-amber-light: #fff4dd;
+  --refloww-semantic-blue: #4b7bec;
+  --refloww-semantic-blue-light: #eaf0ff;
 
   /* Typography */
   --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ============================================================
+   REFLOWW MOBILE DESIGN SYSTEM (max-width: 767px)
+   ============================================================ */
+
+@media (max-width: 767px) {
+  /* Enforce minimum 44px touch targets on mobile interactive controls */
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .mobile-card {
+    background-color: #ffffff;
+    border-radius: 1.25rem; /* 20px */
+    padding: 1rem; /* 16px */
+    border: 1px solid #e7e9e8;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  }
+
+  .dark .mobile-card {
+    background-color: #161a24;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .mobile-primary-btn {
+    min-height: 48px;
+    background-color: #fc6d2d;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 0.875rem; /* 14px */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .mobile-primary-btn:active {
+    background-color: #d9531d;
+    transform: scale(0.98);
+  }
 }
 
 /* Base styles */
@@ -486,4 +552,41 @@ html, body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-are
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ============================================================
+   MINIMALIST FINTECH UI UTILITIES
+   ============================================================ */
+
+.fintech-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dark .fintech-card {
+  background-color: #121620;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.fintech-card:hover {
+  border-color: #cbd5e1;
+}
+
+.dark .fintech-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.fintech-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }

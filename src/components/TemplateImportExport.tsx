@@ -98,8 +98,10 @@ export default function TemplateImportExport({ onImportSuccess }: TemplateImport
             />
             <Button
                 variant="outline"
-                leftIcon={isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                leftIcon={isImporting ? <Loader2 className="w-4 h-4 animate-spin text-neutral-600 dark:text-neutral-300" /> : <Upload className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />}
                 iconOnlyMobile
+                title="Import Template"
+                aria-label="Import Template"
                 onClick={handleImportClick}
                 disabled={isImporting}
             >

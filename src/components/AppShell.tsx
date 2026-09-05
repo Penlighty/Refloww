@@ -41,6 +41,10 @@ const PAGE_TITLES: Record<string, string> = {
     '/': 'Dashboard | Refloww',
 };
 
+import MobileHeader from '@/components/mobile/MobileHeader';
+import MobileBottomNav from '@/components/mobile/MobileBottomNav';
+import MobileSubHeaderNav from '@/components/mobile/MobileSubHeaderNav';
+
 export default function AppShell({ children }: AppShellProps) {
     const router = useRouter();
     const pathname = usePathname();
@@ -120,25 +124,34 @@ export default function AppShell({ children }: AppShellProps) {
     // Authenticated - show full app with sidebar, header, announcement banner, and Firebase sync
     return (
         <FirebaseSyncProvider>
-            <div className="flex flex-col h-screen w-full">
+            <div className="flex flex-col h-screen w-full overflow-hidden bg-[#F4F5F3] dark:bg-[#0B0F19]">
                 {/* Announcement Banner - Real-time from Firebase */}
                 <AnnouncementBanner />
+
+                {/* Mobile-only Header & Sub-Header Navigation */}
+                <div className="md:hidden flex-shrink-0 z-30">
+                    <MobileHeader />
+                    <MobileSubHeaderNav />
+                </div>
 
                 {/* Main App Layout */}
                 <div className="flex-1 flex overflow-hidden">
                     <Sidebar />
-                    <main className="flex-1 flex flex-col min-w-0 bg-background-light dark:bg-background-dark relative overflow-hidden transition-colors">
-                        <Header />
-                        <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
+                    <main className="flex-1 flex flex-col min-w-0 bg-[#F4F5F3] dark:bg-[#0B0F19] relative overflow-hidden transition-colors">
+                        {/* Desktop Header */}
+                        <div className="hidden md:block flex-shrink-0">
+                            <Header />
+                        </div>
+                        <div className="flex-1 overflow-y-auto px-3.5 py-4 sm:p-6 pb-28 md:pb-8 scroll-smooth">
                             <div className="max-w-[1400px] mx-auto w-full">
                                 {children}
-                                <div className="h-8"></div>
                             </div>
                         </div>
                     </main>
                 </div>
 
-
+                {/* Mobile-only Bottom Floating Navigation */}
+                <MobileBottomNav />
             </div>
         </FirebaseSyncProvider>
     );

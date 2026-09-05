@@ -27,40 +27,42 @@ function StatCard({ title, value, subValue, change, note, icon, variant = 'defau
 
     return (
         <div className={`${isFeatured
-            ? 'bg-gradient-to-br from-[#2d3748] via-[#3d4a5c] to-[#4a5568] text-white'
-            : 'bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700'
-            } p-6 rounded-2xl transition-all duration-300`}>
+            ? 'bg-gradient-to-br from-[#1A2232] via-[#222C3E] to-[#121722] text-white border border-neutral-700/60 shadow-md'
+            : 'bg-white dark:bg-[#121620] border border-neutral-200/90 dark:border-neutral-800/80 shadow-xs hover:border-neutral-300 dark:hover:border-neutral-700'
+            } p-5 sm:p-6 rounded-2xl transition-all duration-200`}>
             <div className="flex items-center justify-between mb-3">
-                <p className={`text-sm font-medium ${isFeatured ? 'text-neutral-300' : 'text-neutral-500 dark:text-neutral-400'}`}>
+                <p className={`text-xs font-semibold uppercase tracking-wider ${isFeatured ? 'text-neutral-300' : 'text-neutral-500 dark:text-neutral-400'}`}>
                     {title}
                 </p>
-                <div className={`p-2 rounded-xl ${isFeatured
-                    ? 'bg-white/10 text-white'
-                    : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300'
+                <div className={`p-2.5 rounded-xl ${isFeatured
+                    ? 'bg-[#16A86B]/20 text-[#16A86B]'
+                    : 'bg-neutral-100/80 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300'
                     }`}>
                     {icon}
                 </div>
             </div>
-            <div className="flex items-baseline gap-2">
-                <h3 className={`text-2xl font-bold ${isFeatured ? 'text-white' : 'text-neutral-900 dark:text-white'}`}>
-                    {value}
-                </h3>
+            <div className="flex flex-col gap-1">
+                <div className="flex items-baseline gap-2 flex-wrap">
+                    <h3 className={`text-3xl sm:text-4xl font-bold font-mono tracking-tight ${isFeatured ? 'text-[#16A86B]' : 'text-neutral-900 dark:text-white'}`}>
+                        {value}
+                    </h3>
+                </div>
                 {subValue && (
-                    <span className={`text-base font-normal ${isFeatured ? 'text-neutral-300' : 'text-neutral-500 dark:text-neutral-400'}`}>
+                    <span className={`text-xs font-mono font-medium ${isFeatured ? 'text-neutral-300' : 'text-neutral-500 dark:text-neutral-400'}`}>
                         {subValue}
                     </span>
                 )}
             </div>
             {change && !hideChange && (
-                <div className="flex items-center gap-1 mt-2">
-                    <span className={`flex items-center gap-0.5 text-sm font-semibold ${isFeatured
-                        ? change.positive ? 'text-emerald-300' : 'text-red-300'
-                        : change.positive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'
+                <div className="flex items-center gap-1.5 mt-3">
+                    <span className={`flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full ${isFeatured
+                        ? change.positive ? 'bg-[#16A86B]/20 text-[#16A86B]' : 'bg-red-500/20 text-red-300'
+                        : change.positive ? 'bg-emerald-50 text-[#16A86B] dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300'
                         }`}>
                         {change.positive ? (
-                            <ArrowUpRight className="w-4 h-4" strokeWidth={2} />
+                            <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={2} />
                         ) : (
-                            <ArrowDownRight className="w-4 h-4" strokeWidth={2} />
+                            <ArrowDownRight className="w-3.5 h-3.5" strokeWidth={2} />
                         )}
                         {change.value}
                     </span>
@@ -70,7 +72,7 @@ function StatCard({ title, value, subValue, change, note, icon, variant = 'defau
                 </div>
             )}
             {(!change || hideChange) && (
-                <p className={`text-xs mt-2 ${isFeatured ? 'text-neutral-400' : 'text-neutral-400 dark:text-neutral-500'}`}>
+                <p className={`text-xs mt-3 ${isFeatured ? 'text-neutral-400' : 'text-neutral-400 dark:text-neutral-500'}`}>
                     {note}
                 </p>
             )}
@@ -186,10 +188,20 @@ export default function StatsGrid() {
                     </Link>
                 </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {stats.map((stat, index) => (
-                    <StatCard key={index} {...stat} />
-                ))}
+            <div className="flex flex-col md:grid md:grid-cols-3 gap-3 md:gap-4">
+                {/* 1. Featured Total Revenue Hero Card (Full width on mobile) */}
+                {stats[0] && (
+                    <div className="w-full md:col-span-1">
+                        <StatCard {...stats[0]} />
+                    </div>
+                )}
+
+                {/* 2. Compressed Side-by-Side Cards on Mobile */}
+                <div className="w-full md:col-span-2 grid grid-cols-2 gap-3 md:gap-4">
+                    {stats.slice(1).map((stat, index) => (
+                        <StatCard key={index} {...stat} />
+                    ))}
+                </div>
             </div>
         </section>
     );

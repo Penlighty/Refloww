@@ -90,16 +90,16 @@ export default function RecentTransactions() {
                 </Link>
             </div>
 
-            <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden flex flex-col h-[400px]">
+            <div className="bg-white dark:bg-[#121620] border border-neutral-200/90 dark:border-neutral-800/80 rounded-2xl overflow-hidden flex flex-col h-[400px] shadow-xs">
                 {/* Desktop Table View */}
                 <div className="hidden md:block overflow-x-auto overflow-y-auto custom-scrollbar flex-1">
                     <table className="w-full whitespace-nowrap relative">
-                        <thead className="sticky top-0 z-10 bg-white dark:bg-neutral-800 shadow-sm">
-                            <tr className="border-b border-neutral-100 dark:border-neutral-700">
-                                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider bg-white dark:bg-neutral-800">Client & Document</th>
-                                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider bg-white dark:bg-neutral-800">Date</th>
-                                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider bg-white dark:bg-neutral-800">Status</th>
-                                <th className="text-right px-6 py-4 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider bg-white dark:bg-neutral-800">Amount</th>
+                        <thead className="sticky top-0 z-10 bg-neutral-50/80 dark:bg-[#161a26] border-b border-neutral-200/80 dark:border-neutral-800/80">
+                            <tr>
+                                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Client & Document</th>
+                                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Date</th>
+                                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Status</th>
+                                <th className="text-right px-6 py-3.5 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Amount</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -107,24 +107,24 @@ export default function RecentTransactions() {
                                 const statusKey = doc.status || 'draft';
                                 const statusStyle = statusConfig[statusKey] || statusConfig['draft'];
                                 const docTypeLabel = doc.type === 'receipt' ? 'Receipt' : doc.type === 'invoice' ? 'Invoice' : doc.type === 'delivery-note' ? 'Delivery Note' : 'Estimate';
-                                const docTypeBadgeColor = doc.type === 'receipt' ? 'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300' : doc.type === 'invoice' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300';
+                                const docTypeBadgeColor = doc.type === 'receipt' ? 'bg-violet-100/80 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300' : doc.type === 'invoice' ? 'bg-blue-100/80 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300' : 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300';
                                 const displayAmount = doc.type === 'receipt' ? (doc.amountPaid || doc.grandTotal) : doc.grandTotal;
 
                                 return (
                                     <tr
                                         key={doc.id}
-                                        className="border-b border-neutral-50 dark:border-neutral-700/50 last:border-b-0 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors"
+                                        className="border-b border-neutral-100 dark:border-neutral-800/50 last:border-b-0 hover:bg-neutral-50/70 dark:hover:bg-neutral-800/40 transition-colors"
                                     >
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-3.5">
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(doc.customerName || '')} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0`}>
+                                                <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getAvatarColor(doc.customerName || '')} flex items-center justify-center text-white font-semibold text-xs shrink-0 shadow-xs`}>
                                                     {doc.customerName ? doc.customerName.charAt(0) : (doc as any)._isLocked ? '🔒' : '?'}
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="font-medium text-[#2d3748] dark:text-white">
+                                                    <span className="font-semibold text-sm text-[#2d3748] dark:text-white">
                                                         {doc.customerName || ((doc as any)._isLocked ? 'Encrypted' : 'Unknown')}
                                                     </span>
-                                                    <div className="flex items-center gap-1.5 text-xs text-neutral-400">
+                                                    <div className="flex items-center gap-1.5 text-xs text-neutral-400 font-mono">
                                                         <span className={`px-1.5 py-0.2 rounded text-[10px] font-semibold uppercase ${docTypeBadgeColor}`}>
                                                             {docTypeLabel}
                                                         </span>
@@ -133,17 +133,17 @@ export default function RecentTransactions() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date)}</span>
+                                        <td className="px-6 py-3.5">
+                                            <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{formatDate(doc.date)}</span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusStyle.bgClass} ${statusStyle.textClass}`}>
+                                        <td className="px-6 py-3.5">
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${statusStyle.bgClass} ${statusStyle.textClass}`}>
                                                 <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dotClass}`}></span>
                                                 {statusStyle.label}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <span className="text-sm font-medium text-[#2d3748] dark:text-white">
+                                        <td className="px-6 py-3.5 text-right">
+                                            <span className="text-sm font-bold font-mono text-[#2d3748] dark:text-white">
                                                 {displayAmount !== undefined ? formatCurrency(displayAmount, currency) : ((doc as any)._isLocked ? '🔒 Locked' : '-')}
                                             </span>
                                         </td>
@@ -157,25 +157,25 @@ export default function RecentTransactions() {
                 {/* Mobile List View */}
                 <div className="md:hidden flex-1 overflow-y-auto custom-scrollbar p-2">
                     {recentDocs.map((doc) => (
-                        <div key={doc.id} className="p-4 border-b border-neutral-50 dark:border-neutral-700/50 last:border-0 flex flex-col gap-3">
+                        <div key={doc.id} className="p-3.5 border-b border-neutral-100 dark:border-neutral-800/60 last:border-0 flex flex-col gap-2.5">
                             <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-3 min-w-0">
-                                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(doc.customerName || '')} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0 shadow-sm`}>
+                                    <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getAvatarColor(doc.customerName || '')} flex items-center justify-center text-white font-semibold text-xs shrink-0 shadow-xs`}>
                                         {doc.customerName ? doc.customerName.charAt(0) : (doc as any)._isLocked ? '🔒' : '?'}
                                     </div>
                                     <div className="flex flex-col min-w-0">
-                                        <span className="font-medium text-[#2d3748] dark:text-white text-sm truncate max-w-[150px] sm:max-w-[200px]">
+                                        <span className="font-semibold text-neutral-900 dark:text-white text-xs truncate max-w-[150px] sm:max-w-[200px]">
                                             {doc.customerName || ((doc as any)._isLocked ? 'Encrypted Document' : 'Unknown')}
                                         </span>
-                                        <span className="text-xs text-neutral-400">{formatDate(doc.date)}</span>
+                                        <span className="text-[11px] text-neutral-400">{formatDate(doc.date)}</span>
                                     </div>
                                 </div>
-                                <span className="text-sm font-semibold text-[#2d3748] dark:text-white flex-shrink-0">
+                                <span className="text-xs font-bold font-mono text-[#2d3748] dark:text-white shrink-0">
                                     {doc.grandTotal !== undefined ? formatCurrency(doc.grandTotal, currency) : ((doc as any)._isLocked ? '🔒 Locked' : '-')}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between pl-13">
-                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig[doc.status || 'draft'].bgClass} ${statusConfig[doc.status || 'draft'].textClass}`}>
+                            <div className="flex items-center justify-between pl-12">
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${statusConfig[doc.status || 'draft'].bgClass} ${statusConfig[doc.status || 'draft'].textClass}`}>
                                     <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[doc.status || 'draft'].dotClass}`}></span>
                                     {statusConfig[doc.status || 'draft'].label}
                                 </span>

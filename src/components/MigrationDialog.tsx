@@ -6,6 +6,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui';
 import { Upload, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import {
     batchWrite,
@@ -49,6 +51,18 @@ export function MigrationDialog({ localData, onComplete, onSkip }: MigrationDial
         setProgress(0);
 
         try {
+            // Ensure root user document exists in Firestore before writing subcollections
+            const userRef = doc(db, 'users', user.uid);
+            const userSnap = await getDoc(userRef);
+            if (!userSnap.exists()) {
+                await setDoc(userRef, {
+                    email: user.email || '',
+                    displayName: user.displayName || user.email?.split('@')[0] || 'User',
+                    photoURL: user.photoURL || null,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp(),
+                }, { merge: true });
+            }
             // Migrate templates (with image compression)
             if (localData.templates.length > 0) {
                 // Compress images for each template before migration

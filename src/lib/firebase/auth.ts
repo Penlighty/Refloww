@@ -44,7 +44,12 @@ export const signInWithEmail = async (
     email: string,
     password: string
 ): Promise<UserCredential> => {
-    return signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+    if (!userDoc.exists()) {
+        await createUserProfile(userCredential.user);
+    }
+    return userCredential;
 };
 
 /**

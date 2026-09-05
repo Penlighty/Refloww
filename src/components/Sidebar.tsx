@@ -170,13 +170,13 @@ export default function Sidebar() {
                     ${isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0 md:shadow-none'}
                     ${isCollapsed ? 'md:w-[72px]' : 'md:w-64'} 
                     w-64 
-                    bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 
+                    bg-white dark:bg-[#0b0f19] border-r border-neutral-200/80 dark:border-neutral-800/80 
                     flex flex-col flex-shrink-0 
                     transition-all duration-300 ease-in-out
                 `}
             >
                 {/* Logo Section */}
-                <div className={`h-16 flex items-center ${isCollapsed ? 'md:justify-center px-3' : 'px-5'} justify-start border-b border-neutral-200 dark:border-neutral-700`}>
+                <div className={`h-16 flex items-center ${isCollapsed ? 'md:justify-center px-3' : 'px-5'} justify-start border-b border-neutral-200/80 dark:border-neutral-800/80`}>
                     <Link href="/" className="flex items-center group">
                         {/* Collapsed view (Desktop icon-only mode) */}
                         <div className={`${isCollapsed ? 'hidden md:flex' : 'hidden'} w-9 h-9 items-center justify-center flex-shrink-0`}>
@@ -211,8 +211,8 @@ export default function Sidebar() {
                                     <button
                                         onClick={() => toggleSection(item.label)}
                                         className={`flex items-center gap-3 ${isCollapsed ? 'md:justify-center md:px-2' : 'px-3'} py-2.5 rounded-xl transition-all duration-200 group ${isChildActive && !isExpanded
-                                            ? 'bg-neutral-100/50 dark:bg-neutral-700/50 text-[#2d3748] dark:text-white'
-                                            : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 hover:text-[#2d3748] dark:hover:text-white'
+                                            ? 'bg-neutral-100/70 dark:bg-neutral-800/60 text-[#2d3748] dark:text-white'
+                                            : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/40 hover:text-[#2d3748] dark:hover:text-white'
                                             }`}
                                     >
                                         <Icon className={`w-5 h-5 flex-shrink-0 ${isChildActive ? 'text-[#2d3748] dark:text-white' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300'}`} strokeWidth={1.75} />
@@ -225,7 +225,7 @@ export default function Sidebar() {
                                     </button>
 
                                     {(!isCollapsed || isMobileOpen) && isExpanded && (
-                                        <div className="flex flex-col gap-1 ml-4 pl-4 border-l border-neutral-200 dark:border-neutral-700 mt-1">
+                                        <div className="flex flex-col gap-1 ml-4 pl-4 border-l border-neutral-200/80 dark:border-neutral-800/80 mt-1">
                                             {item.children.map((child) => {
                                                 const ChildIcon = child.icon;
                                                 const active = isActive(child.path);
@@ -234,12 +234,12 @@ export default function Sidebar() {
                                                         key={child.path}
                                                         href={child.path}
                                                         className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${active
-                                                            ? 'bg-neutral-100 dark:bg-neutral-700 text-[#2d3748] dark:text-white'
-                                                            : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 hover:text-[#2d3748] dark:hover:text-white'
+                                                            ? 'bg-orange-500/10 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 font-semibold'
+                                                            : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/40 hover:text-[#2d3748] dark:hover:text-white'
                                                             }`}
                                                         onClick={() => isMobileOpen && setMobileOpen(false)}
                                                     >
-                                                        <ChildIcon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-[#2d3748] dark:text-white' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300'}`} strokeWidth={1.75} />
+                                                        <ChildIcon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-orange-600 dark:text-orange-400' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300'}`} strokeWidth={1.75} />
                                                         <span className={`text-sm text-nowrap ${active ? 'font-semibold' : 'font-medium'}`}>
                                                             {child.label}
                                                         </span>
@@ -260,12 +260,12 @@ export default function Sidebar() {
                                 href={item.path || '/'}
                                 title={isCollapsed ? item.label : undefined}
                                 className={`flex items-center gap-3 ${isCollapsed ? 'md:justify-center md:px-2' : 'px-3'} py-2.5 rounded-xl transition-all duration-200 group ${active
-                                    ? 'bg-neutral-100 dark:bg-neutral-700 text-[#2d3748] dark:text-white'
-                                    : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 hover:text-[#2d3748] dark:hover:text-white'
+                                    ? 'bg-orange-500/10 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 font-semibold'
+                                    : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/40 hover:text-[#2d3748] dark:hover:text-white'
                                     }`}
                                 onClick={() => isMobileOpen && setMobileOpen(false)}
                             >
-                                <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-[#2d3748] dark:text-white' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300'}`} strokeWidth={1.75} />
+                                <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-orange-600 dark:text-orange-400' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300'}`} strokeWidth={1.75} />
                                 <span className={`text-sm text-nowrap ${isCollapsed ? 'md:hidden' : 'block'} ${active ? 'font-semibold' : 'font-medium'}`}>
                                     {item.label}
                                 </span>

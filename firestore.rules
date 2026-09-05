@@ -15,14 +15,18 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      // Check if user document has an admin role
+      // Check if user document has an admin role safely
       return isAuthenticated() && 
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true ||
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'super_admin', 'support_admin', 'content_admin']);
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        ((('isAdmin' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true) ||
+         (('role' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'super_admin', 'support_admin', 'content_admin']));
     }
 
     function isNotSuspended() {
-      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.disabled != true;
+      return isAuthenticated() && 
+        (!exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
+         !('disabled' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data) ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.disabled != true);
     }
 
     // ============================================

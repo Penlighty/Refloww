@@ -159,6 +159,7 @@ export default function CustomersPage() {
     const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
     const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [expandedCustomerId, setExpandedCustomerId] = useState<string | null>(null);
 
     // Auto-repair missing or duplicate Customer IDs for records
     useEffect(() => {
@@ -515,13 +516,27 @@ export default function CustomersPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" leftIcon={<Download className="w-4 h-4" />} iconOnlyMobile onClick={handleExportCSV}>
+                    <Button
+                        variant="outline"
+                        leftIcon={<Download className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />}
+                        iconOnlyMobile
+                        title="Export CSV"
+                        aria-label="Export CSV"
+                        onClick={handleExportCSV}
+                    >
                         Export
                     </Button>
-                    <Button variant="outline" leftIcon={<Upload className="w-4 h-4" />} iconOnlyMobile onClick={() => fileInputRef.current?.click()}>
+                    <Button
+                        variant="outline"
+                        leftIcon={<Upload className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />}
+                        iconOnlyMobile
+                        title="Import CSV"
+                        aria-label="Import CSV"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
                         Import CSV
                     </Button>
-                    <Button leftIcon={<Plus className="w-4 h-4" />} iconOnlyMobile onClick={openCreateModal}>
+                    <Button leftIcon={<Plus className="w-4 h-4" />} className="px-3 sm:px-4" onClick={openCreateModal}>
                         Add Customer
                     </Button>
                 </div>
@@ -658,9 +673,119 @@ export default function CustomersPage() {
                     />
                 </div>
             ) : (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16">
-                    <div className="overflow-x-auto min-h-[300px]">
-                        <table className="w-full min-w-[700px] md:min-w-full">
+                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16 overflow-hidden">
+                    {/* Mobile Customer Cards (< md) */}
+                    <div className="block md:hidden space-y-3 p-3">
+                        {filteredCustomers.map((customer) => {
+                            const isRowSelected = selectedCustomerIds.includes(customer.id);
+                            const isExpanded = expandedCustomerId === customer.id;
+                            const segmentMetrics = calculateCustomerSegmentMetrics(customer, documents, customers);
+
+                            return (
+                                <div
+                                    key={`mobile-customer-${customer.id}`}
+                                    onClick={() => setExpandedCustomerId(isExpanded ? null : customer.id)}
+                                    className={`bg-white dark:bg-neutral-800/90 border rounded-2xl p-4 shadow-sm transition-all cursor-pointer ${
+                                        isRowSelected
+                                            ? 'ring-2 ring-blue-500 bg-blue-50/20 border-blue-200'
+                                            : isExpanded
+                                            ? 'border-neutral-300 dark:border-neutral-600 bg-neutral-50/40 dark:bg-neutral-800/95 shadow-md'
+                                            : 'border-neutral-100 dark:border-neutral-700/80 hover:border-neutral-200 dark:hover:border-neutral-700'
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between gap-3 mb-2.5">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            {isSelectMode && (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isRowSelected}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    onChange={(e) => toggleSelectRow(customer.id, e as any)}
+                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 shrink-0"
+                                                />
+                                            )}
+                                            <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(customer.name)} flex items-center justify-center text-white font-semibold text-sm shrink-0 shadow-sm`}>
+                                                {customer.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <Link
+                                                    href={`/customers/${customer.id}`}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="font-bold text-sm text-[#2d3748] dark:text-white truncate block hover:underline"
+                                                >
+                                                    {customer.name}
+                                                </Link>
+                                                <span className="text-[11px] font-mono text-neutral-400 dark:text-neutral-500 font-medium block">
+                                                    {customer.customerNumber || getNextDocumentNumber('customer', { details: { customerName: customer.name } })}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div onClick={(e) => e.stopPropagation()}>
+                                            <CustomerRowMenu
+                                                customer={customer}
+                                                onEdit={openEditModal}
+                                                onDelete={openDeleteModal}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {segmentMetrics.badges.length > 0 && (
+                                        <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
+                                            {segmentMetrics.badges.map((b) => (
+                                                <span key={b.label} className={`px-2 py-0.5 text-[10px] font-bold rounded-md ${b.bgClass} ${b.textClass}`}>
+                                                    {b.icon} {b.label}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Contact Details - Shown only when card is selected/expanded */}
+                                    {isExpanded && (
+                                        <div className="space-y-1.5 text-xs text-neutral-600 dark:text-neutral-300 py-2.5 border-t border-b border-neutral-100 dark:border-neutral-700/60 my-2">
+                                            {customer.email && (
+                                                <div className="flex items-center gap-2 truncate">
+                                                    <Mail className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                                                    <a href={`mailto:${customer.email}`} onClick={(e) => e.stopPropagation()} className="hover:underline text-blue-600 dark:text-blue-400 truncate">{customer.email}</a>
+                                                </div>
+                                            )}
+                                            {customer.phone && (
+                                                <div className="flex items-center gap-2">
+                                                    <Phone className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                                                    <a href={`tel:${customer.phone}`} onClick={(e) => e.stopPropagation()} className="hover:underline text-neutral-700 dark:text-neutral-300">{formatPhone(customer.phone)}</a>
+                                                </div>
+                                            )}
+                                            {customer.address && (
+                                                <div className="flex items-start gap-2 truncate">
+                                                    <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0 mt-0.5" />
+                                                    <span className="text-neutral-500 dark:text-neutral-400 truncate">{customer.address}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {!isExpanded && <div className="border-t border-neutral-100 dark:border-neutral-700/60 my-2" />}
+
+                                    <div className="flex items-center justify-between pt-0.5">
+                                        <span className="text-[11px] text-neutral-400 dark:text-neutral-500">
+                                            Added {formatDate(customer.createdAt)}
+                                        </span>
+                                        <Link
+                                            href={`/customers/${customer.id}`}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                        >
+                                            View Profile &rarr;
+                                        </Link>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Desktop Customers Table (>= md) */}
+                    <div className="hidden md:block overflow-x-auto min-h-[300px]">
+                        <table className="w-full min-w-full">
                             <thead>
                                 <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
                                     {isSelectMode && (

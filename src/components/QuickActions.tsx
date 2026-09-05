@@ -16,14 +16,14 @@ function QuickActionPill({ href, icon, label, variant = 'secondary' }: QuickActi
     return (
         <Link
             href={href}
-            className={`inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${isPrimary
-                ? 'bg-[#fc6d2d] hover:bg-[#ea500d] text-white shadow-sm shadow-orange-500/25 active:scale-[0.98]'
-                : 'bg-neutral-100 dark:bg-neutral-800 text-[#2d3748] dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+            className={`inline-flex items-center gap-2.5 px-4 py-2 rounded-xl font-semibold text-xs transition-all duration-200 border ${isPrimary
+                ? 'bg-[#fc6d2d] hover:bg-[#ea500d] text-white border-orange-600/30 shadow-xs active:scale-[0.98]'
+                : 'bg-white dark:bg-[#121620] text-[#2d3748] dark:text-neutral-200 border-neutral-200/90 dark:border-neutral-800/80 hover:border-neutral-300 dark:hover:border-neutral-700'
                 }`}
         >
             <span className={`flex items-center justify-center ${isPrimary
                 ? 'text-white'
-                : 'w-7 h-7 bg-[#2d3748] dark:bg-neutral-700 rounded-full text-white dark:text-neutral-200'
+                : 'w-6 h-6 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-neutral-700 dark:text-neutral-300'
                 }`}>
                 {icon}
             </span>
@@ -40,13 +40,13 @@ function QuickActionTile({ href, icon, label, variant = 'secondary' }: QuickActi
             href={href}
             className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 text-center border group ${isPrimary
                 ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500/30 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20'
-                : 'bg-neutral-50/50 dark:bg-neutral-800/40 border-neutral-100/80 dark:border-neutral-700/50 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/70'
-                } shadow-sm active:scale-95`}
+                : 'bg-white dark:bg-[#121620] border-neutral-200/90 dark:border-neutral-800/80 text-neutral-700 dark:text-neutral-300 hover:border-neutral-300 dark:hover:border-neutral-700'
+                } shadow-xs active:scale-95`}
         >
-            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-2 transition-transform duration-200 group-hover:scale-105 group-active:scale-95 ${isPrimary
-                ? 'bg-[#fc6d2d] text-white shadow-sm shadow-orange-500/25'
-                : 'bg-white dark:bg-neutral-800 text-[#2d3748] dark:text-neutral-200 shadow-sm'
-                } [&_svg]:w-5 [&_svg]:h-5 [&_svg]:stroke-[2]`}
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 transition-transform duration-200 group-hover:scale-105 group-active:scale-95 ${isPrimary
+                ? 'bg-[#fc6d2d] text-white shadow-xs'
+                : 'bg-neutral-100 dark:bg-neutral-800 text-[#2d3748] dark:text-neutral-200'
+                } [&_svg]:w-4 [&_svg]:h-4 [&_svg]:stroke-[2]`}
             >
                 {icon}
             </div>

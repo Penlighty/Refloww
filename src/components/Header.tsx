@@ -382,13 +382,13 @@ export default function Header() {
     };
 
     return (
-        <header className="h-16 bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-40 transition-colors">
+        <header className="h-16 bg-white dark:bg-[#0b0f19] border-b border-neutral-200/80 dark:border-neutral-800/80 sticky top-0 z-40 transition-colors">
             <div className="h-full px-4 md:px-6 max-w-[1400px] mx-auto w-full flex items-center justify-between">
                 {/* Mobile Menu Button & Brand Logo */}
                 <div className="flex items-center gap-2 md:hidden mr-3">
                     <button
                         onClick={toggleMobile}
-                        className="p-2 -ml-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 rounded-lg transition-colors"
+                        className="p-2 -ml-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 rounded-lg transition-colors"
                         aria-label="Toggle menu"
                     >
                         <Menu className="w-5 h-5" />

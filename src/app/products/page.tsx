@@ -7,7 +7,7 @@ import { useProductStore, useSettingsStore, useDiscountStore, useDocumentStore, 
 import { Product, ProductFormData, StockBatch, StockMovement, ProductType } from '@/lib/types';
 import { formatCurrency, formatDate, parseCSV, generateCSV, downloadCSV, readFileAsText } from '@/lib/utils';
 import { calculateReorderMetrics, getBatchExpiryStatus, generateAutoBatchNumber } from '@/lib/utils/inventoryUtils';
-import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea, Select, PageHelpModal, HelpTooltip, ImageUploader } from '@/components/ui';
+import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea, Select, PageHelpModal, HelpTooltip, ImageUploader, SubTabs } from '@/components/ui';
 import { toast } from 'react-hot-toast';
 import { generateSkuFromCategory } from '@/lib/utils/productUtils';
 import { validateContentPolicy } from '@/lib/utils/contentPolicy';
@@ -580,135 +580,124 @@ export default function ProductsPage() {
                         variant="outline"
                         leftIcon={<Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" />}
                         iconOnlyMobile
+                        title="Scan Packaging / OCR Batch"
+                        aria-label="Scan Packaging / OCR Batch"
                         onClick={() => openOcrForProduct()}
                     >
-                        Scan Packaging / OCR Batch
+                        Scan Packaging
                     </Button>
                     <Link href="/storefront">
-                        <Button variant="outline" leftIcon={<Store className="w-4 h-4 text-blue-600" />} iconOnlyMobile>
+                        <Button
+                            variant="outline"
+                            leftIcon={<Store className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                            iconOnlyMobile
+                            title="Storefront"
+                            aria-label="Storefront"
+                        >
                             Storefront
                         </Button>
                     </Link>
-                    <Button variant="ghost" leftIcon={<Download className="w-4 h-4" />} iconOnlyMobile onClick={handleExportCSV}>
+                    <Button
+                        variant="outline"
+                        leftIcon={<Download className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />}
+                        iconOnlyMobile
+                        title="Export CSV"
+                        aria-label="Export CSV"
+                        onClick={handleExportCSV}
+                    >
                         Export
                     </Button>
-                    <Button leftIcon={<Plus className="w-4 h-4" />} iconOnlyMobile onClick={openCreateModal}>
-                        Add Product / Service
+                    <Button leftIcon={<Plus className="w-4 h-4" />} className="px-3 sm:px-4" onClick={openCreateModal}>
+                        Add Product
                     </Button>
                 </div>
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-700 mb-6 overflow-x-auto pb-px">
-                <div className="flex items-center gap-1">
-                    <button
-                        onClick={() => setActiveTab('catalog')}
-                        className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                            activeTab === 'catalog'
-                                ? 'border-violet-600 text-violet-600 dark:border-violet-400 dark:text-violet-400'
-                                : 'border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
-                        }`}
-                    >
-                        <Package className="w-4 h-4" />
-                        Products & Services ({displayProducts.length})
-                    </button>
-                    <PageHelpModal
-                        title="Products & Services Catalog"
-                        description="Browse, filter, edit, and manage all physical items and non-physical services offered by your business."
-                        terms={[
-                            { term: 'SKU (Stock Keeping Unit)', definition: 'A unique alphanumeric code assigned to identify each product in your catalog.', example: 'ELE-001, SRV-102' },
-                            { term: 'Selling Price vs Cost Price', definition: 'Selling Price is what your customers pay; Cost Price is what you paid to produce or purchase the item.' }
-                        ]}
-                        tips={[
-                            "Click 'Edit' on any product row to change item type, update prices, or set custom supplier lead times."
-                        ]}
-                    />
-                </div>
-
-                <div className="flex items-center gap-1">
-                    <button
-                        onClick={() => setActiveTab('batches')}
-                        className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                            activeTab === 'batches'
-                                ? 'border-violet-600 text-violet-600 dark:border-violet-400 dark:text-violet-400'
-                                : 'border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
-                        }`}
-                    >
-                        <Layers className="w-4 h-4" />
-                        Batches & Expiry Tracker ({batchExpiryInfoList.length})
-                        {(expiredBatchesCount > 0 || nearExpiryBatchesCount > 0) && (
-                            <span className="px-2 py-0.5 rounded-full text-xs bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-bold">
-                                {expiredBatchesCount + nearExpiryBatchesCount} Alerts
-                            </span>
-                        )}
-                    </button>
-                    <PageHelpModal
-                        title="FEFO Batch & Expiry Tracker"
-                        description="Tracks physical product stock by date received, lot batch number, and expiration date to prevent product shrinkage."
-                        terms={[
-                            { term: 'Stock Batch / Lot', definition: 'A specific shipment or group of products received on a given date with an assigned lot code and expiry date.' },
-                            { term: 'Wastage Write-Off', definition: 'Action to record damaged or expired stock so it is deducted from inventory and logged in audit history.' }
-                        ]}
-                        tips={[
-                            "Click 'Write Off' to remove expired stock and keep your available inventory count 100% accurate."
-                        ]}
-                    />
-                </div>
-
-                <div className="flex items-center gap-1">
-                    <button
-                        onClick={() => setActiveTab('reorder')}
-                        className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                            activeTab === 'reorder'
-                                ? 'border-violet-600 text-violet-600 dark:border-violet-400 dark:text-violet-400'
-                                : 'border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
-                        }`}
-                    >
-                        <TrendingUp className="w-4 h-4" />
-                        Smart Reorder Insights
-                        {reorderNeededCount > 0 && (
-                            <span className="px-2 py-0.5 rounded-full text-xs bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 font-bold">
-                                {reorderNeededCount} Low
-                            </span>
-                        )}
-                    </button>
-                    <PageHelpModal
-                        title="Smart Reorder & Velocity Insights"
-                        description="Automated replenishment calculations based on active sales velocity over the past 30 days and supplier delivery windows."
-                        terms={[
-                            { term: 'Daily Sales Velocity', definition: 'Average number of units sold per day calculated from paid invoices and receipts over the past 30 days.' },
-                            { term: 'Supplier Lead Time', definition: 'Number of days it takes for a supplier to fulfill and deliver a restock order.' },
-                            { term: 'Reorder Point (ROP)', definition: 'Threshold stock level. When current stock falls below this level, restock is recommended.' }
-                        ]}
-                        tips={[
-                            "Customize Supplier Lead Time per product in the Product Edit Modal to get tailored reorder alerts."
-                        ]}
-                    />
-                </div>
-
-                <div className="flex items-center gap-1">
-                    <button
-                        onClick={() => setActiveTab('movements')}
-                        className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                            activeTab === 'movements'
-                                ? 'border-violet-600 text-violet-600 dark:border-violet-400 dark:text-violet-400'
-                                : 'border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
-                        }`}
-                    >
-                        <History className="w-4 h-4" />
-                        Stock Movements & Audit ({displayMovements.length})
-                    </button>
-                    <PageHelpModal
-                        title="Stock Movements Audit Log"
-                        description="Complete audit log recording every inventory change, purchase, sale deduction, manual adjustment, and wastage write-off."
-                        terms={[
-                            { term: 'Movement Audit Log', definition: 'An immutable record showing date, item name, change amount, remaining balance, and reason for every stock adjustment.' }
-                        ]}
-                        tips={[
-                            "Use movement logs to audit unexpected inventory losses or verify sales deductions."
-                        ]}
-                    />
-                </div>
+            <div className="border-b border-neutral-200 dark:border-neutral-700 mb-6 pb-2">
+                <SubTabs
+                    activeTab={activeTab}
+                    onChangeTab={(tabId) => setActiveTab(tabId as any)}
+                    tabs={[
+                        {
+                            id: 'catalog',
+                            label: 'Products & Services',
+                            icon: Package,
+                            count: displayProducts.length,
+                            helpModal: {
+                                title: 'Products & Services Catalog',
+                                description: 'Browse, filter, edit, and manage all physical items and non-physical services offered by your business.',
+                                terms: [
+                                    { term: 'SKU (Stock Keeping Unit)', definition: 'A unique alphanumeric code assigned to identify each product in your catalog.', example: 'ELE-001, SRV-102' },
+                                    { term: 'Selling Price vs Cost Price', definition: 'Selling Price is what your customers pay; Cost Price is what you paid to produce or purchase the item.' }
+                                ],
+                                tips: [
+                                    "Click 'Edit' on any product row to change item type, update prices, or set custom supplier lead times."
+                                ]
+                            }
+                        },
+                        {
+                            id: 'batches',
+                            label: 'Batches & Expiry Tracker',
+                            icon: Layers,
+                            count: batchExpiryInfoList.length,
+                            badge: (expiredBatchesCount > 0 || nearExpiryBatchesCount > 0) ? (
+                                <span className="px-2 py-0.5 rounded-full text-xs bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-bold">
+                                    {expiredBatchesCount + nearExpiryBatchesCount} Alerts
+                                </span>
+                            ) : undefined,
+                            helpModal: {
+                                title: 'FEFO Batch & Expiry Tracker',
+                                description: 'Tracks physical product stock by date received, lot batch number, and expiration date to prevent product shrinkage.',
+                                terms: [
+                                    { term: 'Stock Batch / Lot', definition: 'A specific shipment or group of products received on a given date with an assigned lot code and expiry date.' },
+                                    { term: 'Wastage Write-Off', definition: 'Action to record damaged or expired stock so it is deducted from inventory and logged in audit history.' }
+                                ],
+                                tips: [
+                                    "Click 'Write Off' to remove expired stock and keep your available inventory count 100% accurate."
+                                ]
+                            }
+                        },
+                        {
+                            id: 'reorder',
+                            label: 'Smart Reorder Insights',
+                            icon: TrendingUp,
+                            badge: reorderNeededCount > 0 ? (
+                                <span className="px-2 py-0.5 rounded-full text-xs bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 font-bold">
+                                    {reorderNeededCount} Low
+                                </span>
+                            ) : undefined,
+                            helpModal: {
+                                title: 'Smart Reorder & Velocity Insights',
+                                description: 'Automated replenishment calculations based on active sales velocity over the past 30 days and supplier delivery windows.',
+                                terms: [
+                                    { term: 'Daily Sales Velocity', definition: 'Average number of units sold per day calculated from paid invoices and receipts over the past 30 days.' },
+                                    { term: 'Supplier Lead Time', definition: 'Number of days it takes for a supplier to fulfill and deliver a restock order.' },
+                                    { term: 'Reorder Point (ROP)', definition: 'Threshold stock level. When current stock falls below this level, restock is recommended.' }
+                                ],
+                                tips: [
+                                    "Customize Supplier Lead Time per product in the Product Edit Modal to get tailored reorder alerts."
+                                ]
+                            }
+                        },
+                        {
+                            id: 'movements',
+                            label: 'Stock Movements & Audit',
+                            icon: History,
+                            count: displayMovements.length,
+                            helpModal: {
+                                title: 'Stock Movements Audit Log',
+                                description: 'Complete audit log recording every inventory change, purchase, sale deduction, manual adjustment, and wastage write-off.',
+                                terms: [
+                                    { term: 'Movement Audit Log', definition: 'An immutable record showing date, item name, change amount, remaining balance, and reason for every stock adjustment.' }
+                                ],
+                                tips: [
+                                    "Use movement logs to audit unexpected inventory losses or verify sales deductions."
+                                ]
+                            }
+                        }
+                    ]}
+                />
             </div>
 
             {/* TAB 1: CATALOG */}
@@ -783,7 +772,123 @@ export default function ProductsPage() {
                         </div>
                     ) : (
                         <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16 overflow-hidden">
-                            <div className="overflow-x-auto">
+                            {/* Mobile Product Cards (< md) */}
+                            <div className="block md:hidden space-y-3 p-3">
+                                {filteredProducts.map((product) => {
+                                    const isService = product.productType === 'service' || product.productType === 'digital';
+                                    const stockQty = product.stockQuantity;
+                                    const isLow = !isService && stockQty !== undefined && stockQty <= (product.minReorderPoint || 5);
+                                    const isOut = !isService && stockQty !== undefined && stockQty === 0;
+                                    const isRowSelected = selectedProductIds.includes(product.id);
+
+                                    return (
+                                        <div
+                                            key={`mobile-product-${product.id}`}
+                                            className={`bg-white dark:bg-neutral-800/90 border border-neutral-100 dark:border-neutral-700/80 rounded-2xl p-4 shadow-sm transition-all ${
+                                                isRowSelected ? 'ring-2 ring-violet-500 bg-violet-50/20' : ''
+                                            }`}
+                                        >
+                                            <div className="flex items-start justify-between gap-3 mb-2">
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    {isSelectMode && (
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isRowSelected}
+                                                            onChange={(e) => toggleSelectRow(product.id, e as any)}
+                                                            className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-violet-600 focus:ring-violet-500"
+                                                        />
+                                                    )}
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 overflow-hidden ${
+                                                        product.productType === 'service'
+                                                            ? 'bg-gradient-to-br from-emerald-400 to-teal-600'
+                                                            : product.productType === 'digital'
+                                                                ? 'bg-gradient-to-br from-blue-400 to-indigo-600'
+                                                                : 'bg-gradient-to-br from-violet-400 to-violet-600'
+                                                    }`}>
+                                                        {product.imageUrl ? (
+                                                            <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                                                        ) : product.productType === 'service' ? (
+                                                            <Zap className="w-5 h-5" />
+                                                        ) : product.productType === 'digital' ? (
+                                                            <FileCode className="w-5 h-5" />
+                                                        ) : (
+                                                            <Package className="w-5 h-5" />
+                                                        )}
+                                                    </div>
+
+                                                    <div className="min-w-0">
+                                                        <Link href={`/products/${product.id}`} className="font-bold text-sm text-[#2d3748] dark:text-white truncate block">
+                                                            {product.name}
+                                                        </Link>
+                                                        <span className="text-[10px] font-mono text-neutral-400 dark:text-neutral-500">
+                                                            {product.sku || 'No SKU'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize shrink-0 ${
+                                                    product.productType === 'service' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
+                                                    product.productType === 'digital' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' :
+                                                    'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300'
+                                                }`}>
+                                                    {product.productType || 'Physical'}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 my-2">
+                                                <span>Category: <strong className="text-neutral-700 dark:text-neutral-300">{product.category || 'General'}</strong></span>
+                                                <div>
+                                                    {isService ? (
+                                                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
+                                                            Unlimited
+                                                        </span>
+                                                    ) : isOut ? (
+                                                        <span className="text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded-full">
+                                                            Out of Stock (0)
+                                                        </span>
+                                                    ) : isLow ? (
+                                                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full">
+                                                            Low Stock ({stockQty})
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                                                            Stock: {stockQty ?? 0}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between pt-2.5 border-t border-neutral-100 dark:border-neutral-700/60">
+                                                <div>
+                                                    <span className="text-[10px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">Price</span>
+                                                    <span className="font-bold text-sm text-neutral-900 dark:text-white">
+                                                        {formatCurrency(product.unitPrice, company.currency)}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <Link
+                                                        href={`/products/${product.id}`}
+                                                        className="px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 rounded-xl text-xs font-semibold hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                                                    >
+                                                        View
+                                                    </Link>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => openEditModal(product)}
+                                                        className="px-3 py-1.5 bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 rounded-xl text-xs font-semibold hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-colors"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Desktop Product Table (>= md) */}
+                            <div className="hidden md:block overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
                                         <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">

@@ -5,7 +5,7 @@
 import React, { useMemo, useState } from 'react';
 import { useDocumentStore, useSettingsStore, useTemplateStore, useOrganizationStore, useTransactionStore } from '@/lib/store';
 import { formatCurrency, getEffectiveGrandTotal, calculatePaymentSpeedDistribution } from '@/lib/utils';
-import { X, Lightbulb } from 'lucide-react';
+import { X, Lightbulb, DollarSign, Clock, FileText, Zap, TrendingUp } from 'lucide-react';
 import { DocumentStatus } from '@/lib/types';
 import RevenueChart from "@/components/dashboard/RevenueChart";
 import ProductVelocityWidget from "@/components/ProductVelocityWidget";
@@ -19,7 +19,9 @@ interface SummaryMetric {
     label: string;
     value: string;
     description: string;
-    highlight?: boolean;
+    icon: React.ReactNode;
+    variant?: 'featured' | 'default';
+    colorClass?: string;
 }
 
 // ==========================================
@@ -27,13 +29,32 @@ interface SummaryMetric {
 // ==========================================
 
 function SummaryCard({ metric }: { metric: SummaryMetric }) {
+    const isFeatured = metric.variant === 'featured';
+
     return (
-        <div className="bg-white dark:bg-neutral-800 p-6 rounded-2xl border border-neutral-100 dark:border-neutral-700 shadow-sm hover:shadow-md transition-all duration-200">
-            <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-1">{metric.label}</h3>
-            <div className={`text-2xl font-bold mb-2 ${metric.highlight ? 'text-primary' : 'text-neutral-900 dark:text-white'}`}>
-                {metric.value}
+        <div className={`${isFeatured
+            ? 'bg-gradient-to-br from-[#1A2232] via-[#222C3E] to-[#121722] text-white border border-neutral-700/60 shadow-md p-5 sm:p-6'
+            : 'bg-white dark:bg-[#121620] border border-neutral-200/90 dark:border-neutral-800/80 shadow-xs p-3.5 sm:p-5 hover:border-neutral-300 dark:hover:border-neutral-700'
+            } rounded-2xl transition-all duration-200`}>
+            <div className="flex items-center justify-between mb-2">
+                <p className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${isFeatured ? 'text-neutral-300' : 'text-neutral-500 dark:text-neutral-400'}`}>
+                    {metric.label}
+                </p>
+                <div className={`p-1.5 sm:p-2 rounded-xl ${isFeatured
+                    ? 'bg-[#16A86B]/20 text-[#16A86B]'
+                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300'
+                    }`}>
+                    {metric.icon}
+                </div>
             </div>
-            <p className="text-xs text-neutral-400 dark:text-neutral-500">{metric.description}</p>
+            <div className="flex flex-col gap-0.5">
+                <h3 className={`${isFeatured ? 'text-3xl sm:text-4xl text-[#16A86B]' : 'text-lg sm:text-2xl text-neutral-900 dark:text-white'} font-bold font-mono tracking-tight`}>
+                    {metric.value}
+                </h3>
+                <p className={`text-[10px] sm:text-xs mt-1 ${isFeatured ? 'text-neutral-400' : 'text-neutral-400 dark:text-neutral-500'}`}>
+                    {metric.description}
+                </p>
+            </div>
         </div>
     );
 }
@@ -200,6 +221,34 @@ export default function AnalyticsPage() {
         };
     }, [displayDocuments, activeTransactions]);
 
+    const summaryMetrics: SummaryMetric[] = [
+        {
+            label: 'Money Received',
+            value: formatCurrency(metrics.paidThisMonth, company.currency),
+            description: 'This month',
+            icon: <DollarSign className="w-4 h-4" strokeWidth={2} />,
+            variant: 'featured'
+        },
+        {
+            label: 'Money Waiting',
+            value: formatCurrency(metrics.waiting, company.currency),
+            description: 'Sent & Overdue Invoices',
+            icon: <Clock className="w-4 h-4" strokeWidth={2} />
+        },
+        {
+            label: 'Invoices Sent',
+            value: metrics.sentCount.toString(),
+            description: 'All time active',
+            icon: <FileText className="w-4 h-4" strokeWidth={2} />
+        },
+        {
+            label: 'Avg Payment Time',
+            value: `${metrics.avgDays} Days`,
+            description: 'From sent to paid',
+            icon: <Zap className="w-4 h-4" strokeWidth={2} />
+        }
+    ];
+
     const statusCounts = useMemo(() => {
         return displayDocuments.reduce((acc, d) => {
             const effectiveStatus = (d.type === 'receipt' && d.status === 'draft') ? 'paid' : d.status;
@@ -320,9 +369,9 @@ export default function AnalyticsPage() {
     return (
         <main className="max-w-6xl mx-auto pb-20">
             {/* Header */}
-            <header className="mb-10">
+            <header className="mb-6">
                 <div className="flex items-center gap-2">
-                    <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">Analytics</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white">Analytics</h1>
                     <PageHelpModal
                         title="Revenue & Cashflow Analytics"
                         description="Detailed insights into monthly revenue streams, pending payments, payment speed trends, top customers, and best-selling products."
@@ -333,40 +382,21 @@ export default function AnalyticsPage() {
                         ]}
                     />
                 </div>
-                <p className="text-neutral-500 dark:text-neutral-400 mt-1">Quiet insights to help you invoice better.</p>
+                <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">Quiet insights to help you invoice better.</p>
             </header>
 
-            {/* 1. Top Summary */}
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-                <SummaryCard
-                    metric={{
-                        label: 'Money Received',
-                        value: formatCurrency(metrics.paidThisMonth, company.currency),
-                        description: 'This month',
-                        highlight: true
-                    }}
-                />
-                <SummaryCard
-                    metric={{
-                        label: 'Money Waiting',
-                        value: formatCurrency(metrics.waiting, company.currency),
-                        description: 'Sent & Overdue Invoices'
-                    }}
-                />
-                <SummaryCard
-                    metric={{
-                        label: 'Invoices Sent',
-                        value: metrics.sentCount.toString(),
-                        description: 'All time active'
-                    }}
-                />
-                <SummaryCard
-                    metric={{
-                        label: 'Avg Payment Time',
-                        value: `${metrics.avgDays} Days`,
-                        description: 'From sent to paid'
-                    }}
-                />
+            {/* 1. Top Summary Cards (Compressed 3-column row on mobile) */}
+            <section className="flex flex-col md:grid md:grid-cols-4 gap-3 md:gap-4 mb-8">
+                {/* Money Received (Hero card) */}
+                <div className="w-full md:col-span-1">
+                    <SummaryCard metric={summaryMetrics[0]} />
+                </div>
+                {/* Money Waiting, Invoices Sent, Avg Payment Time (Side by Side on mobile) */}
+                <div className="w-full md:col-span-3 grid grid-cols-3 gap-2.5 sm:gap-4">
+                    {summaryMetrics.slice(1).map((metric, index) => (
+                        <SummaryCard key={index} metric={metric} />
+                    ))}
+                </div>
             </section>
 
             {/* Revenue Trend - Moved from Dashboard */}

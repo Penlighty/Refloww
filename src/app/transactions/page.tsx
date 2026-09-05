@@ -359,7 +359,7 @@ export default function TransactionsPage() {
                 </div>
             </div>
 
-            {/* Transactions Data Table */}
+            {/* Transactions Data Table (Desktop & Mobile Views) */}
             <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-100 dark:border-neutral-700 shadow-sm overflow-hidden">
                 {filteredTransactions.length === 0 ? (
                     <div className="p-12 text-center space-y-3">
@@ -372,219 +372,282 @@ export default function TransactionsPage() {
                         </p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left whitespace-nowrap">
-                            <thead className="bg-neutral-50/80 dark:bg-neutral-900/60 border-b border-neutral-100 dark:border-neutral-700 text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-                                <tr>
-                                    {isSelectMode && (
-                                        <th className="px-4 py-4 w-10 text-center">
-                                            <input
-                                                type="checkbox"
-                                                checked={isAllSelected}
-                                                onChange={toggleSelectAll}
-                                                className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                                            />
-                                        </th>
-                                    )}
-                                    <th className="px-6 py-4">
-                                        <button
-                                            onClick={() => handleSort('transactionNumber')}
-                                            className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-                                        >
-                                            Transaction ID
-                                            <ArrowUpDown className="w-3 h-3" />
-                                        </button>
-                                    </th>
-                                    <th className="px-6 py-4">
-                                        <button
-                                            onClick={() => handleSort('customerName')}
-                                            className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-                                        >
-                                            Customer
-                                            <ArrowUpDown className="w-3 h-3" />
-                                        </button>
-                                    </th>
-                                    <th className="px-6 py-4">
-                                        <button
-                                            onClick={() => handleSort('source')}
-                                            className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-                                        >
-                                            Source
-                                            <ArrowUpDown className="w-3 h-3" />
-                                        </button>
-                                    </th>
-                                    <th className="px-6 py-4">Connected Documents</th>
-                                    <th className="px-6 py-4">
-                                        <button
-                                            onClick={() => handleSort('paymentStatus')}
-                                            className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-                                        >
-                                            Payment
-                                            <ArrowUpDown className="w-3 h-3" />
-                                        </button>
-                                    </th>
-                                    <th className="px-6 py-4">
-                                        <button
-                                            onClick={() => handleSort('fulfillmentStatus')}
-                                            className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-                                        >
-                                            Delivery
-                                            <ArrowUpDown className="w-3 h-3" />
-                                        </button>
-                                    </th>
-                                    <th className="px-6 py-4 text-right">
-                                        <button
-                                            onClick={() => handleSort('grandTotal')}
-                                            className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors ml-auto"
-                                        >
-                                            Amount
-                                            <ArrowUpDown className="w-3 h-3" />
-                                        </button>
-                                    </th>
-                                    <th className="px-6 py-4 text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700/60 text-sm">
-                                {filteredTransactions.map((trx) => {
-                                    const isRowSelected = selectedTrxIds.includes(trx.id);
-                                    return (
-                                    <tr 
-                                        key={trx.id}
-                                        onClick={() => setSelectedTransactionId(trx.id)}
-                                        className={`hover:bg-neutral-50/60 dark:hover:bg-neutral-700/30 transition-colors cursor-pointer group ${isRowSelected ? 'bg-blue-50/40 dark:bg-blue-900/20' : ''}`}
-                                    >
-                                        {isSelectMode && (
-                                            <td className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={isRowSelected}
-                                                    onChange={(e) => toggleSelectRow(trx.id, e as any)}
-                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                                                />
-                                            </td>
-                                        )}
-                                        {/* TRX ID & Date */}
-                                        <td className="px-6 py-4">
-                                            <div className="font-bold text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <>
+                        {/* Mobile Card List View (< 768px) */}
+                        <div className="md:hidden divide-y divide-neutral-100 dark:divide-neutral-800">
+                            {filteredTransactions.map((trx) => (
+                                <div 
+                                    key={trx.id}
+                                    onClick={() => setSelectedTransactionId(trx.id)}
+                                    className="p-4 flex flex-col gap-2.5 active:bg-neutral-50 dark:active:bg-neutral-800/60 transition-colors"
+                                >
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-sm font-mono text-neutral-900 dark:text-white">
                                                 {trx.transactionNumber}
-                                            </div>
-                                            <div className="text-xs text-neutral-400">
-                                                {formatDate(trx.date)}
-                                            </div>
-                                        </td>
-
-                                        {/* Customer */}
-                                        <td className="px-6 py-4 font-semibold text-[#2d3748] dark:text-white">
-                                            {trx.customerName}
-                                        </td>
-
-                                        {/* Source */}
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                                                trx.source === 'storefront' ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' :
-                                                trx.source === 'pos' ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' :
-                                                'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                            </span>
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
+                                                trx.source === 'storefront' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' :
+                                                trx.source === 'pos' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' :
+                                                'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
                                             }`}>
                                                 {trx.source}
                                             </span>
-                                        </td>
+                                        </div>
+                                        <span className="text-base font-bold font-mono text-neutral-900 dark:text-white">
+                                            {formatCurrency(trx.grandTotal, currency)}
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
+                                        <span className="font-medium text-neutral-800 dark:text-neutral-200">{trx.customerName}</span>
+                                        <span>{formatDate(trx.date)}</span>
+                                    </div>
 
-                                        {/* Connected Documents Badges */}
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-1.5 flex-wrap">
-                                                {trx.invoiceNumber && (
-                                                    <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs font-semibold flex items-center gap-1">
-                                                        <FileText className="w-3 h-3" />
-                                                        {trx.invoiceNumber}
-                                                    </span>
-                                                )}
-                                                {trx.receiptNumbers?.map(r => (
-                                                    <span key={r} className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 text-xs font-semibold flex items-center gap-1">
-                                                        <Receipt className="w-3 h-3" />
-                                                        {r}
-                                                    </span>
-                                                ))}
-                                                {trx.deliveryNoteNumbers?.map(d => (
-                                                    <span key={d} className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300 text-xs font-semibold flex items-center gap-1">
-                                                        <Truck className="w-3 h-3" />
-                                                        {d}
-                                                    </span>
-                                                ))}
-                                                {!trx.invoiceNumber && (!trx.receiptNumbers || trx.receiptNumbers.length === 0) && (!trx.deliveryNoteNumbers || trx.deliveryNoteNumbers.length === 0) && (
-                                                    <span className="text-xs text-neutral-400 italic">No docs linked</span>
-                                                )}
-                                            </div>
-                                        </td>
-
-                                        {/* Payment Status */}
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                                                trx.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                    <div className="flex items-center justify-between pt-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                                trx.paymentStatus === 'paid' ? 'bg-emerald-50 text-[#16A86B] dark:bg-emerald-950/60 dark:text-emerald-400' :
                                                 trx.paymentStatus === 'partially_paid' ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' :
-                                                trx.paymentStatus === 'refunded' ? 'bg-neutral-100 text-neutral-500 dark:bg-neutral-700' :
+                                                trx.paymentStatus === 'refunded' ? 'bg-neutral-100 text-neutral-500' :
                                                 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                                             }`}>
                                                 <span className={`w-1.5 h-1.5 rounded-full ${
-                                                    trx.paymentStatus === 'paid' ? 'bg-emerald-500' :
+                                                    trx.paymentStatus === 'paid' ? 'bg-[#16A86B]' :
                                                     trx.paymentStatus === 'partially_paid' ? 'bg-amber-500' :
                                                     'bg-red-500'
                                                 }`} />
-                                                {trx.paymentStatus === 'paid' ? 'Paid' :
-                                                 trx.paymentStatus === 'partially_paid' ? 'Partial' :
-                                                 trx.paymentStatus === 'refunded' ? 'Refunded' : 'Unpaid'}
+                                                {trx.paymentStatus === 'paid' ? 'Paid' : trx.paymentStatus === 'partially_paid' ? 'Partial' : trx.paymentStatus === 'refunded' ? 'Refunded' : 'Unpaid'}
                                             </span>
-                                        </td>
-
-                                        {/* Delivery Status */}
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                                                trx.fulfillmentStatus === 'fulfilled' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' :
-                                                'bg-neutral-100 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400'
+                                            
+                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                                trx.fulfillmentStatus === 'fulfilled' ? 'text-emerald-600 dark:text-emerald-400' : 'text-neutral-400'
                                             }`}>
-                                                {trx.fulfillmentStatus === 'fulfilled' ? (
-                                                    <>
-                                                        <CheckCircle2 className="w-3 h-3" />
-                                                        Fulfilled
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Clock className="w-3 h-3" />
-                                                        Unfulfilled
-                                                    </>
-                                                )}
+                                                {trx.fulfillmentStatus === 'fulfilled' ? 'Delivered' : 'Pending Delivery'}
                                             </span>
-                                        </td>
+                                        </div>
 
-                                        {/* Amount */}
-                                        <td className="px-6 py-4 text-right font-bold text-[#2d3748] dark:text-white">
-                                            {formatCurrency(trx.grandTotal, currency)}
-                                        </td>
+                                        <ChevronRight className="w-4 h-4 text-neutral-400" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
 
-                                        {/* Actions */}
-                                        <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
-                                            <div className="flex items-center justify-center gap-2">
-                                                <button
-                                                    onClick={() => setSelectedTransactionId(trx.id)}
-                                                    className="p-1.5 rounded-lg text-neutral-400 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
-                                                    title="View Details"
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(trx.id, trx.transactionNumber)}
-                                                    className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
-                                                    title="Delete Transaction"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
+                        {/* Desktop Table View (>= 768px) */}
+                        <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full text-left whitespace-nowrap">
+                                <thead className="bg-neutral-50/80 dark:bg-neutral-900/60 border-b border-neutral-100 dark:border-neutral-700 text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                                    <tr>
+                                        {isSelectMode && (
+                                            <th className="px-4 py-4 w-10 text-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isAllSelected}
+                                                    onChange={toggleSelectAll}
+                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                />
+                                            </th>
+                                        )}
+                                        <th className="px-6 py-4">
+                                            <button
+                                                onClick={() => handleSort('transactionNumber')}
+                                                className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                            >
+                                                Transaction ID
+                                                <ArrowUpDown className="w-3 h-3" />
+                                            </button>
+                                        </th>
+                                        <th className="px-6 py-4">
+                                            <button
+                                                onClick={() => handleSort('customerName')}
+                                                className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                            >
+                                                Customer
+                                                <ArrowUpDown className="w-3 h-3" />
+                                            </button>
+                                        </th>
+                                        <th className="px-6 py-4">
+                                            <button
+                                                onClick={() => handleSort('source')}
+                                                className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                            >
+                                                Source
+                                                <ArrowUpDown className="w-3 h-3" />
+                                            </button>
+                                        </th>
+                                        <th className="px-6 py-4">Connected Documents</th>
+                                        <th className="px-6 py-4">
+                                            <button
+                                                onClick={() => handleSort('paymentStatus')}
+                                                className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                            >
+                                                Payment
+                                                <ArrowUpDown className="w-3 h-3" />
+                                            </button>
+                                        </th>
+                                        <th className="px-6 py-4">
+                                            <button
+                                                onClick={() => handleSort('fulfillmentStatus')}
+                                                className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                            >
+                                                Delivery
+                                                <ArrowUpDown className="w-3 h-3" />
+                                            </button>
+                                        </th>
+                                        <th className="px-6 py-4 text-right">
+                                            <button
+                                                onClick={() => handleSort('grandTotal')}
+                                                className="flex items-center gap-1.5 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors ml-auto"
+                                            >
+                                                Amount
+                                                <ArrowUpDown className="w-3 h-3" />
+                                            </button>
+                                        </th>
+                                        <th className="px-6 py-4 text-center">Action</th>
                                     </tr>
-                                );
-                            })}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700/60 text-sm">
+                                    {filteredTransactions.map((trx) => {
+                                        const isRowSelected = selectedTrxIds.includes(trx.id);
+                                        return (
+                                        <tr 
+                                            key={trx.id}
+                                            onClick={() => setSelectedTransactionId(trx.id)}
+                                            className={`hover:bg-neutral-50/60 dark:hover:bg-neutral-700/30 transition-colors cursor-pointer group ${isRowSelected ? 'bg-blue-50/40 dark:bg-blue-900/20' : ''}`}
+                                        >
+                                            {isSelectMode && (
+                                                <td className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isRowSelected}
+                                                        onChange={(e) => toggleSelectRow(trx.id, e as any)}
+                                                        className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                    />
+                                                </td>
+                                            )}
+                                            {/* TRX ID & Date */}
+                                            <td className="px-6 py-4">
+                                                <div className="font-bold text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                    {trx.transactionNumber}
+                                                </div>
+                                                <div className="text-xs text-neutral-400">
+                                                    {formatDate(trx.date)}
+                                                </div>
+                                            </td>
+
+                                            {/* Customer */}
+                                            <td className="px-6 py-4 font-semibold text-[#2d3748] dark:text-white">
+                                                {trx.customerName}
+                                            </td>
+
+                                            {/* Source */}
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
+                                                    trx.source === 'storefront' ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' :
+                                                    trx.source === 'pos' ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' :
+                                                    'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                                }`}>
+                                                    {trx.source}
+                                                </span>
+                                            </td>
+
+                                            {/* Connected Documents Badges */}
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    {trx.invoiceNumber && (
+                                                        <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs font-semibold flex items-center gap-1">
+                                                            <FileText className="w-3 h-3" />
+                                                            {trx.invoiceNumber}
+                                                        </span>
+                                                    )}
+                                                    {trx.receiptNumbers?.map(r => (
+                                                        <span key={r} className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 text-xs font-semibold flex items-center gap-1">
+                                                            <Receipt className="w-3 h-3" />
+                                                            {r}
+                                                        </span>
+                                                    ))}
+                                                    {trx.deliveryNoteNumbers?.map(d => (
+                                                        <span key={d} className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300 text-xs font-semibold flex items-center gap-1">
+                                                            <Truck className="w-3 h-3" />
+                                                            {d}
+                                                        </span>
+                                                    ))}
+                                                    {!trx.invoiceNumber && (!trx.receiptNumbers || trx.receiptNumbers.length === 0) && (!trx.deliveryNoteNumbers || trx.deliveryNoteNumbers.length === 0) && (
+                                                        <span className="text-xs text-neutral-400 italic">No docs linked</span>
+                                                    )}
+                                                </div>
+                                            </td>
+
+                                            {/* Payment Status */}
+                                            <td className="px-6 py-4">
+                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                                    trx.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                                    trx.paymentStatus === 'partially_paid' ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' :
+                                                    trx.paymentStatus === 'refunded' ? 'bg-neutral-100 text-neutral-500 dark:bg-neutral-700' :
+                                                    'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                                                }`}>
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${
+                                                        trx.paymentStatus === 'paid' ? 'bg-emerald-500' :
+                                                        trx.paymentStatus === 'partially_paid' ? 'bg-amber-500' :
+                                                        'bg-red-500'
+                                                    }`} />
+                                                    {trx.paymentStatus === 'paid' ? 'Paid' :
+                                                     trx.paymentStatus === 'partially_paid' ? 'Partial' :
+                                                     trx.paymentStatus === 'refunded' ? 'Refunded' : 'Unpaid'}
+                                                </span>
+                                            </td>
+
+                                            {/* Delivery Status */}
+                                            <td className="px-6 py-4">
+                                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                                    trx.fulfillmentStatus === 'fulfilled' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                                    'bg-neutral-100 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400'
+                                                }`}>
+                                                    {trx.fulfillmentStatus === 'fulfilled' ? (
+                                                        <>
+                                                            <CheckCircle2 className="w-3 h-3" />
+                                                            Fulfilled
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Clock className="w-3 h-3" />
+                                                            Unfulfilled
+                                                        </>
+                                                    )}
+                                                </span>
+                                            </td>
+
+                                            {/* Amount */}
+                                            <td className="px-6 py-4 text-right font-bold text-[#2d3748] dark:text-white">
+                                                {formatCurrency(trx.grandTotal, currency)}
+                                            </td>
+
+                                            {/* Actions */}
+                                            <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <button
+                                                        onClick={() => setSelectedTransactionId(trx.id)}
+                                                        className="p-1.5 rounded-lg text-neutral-400 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                                                        title="View Details"
+                                                    >
+                                                        <Eye className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(trx.id, trx.transactionNumber)}
+                                                        className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                                                        title="Delete Transaction"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
                 )}
             </div>
 

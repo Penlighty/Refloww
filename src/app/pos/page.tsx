@@ -44,6 +44,7 @@ export default function POSPage() {
     const { createDocument } = useDocumentStore();
     const activeOrgId = useOrganizationStore((state) => state.activeOrganizationId);
     const company = useSettingsStore(state => state.company);
+    const currency = company.currency || 'USD';
 
     const displayProducts = useMemo(() => getFilteredProducts(), [products, activeOrgId, getFilteredProducts]);
     const displayCustomers = useMemo(() => getFilteredCustomers(), [customers, activeOrgId, getFilteredCustomers]);
@@ -337,11 +338,11 @@ export default function POSPage() {
                     onClick={() => setMobileTab('products')}
                     className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                         mobileTab === 'products'
-                            ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                            ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm'
                             : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800'
                     }`}
                 >
-                    <Tag className="w-3.5 h-3.5" />
+                    <Tag className="w-3.5 h-3.5 text-[#fc6d2d]" />
                     <span>Products ({filteredProducts.length})</span>
                 </button>
                 <button
@@ -349,17 +350,39 @@ export default function POSPage() {
                     onClick={() => setMobileTab('cart')}
                     className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer relative ${
                         mobileTab === 'cart'
-                            ? 'bg-blue-600 text-white shadow-sm'
+                            ? 'bg-[#fc6d2d] text-white shadow-sm'
                             : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800'
                     }`}
                 >
                     <ShoppingCart className="w-3.5 h-3.5" />
                     <span>Cart ({cartTotalCount})</span>
                     {cartTotalCount > 0 && mobileTab !== 'cart' && (
-                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                        <span className="w-2 h-2 rounded-full bg-[#fc6d2d] animate-pulse"></span>
                     )}
                 </button>
             </div>
+
+            {/* Mobile Quick Floating Cart Sticky Banner */}
+            {mobileTab === 'products' && cartTotalCount > 0 && (
+                <div className="lg:hidden fixed bottom-20 left-4 right-4 z-20 bg-neutral-900/95 backdrop-blur-md text-white p-3 rounded-2xl shadow-xl flex items-center justify-between border border-neutral-800 animate-in fade-in slide-in-from-bottom-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-[#fc6d2d] flex items-center justify-center text-white font-bold text-xs">
+                            {cartTotalCount}
+                        </div>
+                        <div>
+                            <p className="text-[11px] text-neutral-400 font-medium">Cart Subtotal</p>
+                            <p className="text-sm font-bold font-mono text-white">{formatCurrency(grandTotal, currency)}</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => setMobileTab('cart')}
+                        className="px-4 py-2 bg-[#fc6d2d] hover:bg-[#ea500d] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 active:scale-95 transition-all shadow-md"
+                    >
+                        <span>View Cart</span>
+                        <ArrowRight className="w-4 h-4" />
+                    </button>
+                </div>
+            )}
 
             {/* Left Column: Product Selection Grid */}
             <div className={`flex-1 min-w-0 flex-col bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-100 dark:border-neutral-700 overflow-hidden shadow-sm h-full ${mobileTab === 'cart' ? 'hidden lg:flex' : 'flex'}`}>

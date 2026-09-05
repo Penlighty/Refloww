@@ -356,46 +356,68 @@ export default function SettingsPage() {
                         </p>
                     </div>
 
-                    <div className="hidden sm:block">
-                        {isUserCategory ? (
-                            <Button
-                                onClick={handleSaveUserProfile}
-                                disabled={!isUserDirty}
-                                leftIcon={<Save className="w-4 h-4" />}
-                            >
-                                Save Profile
-                            </Button>
-                        ) : (
-                            <Button
-                                onClick={handleSaveOrgSettings}
-                                disabled={!isOrgDirty}
-                                leftIcon={<Save className="w-4 h-4" />}
-                            >
-                                Save Organization
-                            </Button>
-                        )}
-                    </div>
                 </div>
 
                 {/* Mobile Navigation Bar */}
-                <div className="flex flex-row gap-2 overflow-x-auto pb-1 w-full scrollbar-none md:hidden py-1">
-                    {ALL_TABS.map((tab) => {
-                        const Icon = tab.icon;
-                        const isActive = activeTab === tab.id;
-                        return (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl transition-all flex-shrink-0 text-sm whitespace-nowrap ${isActive
-                                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold'
-                                    : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 font-medium'
+                <div className="md:hidden space-y-2.5 mt-1 pb-2 border-b border-neutral-200/60 dark:border-neutral-700/60">
+                    {/* Category Switcher: User Account vs Organization */}
+                    <div className="flex bg-neutral-100 dark:bg-neutral-800/80 p-1 rounded-xl">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (currentTabObj.category !== 'user') {
+                                    setActiveTab('user-profile');
+                                }
+                            }}
+                            className={`flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                                isUserCategory
+                                    ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+                            }`}
+                        >
+                            <User className="w-3.5 h-3.5" />
+                            <span>User Account</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (currentTabObj.category !== 'org') {
+                                    setActiveTab('general');
+                                }
+                            }}
+                            className={`flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                                !isUserCategory
+                                    ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+                            }`}
+                        >
+                            <Building className="w-3.5 h-3.5" />
+                            <span>Organization</span>
+                        </button>
+                    </div>
+
+                    {/* Sub-tabs for selected category */}
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        {ALL_TABS.filter(t => t.category === (isUserCategory ? 'user' : 'org')).map((tab) => {
+                            const Icon = tab.icon;
+                            const isActive = activeTab === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all text-xs font-semibold cursor-pointer ${
+                                        isActive
+                                            ? 'bg-blue-600 text-white shadow-sm'
+                                            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
                                     }`}
-                            >
-                                <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.75} />
-                                {tab.label}
-                            </button>
-                        );
-                    })}
+                                >
+                                    <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={isActive ? 2 : 1.75} />
+                                    <span>{tab.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
@@ -580,15 +602,6 @@ export default function SettingsPage() {
                                         </p>
                                     </div>
 
-                                    <div className="pt-4 flex justify-end">
-                                        <Button
-                                            onClick={handleSaveUserProfile}
-                                            disabled={!isUserDirty}
-                                            leftIcon={<Save className="w-4 h-4" />}
-                                        >
-                                            Save User Profile
-                                        </Button>
-                                    </div>
                                 </div>
                             </section>
                         </div>
@@ -675,6 +688,7 @@ export default function SettingsPage() {
                                             ))}
                                         </div>
                                     </div>
+
                                 </div>
                             </section>
                         </div>
@@ -856,6 +870,16 @@ export default function SettingsPage() {
                                             onChange={(e) => handleOrgChange('address', e.target.value)}
                                             placeholder="123 Business Street&#10;City, State 10001"
                                         />
+                                    </div>
+
+                                    <div className="pt-4 flex justify-end">
+                                        <Button
+                                            onClick={handleSaveOrgSettings}
+                                            disabled={!isOrgDirty}
+                                            leftIcon={<Save className="w-4 h-4" />}
+                                        >
+                                            Save Changes
+                                        </Button>
                                     </div>
                                 </div>
                             </section>
@@ -1112,6 +1136,7 @@ export default function SettingsPage() {
                                             leftIcon={<Calendar className="w-4 h-4 text-neutral-400" />}
                                         />
                                     </div>
+
                                 </div>
                             </section>
                         </div>
@@ -1355,6 +1380,19 @@ export default function SettingsPage() {
                     )}
                 </ModalFooter>
             </Modal>
+
+            {/* Single Floating Action Button (FAB) at the bottom end */}
+            {(isUserCategory ? isUserDirty : isOrgDirty) && (
+                <div className="fixed bottom-6 right-6 z-40 md:bottom-8 md:right-8 animate-in fade-in slide-in-from-bottom-4 duration-200">
+                    <Button
+                        onClick={isUserCategory ? handleSaveUserProfile : handleSaveOrgSettings}
+                        leftIcon={<Save className="w-4 h-4" />}
+                        className="shadow-2xl font-bold px-5 py-3 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-95 text-white shadow-orange-500/30 ring-4 ring-orange-500/20 transition-all flex items-center gap-2"
+                    >
+                        Save Changes
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }
