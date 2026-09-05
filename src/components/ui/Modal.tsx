@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { clsx } from 'clsx';
 import { X } from 'lucide-react';
 
@@ -38,6 +39,11 @@ export function Modal({
 }: ModalProps & { footer?: React.ReactNode }) {
     const overlayRef = useRef<HTMLDivElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleEscape = useCallback(
         (e: KeyboardEvent) => {
@@ -66,14 +72,14 @@ export function Modal({
         }
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || !mounted) return null;
 
-    return (
+    return createPortal(
         <div
             ref={overlayRef}
             onClick={handleOverlayClick}
             className={clsx(
-                'fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4',
+                'fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4',
                 'bg-black/60 backdrop-blur-xs',
                 'animate-in fade-in duration-200'
             )}
@@ -86,7 +92,7 @@ export function Modal({
                 aria-describedby={description ? 'modal-description' : undefined}
                 className={clsx(
                     'relative w-full bg-white dark:bg-[#161a24] rounded-t-[28px] sm:rounded-2xl shadow-2xl border border-neutral-200/80 dark:border-neutral-800',
-                    'animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200 flex flex-col max-h-[85vh] sm:max-h-[90vh] pb-3 sm:pb-0',
+                    'animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200 flex flex-col max-h-[85vh] sm:max-h-[90vh] pb-4 sm:pb-0',
                     sizeStyles[size]
                 )}
             >
@@ -132,7 +138,8 @@ export function Modal({
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
 

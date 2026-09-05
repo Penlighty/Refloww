@@ -636,7 +636,7 @@ export default function POSPage() {
             </div>
 
             {/* Right Column: Checkout Cart */}
-            <div className={`w-full lg:w-[380px] xl:w-[400px] shrink-0 flex-col bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-100 dark:border-neutral-700 overflow-hidden shadow-sm h-full justify-between ${mobileTab === 'products' ? 'hidden lg:flex' : 'flex'}`}>
+            <div className={`w-full lg:w-[380px] xl:w-[400px] shrink-0 flex-col bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-100 dark:border-neutral-700 overflow-hidden shadow-sm h-full justify-between pb-24 lg:pb-0 ${mobileTab === 'products' ? 'hidden lg:flex' : 'flex'}`}>
                 
                 {/* Mobile Back Button Header */}
                 <div className="flex lg:hidden items-center justify-between p-3 border-b border-neutral-100 dark:border-neutral-700 bg-blue-50/50 dark:bg-blue-950/30">

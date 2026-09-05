@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { 
     X, 
@@ -34,8 +35,13 @@ export default function TransactionDetailModal({ transactionId, onClose }: Trans
     const { getTransactionById, updatePaymentStatus, updateFulfillmentStatus } = useTransactionStore();
     const { documents, convertDocument, getDocumentById } = useDocumentStore();
     const { company } = useSettingsStore();
+    const [mounted, setMounted] = useState(false);
 
-    if (!transactionId) return null;
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!transactionId || !mounted) return null;
 
     const transaction = getTransactionById(transactionId);
     if (!transaction) return null;
@@ -73,8 +79,8 @@ export default function TransactionDetailModal({ transactionId, onClose }: Trans
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+    return createPortal(
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
             <div 
                 className="bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-100 dark:border-neutral-700 shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col my-auto"
                 onClick={(e) => e.stopPropagation()}
@@ -113,84 +119,12 @@ export default function TransactionDetailModal({ transactionId, onClose }: Trans
 
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-xl text-neutral-400 hover:text-neutral-600 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                        className="p-2 rounded-full text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 bg-neutral-100 dark:bg-neutral-700 transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <div className="p-6 space-y-8 flex-1">
-                    {/* Lifecycle Pipeline Visual Stepper */}
-                    <div className="bg-neutral-50 dark:bg-neutral-900/40 p-6 rounded-2xl border border-neutral-100 dark:border-neutral-700/60">
-                        <h4 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-4">
-                            Transaction Lifecycle Flow
-                        </h4>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative">
-                            {/* Step 1: Invoice */}
-                            <div className="flex items-center gap-3 bg-white dark:bg-neutral-800 p-4 rounded-xl border border-neutral-200/60 dark:border-neutral-700 shadow-sm">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                    transaction.invoiceId ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-400'
-                                }`}>
-                                    <FileText className="w-5 h-5" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-xs text-neutral-400 font-medium">1. Invoice</p>
-                                    <p className="text-sm font-semibold text-[#2d3748] dark:text-white truncate">
-                                        {transaction.invoiceNumber || 'No Invoice'}
-                                    </p>
-                                </div>
-                                {transaction.invoiceId && (
-                                    <CheckCircle2 className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                                )}
-                            </div>
-
-                            {/* Step 2: Payment Receipt */}
-                            <div className="flex items-center gap-3 bg-white dark:bg-neutral-800 p-4 rounded-xl border border-neutral-200/60 dark:border-neutral-700 shadow-sm">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                    transaction.paymentStatus === 'paid' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' : 
-                                    transaction.paymentStatus === 'partially_paid' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400' : 
-                                    'bg-neutral-100 dark:bg-neutral-700 text-neutral-400'
-                                }`}>
-                                    <Receipt className="w-5 h-5" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-xs text-neutral-400 font-medium">2. Payment</p>
-                                    <p className="text-sm font-semibold text-[#2d3748] dark:text-white truncate">
-                                        {transaction.paymentStatus === 'paid' ? 'Paid Full' :
-                                         transaction.paymentStatus === 'partially_paid' ? 'Partial' : 'Unpaid'}
-                                    </p>
-                                </div>
-                                {transaction.paymentStatus === 'paid' ? (
-                                    <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                                ) : (
-                                    <Clock className="w-5 h-5 text-amber-500 flex-shrink-0" />
-                                )}
-                            </div>
-
-                            {/* Step 3: Delivery Note */}
-                            <div className="flex items-center gap-3 bg-white dark:bg-neutral-800 p-4 rounded-xl border border-neutral-200/60 dark:border-neutral-700 shadow-sm">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                    transaction.fulfillmentStatus === 'fulfilled' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-400'
-                                }`}>
-                                    <Truck className="w-5 h-5" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-xs text-neutral-400 font-medium">3. Delivery</p>
-                                    <p className="text-sm font-semibold text-[#2d3748] dark:text-white truncate">
-                                        {transaction.fulfillmentStatus === 'fulfilled' ? 'Fulfilled' : 'Pending Delivery'}
-                                    </p>
-                                </div>
-                                {transaction.fulfillmentStatus === 'fulfilled' ? (
-                                    <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                                ) : (
-                                    <Clock className="w-5 h-5 text-neutral-400 flex-shrink-0" />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Connected Documents Section */}
                     <div>
                         <div className="flex items-center justify-between mb-4">
                             <h4 className="text-sm font-bold text-[#2d3748] dark:text-white">
@@ -379,7 +313,7 @@ export default function TransactionDetailModal({ transactionId, onClose }: Trans
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div>,
+        document.body
     );
 }

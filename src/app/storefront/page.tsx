@@ -1059,7 +1059,7 @@ export default function StorefrontAdminPage() {
 
             {/* Sleek Floating Toast Notification */}
             {toastMessage && (
-                <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-semibold animate-in fade-in slide-in-from-bottom-5 duration-200 ${
+                <div className={`fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-[120] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-semibold animate-in fade-in slide-in-from-bottom-5 duration-200 ${
                     toastMessage.type === 'success'
                         ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border-emerald-500/50 shadow-emerald-950/20'
                         : 'bg-rose-950 text-rose-100 border-rose-800 shadow-rose-950/20'

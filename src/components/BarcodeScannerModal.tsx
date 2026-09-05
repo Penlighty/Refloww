@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { X, Camera, RefreshCw, Volume2, CheckCircle2, ScanLine } from 'lucide-react';
 import { Button, Input } from '@/components/ui';
@@ -172,8 +173,10 @@ export default function BarcodeScannerModal({
 
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+    if (typeof window === 'undefined') return null;
+
+    return createPortal(
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
             <div className="bg-white dark:bg-neutral-900 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-neutral-200 dark:border-neutral-800 flex flex-col max-h-[90vh]">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-800/50">
@@ -265,6 +268,7 @@ export default function BarcodeScannerModal({
                     </Button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
