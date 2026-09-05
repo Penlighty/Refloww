@@ -48,7 +48,7 @@ function SummaryCard({ metric }: { metric: SummaryMetric }) {
                 </div>
             </div>
             <div className="flex flex-col gap-0.5">
-                <h3 className={`${isFeatured ? 'text-3xl sm:text-4xl text-[#16A86B]' : 'text-lg sm:text-2xl text-neutral-900 dark:text-white'} font-bold font-mono tracking-tight`}>
+                <h3 className={`${isFeatured ? 'text-2xl sm:text-3xl md:text-4xl text-[#16A86B]' : 'text-sm sm:text-lg md:text-xl text-neutral-900 dark:text-white'} font-extrabold font-money tracking-tight`}>
                     {metric.value}
                 </h3>
                 <p className={`text-[10px] sm:text-xs mt-1 ${isFeatured ? 'text-neutral-400' : 'text-neutral-400 dark:text-neutral-500'}`}>

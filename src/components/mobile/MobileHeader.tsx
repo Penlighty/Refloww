@@ -115,7 +115,7 @@ export default function MobileHeader({
                             <div className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 flex items-center justify-center shrink-0 group-hover:bg-neutral-200 dark:group-hover:bg-neutral-700 transition-colors">
                                 <ArrowLeft className="w-4 h-4" />
                             </div>
-                            <h2 className="text-xs font-bold text-neutral-900 dark:text-white truncate max-w-[140px] group-hover:text-[#fc6d2d] transition-colors">
+                            <h2 className="text-sm sm:text-base font-bold text-neutral-900 dark:text-white truncate max-w-[140px] sm:max-w-xs group-hover:text-[#fc6d2d] transition-colors">
                                 {title || 'Overview'}
                             </h2>
                         </Link>

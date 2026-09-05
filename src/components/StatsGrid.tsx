@@ -43,7 +43,7 @@ function StatCard({ title, value, subValue, change, note, icon, variant = 'defau
             </div>
             <div className="flex flex-col gap-1">
                 <div className="flex items-baseline gap-2 flex-wrap">
-                    <h3 className={`text-3xl sm:text-4xl font-bold font-mono tracking-tight ${isFeatured ? 'text-[#16A86B]' : 'text-neutral-900 dark:text-white'}`}>
+                    <h3 className={`text-2xl sm:text-3xl md:text-4xl font-extrabold font-money tracking-tight ${isFeatured ? 'text-[#16A86B]' : 'text-neutral-900 dark:text-white'}`}>
                         {value}
                     </h3>
                 </div>

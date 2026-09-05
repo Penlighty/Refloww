@@ -56,7 +56,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 ref={ref}
                 disabled={isDisabled}
                 className={clsx(
-                    'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 cursor-pointer whitespace-nowrap',
+                    'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 cursor-pointer whitespace-nowrap',
                     'focus:outline-none focus:ring-2 focus:ring-neutral-500/20 focus:ring-offset-2',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
                     variantStyles[variant],

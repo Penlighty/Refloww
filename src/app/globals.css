@@ -138,6 +138,128 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ============================================================
+   REFLOWW TYPOGRAPHY HIERARCHY UTILITIES
+   ============================================================ */
+
+/* Tabular monetary numbers with negative tracking for financial clarity */
+.font-money {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Hero metric / banner titles */
+.text-heading-xl {
+  font-size: 1.5rem; /* 24px mobile */
+  line-height: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+@media (min-width: 640px) {
+  .text-heading-xl {
+    font-size: 1.875rem; /* 30px sm */
+    line-height: 2.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .text-heading-xl {
+    font-size: 2.25rem; /* 36px md */
+    line-height: 2.5rem;
+  }
+}
+
+/* Page titles */
+.text-heading-lg {
+  font-size: 1.125rem; /* 18px mobile */
+  line-height: 1.625rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+@media (min-width: 640px) {
+  .text-heading-lg {
+    font-size: 1.25rem; /* 20px sm */
+    line-height: 1.75rem;
+  }
+}
+
+/* Section titles */
+.text-heading-md {
+  font-size: 1rem; /* 16px mobile */
+  line-height: 1.5rem;
+  font-weight: 700;
+}
+
+@media (min-width: 640px) {
+  .text-heading-md {
+    font-size: 1.125rem; /* 18px sm */
+    line-height: 1.625rem;
+  }
+}
+
+/* Card titles / Item headers */
+.text-heading-sm {
+  font-size: 0.875rem; /* 14px mobile */
+  line-height: 1.25rem;
+  font-weight: 600;
+}
+
+@media (min-width: 640px) {
+  .text-heading-sm {
+    font-size: 1rem; /* 16px sm */
+    line-height: 1.5rem;
+  }
+}
+
+/* Body text */
+.text-body-md {
+  font-size: 0.75rem; /* 12px mobile */
+  line-height: 1.125rem;
+  font-weight: 500;
+}
+
+@media (min-width: 640px) {
+  .text-body-md {
+    font-size: 0.875rem; /* 14px sm */
+    line-height: 1.25rem;
+  }
+}
+
+/* Metadata & Section Category Labels */
+.text-caption {
+  font-size: 0.6875rem; /* 11px mobile */
+  line-height: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 640px) {
+  .text-caption {
+    font-size: 0.75rem; /* 12px sm */
+    line-height: 1rem;
+  }
+}
+
+/* Badges & Status Pill Text */
+.text-badge {
+  font-size: 0.625rem; /* 10px mobile */
+  line-height: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 640px) {
+  .text-badge {
+    font-size: 0.75rem; /* 12px sm */
+    line-height: 1rem;
+  }
+}
+
+
 /* Custom scrollbar - minimal */
 ::-webkit-scrollbar {
   width: 6px;
