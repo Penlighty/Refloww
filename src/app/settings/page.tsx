@@ -1383,7 +1383,7 @@ export default function SettingsPage() {
 
             {/* Single Floating Action Button (FAB) at the bottom end */}
             {(isUserCategory ? isUserDirty : isOrgDirty) && (
-                <div className="fixed bottom-6 right-6 z-40 md:bottom-8 md:right-8 animate-in fade-in slide-in-from-bottom-4 duration-200">
+                <div className="fixed bottom-20 right-4 sm:bottom-8 sm:right-8 z-[90] animate-in fade-in slide-in-from-bottom-4 duration-200">
                     <Button
                         onClick={isUserCategory ? handleSaveUserProfile : handleSaveOrgSettings}
                         leftIcon={<Save className="w-4 h-4" />}

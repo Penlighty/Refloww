@@ -840,7 +840,7 @@ export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undef
 
             {/* Floating Shopping Cart Card */}
             {cartTotalCount > 0 && (
-                <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 duration-300">
+                <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-[90] animate-in slide-in-from-bottom-4 duration-300">
                     <div
                         onClick={() => setIsCartOpen(true)}
                         className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 shadow-2xl rounded-2xl p-3 pl-4 flex items-center gap-4 cursor-pointer hover:border-blue-400 dark:hover:border-neutral-500 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
