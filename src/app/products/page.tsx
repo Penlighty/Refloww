@@ -9,7 +9,7 @@ import { formatCurrency, formatDate, parseCSV, generateCSV, downloadCSV, readFil
 import { calculateReorderMetrics, getBatchExpiryStatus, generateAutoBatchNumber } from '@/lib/utils/inventoryUtils';
 import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea, Select, PageHelpModal, HelpTooltip, ImageUploader, SubTabs } from '@/components/ui';
 import { toast } from 'react-hot-toast';
-import { generateSkuFromCategory } from '@/lib/utils/productUtils';
+import { generateSkuFromCategory, getStockColorCue } from '@/lib/utils/productUtils';
 import { validateContentPolicy } from '@/lib/utils/contentPolicy';
 import OcrBatchModal from '@/components/OcrBatchModal';
 import BarcodeScannerModal from '@/components/BarcodeScannerModal';
@@ -838,23 +838,15 @@ export default function ProductsPage() {
                                             <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 my-2">
                                                 <span>Category: <strong className="text-neutral-700 dark:text-neutral-300">{product.category || 'General'}</strong></span>
                                                 <div>
-                                                    {isService ? (
-                                                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
-                                                            Unlimited
-                                                        </span>
-                                                    ) : isOut ? (
-                                                        <span className="text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded-full">
-                                                            Out of Stock (0)
-                                                        </span>
-                                                    ) : isLow ? (
-                                                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full">
-                                                            Low Stock ({stockQty})
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
-                                                            Stock: {stockQty ?? 0}
-                                                        </span>
-                                                    )}
+                                                    {(() => {
+                                                        const cue = getStockColorCue(stockQty, product.minReorderPoint, isService);
+                                                        return (
+                                                            <span className={`text-[10px] px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${cue.badgeClass}`}>
+                                                                <span className={`w-1.5 h-1.5 rounded-full ${cue.dotClass}`} />
+                                                                {cue.shortLabel}
+                                                            </span>
+                                                        );
+                                                    })()}
                                                 </div>
                                             </div>
 
@@ -1018,18 +1010,23 @@ export default function ProductsPage() {
                                                         {isService ? (
                                                             <span className="text-xs text-neutral-400 italic font-medium">N/A (Service)</span>
                                                         ) : stockQty !== undefined ? (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                                                                    isOut
-                                                                        ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-                                                                        : isLow
-                                                                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
-                                                                            : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                                                }`}>
-                                                                    {stockQty} units
-                                                                </span>
-                                                                {isLow && <span title="Below reorder point"><AlertTriangle className="w-4 h-4 text-amber-500" /></span>}
-                                                            </div>
+                                                            (() => {
+                                                                const cue = getStockColorCue(stockQty, product.minReorderPoint, isService);
+                                                                return (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${cue.badgeClass}`}>
+                                                                            <span className={`w-2 h-2 rounded-full ${cue.dotClass}`} />
+                                                                            {cue.label}
+                                                                        </span>
+                                                                        {cue.status === 'red' && (
+                                                                            <span title="Below set limit to restock"><AlertTriangle className="w-4 h-4 text-red-500 animate-bounce" /></span>
+                                                                        )}
+                                                                        {cue.status === 'amber' && (
+                                                                            <span title="Getting low to limit"><AlertTriangle className="w-4 h-4 text-amber-500" /></span>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })()
                                                         ) : (
                                                             <span className="text-xs text-neutral-400 italic">Not Tracked</span>
                                                         )}
@@ -1275,13 +1272,15 @@ export default function ProductsPage() {
                                                 {metrics.calculatedReorderPoint} units
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                                                    metrics.isReorderNeeded
-                                                        ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
-                                                        : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                                }`}>
-                                                    {product.stockQuantity ?? 0} units
-                                                </span>
+                                                {(() => {
+                                                    const cue = getStockColorCue(product.stockQuantity, product.minReorderPoint, false);
+                                                    return (
+                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${cue.badgeClass}`}>
+                                                            <span className={`w-2 h-2 rounded-full ${cue.dotClass}`} />
+                                                            {cue.shortLabel}
+                                                        </span>
+                                                    );
+                                                })()}
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <span className="font-bold text-sm text-violet-600 dark:text-violet-400">

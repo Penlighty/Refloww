@@ -7,7 +7,7 @@ import { useProductStore, useDocumentStore, useSettingsStore, DEFAULT_CATEGORIES
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { getBatchExpiryStatus, calculateReorderMetrics } from '@/lib/utils/inventoryUtils';
 import { Button, Modal, ModalFooter, Input, Textarea, EmptyState, Select, PageHelpModal, HelpTooltip } from '@/components/ui';
-import { generateSkuFromCategory } from '@/lib/utils/productUtils';
+import { generateSkuFromCategory, getStockColorCue } from '@/lib/utils/productUtils';
 import OcrBatchModal from '@/components/OcrBatchModal';
 import { toast } from 'react-hot-toast';
 
@@ -322,16 +322,17 @@ export default function ProductDetailClient() {
 
                         <div className="mt-4 pt-4 border-t border-neutral-600/50 flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-neutral-300">Stock Availability</p>
-                                <p className="text-xl font-bold text-emerald-400">
-                                    {isService ? 'Unlimited (Service)' : `${product.stockQuantity ?? 0} units`}
-                                </p>
+                                <p className="text-xs text-neutral-300 mb-1">Stock Availability</p>
+                                {(() => {
+                                    const cue = getStockColorCue(product.stockQuantity, product.minReorderPoint, isService);
+                                    return (
+                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${cue.badgeClass}`}>
+                                            <span className={`w-2 h-2 rounded-full ${cue.dotClass}`} />
+                                            {cue.label}
+                                        </span>
+                                    );
+                                })()}
                             </div>
-                            {reorderMetrics?.isReorderNeeded && (
-                                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-400 text-amber-950 flex items-center gap-1">
-                                    <AlertTriangle className="w-3.5 h-3.5" /> Low Stock
-                                </span>
-                            )}
                         </div>
                     </div>
 
