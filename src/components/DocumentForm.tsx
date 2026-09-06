@@ -51,7 +51,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     // Stores
     const { templates, getFilteredTemplates, getTemplateById } = useTemplateStore();
     const { customers, getFilteredCustomers } = useCustomerStore();
-    const { products, getFilteredProducts, getProductByBarcode } = useProductStore();
+    const { products, getFilteredProducts, getProductByBarcode, adjustStock } = useProductStore();
     const { discounts, getFilteredDiscounts } = useDiscountStore();
     const { company, getNextDocumentNumber, incrementDocumentNumber, updateNumbering } = useSettingsStore();
     const activeOrgId = useOrganizationStore(state => state.activeOrganizationId);
@@ -103,6 +103,32 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     const [expandedLineItemId, setExpandedLineItemId] = useState<string | null>(null);
     const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
     const [quickBarcodeQuery, setQuickBarcodeQuery] = useState('');
+    const [restockQtyMap, setRestockQtyMap] = useState<{ [productId: string]: number }>({});
+
+    // Helper: Determine if a physical product is out of stock
+    const isProductOutOfStock = (product?: { productType?: string; inStock?: boolean; stockQuantity?: number }) => {
+        if (!product) return false;
+        const isPhysical = !product.productType || product.productType === 'physical';
+        if (!isPhysical) return false;
+        if (product.inStock === false) return true;
+        if (product.stockQuantity !== undefined && product.stockQuantity <= 0) return true;
+        return false;
+    };
+
+    // Helper: Handle quick restock right from the document line items form
+    const handleQuickRestock = (productId: string, qtyToAdd: number) => {
+        if (!qtyToAdd || qtyToAdd <= 0) {
+            toast.error('Please enter a valid restock quantity (greater than 0)');
+            return;
+        }
+        const product = displayProducts.find(p => p.id === productId);
+        if (!product) return;
+
+        const currentStock = Math.max(0, product.stockQuantity || 0);
+        const newStock = currentStock + qtyToAdd;
+        adjustStock(productId, undefined, newStock, 'Quick restock from invoice form', 'adjustment');
+        toast.success(`Restocked ${product.name}! New stock: ${newStock} unit(s)`);
+    };
 
     // 4. Reactive Defaults (Apply when store loads)
     const hasAppliedDefaultTax = useRef(false);
@@ -442,6 +468,11 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
             return;
         }
 
+        if (isProductOutOfStock(matchedProduct)) {
+            toast.error(`Cannot add "${matchedProduct.name}": Item is out of stock (0 remaining). Please restock unit before adding.`);
+            return;
+        }
+
         playScanBeep();
 
         setLineItems(prevItems => {
@@ -521,6 +552,19 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                     updated.productName = product.name;
                     updated.description = product.description;
                     updated.unitPrice = product.unitPrice;
+
+                    if (isProductOutOfStock(product)) {
+                        toast.error(`"${product.name}" is out of stock (0 remaining). Use "Restock Unit" to add inventory.`, { id: `out-of-stock-${product.id}` });
+                    }
+                }
+            }
+
+            if (field === 'quantity') {
+                const product = displayProducts.find(p => p.id === item.productId);
+                if (product && (!product.productType || product.productType === 'physical') && product.stockQuantity !== undefined) {
+                    if (value > product.stockQuantity) {
+                        toast.error(`Only ${product.stockQuantity} unit(s) available in stock for ${product.name}!`, { id: `stock-limit-${product.id}` });
+                    }
                 }
             }
 
@@ -534,6 +578,23 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     // --- FORM SUBMISSION ---
     const handleSubmit = async () => {
         if (!selectedTemplateId || !selectedCustomerId) return;
+
+        // Guard: Check if any line item contains an unrestocked out-of-stock product
+        for (const item of lineItems) {
+            if (item.productId) {
+                const product = displayProducts.find(p => p.id === item.productId);
+                if (product && isProductOutOfStock(product)) {
+                    toast.error(`Cannot save document: "${product.name}" is out of stock (0 remaining). Please click "Restock Unit" or remove the item.`);
+                    setIsSubmitting(false);
+                    return;
+                }
+                if (product && (!product.productType || product.productType === 'physical') && product.stockQuantity !== undefined && item.quantity > product.stockQuantity) {
+                    toast.error(`Cannot save document: "${product.name}" quantity (${item.quantity}) exceeds available stock (${product.stockQuantity}).`);
+                    setIsSubmitting(false);
+                    return;
+                }
+            }
+        }
 
         setIsSubmitting(true);
 
@@ -914,18 +975,59 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                 }
                                                 // 2. Product Selection
                                                 if (col.key === 'product' || col.key === 'productName' || col.key === 'description') {
+                                                    const product = displayProducts.find(p => p.id === item.productId);
+                                                    const isOutOfStock = isProductOutOfStock(product);
+
                                                     return (
                                                         <div key={col.id} style={{ width: `${col.width}%`, flexShrink: 0 }} className="px-1">
                                                             <select
                                                                 value={item.productId}
                                                                 onChange={(e) => updateLineItem(item.id, 'productId', e.target.value)}
-                                                                className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                                className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 ${
+                                                                    isOutOfStock
+                                                                        ? 'border-amber-400 text-amber-900 dark:text-amber-300 bg-amber-50/50 dark:bg-amber-950/20 font-medium'
+                                                                        : 'border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100'
+                                                                }`}
                                                             >
                                                                 <option value="">Select item...</option>
-                                                                {displayProducts.map(p => (
-                                                                    <option key={p.id} value={p.id}>{p.name}</option>
-                                                                ))}
+                                                                {displayProducts.map(p => {
+                                                                    const outOfStock = isProductOutOfStock(p);
+                                                                    return (
+                                                                        <option key={p.id} value={p.id}>
+                                                                            {p.name} {outOfStock ? `— ⚠️ Out of Stock (0 remaining)` : (p.stockQuantity !== undefined ? `(${p.stockQuantity} in stock)` : '')}
+                                                                        </option>
+                                                                    );
+                                                                })}
                                                             </select>
+
+                                                            {product && isOutOfStock && (
+                                                                <div className="mt-1.5 p-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-lg flex items-center justify-between text-xs text-amber-900 dark:text-amber-200 gap-2">
+                                                                    <div className="flex items-center gap-1 font-medium">
+                                                                        <span className="shrink-0 text-amber-600 dark:text-amber-400 font-bold">⚠️ Out of Stock</span>
+                                                                        <span className="hidden xl:inline text-[11px]">Restock required to issue document</span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                                        <input
+                                                                            type="number"
+                                                                            min="1"
+                                                                            placeholder="Qty"
+                                                                            value={restockQtyMap[product.id] || ''}
+                                                                            onChange={(e) => setRestockQtyMap({ ...restockQtyMap, [product.id]: parseInt(e.target.value) || 0 })}
+                                                                            className="w-14 px-1.5 py-0.5 text-xs border border-amber-300 dark:border-amber-700 rounded bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-center font-bold"
+                                                                        />
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                const qty = restockQtyMap[product.id] || 10;
+                                                                                handleQuickRestock(product.id, qty);
+                                                                            }}
+                                                                            className="px-2 py-0.5 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold text-[11px] transition-colors shrink-0 shadow-sm"
+                                                                        >
+                                                                            Restock Unit
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     );
                                                 }
@@ -1011,6 +1113,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                 {lineItems.map((item, index) => {
                                     const isExpanded = expandedLineItemId === item.id;
                                     const product = displayProducts.find(p => p.id === item.productId);
+                                    const isOutOfStock = isProductOutOfStock(product);
                                     const displayName = product ? product.name : 'Select item...';
 
                                     return (
@@ -1018,9 +1121,11 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                             key={item.id} 
                                             className={`
                                                 border rounded-xl transition-all duration-200 bg-white dark:bg-neutral-800 overflow-hidden
-                                                ${isExpanded 
-                                                    ? 'border-blue-500 shadow-sm ring-1 ring-blue-500/20' 
-                                                    : 'border-neutral-200 dark:border-neutral-700'
+                                                ${isOutOfStock
+                                                    ? 'border-amber-400 ring-1 ring-amber-400/30'
+                                                    : isExpanded 
+                                                        ? 'border-blue-500 shadow-sm ring-1 ring-blue-500/20' 
+                                                        : 'border-neutral-200 dark:border-neutral-700'
                                                 }
                                             `}
                                         >
@@ -1031,12 +1136,18 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                             >
                                                 <div className="flex items-center gap-2 min-w-0 flex-1">
                                                     <span className="text-xs font-bold text-neutral-500 dark:text-neutral-400 shrink-0">#{index + 1}</span>
-                                                    <span className={`text-xs font-semibold truncate ${product ? 'text-[#2d3748] dark:text-white' : 'text-neutral-400 dark:text-neutral-500'}`}>
+                                                    <span className={`text-xs font-semibold truncate ${product ? (isOutOfStock ? 'text-amber-600 dark:text-amber-400' : 'text-[#2d3748] dark:text-white') : 'text-neutral-400 dark:text-neutral-500'}`}>
                                                         {displayName}
                                                     </span>
-                                                    <span className="text-[10px] bg-neutral-100 dark:bg-neutral-700 px-1.5 py-0.5 rounded text-neutral-500 dark:text-neutral-400 shrink-0">
-                                                        Qty: {item.quantity}
-                                                    </span>
+                                                    {isOutOfStock ? (
+                                                        <span className="text-[10px] bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-1.5 py-0.5 rounded font-bold shrink-0">
+                                                            ⚠️ Out of Stock
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[10px] bg-neutral-100 dark:bg-neutral-700 px-1.5 py-0.5 rounded text-neutral-500 dark:text-neutral-400 shrink-0">
+                                                            Qty: {item.quantity}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center gap-2 ml-3 shrink-0">
                                                     <span className="text-xs font-bold text-[#2d3748] dark:text-white">
@@ -1077,13 +1188,51 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                             <select
                                                                 value={item.productId}
                                                                 onChange={(e) => updateLineItem(item.id, 'productId', e.target.value)}
-                                                                className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                                className={`w-full px-2.5 py-1.5 text-xs border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 ${
+                                                                    isOutOfStock
+                                                                        ? 'border-amber-400 text-amber-900 dark:text-amber-300 bg-amber-50/50 dark:bg-amber-950/20 font-medium'
+                                                                        : 'border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100'
+                                                                }`}
                                                             >
                                                                 <option value="">Select item...</option>
-                                                                {displayProducts.map(p => (
-                                                                    <option key={p.id} value={p.id}>{p.name}</option>
-                                                                ))}
+                                                                {displayProducts.map(p => {
+                                                                    const outOfStock = isProductOutOfStock(p);
+                                                                    return (
+                                                                        <option key={p.id} value={p.id}>
+                                                                            {p.name} {outOfStock ? `— ⚠️ Out of Stock (0 remaining)` : (p.stockQuantity !== undefined ? `(${p.stockQuantity} in stock)` : '')}
+                                                                        </option>
+                                                                    );
+                                                                })}
                                                             </select>
+
+                                                            {product && isOutOfStock && (
+                                                                <div className="mt-2 p-2.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between text-xs text-amber-900 dark:text-amber-200 gap-2">
+                                                                    <div className="flex items-center gap-1.5 font-medium">
+                                                                        <span className="shrink-0 text-amber-600 dark:text-amber-400 font-bold">⚠️ Out of Stock</span>
+                                                                        <span className="text-[11px]">Restock required before saving</span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                                                                        <input
+                                                                            type="number"
+                                                                            min="1"
+                                                                            placeholder="Qty"
+                                                                            value={restockQtyMap[product.id] || ''}
+                                                                            onChange={(e) => setRestockQtyMap({ ...restockQtyMap, [product.id]: parseInt(e.target.value) || 0 })}
+                                                                            className="w-20 px-2 py-1 text-xs border border-amber-300 dark:border-amber-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-center font-bold"
+                                                                        />
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                const qty = restockQtyMap[product.id] || 10;
+                                                                                handleQuickRestock(product.id, qty);
+                                                                            }}
+                                                                            className="flex-1 sm:flex-none px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-xs transition-colors shadow-sm"
+                                                                        >
+                                                                            Restock Unit
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
 
