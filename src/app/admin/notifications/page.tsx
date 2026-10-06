@@ -19,7 +19,7 @@ import {
     CheckCircle,
     LayoutGrid,
     List as ListIcon
-} from 'lucide-react';
+} from '@/components/icons';
 import {
     getAnnouncements,
     createAnnouncement,
@@ -208,10 +208,10 @@ export default function NotificationsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">
+                    <h1 className="text-2xl font-bold text-ink">
                         Notifications & Announcements
                     </h1>
-                    <p className="text-neutral-500 dark:text-neutral-400 mt-1">
+                    <p className="text-ink-muted mt-1">
                         Manage global banners and broadcast messages.
                         <span className="ml-2 text-sm">
                             <span className="text-emerald-600 font-medium">{activeCount} Active</span>
@@ -221,7 +221,7 @@ export default function NotificationsPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="flex items-center p-1 bg-neutral-100 dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 mr-2">
+                    <div className="flex items-center p-1 bg-paper-2 rounded-xl border border-line mr-2">
                         <button
                             onClick={() => setViewMode('grid')}
                             className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid'
@@ -229,7 +229,7 @@ export default function NotificationsPage() {
                                 : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'}`}
                             title="Grid View"
                         >
-                            <LayoutGrid className="w-4 h-4" />
+                            <LayoutGrid className="size-4" />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
@@ -238,7 +238,7 @@ export default function NotificationsPage() {
                                 : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'}`}
                             title="List View"
                         >
-                            <ListIcon className="w-4 h-4" />
+                            <ListIcon className="size-4" />
                         </button>
                     </div>
                     <button
@@ -246,13 +246,13 @@ export default function NotificationsPage() {
                         className="p-2 text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                         title="Refresh"
                     >
-                        <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`size-5 ${loading ? 'rf-spin' : ''}`} />
                     </button>
                     <button
                         onClick={() => setIsCreating(true)}
                         className="flex items-center gap-2 bg-[#2d3748] dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-4 py-2 rounded-xl font-medium text-sm transition-colors shadow-lg shadow-neutral-900/20"
                     >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="size-4" />
                         New Announcement
                     </button>
                 </div>
@@ -261,16 +261,16 @@ export default function NotificationsPage() {
             {/* Create/Edit Panel */}
             {
                 isCreating && (
-                    <div className="max-w-3xl mx-auto bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-8 shadow-lg shadow-neutral-200/50 dark:shadow-neutral-900/50 animate-in fade-in slide-in-from-top-4 mb-10">
+                    <div className="max-w-3xl mx-auto bg-paper border border-line rounded-panel shadow-xs p-8 shadow-lg shadow-neutral-200/50 dark:shadow-neutral-900/50 animate-in fade-in slide-in-from-top-4 mb-10">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">
+                            <h2 className="text-lg font-semibold text-ink">
                                 {editingId ? 'Edit Announcement' : 'Create New Announcement'}
                             </h2>
                             <button
                                 onClick={resetForm}
                                 className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
                             >
-                                <X className="w-5 h-5 text-neutral-400" />
+                                <X className="size-5 text-neutral-400" />
                             </button>
                         </div>
 
@@ -285,7 +285,7 @@ export default function NotificationsPage() {
                                         type="text"
                                         value={formData.title}
                                         onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                        className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white placeholder-neutral-400 transition-all"
+                                        className="w-full px-4 py-2.5 bg-ground border border-line rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink placeholder-neutral-400 transition-all"
                                         placeholder="e.g. New Feature Available"
                                     />
                                 </div>
@@ -296,7 +296,7 @@ export default function NotificationsPage() {
                                     <select
                                         value={formData.type}
                                         onChange={e => setFormData({ ...formData, type: e.target.value as any })}
-                                        className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white transition-all"
+                                        className="w-full px-4 py-2.5 bg-ground border border-line rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink transition-all"
                                     >
                                         <option value="announcement">Announcement</option>
                                         <option value="promotion">Promotion</option>
@@ -322,7 +322,7 @@ export default function NotificationsPage() {
                                             flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all
                                             ${formData.displayStyle === style.id
                                                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                                    : 'border-neutral-200 dark:border-neutral-700 hover:border-blue-300'
+                                                    : 'border-line hover:border-blue-300'
                                                 }
                                         `}
                                         >
@@ -335,7 +335,7 @@ export default function NotificationsPage() {
                                                 className="sr-only"
                                             />
                                             <span className="text-lg">{style.icon}</span>
-                                            <span className={`text-sm font-medium ${formData.displayStyle === style.id ? 'text-blue-700 dark:text-blue-300' : 'text-neutral-600 dark:text-neutral-400'}`}>
+                                            <span className={`text-sm font-medium ${formData.displayStyle === style.id ? 'text-blue-700 dark:text-blue-300' : 'text-ink-muted'}`}>
                                                 {style.label}
                                             </span>
                                         </label>
@@ -344,7 +344,7 @@ export default function NotificationsPage() {
                             </div>
 
                             {/* === INTELLIGENT OPTIONS BASED ON STYLE === */}
-                            <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-xl p-5 border border-neutral-100 dark:border-neutral-700/50 space-y-5">
+                            <div className="bg-paper-2/50 rounded-xl p-5 border border-line/50 space-y-5">
 
                                 {/* Options for Banner */}
                                 {formData.displayStyle === 'banner' && (
@@ -354,7 +354,7 @@ export default function NotificationsPage() {
                                                 type="checkbox"
                                                 checked={formData.allowDismiss}
                                                 onChange={(e) => setFormData({ ...formData, allowDismiss: e.target.checked })}
-                                                className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                                                className="size-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
                                             />
                                             <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                                                 Allow user to dismiss this banner
@@ -374,7 +374,7 @@ export default function NotificationsPage() {
                                                 type="url"
                                                 value={formData.imageUrl}
                                                 onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
-                                                className="w-full px-4 py-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm"
+                                                className="w-full px-4 py-2 bg-ground border border-line rounded-xl text-sm"
                                                 placeholder="https://..."
                                             />
                                         </div>
@@ -382,14 +382,14 @@ export default function NotificationsPage() {
                                             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
                                                 Modal Size
                                             </label>
-                                            <div className="flex bg-white dark:bg-neutral-900 rounded-lg p-1 border border-neutral-200 dark:border-neutral-700 inline-flex">
+                                            <div className="flex bg-ground rounded-lg p-1 border border-line inline-flex">
                                                 {['sm', 'md', 'lg'].map((size) => (
                                                     <button
                                                         key={size}
                                                         type="button"
                                                         onClick={() => setFormData({ ...formData, modalSize: size as any })}
                                                         className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${formData.modalSize === size
-                                                            ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm'
+                                                            ? 'bg-paper-2 text-ink shadow-sm'
                                                             : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
                                                             }`}
                                                     >
@@ -404,7 +404,7 @@ export default function NotificationsPage() {
                                                     type="checkbox"
                                                     checked={formData.allowDismiss !== false}
                                                     onChange={(e) => setFormData({ ...formData, allowDismiss: e.target.checked })}
-                                                    className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                                                    className="size-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
                                                 />
                                                 <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                                                     User can close/dismiss (Recommended)
@@ -429,7 +429,7 @@ export default function NotificationsPage() {
                                             type="date"
                                             value={formData.expiresAt ? formData.expiresAt.split('T')[0] : ''}
                                             onChange={e => setFormData({ ...formData, expiresAt: e.target.value })}
-                                            className="px-4 py-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm"
+                                            className="px-4 py-2 bg-ground border border-line rounded-xl text-sm"
                                         />
                                     </div>
                                 )}
@@ -445,7 +445,7 @@ export default function NotificationsPage() {
                                     value={formData.message}
                                     onChange={e => setFormData({ ...formData, message: e.target.value })}
                                     rows={3}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white placeholder-neutral-400 transition-all resize-none"
+                                    className="w-full px-4 py-2.5 bg-ground border border-line rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink placeholder-neutral-400 transition-all resize-none"
                                     placeholder="The message that will appear to all users..."
                                 />
                             </div>
@@ -459,7 +459,7 @@ export default function NotificationsPage() {
                                         type="text"
                                         value={formData.ctaText}
                                         onChange={e => setFormData({ ...formData, ctaText: e.target.value })}
-                                        className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white placeholder-neutral-400 transition-all"
+                                        className="w-full px-4 py-2.5 bg-ground border border-line rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink placeholder-neutral-400 transition-all"
                                         placeholder="e.g. Learn More"
                                     />
                                 </div>
@@ -471,7 +471,7 @@ export default function NotificationsPage() {
                                         type="url"
                                         value={formData.ctaLink}
                                         onChange={e => setFormData({ ...formData, ctaLink: e.target.value })}
-                                        className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white placeholder-neutral-400 transition-all"
+                                        className="w-full px-4 py-2.5 bg-ground border border-line rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink placeholder-neutral-400 transition-all"
                                         placeholder="https://..."
                                     />
                                 </div>
@@ -483,18 +483,18 @@ export default function NotificationsPage() {
                                     type="checkbox"
                                     checked={formData.isActive}
                                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                                    className="w-5 h-5 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                                    className="size-5 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
                                 />
                                 <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                                     Publish immediately (make active)
                                 </span>
                             </label>
 
-                            <div className="flex items-center gap-4 pt-4 border-t border-neutral-100 dark:border-neutral-700">
+                            <div className="flex items-center gap-4 pt-4 border-t border-line">
                                 <button
                                     type="button"
                                     onClick={resetForm}
-                                    className="px-5 py-2.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-xl font-medium transition-colors"
+                                    className="px-5 py-2.5 text-ink-muted hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-xl font-medium transition-colors"
                                 >
                                     Cancel
                                 </button>
@@ -504,9 +504,9 @@ export default function NotificationsPage() {
                                     className="flex items-center gap-2 px-6 py-2.5 bg-[#2d3748] dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 rounded-xl font-medium transition-colors disabled:opacity-50"
                                 >
                                     {formLoading ? (
-                                        <RefreshCw className="w-4 h-4 animate-spin" />
+                                        <RefreshCw className="size-4 rf-spin" />
                                     ) : (
-                                        <CheckCircle className="w-4 h-4" />
+                                        <CheckCircle className="size-4" />
                                     )}
                                     {editingId ? 'Save Changes' : 'Publish Announcement'}
                                 </button>
@@ -521,7 +521,7 @@ export default function NotificationsPage() {
                 loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6 animate-pulse">
+                            <div key={i} className="bg-paper border border-line rounded-panel shadow-xs p-6 animate-pulse">
                                 <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4 mb-4"></div>
                                 <div className="h-16 bg-neutral-100 dark:bg-neutral-700/50 rounded mb-4"></div>
                                 <div className="h-8 bg-neutral-200 dark:bg-neutral-700 rounded w-1/2"></div>
@@ -529,9 +529,9 @@ export default function NotificationsPage() {
                         ))}
                     </div>
                 ) : announcements.length === 0 ? (
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-12 text-center">
-                        <Megaphone className="w-12 h-12 mx-auto mb-3 text-neutral-300 dark:text-neutral-600" />
-                        <p className="text-neutral-500 dark:text-neutral-400">No announcements yet.</p>
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-12 text-center">
+                        <Megaphone className="size-12 mx-auto mb-3 text-neutral-300 dark:text-neutral-600" />
+                        <p className="text-ink-muted">No announcements yet.</p>
                         <button
                             onClick={() => setIsCreating(true)}
                             className="mt-4 text-blue-600 hover:text-blue-700 font-medium text-sm"
@@ -540,11 +540,11 @@ export default function NotificationsPage() {
                         </button>
                     </div>
                 ) : viewMode === 'list' ? (
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow-sm overflow-hidden">
+                    <div className="bg-paper border border-line rounded-panel shadow-xs shadow-sm overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-neutral-50/50 dark:bg-neutral-800/50 border-b border-neutral-100 dark:border-neutral-700 text-xs font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                                    <tr className="bg-neutral-50/50 dark:bg-neutral-800/50 border-b border-line text-xs font-semibold text-ink-muted uppercase tracking-wider">
                                         <th className="px-6 py-4">Title & Message</th>
                                         <th className="px-6 py-4">Type</th>
                                         <th className="px-6 py-4">Display</th>
@@ -553,7 +553,7 @@ export default function NotificationsPage() {
                                         <th className="px-6 py-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700">
+                                <tbody className="divide-y divide-line">
                                     {announcements.map((announcement) => {
                                         const TypeIcon = typeConfig[announcement.type]?.icon || Megaphone;
                                         const typeBg = typeConfig[announcement.type]?.bg || 'bg-blue-50';
@@ -562,13 +562,13 @@ export default function NotificationsPage() {
                                         return (
                                             <tr key={announcement.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors">
                                                 <td className="px-6 py-4 max-w-sm">
-                                                    <div className="font-medium text-[#2d3748] dark:text-white line-clamp-1">{announcement.title}</div>
-                                                    <div className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-1">{announcement.message}</div>
+                                                    <div className="font-medium text-ink line-clamp-1">{announcement.title}</div>
+                                                    <div className="text-sm text-ink-muted line-clamp-1">{announcement.message}</div>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2">
                                                         <div className={`p-1.5 rounded-lg ${typeBg} ${typeColor}`}>
-                                                            <TypeIcon className="w-4 h-4" />
+                                                            <TypeIcon className="size-4" />
                                                         </div>
                                                         <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 capitalize">{announcement.type}</span>
                                                     </div>
@@ -581,9 +581,9 @@ export default function NotificationsPage() {
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
-                                                        <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {announcement.views}</span>
-                                                        <span className="flex items-center gap-1"><MousePointer2 className="w-3.5 h-3.5" /> {announcement.clicks}</span>
+                                                    <div className="flex items-center gap-3 text-xs text-ink-muted">
+                                                        <span className="flex items-center gap-1"><Eye className="size-3.5" /> {announcement.views}</span>
+                                                        <span className="flex items-center gap-1"><MousePointer2 className="size-3.5" /> {announcement.clicks}</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -601,7 +601,7 @@ export default function NotificationsPage() {
                                                             onClick={() => handleEdit(announcement)}
                                                             className="p-2 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                                                         >
-                                                            <Edit2 className="w-4 h-4" />
+                                                            <Edit2 className="size-4" />
                                                         </button>
                                                         <button
                                                             onClick={() => handleToggleActive(announcement.id, announcement.isActive)}
@@ -610,13 +610,13 @@ export default function NotificationsPage() {
                                                                 : 'text-neutral-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
                                                                 }`}
                                                         >
-                                                            {announcement.isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
+                                                            {announcement.isActive ? <PowerOff className="size-4" /> : <Power className="size-4" />}
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(announcement.id)}
                                                             className="p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                                                         >
-                                                            <Trash2 className="w-4 h-4" />
+                                                            <Trash2 className="size-4" />
                                                         </button>
                                                     </div>
                                                 </td>
@@ -638,8 +638,8 @@ export default function NotificationsPage() {
                                 <div
                                     key={announcement.id}
                                     className={`
-                                    bg-white dark:bg-neutral-800 
-                                    border border-neutral-200 dark:border-neutral-700 
+                                    bg-paper 
+                                    border border-line 
                                     rounded-2xl p-5 
                                     shadow-sm hover:shadow-md 
                                     transition-all duration-200 
@@ -651,13 +651,13 @@ export default function NotificationsPage() {
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-3">
                                             <div className={`p-2 rounded-lg ${typeBg} ${typeColor}`}>
-                                                <TypeIcon className="w-5 h-5" />
+                                                <TypeIcon className="size-5" />
                                             </div>
                                             <div>
-                                                <h3 className="font-semibold text-[#2d3748] dark:text-white line-clamp-1">
+                                                <h3 className="font-semibold text-ink line-clamp-1">
                                                     {announcement.title}
                                                 </h3>
-                                                <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                                                <span className="text-xs text-ink-muted">
                                                     {new Date(announcement.createdAt).toLocaleDateString()}
                                                 </span>
                                             </div>
@@ -672,14 +672,14 @@ export default function NotificationsPage() {
 
                                             <span className={`w-2 h-2 rounded-full ${announcement.isActive ? 'bg-emerald-500' : 'bg-neutral-400'
                                                 }`}></span>
-                                            <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                                            <span className="text-xs font-medium text-ink-muted">
                                                 {announcement.isActive ? 'Active' : 'Inactive'}
                                             </span>
                                         </div>
                                     </div>
 
                                     {/* Message */}
-                                    <p className="text-sm text-neutral-600 dark:text-neutral-300 mb-4 line-clamp-3">
+                                    <p className="text-sm text-ink-muted mb-4 line-clamp-3">
                                         {announcement.message}
                                     </p>
 
@@ -695,14 +695,14 @@ export default function NotificationsPage() {
                                     }
 
                                     {/* Stats & Actions */}
-                                    <div className="flex items-center justify-between pt-4 border-t border-neutral-100 dark:border-neutral-700">
-                                        <div className="flex items-center gap-4 text-xs text-neutral-500 dark:text-neutral-400">
+                                    <div className="flex items-center justify-between pt-4 border-t border-line">
+                                        <div className="flex items-center gap-4 text-xs text-ink-muted">
                                             <span className="flex items-center gap-1" title="Views">
-                                                <Eye className="w-3.5 h-3.5" />
+                                                <Eye className="size-3.5" />
                                                 {announcement.views.toLocaleString()}
                                             </span>
                                             <span className="flex items-center gap-1" title="Clicks">
-                                                <MousePointer2 className="w-3.5 h-3.5" />
+                                                <MousePointer2 className="size-3.5" />
                                                 {announcement.clicks.toLocaleString()}
                                             </span>
                                         </div>
@@ -712,7 +712,7 @@ export default function NotificationsPage() {
                                                 className="p-2 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                                                 title="Edit"
                                             >
-                                                <Edit2 className="w-4 h-4" />
+                                                <Edit2 className="size-4" />
                                             </button>
                                             <button
                                                 onClick={() => handleToggleActive(announcement.id, announcement.isActive)}
@@ -724,9 +724,9 @@ export default function NotificationsPage() {
                                                 title={announcement.isActive ? 'Deactivate' : 'Activate'}
                                             >
                                                 {announcement.isActive ? (
-                                                    <PowerOff className="w-4 h-4" />
+                                                    <PowerOff className="size-4" />
                                                 ) : (
-                                                    <Power className="w-4 h-4" />
+                                                    <Power className="size-4" />
                                                 )}
                                             </button>
                                             <button
@@ -735,7 +735,7 @@ export default function NotificationsPage() {
                                                 className="p-2 text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
                                                 title="Delete"
                                             >
-                                                <Trash2 className="w-4 h-4" />
+                                                <Trash2 className="size-4" />
                                             </button>
                                         </div>
                                     </div>

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { X, Camera, RefreshCw, Volume2, CheckCircle2, ScanLine } from 'lucide-react';
+import { X, Camera, RefreshCw, Volume2, CheckCircle2, ScanLine } from '@/components/icons';
 import { Button, Input } from '@/components/ui';
 import { playScanBeep } from '@/lib/utils/audio';
 
@@ -177,16 +177,16 @@ export default function BarcodeScannerModal({
 
     return createPortal(
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white dark:bg-neutral-900 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-neutral-200 dark:border-neutral-800 flex flex-col max-h-[90vh]">
+            <div className="bg-ground rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-line flex flex-col max-h-[90vh]">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-800/50">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-neutral-50/50 dark:bg-neutral-800/50">
                     <div className="flex items-center gap-2.5">
                         <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                            <ScanLine className="w-5 h-5" />
+                            <ScanLine className="size-5" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-[#2d3748] dark:text-white text-base">{title}</h3>
-                            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                            <h3 className="font-semibold text-ink text-base">{title}</h3>
+                            <p className="text-xs text-ink-muted">
                                 {mode === 'continuous' ? 'Batch mode: keeps camera active for scanning multiple items' : 'Align barcode within the target frame'}
                             </p>
                         </div>
@@ -195,7 +195,7 @@ export default function BarcodeScannerModal({
                         onClick={onClose}
                         className="p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                     >
-                        <X className="w-5 h-5" />
+                        <X className="size-5" />
                     </button>
                 </div>
 
@@ -216,13 +216,13 @@ export default function BarcodeScannerModal({
 
                         {scannerError && (
                             <div className="p-6 text-center text-rose-400 text-sm space-y-2">
-                                <Camera className="w-10 h-10 mx-auto opacity-50 text-rose-400" />
+                                <Camera className="size-10 mx-auto opacity-50 text-rose-400" />
                                 <p>{scannerError}</p>
                                 <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() => startScanner('barcode-reader-container')}
-                                    leftIcon={<RefreshCw className="w-4 h-4" />}
+                                    leftIcon={<RefreshCw className="size-4" />}
                                     className="mt-2 text-white border-neutral-700"
                                 >
                                     Retry Camera
@@ -235,17 +235,17 @@ export default function BarcodeScannerModal({
                     {lastScanned && (
                         <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-200 text-sm animate-bounce-short">
                             <div className="flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                                 <span className="font-mono font-semibold">{lastScanned.code}</span>
                             </div>
                             <span className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
-                                <Volume2 className="w-3.5 h-3.5" /> Scanned!
+                                <Volume2 className="size-3.5" /> Scanned!
                             </span>
                         </div>
                     )}
 
                     {/* Manual Entry Fallback */}
-                    <form onSubmit={handleManualSubmit} className="flex gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800">
+                    <form onSubmit={handleManualSubmit} className="flex gap-2 pt-2 border-t border-line">
                         <Input
                             placeholder="Or type/scan barcode manually..."
                             value={manualInput}
@@ -259,8 +259,8 @@ export default function BarcodeScannerModal({
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                <div className="px-6 py-4 bg-paper-2/50 border-t border-line flex items-center justify-between">
+                    <span className="text-xs text-ink-muted">
                         Hardware USB/Bluetooth scanners can also scan directly into inputs.
                     </span>
                     <Button variant="outline" size="sm" onClick={onClose}>

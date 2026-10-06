@@ -15,5 +15,7 @@ export { HelpTooltip, LabelWithHelp } from './HelpTooltip';
 export { PageHelpModal } from './PageHelpModal';
 export { ImageUploader } from './ImageUploader';
 export { FixedDropdownMenu } from './FixedDropdownMenu';
-export { SubTabs, type TabItem } from './SubTabs';
-
+export { Tag, type TagTone } from './Tag';
+export { PageHeader } from './PageHeader';
+export { StatBand, type StatItem } from './StatBand';
+export { SubTabs, type TabItem, type SubTabsProps } from './SubTabs';

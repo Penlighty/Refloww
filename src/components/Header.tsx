@@ -36,7 +36,7 @@ import {
     Plus,
     Shield,
     Users
-} from 'lucide-react';
+} from '@/components/icons';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ThemeToggleSimple } from './ThemeToggle';
@@ -51,16 +51,16 @@ import { respondToOrgInvitation } from '@/lib/firebase/firestore';
 import FeedbackModal from './FeedbackModal';
 
 const typeConfig = {
-    announcement: { icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-900/30' },
-    promotion: { icon: Gift, color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-900/30' },
-    greeting: { icon: Info, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
-    warning: { icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-100 dark:bg-amber-900/30' }
+    announcement: { icon: Megaphone, color: 'text-ink-2', bg: 'bg-paper-2' },
+    promotion: { icon: Gift, color: 'text-ink-2', bg: 'bg-paper-2' },
+    greeting: { icon: Info, color: 'text-ink-2', bg: 'bg-paper-2' },
+    warning: { icon: AlertTriangle, color: 'text-ink-2', bg: 'bg-paper-2' }
 };
 
 const priorityConfig = {
-    'urgent': { textClass: 'text-red-500', dotClass: 'bg-red-500' },
-    'normal': { textClass: 'text-neutral-500 dark:text-neutral-400', dotClass: 'bg-neutral-400' },
-    'low': { textClass: 'text-neutral-400 dark:text-neutral-500', dotClass: 'bg-neutral-300' },
+    'urgent': { textClass: 'text-danger-text', dotClass: 'bg-danger-solid' },
+    'normal': { textClass: 'text-ink-3', dotClass: 'bg-ink-4' },
+    'low': { textClass: 'text-ink-4', dotClass: 'bg-ink-4' },
 };
 
 import toast from 'react-hot-toast';
@@ -391,7 +391,7 @@ export default function Header() {
                         className="p-2 -ml-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 rounded-lg transition-colors"
                         aria-label="Toggle menu"
                     >
-                        <Menu className="w-5 h-5" />
+                        <Menu className="size-5" />
                     </button>
                     <Link href="/" className="flex items-center shrink-0">
                         <img
@@ -406,11 +406,11 @@ export default function Header() {
                 <div className="flex items-center gap-4 flex-1 max-w-xl relative" ref={searchContainerRef}>
                     <div className="relative w-full max-w-md group">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <Search className="text-neutral-400 group-focus-within:text-blue-500 transition-colors w-4 h-4" strokeWidth={2} />
+                            <Search className="text-neutral-400 group-focus-within:text-blue-500 transition-colors size-4" />
                         </div>
                         <input
                             ref={searchInputRef}
-                            className="block w-full pl-10 pr-24 py-2 border border-neutral-200 dark:border-neutral-700 rounded-full leading-5 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 sm:text-sm transition-all shadow-sm focus:border-blue-500 dark:focus:border-blue-400"
+                            className="block w-full pl-10 pr-24 py-2 border border-line rounded-full leading-5 bg-paper-2 text-ink placeholder-neutral-400 dark:placeholder-neutral-500 sm:text-sm transition-all shadow-sm focus:border-blue-500 dark:focus:border-blue-400"
                             style={{ outline: 'none', boxShadow: 'none' }}
                             placeholder="Search documents, customers, products..."
                             type="text"
@@ -433,11 +433,11 @@ export default function Header() {
                                     }}
                                     className="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 rounded-full hover:bg-neutral-200/50 dark:hover:bg-neutral-600 transition-colors"
                                 >
-                                    <X className="w-3.5 h-3.5" />
+                                    <X className="size-3.5" />
                                 </button>
                             ) : (
                                 <div className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-200/60 dark:bg-neutral-600/80 text-neutral-400 dark:text-neutral-300 text-[11px] font-medium pointer-events-none">
-                                    <Command className="w-3 h-3" />
+                                    <Command className="size-3.5" />
                                     <span>K</span>
                                 </div>
                             )}
@@ -446,18 +446,18 @@ export default function Header() {
                         {/* Live Search Results Dropdown Popover (Aligned to Input container) */}
                         {isSearchOpen && searchQuery.trim() !== '' && (
                             <div 
-                                className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl border border-neutral-200/80 dark:border-neutral-700/80 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 flex flex-col"
+                                className="absolute top-full left-0 mt-2 w-full bg-paper rounded-2xl shadow-2xl border border-neutral-200/80 dark:border-neutral-700/80 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 flex flex-col"
                                 style={{ maxHeight: '350px' }}
                             >
                                 {/* Category Filter Tabs */}
-                                <div className="flex-shrink-0 flex items-center gap-1 p-2 bg-neutral-50/80 dark:bg-neutral-900/50 border-b border-neutral-100 dark:border-neutral-700/60 text-xs overflow-x-auto">
+                                <div className="flex-shrink-0 flex items-center gap-1 p-2 bg-neutral-50/80 dark:bg-neutral-900/50 border-b border-line/60 text-xs overflow-x-auto">
                                     <button
                                         type="button"
                                         onClick={() => setSearchCategory('all')}
                                         className={`px-3 py-1 rounded-full font-medium transition-colors cursor-pointer ${
                                             searchCategory === 'all'
                                                 ? 'bg-blue-600 text-white shadow-sm'
-                                                : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50'
+                                                : 'text-ink-muted hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50'
                                         }`}
                                     >
                                         All ({searchResults.total})
@@ -468,7 +468,7 @@ export default function Header() {
                                         className={`px-3 py-1 rounded-full font-medium transition-colors cursor-pointer ${
                                             searchCategory === 'documents'
                                                 ? 'bg-blue-600 text-white shadow-sm'
-                                                : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50'
+                                                : 'text-ink-muted hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50'
                                         }`}
                                     >
                                         Documents ({searchResults.documents.length})
@@ -479,7 +479,7 @@ export default function Header() {
                                         className={`px-3 py-1 rounded-full font-medium transition-colors cursor-pointer ${
                                             searchCategory === 'customers'
                                                 ? 'bg-blue-600 text-white shadow-sm'
-                                                : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50'
+                                                : 'text-ink-muted hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50'
                                         }`}
                                     >
                                         Customers ({searchResults.customers.length})
@@ -490,7 +490,7 @@ export default function Header() {
                                         className={`px-3 py-1 rounded-full font-medium transition-colors cursor-pointer ${
                                             searchCategory === 'products'
                                                 ? 'bg-blue-600 text-white shadow-sm'
-                                                : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50'
+                                                : 'text-ink-muted hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50'
                                         }`}
                                     >
                                         Products ({searchResults.products.length})
@@ -501,11 +501,11 @@ export default function Header() {
                                 <div className="flex-1 overflow-y-auto p-2 space-y-3 min-h-0" style={{ maxHeight: '260px' }}>
                                 {searchResults.total === 0 ? (
                                     <div className="py-8 text-center px-4 space-y-2">
-                                        <Search className="w-8 h-8 text-neutral-300 dark:text-neutral-600 mx-auto" strokeWidth={1.5} />
-                                        <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">
+                                        <Search className="size-8 text-neutral-300 dark:text-neutral-600 mx-auto" />
+                                        <p className="text-sm font-semibold text-ink-muted">
                                             No results for &quot;{searchQuery}&quot;
                                         </p>
-                                        <p className="text-xs text-neutral-400 dark:text-neutral-500 max-w-xs mx-auto">
+                                        <p className="text-xs text-ink-muted max-w-xs mx-auto">
                                             Try searching document numbers (INV-..., RCP-...), customer names, product SKUs, or email addresses.
                                         </p>
                                     </div>
@@ -514,7 +514,7 @@ export default function Header() {
                                         {/* Documents Group */}
                                         {(searchCategory === 'all' || searchCategory === 'documents') && searchResults.documents.length > 0 && (
                                             <div>
-                                                <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 flex items-center justify-between">
+                                                <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted flex items-center justify-between">
                                                     <span>Documents</span>
                                                     <span>{searchResults.documents.length}</span>
                                                 </div>
@@ -537,11 +537,11 @@ export default function Header() {
                                                             >
                                                                 <div className="flex items-center gap-3 min-w-0">
                                                                     <div className="p-2 rounded-lg bg-blue-100/70 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 shrink-0">
-                                                                        <IconComponent className="w-4 h-4" />
+                                                                        <IconComponent className="size-4" />
                                                                     </div>
                                                                     <div className="min-w-0">
                                                                         <div className="flex items-center gap-2">
-                                                                            <span className="font-semibold text-xs text-neutral-900 dark:text-white truncate">
+                                                                            <span className="font-semibold text-xs text-ink truncate">
                                                                                 {doc.documentNumber}
                                                                             </span>
                                                                             <span className={`text-[10px] px-1.5 py-0.2 rounded font-medium capitalize ${
@@ -552,7 +552,7 @@ export default function Header() {
                                                                                 {doc.status}
                                                                             </span>
                                                                         </div>
-                                                                        <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+                                                                        <p className="text-xs text-ink-muted truncate">
                                                                             {doc.customerName || 'No customer'} • {doc.lineItems?.length || 0} line item(s)
                                                                         </p>
                                                                     </div>
@@ -572,7 +572,7 @@ export default function Header() {
                                         {/* Customers Group */}
                                         {(searchCategory === 'all' || searchCategory === 'customers') && searchResults.customers.length > 0 && (
                                             <div>
-                                                <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 flex items-center justify-between">
+                                                <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted flex items-center justify-between">
                                                     <span>Customers</span>
                                                     <span>{searchResults.customers.length}</span>
                                                 </div>
@@ -594,11 +594,11 @@ export default function Header() {
                                                             >
                                                                 <div className="flex items-center gap-3 min-w-0">
                                                                     <div className="p-2 rounded-lg bg-purple-100/70 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 shrink-0">
-                                                                        <User className="w-4 h-4" />
+                                                                        <User className="size-4" />
                                                                     </div>
                                                                     <div className="min-w-0">
                                                                         <div className="flex items-center gap-2">
-                                                                            <span className="font-semibold text-xs text-neutral-900 dark:text-white truncate">
+                                                                            <span className="font-semibold text-xs text-ink truncate">
                                                                                 {cust.name}
                                                                             </span>
                                                                             {cust.customerNumber && (
@@ -607,12 +607,12 @@ export default function Header() {
                                                                                 </span>
                                                                             )}
                                                                         </div>
-                                                                        <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+                                                                        <p className="text-xs text-ink-muted truncate">
                                                                             {[cust.companyName, cust.email, cust.phone].filter(Boolean).join(' • ') || 'No contact details'}
                                                                         </p>
                                                                     </div>
                                                                 </div>
-                                                                <ChevronRight className="w-4 h-4 text-neutral-300 dark:text-neutral-600 shrink-0" />
+                                                                <ChevronRight className="size-4 text-neutral-300 dark:text-neutral-600 shrink-0" />
                                                             </button>
                                                         );
                                                     })}
@@ -623,7 +623,7 @@ export default function Header() {
                                         {/* Products Group */}
                                         {(searchCategory === 'all' || searchCategory === 'products') && searchResults.products.length > 0 && (
                                             <div>
-                                                <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 flex items-center justify-between">
+                                                <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted flex items-center justify-between">
                                                     <span>Products</span>
                                                     <span>{searchResults.products.length}</span>
                                                 </div>
@@ -645,11 +645,11 @@ export default function Header() {
                                                             >
                                                                 <div className="flex items-center gap-3 min-w-0">
                                                                     <div className="p-2 rounded-lg bg-amber-100/70 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 shrink-0">
-                                                                        <Package className="w-4 h-4" />
+                                                                        <Package className="size-4" />
                                                                     </div>
                                                                     <div className="min-w-0">
                                                                         <div className="flex items-center gap-2">
-                                                                            <span className="font-semibold text-xs text-neutral-900 dark:text-white truncate">
+                                                                            <span className="font-semibold text-xs text-ink truncate">
                                                                                 {prod.name}
                                                                             </span>
                                                                             {prod.sku && (
@@ -658,7 +658,7 @@ export default function Header() {
                                                                                 </span>
                                                                             )}
                                                                         </div>
-                                                                        <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+                                                                        <p className="text-xs text-ink-muted truncate">
                                                                             {prod.category || 'General'} {prod.stockQuantity !== undefined ? `• Stock: ${prod.stockQuantity}` : ''}
                                                                         </p>
                                                                     </div>
@@ -679,7 +679,7 @@ export default function Header() {
                             </div>
 
                             {/* Footer Shortcuts hint */}
-                            <div className="flex-shrink-0 p-2 bg-neutral-50 dark:bg-neutral-900/70 border-t border-neutral-100 dark:border-neutral-700/60 flex items-center justify-between text-[11px] text-neutral-400 dark:text-neutral-500 px-3">
+                            <div className="flex-shrink-0 p-2 bg-paper-2/70 border-t border-line/60 flex items-center justify-between text-[11px] text-ink-muted px-3">
                                 <div className="flex items-center gap-3">
                                     <span className="flex items-center gap-1">
                                         <kbd className="font-mono bg-white dark:bg-neutral-700 px-1 py-0.5 rounded border border-neutral-200 dark:border-neutral-600 text-[10px]">↑↓</kbd> Navigate
@@ -707,7 +707,7 @@ export default function Header() {
                         className="relative p-2 text-neutral-500 hover:text-[#2d3748] dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-all duration-200 cursor-pointer"
                         title="Shopping Cart"
                     >
-                        <ShoppingBag className="w-5 h-5 text-neutral-600 dark:text-neutral-300" />
+                        <ShoppingBag className="size-5 text-ink-muted" />
                         {cartTotalCount > 0 && (
                             <span className="absolute -top-1 -right-1 bg-[#fc6d2d] text-white text-[10px] font-extrabold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center border-2 border-white dark:border-neutral-800 shadow-md animate-in zoom-in-50">
                                 {cartTotalCount > 99 ? '99+' : cartTotalCount}
@@ -732,7 +732,7 @@ export default function Header() {
                                 <p className="text-sm font-semibold text-[#2d3748] dark:text-neutral-100 leading-none">
                                     {displayName}
                                 </p>
-                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5 max-w-[150px] truncate">
+                                <p className="text-xs text-ink-muted mt-0.5 max-w-[150px] truncate">
                                     {email}
                                 </p>
                             </div>
@@ -742,7 +742,7 @@ export default function Header() {
                                     <img
                                         src={photoURL}
                                         alt={displayName}
-                                        className="w-9 h-9 rounded-full object-cover shadow-sm border border-neutral-100 dark:border-neutral-700"
+                                        className="w-9 h-9 rounded-full object-cover shadow-sm border border-line"
                                     />
                                 ) : (
                                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center overflow-hidden shadow-sm">
@@ -755,22 +755,21 @@ export default function Header() {
                             </div>
                             
                             <ChevronDown
-                                className={`text-neutral-400 w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
-                                strokeWidth={2}
+                                className={`text-neutral-400 size-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
                             />
                         </button>
 
                         {/* Dropdown Menu */}
                         {isUserMenuOpen && (
-                            <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-neutral-800 rounded-2xl shadow-xl border border-neutral-100 dark:border-neutral-700 py-2 z-50 overflow-hidden">
+                            <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-paper rounded-2xl shadow-xl border border-line py-2 z-50 overflow-hidden">
                                 {activeTab === 'main' ? (
                                     <>
                                         {/* User Info */}
-                                        <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-700">
-                                            <p className="text-sm font-semibold text-[#2d3748] dark:text-white">
+                                        <div className="px-4 py-3 border-b border-line">
+                                            <p className="text-sm font-semibold text-ink">
                                                 {displayName}
                                             </p>
-                                            <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+                                            <p className="text-xs text-ink-muted truncate">
                                                 {email}
                                             </p>
                                         </div>
@@ -780,7 +779,7 @@ export default function Header() {
                                             <div className="px-3 py-2 border-b border-amber-200 dark:border-amber-900 bg-amber-50/90 dark:bg-amber-950/40">
                                                 <div className="flex items-center justify-between px-1 mb-1.5">
                                                     <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1">
-                                                        <Building className="w-3 h-3 text-amber-600" />
+                                                        <Building className="size-3.5 text-amber-600" />
                                                         Pending Org Invites ({pendingInvitations.length})
                                                     </span>
                                                 </div>
@@ -789,17 +788,17 @@ export default function Header() {
                                                     {pendingInvitations.map((invite) => (
                                                         <div
                                                             key={invite.id}
-                                                            className="p-2 rounded-xl bg-white dark:bg-neutral-800 border border-amber-200/80 dark:border-amber-800/80 shadow-sm"
+                                                            className="p-2 rounded-xl bg-paper border border-amber-200/80 dark:border-amber-800/80 shadow-sm"
                                                         >
                                                             <div className="flex items-center justify-between gap-1 mb-1">
-                                                                <span className="text-xs font-bold text-neutral-900 dark:text-white truncate">
+                                                                <span className="text-xs font-bold text-ink truncate">
                                                                     {invite.orgName}
                                                                 </span>
                                                                 <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 capitalize">
                                                                     {invite.role === 'admin' ? 'Co-Admin' : invite.role === 'inventory_manager' ? 'Manager' : 'Cashier'}
                                                                 </span>
                                                             </div>
-                                                            <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mb-2 truncate">
+                                                            <p className="text-[10px] text-ink-muted mb-2 truncate">
                                                                 From: {invite.inviterEmail}
                                                             </p>
 
@@ -816,7 +815,7 @@ export default function Header() {
                                                                     }}
                                                                     className="flex-1 py-1 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center justify-center gap-1 transition-colors cursor-pointer"
                                                                 >
-                                                                    <Check className="w-3 h-3" /> Accept
+                                                                    <Check className="size-3.5" /> Accept
                                                                 </button>
                                                                 <button
                                                                     type="button"
@@ -839,16 +838,16 @@ export default function Header() {
                                         )}
 
                                         {/* Organization Switcher Section */}
-                                        <div className="px-3 py-2 border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/70 dark:bg-neutral-900">
+                                        <div className="px-3 py-2 border-b border-line bg-neutral-50/70 dark:bg-neutral-900">
                                             <div className="flex items-center justify-between px-1 mb-1.5">
-                                                <span className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                                                <span className="text-[10px] font-bold text-ink-muted uppercase tracking-wider">
                                                     My Organizations
                                                 </span>
                                                 <button
                                                     onClick={() => setIsCreateOrgModalOpen(true)}
                                                     className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5 cursor-pointer"
                                                 >
-                                                    <Plus className="w-3 h-3" /> New
+                                                    <Plus className="size-3.5" /> New
                                                 </button>
                                             </div>
 
@@ -869,14 +868,14 @@ export default function Header() {
                                                             }`}
                                                         >
                                                             <div className="flex items-center gap-2 min-w-0">
-                                                                <Building className="w-3.5 h-3.5 shrink-0 opacity-70" />
+                                                                <Building className="size-3.5 shrink-0 opacity-70" />
                                                                 <span className="text-xs truncate">{org.name}</span>
                                                             </div>
                                                             <div className="flex items-center gap-1 shrink-0">
-                                                                <span className="text-[10px] px-1.5 py-0.2 rounded font-bold uppercase bg-neutral-200/70 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300">
+                                                                <span className="text-[10px] px-1.5 py-0.2 rounded font-bold uppercase bg-neutral-200/70 dark:bg-neutral-700 text-ink-muted">
                                                                     {org.roleInOrg === 'admin' ? 'Owner' : org.roleInOrg === 'inventory_manager' ? 'Manager' : 'Cashier'}
                                                                 </span>
-                                                                {isActive && <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />}
+                                                                {isActive && <Check className="size-3.5 text-blue-600 dark:text-blue-400 shrink-0" />}
                                                             </div>
                                                         </button>
                                                     );
@@ -886,9 +885,9 @@ export default function Header() {
                                             <Link
                                                 href="/settings?tab=team"
                                                 onClick={() => setIsUserMenuOpen(false)}
-                                                className="mt-2 w-full py-1.5 px-2 rounded-xl bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 text-xs font-semibold text-neutral-700 dark:text-neutral-200 flex items-center justify-center gap-1.5 hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors"
+                                                className="mt-2 w-full py-1.5 px-2 rounded-xl bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 text-xs font-semibold text-ink-muted flex items-center justify-center gap-1.5 hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors"
                                             >
-                                                <UserPlus className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                                                <UserPlus className="size-3.5 text-blue-600 dark:text-blue-400" />
                                                 <span>Invite Staff / Manage Team</span>
                                             </Link>
                                         </div>
@@ -900,7 +899,7 @@ export default function Header() {
                                                 onClick={() => setIsUserMenuOpen(false)}
                                                 className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors"
                                             >
-                                                <Settings className="w-4 h-4 text-neutral-400" />
+                                                <Settings className="size-4 text-neutral-400" />
                                                 Settings
                                             </Link>
                                             
@@ -909,7 +908,7 @@ export default function Header() {
                                                 className="flex items-center justify-between w-full px-4 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors"
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <Bell className="w-4 h-4 text-neutral-400" />
+                                                    <Bell className="size-4 text-neutral-400" />
                                                     <span>Notifications</span>
                                                 </div>
                                                 {pendingCount > 0 && (
@@ -926,18 +925,18 @@ export default function Header() {
                                                 }}
                                                 className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors w-full text-left"
                                             >
-                                                <MessageSquare className="w-4 h-4 text-neutral-400" />
+                                                <MessageSquare className="size-4 text-neutral-400" />
                                                 Send Feedback
                                             </button>
                                         </div>
 
                                         {/* Logout */}
-                                        <div className="border-t border-neutral-100 dark:border-neutral-700 pt-1.5">
+                                        <div className="border-t border-line pt-1.5">
                                             <button
                                                 onClick={handleLogout}
                                                 className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors w-full text-left"
                                             >
-                                                <LogOut className="w-4 h-4" />
+                                                <LogOut className="size-4" />
                                                 Sign out
                                             </button>
                                         </div>
@@ -945,18 +944,18 @@ export default function Header() {
                                 ) : (
                                     <>
                                         {/* Notifications / Tasks view */}
-                                        <div className="flex items-center justify-between px-3 py-2.5 border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-900/50">
+                                        <div className="flex items-center justify-between px-3 py-2.5 border-b border-line bg-paper-2">
                                             <button
                                                 onClick={() => setActiveTab('main')}
                                                 className="flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
                                             >
-                                                <ChevronLeft className="w-4 h-4" />
+                                                <ChevronLeft className="size-4" />
                                                 Back
                                             </button>
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-xs font-bold text-[#2d3748] dark:text-white">Notifications</span>
+                                                <span className="text-xs font-bold text-ink">Notifications</span>
                                                 {pendingCount > 0 && (
-                                                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300">
+                                                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-neutral-200 dark:bg-neutral-700 text-ink-muted">
                                                         {pendingCount}
                                                     </span>
                                                 )}
@@ -967,9 +966,9 @@ export default function Header() {
                                             {tasks.length === 0 ? (
                                                 <div className="flex flex-col items-center justify-center text-center py-6 px-4">
                                                     <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full mb-2">
-                                                        <Check className="w-4 h-4" strokeWidth={2.5} />
+                                                        <Check className="size-4" />
                                                     </div>
-                                                    <p className="text-xs font-bold text-[#2d3748] dark:text-white">All caught up!</p>
+                                                    <p className="text-xs font-bold text-ink">All caught up!</p>
                                                     <p className="text-[10px] text-neutral-400 mt-0.5">No pending actions.</p>
                                                 </div>
                                             ) : (
@@ -996,14 +995,14 @@ export default function Header() {
                                                                         const noteType = (note?.type || 'announcement') as 'announcement' | 'promotion' | 'greeting' | 'warning';
                                                                         const Icon = typeConfig[noteType].icon;
                                                                         const colorClass = typeConfig[noteType].color;
-                                                                        return <Icon className={`w-3.5 h-3.5 ${colorClass}`} />;
+                                                                        return <Icon className={`size-3.5 ${colorClass}`} />;
                                                                     })()
                                                                 ) : (
                                                                     <div className={`w-1.5 h-1.5 rounded-full ${priorityConfig[task.priority as 'urgent' | 'normal' | 'low']?.dotClass || ''}`}></div>
                                                                 )}
                                                             </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <p className="text-xs font-semibold text-[#2d3748] dark:text-white group-hover:text-neutral-700 dark:group-hover:text-neutral-200 transition-colors line-clamp-1">
+                                                                <p className="text-xs font-semibold text-ink group-hover:text-neutral-700 dark:group-hover:text-neutral-200 transition-colors line-clamp-1">
                                                                     {task.title}
                                                                 </p>
                                                                 <div className="flex items-center gap-1 mt-0.5">
@@ -1017,7 +1016,7 @@ export default function Header() {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <ArrowRight className="w-3.5 h-3.5 text-neutral-300 group-hover:text-neutral-500 dark:text-neutral-600 dark:group-hover:text-neutral-400 transition-colors opacity-0 group-hover:opacity-100" />
+                                                            <ArrowRight className="size-3.5 text-neutral-300 group-hover:text-neutral-500 dark:text-neutral-600 dark:group-hover:text-neutral-400 transition-colors opacity-0 group-hover:opacity-100" />
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -1025,10 +1024,10 @@ export default function Header() {
                                         </div>
 
                                         {/* Footer */}
-                                        <div className="p-2.5 bg-neutral-50 dark:bg-neutral-900/30 border-t border-neutral-100 dark:border-neutral-700">
+                                        <div className="p-2.5 bg-paper-2/30 border-t border-line">
                                             <div className="flex items-start gap-2 px-1">
-                                                <Sparkles className="w-3 h-3 text-blue-500 mt-0.5" />
-                                                <p className="text-[10px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                                                <Sparkles className="size-3.5 text-blue-500 mt-0.5" />
+                                                <p className="text-[10px] text-ink-muted leading-relaxed">
                                                     Use <kbd className="font-mono bg-white dark:bg-neutral-700 px-1 py-0.5 rounded border border-neutral-200 dark:border-neutral-600 text-[9px]">⌘K</kbd> to search everything.
                                                 </p>
                                             </div>
@@ -1044,13 +1043,13 @@ export default function Header() {
             {/* Create Organization Modal */}
             {isCreateOrgModalOpen && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-neutral-800 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-neutral-100 dark:border-neutral-700 animate-in zoom-in-95">
+                    <div className="bg-paper rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-line animate-in zoom-in-95">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <div className="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
-                                    <Building className="w-5 h-5" />
+                                    <Building className="size-5" />
                                 </div>
-                                <h3 className="text-base font-bold text-neutral-900 dark:text-white">
+                                <h3 className="text-base font-bold text-ink">
                                     Create New Organization
                                 </h3>
                             </div>
@@ -1058,11 +1057,11 @@ export default function Header() {
                                 onClick={() => setIsCreateOrgModalOpen(false)}
                                 className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
                             >
-                                <X className="w-5 h-5" />
+                                <X className="size-5" />
                             </button>
                         </div>
 
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                        <p className="text-xs text-ink-muted">
                             Set up a new store or business branch. You will be assigned as the Organization Owner.
                         </p>
 
@@ -1076,7 +1075,7 @@ export default function Header() {
                                     value={newOrgName}
                                     onChange={(e) => setNewOrgName(e.target.value)}
                                     placeholder="e.g. Lagos Island Branch, Refloww Fashion..."
-                                    className="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-blue-500"
+                                    className="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-ink placeholder-neutral-400 focus:outline-none focus:border-blue-500"
                                 />
                             </div>
                         </div>
@@ -1084,7 +1083,7 @@ export default function Header() {
                         <div className="flex justify-end gap-2 pt-2">
                             <button
                                 onClick={() => setIsCreateOrgModalOpen(false)}
-                                className="px-4 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-xs font-semibold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 cursor-pointer"
+                                className="px-4 py-2 rounded-xl border border-line text-xs font-semibold text-ink-muted hover:bg-neutral-50 dark:hover:bg-neutral-700 cursor-pointer"
                             >
                                 Cancel
                             </button>
@@ -1118,10 +1117,10 @@ export default function Header() {
             >
                 {cart.length === 0 ? (
                     <div className="p-8 text-center space-y-3">
-                        <div className="w-14 h-14 bg-neutral-100 dark:bg-neutral-800 text-neutral-400 rounded-2xl flex items-center justify-center mx-auto">
+                        <div className="w-14 h-14 bg-paper-2 text-neutral-400 rounded-2xl flex items-center justify-center mx-auto">
                             <ShoppingBag className="w-7 h-7" />
                         </div>
-                        <h3 className="text-base font-bold text-[#2d3748] dark:text-white">Your cart is empty</h3>
+                        <h3 className="text-base font-bold text-ink">Your cart is empty</h3>
                         <p className="text-xs text-neutral-500 max-w-xs mx-auto">Items added from your catalog or storefront will appear here.</p>
                         <Button
                             variant="outline"
@@ -1136,55 +1135,55 @@ export default function Header() {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between text-xs text-neutral-500 pb-2 border-b border-neutral-100 dark:border-neutral-700">
+                        <div className="flex items-center justify-between text-xs text-neutral-500 pb-2 border-b border-line">
                             <span>{cartTotalCount} {cartTotalCount === 1 ? 'item' : 'items'} in cart</span>
                             <button
                                 onClick={clearCart}
                                 className="text-rose-500 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
                             >
-                                <Trash2 className="w-3.5 h-3.5" /> Clear All
+                                <Trash2 className="size-3.5" /> Clear All
                             </button>
                         </div>
 
-                        <div className="divide-y divide-neutral-100 dark:divide-neutral-700 max-h-72 overflow-y-auto pr-1">
+                        <div className="divide-y divide-line max-h-72 overflow-y-auto pr-1">
                             {cart.map(item => {
                                 const price = item.product.discountedPrice || item.product.unitPrice;
                                 return (
                                     <div key={item.product.id} className="py-3 flex items-center justify-between gap-3">
                                         <div className="flex items-center gap-3 min-w-0 flex-1">
                                             {item.product.imageUrl ? (
-                                                <img src={item.product.imageUrl} alt={item.product.name} className="w-11 h-11 rounded-xl object-cover shrink-0 border border-neutral-100 dark:border-neutral-700" />
+                                                <img src={item.product.imageUrl} alt={item.product.name} className="w-11 h-11 rounded-xl object-cover shrink-0 border border-line" />
                                             ) : (
                                                 <div className="w-11 h-11 bg-neutral-100 dark:bg-neutral-700 rounded-xl flex items-center justify-center text-neutral-400 shrink-0">
-                                                    <ShoppingBag className="w-5 h-5" />
+                                                    <ShoppingBag className="size-5" />
                                                 </div>
                                             )}
                                             <div className="min-w-0 flex-1">
-                                                <h4 className="font-semibold text-xs text-[#2d3748] dark:text-white truncate">{item.product.name}</h4>
+                                                <h4 className="font-semibold text-xs text-ink truncate">{item.product.name}</h4>
                                                 <p className="text-[11px] text-neutral-400">{formatCurrency(price, company.currency)} each</p>
                                             </div>
                                         </div>
 
                                         <div className="flex items-center gap-2.5 shrink-0">
-                                            <div className="flex items-center border border-neutral-200 dark:border-neutral-700 rounded-xl overflow-hidden bg-neutral-50 dark:bg-neutral-800">
+                                            <div className="flex items-center border border-line rounded-xl overflow-hidden bg-paper-2">
                                                 <button
                                                     type="button"
                                                     onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
                                                     className="p-1 text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition-colors cursor-pointer"
                                                 >
-                                                    <Minus className="w-3.5 h-3.5" />
+                                                    <Minus className="size-3.5" />
                                                 </button>
-                                                <span className="px-2 text-xs font-bold text-[#2d3748] dark:text-white">{item.quantity}</span>
+                                                <span className="px-2 text-xs font-bold text-ink">{item.quantity}</span>
                                                 <button
                                                     type="button"
                                                     onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
                                                     className="p-1 text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition-colors cursor-pointer"
                                                 >
-                                                    <Plus className="w-3.5 h-3.5" />
+                                                    <Plus className="size-3.5" />
                                                 </button>
                                             </div>
 
-                                            <span className="text-xs font-bold text-[#2d3748] dark:text-white min-w-[55px] text-right">
+                                            <span className="text-xs font-bold text-ink min-w-[55px] text-right">
                                                 {formatCurrency(price * item.quantity, company.currency)}
                                             </span>
 
@@ -1194,7 +1193,7 @@ export default function Header() {
                                                 className="p-1 text-neutral-400 hover:text-rose-500 transition-colors cursor-pointer"
                                                 title="Remove item"
                                             >
-                                                <Trash2 className="w-3.5 h-3.5" />
+                                                <Trash2 className="size-3.5" />
                                             </button>
                                         </div>
                                     </div>
@@ -1203,13 +1202,13 @@ export default function Header() {
                         </div>
 
                         {/* Total Summary */}
-                        <div className="p-4 bg-neutral-50 dark:bg-neutral-800/80 rounded-2xl space-y-1.5 border border-neutral-200/60 dark:border-neutral-700/60">
+                        <div className="p-4 bg-paper-2/80 rounded-2xl space-y-1.5 border border-neutral-200/60 dark:border-neutral-700/60">
                             <div className="flex items-center justify-between text-xs text-neutral-500">
                                 <span>Subtotal</span>
-                                <span className="font-semibold text-[#2d3748] dark:text-white">{formatCurrency(cartSubtotal, company.currency)}</span>
+                                <span className="font-semibold text-ink">{formatCurrency(cartSubtotal, company.currency)}</span>
                             </div>
-                            <div className="flex items-center justify-between text-sm font-bold pt-2 border-t border-neutral-200 dark:border-neutral-700">
-                                <span className="text-[#2d3748] dark:text-white">Total Amount</span>
+                            <div className="flex items-center justify-between text-sm font-bold pt-2 border-t border-line">
+                                <span className="text-ink">Total Amount</span>
                                 <span className="text-emerald-600 dark:text-emerald-400">{formatCurrency(cartSubtotal, company.currency)}</span>
                             </div>
                         </div>
@@ -1225,7 +1224,7 @@ export default function Header() {
                                 setIsGlobalCartOpen(false);
                                 router.push('/storefront/catalog');
                             }}
-                            rightIcon={<ArrowRight className="w-4 h-4" />}
+                            rightIcon={<ArrowRight className="size-4" />}
                         >
                             Proceed to Checkout
                         </Button>

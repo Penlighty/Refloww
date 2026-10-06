@@ -4,7 +4,7 @@ import { useCustomerStore } from '@/lib/store/customerStore';
 import { generateDocumentNumber, parseFormat, getFormatPreview } from '@/lib/utils/numbering';
 import { Input, Button } from '@/components/ui';
 import { toast } from 'react-hot-toast';
-import { Hash, Calendar, Users, HelpCircle, Check, AlertTriangle, Trash2, Plus, Box, UserSquare, FileText, RefreshCw } from 'lucide-react';
+import { Hash, Calendar, Users, HelpCircle, Check, AlertTriangle, Trash2, Plus, Box, UserSquare, FileText, RefreshCw } from '@/components/icons';
 
 interface DocumentNumberingProps {
     value: NumberingSettings;
@@ -104,21 +104,21 @@ export default function DocumentNumbering({ value, onChange }: DocumentNumbering
     const isCurrentFormatInPresets = allPresets.some(p => p.format === currentSettings.format);
 
     return (
-        <section className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm">
+        <section className="bg-paper border border-line rounded-panel shadow-xs p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-lg">
-                    <Hash className="w-5 h-5" />
+                    <Hash className="size-5" />
                 </div>
                 <div>
-                    <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">ID & Numbering</h2>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                    <h2 className="text-lg font-semibold text-ink">ID & Numbering</h2>
+                    <p className="text-sm text-ink-muted">
                         Configure how new IDs are generated for documents, customers, and products.
                     </p>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 border-b border-neutral-100 dark:border-neutral-700 mb-6 overflow-x-auto pb-1">
+            <div className="flex gap-2 border-b border-line mb-6 overflow-x-auto pb-1">
                 {TAB_CONFIG.map((tab) => {
                     const Icon = tab.icon;
                     return (
@@ -130,7 +130,7 @@ export default function DocumentNumbering({ value, onChange }: DocumentNumbering
                                 : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300'
                                 }`}
                         >
-                            {(activeTab === tab.id) && <Icon className="w-4 h-4" />}
+                            {(activeTab === tab.id) && <Icon className="size-4" />}
                             {tab.label}
                             {activeTab === tab.id && (
                                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 dark:bg-blue-400 rounded-t-full" />
@@ -152,7 +152,7 @@ export default function DocumentNumbering({ value, onChange }: DocumentNumbering
                                 onClick={() => addCustomNumberingFormat(activeTab, currentSettings.format)}
                                 className="text-xs flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline font-medium"
                             >
-                                <Plus className="w-3 h-3" />
+                                <Plus className="size-3.5" />
                                 Save as Preset
                             </button>
                         )}
@@ -195,7 +195,7 @@ export default function DocumentNumbering({ value, onChange }: DocumentNumbering
 
                     {!isValid && (
                         <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
-                            <AlertTriangle className="w-4 h-4" />
+                            <AlertTriangle className="size-4" />
                             <span>Format must include a sequence number (e.g., ####).</span>
                         </div>
                     )}
@@ -218,20 +218,20 @@ export default function DocumentNumbering({ value, onChange }: DocumentNumbering
                         </p>
                     </div>
 
-                    <div className="bg-neutral-50 dark:bg-neutral-800/50 rounded-xl p-4 border border-neutral-100 dark:border-neutral-700">
+                    <div className="bg-paper-2/50 rounded-xl p-4 border border-line">
                         <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
                             PREVIEW
                         </label>
                         <div className="flex items-center justify-between">
-                            <span className="text-xl font-mono font-medium text-[#2d3748] dark:text-white tracking-tight">
+                            <span className="text-xl font-mono font-medium text-ink tracking-tight">
                                 {preview}
                             </span>
                             <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-full font-medium">
-                                <Check className="w-3 h-3" />
+                                <Check className="size-3.5" />
                                 Valid
                             </div>
                         </div>
-                        <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-2">
+                        <p className="text-xs text-ink-muted mt-2">
                             Example of generated ID.
                         </p>
                     </div>
@@ -248,7 +248,7 @@ export default function DocumentNumbering({ value, onChange }: DocumentNumbering
                         <Button
                             size="sm"
                             variant="outline"
-                            leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+                            leftIcon={<RefreshCw className="size-3.5" />}
                             onClick={() => {
                                 useCustomerStore.getState().reformatAllCustomers();
                                 toast.success('All existing customer IDs reformatted to match current pattern!');
@@ -275,13 +275,13 @@ export default function DocumentNumbering({ value, onChange }: DocumentNumbering
                                     // Persistent highlight logic
                                     className={`relative text-left p-3 rounded-lg border transition-all group ${isSelected
                                         ? 'border-blue-500 ring-1 ring-blue-500 bg-blue-50/10'
-                                        : 'border-neutral-200 dark:border-neutral-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10'
+                                        : 'border-line hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10'
                                         }`}
                                 >
-                                    <div className={`text-xs font-medium mb-1 ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-neutral-500 dark:text-neutral-400'}`}>
+                                    <div className={`text-xs font-medium mb-1 ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-ink-muted'}`}>
                                         {preset.name}
                                     </div>
-                                    <div className={`text-sm font-mono font-medium ${isSelected ? 'text-[#2d3748] dark:text-white' : 'text-neutral-700 dark:text-neutral-300'}`}>
+                                    <div className={`text-sm font-mono font-medium ${isSelected ? 'text-ink' : 'text-neutral-700 dark:text-neutral-300'}`}>
                                         {preset.label}
                                     </div>
 
@@ -295,7 +295,7 @@ export default function DocumentNumbering({ value, onChange }: DocumentNumbering
                                             className="absolute top-1 right-1 p-1 rounded-full text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
                                             title="Remove Preset"
                                         >
-                                            <Trash2 className="w-3 h-3" />
+                                            <Trash2 className="size-3.5" />
                                         </div>
                                     )}
                                 </button>
@@ -312,10 +312,10 @@ function TokenButton({ icon: Icon, label, onClick, tooltip }: any) {
     return (
         <button
             onClick={onClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 rounded-md text-xs font-medium hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors border border-transparent hover:border-neutral-300 dark:hover:border-neutral-500"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 text-ink-muted rounded-md text-xs font-medium hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors border border-transparent hover:border-neutral-300 dark:hover:border-neutral-500"
             title={tooltip}
         >
-            <Icon className="w-3.5 h-3.5" />
+            <Icon className="size-3.5" />
             {label}
         </button>
     );

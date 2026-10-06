@@ -3,7 +3,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Modal, ModalFooter, Button } from '@/components/ui';
-import { Keyboard } from 'lucide-react';
+import { Keyboard } from '@/components/icons';
 
 interface Shortcut {
     keys: string[];
@@ -117,7 +117,7 @@ export function KeyboardShortcuts({ children }: KeyboardShortcutsProps) {
                 <div className="space-y-6">
                     {Object.entries(groupedShortcuts).map(([category, categoryShortcuts]) => (
                         <div key={category}>
-                            <h3 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">
+                            <h3 className="text-sm font-semibold text-ink-muted uppercase tracking-wider mb-3">
                                 {category}
                             </h3>
                             <div className="space-y-2">
@@ -132,7 +132,7 @@ export function KeyboardShortcuts({ children }: KeyboardShortcutsProps) {
                                         <div className="flex items-center gap-1">
                                             {shortcut.keys.map((key, keyIndex) => (
                                                 <span key={keyIndex}>
-                                                    <kbd className="px-2 py-1 text-xs font-mono bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded text-neutral-600 dark:text-neutral-300">
+                                                    <kbd className="px-2 py-1 text-xs font-mono bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded text-ink-muted">
                                                         {key}
                                                     </kbd>
                                                     {keyIndex < shortcut.keys.length - 1 && (
@@ -148,7 +148,7 @@ export function KeyboardShortcuts({ children }: KeyboardShortcutsProps) {
                     ))}
                 </div>
                 <ModalFooter>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 flex-1">
+                    <p className="text-xs text-ink-muted flex-1">
                         Press <kbd className="px-1.5 py-0.5 text-xs font-mono bg-neutral-100 dark:bg-neutral-700 rounded">?</kbd> from anywhere to show this dialog
                     </p>
                     <Button variant="secondary" onClick={() => setShowShortcuts(false)}>

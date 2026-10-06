@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { HelpCircle, X } from 'lucide-react';
+import { HelpCircle, X, Analytics, Lightbulb } from '@/components/icons';
 import { useSettingsStore } from '@/lib/store';
-import { FINANCIAL_TERMS, FinancialTermDefinition } from '@/lib/utils/financialTerms';
+import { FINANCIAL_TERMS } from '@/lib/utils/financialTerms';
 
 interface HelpTooltipProps {
     termKey: string;
@@ -18,13 +18,11 @@ export function HelpTooltip({ termKey, className = '', size = 'sm' }: HelpToolti
     const triggerRef = useRef<HTMLButtonElement>(null);
     const tooltipRef = useRef<HTMLDivElement>(null);
 
-    // Don't render if help is disabled in settings
     if (!company.showFieldHelp) return null;
 
     const term = FINANCIAL_TERMS[termKey];
     if (!term) return null;
 
-    // Calculate position based on viewport
     useEffect(() => {
         if (isOpen && triggerRef.current) {
             const rect = triggerRef.current.getBoundingClientRect();
@@ -34,7 +32,6 @@ export function HelpTooltip({ termKey, className = '', size = 'sm' }: HelpToolti
         }
     }, [isOpen]);
 
-    // Close on click outside
     useEffect(() => {
         if (!isOpen) return;
         const handleClickOutside = (e: MouseEvent) => {
@@ -51,7 +48,7 @@ export function HelpTooltip({ termKey, className = '', size = 'sm' }: HelpToolti
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isOpen]);
 
-    const iconSize = size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4';
+    const iconSize = size === 'sm' ? 'size-3.5' : 'size-4';
 
     return (
         <span className={`relative inline-flex items-center ${className}`}>
@@ -59,11 +56,7 @@ export function HelpTooltip({ termKey, className = '', size = 'sm' }: HelpToolti
                 ref={triggerRef}
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`
-                    ${iconSize} text-neutral-400 hover:text-blue-500 
-                    dark:text-neutral-500 dark:hover:text-blue-400
-                    transition-colors cursor-help
-                `}
+                className={`${iconSize} text-ink-3 hover:text-primary-text transition-colors cursor-help`}
                 aria-label={`Help: ${term.term}`}
             >
                 <HelpCircle className="w-full h-full" />
@@ -74,50 +67,37 @@ export function HelpTooltip({ termKey, className = '', size = 'sm' }: HelpToolti
                     ref={tooltipRef}
                     className={`
                         absolute z-50 w-72 p-4 
-                        bg-white dark:bg-neutral-800 
-                        border border-neutral-200 dark:border-neutral-700
-                        rounded-xl shadow-xl
+                        bg-paper border border-line
+                        rounded-panel shadow-pop
                         ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'}
                         left-1/2 -translate-x-1/2
-                        animate-in fade-in slide-in-from-bottom-2 duration-200
+                        animate-pop
                     `}
                 >
-                    {/* Arrow */}
-                    <div
-                        className={`
-                            absolute left-1/2 -translate-x-1/2 w-3 h-3 rotate-45
-                            bg-white dark:bg-neutral-800
-                            border-neutral-200 dark:border-neutral-700
-                            ${position === 'top'
-                                ? 'bottom-0 translate-y-1/2 border-r border-b'
-                                : 'top-0 -translate-y-1/2 border-l border-t'}
-                        `}
-                    />
-
-                    {/* Close button */}
                     <button
+                        type="button"
                         onClick={() => setIsOpen(false)}
-                        className="absolute top-2 right-2 p-1 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                        className="absolute top-2 right-2 p-1 rounded-ctl text-ink-3 hover:text-ink hover:bg-paper-2 transition-colors"
+                        aria-label="Close help"
                     >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="size-3.5" />
                     </button>
 
-                    {/* Content */}
                     <div className="space-y-2">
-                        <h4 className="font-semibold text-sm text-[#2d3748] dark:text-white pr-6">
+                        <h4 className="font-heading font-semibold text-body text-ink pr-6">
                             {term.term}
                         </h4>
-                        <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed">
+                        <p className="text-caption text-ink-2 leading-relaxed">
                             {term.definition}
                         </p>
 
                         {term.calculation && (
-                            <div className="pt-2 border-t border-neutral-100 dark:border-neutral-700">
+                            <div className="pt-2 border-t border-line">
                                 <div className="flex items-start gap-2">
-                                    <span className="text-xs">📊</span>
+                                    <Analytics className="size-3.5 text-ink-3 shrink-0 mt-0.5" />
                                     <div>
-                                        <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Calculation</span>
-                                        <p className="text-xs text-neutral-700 dark:text-neutral-200 font-mono mt-0.5">
+                                        <span className="text-micro font-medium text-ink-3">Calculation</span>
+                                        <p className="text-micro text-ink font-mono mt-0.5">
                                             {term.calculation}
                                         </p>
                                     </div>
@@ -126,12 +106,12 @@ export function HelpTooltip({ termKey, className = '', size = 'sm' }: HelpToolti
                         )}
 
                         {term.example && (
-                            <div className="pt-2 border-t border-neutral-100 dark:border-neutral-700">
+                            <div className="pt-2 border-t border-line">
                                 <div className="flex items-start gap-2">
-                                    <span className="text-xs">💡</span>
+                                    <Lightbulb className="size-3.5 text-ink-3 shrink-0 mt-0.5" />
                                     <div>
-                                        <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Example</span>
-                                        <p className="text-xs text-neutral-700 dark:text-neutral-200 mt-0.5">
+                                        <span className="text-micro font-medium text-ink-3">Example</span>
+                                        <p className="text-micro text-ink-2 mt-0.5">
                                             {term.example}
                                         </p>
                                     </div>
@@ -145,7 +125,6 @@ export function HelpTooltip({ termKey, className = '', size = 'sm' }: HelpToolti
     );
 }
 
-// Inline label with help tooltip
 interface LabelWithHelpProps {
     label: string;
     termKey: string;
@@ -157,7 +136,7 @@ export function LabelWithHelp({ label, termKey, required, className = '' }: Labe
     return (
         <span className={`inline-flex items-center gap-1.5 ${className}`}>
             <span>{label}</span>
-            {required && <span className="text-red-500">*</span>}
+            {required && <span className="text-danger-text">*</span>}
             <HelpTooltip termKey={termKey} />
         </span>
     );

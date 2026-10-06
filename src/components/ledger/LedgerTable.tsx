@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { Document } from '@/lib/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { FileText, Receipt, Truck, ArrowUpDown, CheckSquare, Square } from 'lucide-react';
+import { FileText, Receipt, Truck, ArrowUpDown, CheckSquare, Square, Lock } from '@/components/icons';
+import { Tag } from '@/components/ui';
+import { useSettingsStore } from '@/lib/store';
 
 interface LedgerTableProps {
     documents: Document[];
@@ -17,22 +19,29 @@ interface LedgerTableProps {
     isAllSelected?: boolean;
 }
 
-const statusConfig = {
-    'draft': { label: 'Draft', bgClass: 'bg-neutral-100 dark:bg-neutral-700', textClass: 'text-neutral-600 dark:text-neutral-300', dotClass: 'bg-neutral-400' },
-    'sent': { label: 'Sent', bgClass: 'bg-blue-50 dark:bg-blue-900/30', textClass: 'text-blue-600 dark:text-blue-400', dotClass: 'bg-blue-500' },
-    'partially_paid': { label: 'Partially Paid', bgClass: 'bg-amber-50 dark:bg-amber-900/30', textClass: 'text-amber-600 dark:text-amber-400', dotClass: 'bg-amber-500' },
-    'paid': { label: 'Paid', bgClass: 'bg-emerald-50 dark:bg-emerald-900/30', textClass: 'text-emerald-600 dark:text-emerald-400', dotClass: 'bg-emerald-500' },
-    'overdue': { label: 'Overdue', bgClass: 'bg-red-50 dark:bg-red-900/30', textClass: 'text-red-600 dark:text-red-400', dotClass: 'bg-red-500' },
-    'cancelled': { label: 'Cancelled', bgClass: 'bg-neutral-100 dark:bg-neutral-700', textClass: 'text-neutral-500 dark:text-neutral-400', dotClass: 'bg-neutral-400' },
+const statusTagVariant: Record<string, 'neutral' | 'info' | 'warning' | 'success' | 'danger'> = {
+    'draft': 'neutral',
+    'sent': 'info',
+    'partially_paid': 'warning',
+    'paid': 'success',
+    'overdue': 'danger',
+    'cancelled': 'neutral',
+};
+
+const statusLabel: Record<string, string> = {
+    'draft': 'Draft',
+    'sent': 'Sent',
+    'partially_paid': 'Partially Paid',
+    'paid': 'Paid',
+    'overdue': 'Overdue',
+    'cancelled': 'Cancelled',
 };
 
 const typeConfig = {
-    'invoice': { icon: FileText, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/30' },
-    'receipt': { icon: Receipt, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-900/30' },
-    'delivery-note': { icon: Truck, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/30' },
+    'invoice': { icon: FileText, color: 'text-primary-500', bg: 'bg-primary-500/10' },
+    'receipt': { icon: Receipt, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    'delivery-note': { icon: Truck, color: 'text-[#0284c7]', bg: 'bg-[#0284c7]/10' },
 };
-
-import { useSettingsStore } from '@/lib/store';
 
 export default function LedgerTable({
     documents,
@@ -50,91 +59,92 @@ export default function LedgerTable({
 
     if (documents.length === 0) {
         return (
-            <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12 text-center">
-                <p className="text-neutral-400 dark:text-neutral-500">No transactions found matching your criteria.</p>
+            <div className="panel p-12 text-center">
+                <p className="text-ink-muted text-sm">No transactions found matching your criteria.</p>
             </div>
         );
     }
 
     return (
-        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden">
+        <div className="panel overflow-hidden">
             <div className="overflow-x-auto">
-                <table className="w-full whitespace-nowrap">
+                <table className="w-full whitespace-nowrap text-left border-collapse">
                     <thead>
-                        <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                        <tr className="border-b border-line bg-paper-2/60">
                             {isSelectMode && (
-                                <th className="px-6 py-4 w-10">
+                                <th className="px-6 py-3.5 w-10">
                                     <button
                                         onClick={onToggleSelectAll}
-                                        className="p-1 rounded-md text-neutral-400 hover:text-[#2d3748] dark:hover:text-neutral-200 transition-colors"
+                                        className="p-1 rounded text-ink-muted hover:text-ink transition-colors"
                                     >
                                         {isAllSelected ? (
-                                            <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                            <CheckSquare className="size-4 text-primary-500" />
                                         ) : (
-                                            <Square className="w-4 h-4" />
+                                            <Square className="size-4" />
                                         )}
                                     </button>
                                 </th>
                             )}
-                            <th className="text-left px-6 py-4">
+                            <th className="px-6 py-3.5">
                                 <button
                                     onClick={() => onSort('date')}
-                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                    className="flex items-center gap-1.5 text-xs font-mono font-medium uppercase tracking-wider text-ink-muted hover:text-ink transition-colors"
                                 >
                                     Date
-                                    <ArrowUpDown className="w-3 h-3" />
+                                    <ArrowUpDown className="size-3.5" />
                                 </button>
                             </th>
-                            <th className="text-left px-6 py-4">
+                            <th className="px-6 py-3.5">
                                 <button
                                     onClick={() => onSort('type')}
-                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                    className="flex items-center gap-1.5 text-xs font-mono font-medium uppercase tracking-wider text-ink-muted hover:text-ink transition-colors"
                                 >
                                     Type
-                                    <ArrowUpDown className="w-3 h-3" />
+                                    <ArrowUpDown className="size-3.5" />
                                 </button>
                             </th>
-                            <th className="text-left px-6 py-4">
+                            <th className="px-6 py-3.5">
                                 <button
                                     onClick={() => onSort('documentNumber')}
-                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                    className="flex items-center gap-1.5 text-xs font-mono font-medium uppercase tracking-wider text-ink-muted hover:text-ink transition-colors"
                                 >
                                     Reference
-                                    <ArrowUpDown className="w-3 h-3" />
+                                    <ArrowUpDown className="size-3.5" />
                                 </button>
                             </th>
-                            <th className="text-left px-6 py-4">
+                            <th className="px-6 py-3.5">
                                 <button
                                     onClick={() => onSort('customerName' as keyof Document)}
-                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                    className="flex items-center gap-1.5 text-xs font-mono font-medium uppercase tracking-wider text-ink-muted hover:text-ink transition-colors"
                                 >
                                     Customer
-                                    <ArrowUpDown className="w-3 h-3" />
+                                    <ArrowUpDown className="size-3.5" />
                                 </button>
                             </th>
-                            <th className="text-left px-6 py-4">
+                            <th className="px-6 py-3.5">
                                 <button
                                     onClick={() => onSort('status')}
-                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                    className="flex items-center gap-1.5 text-xs font-mono font-medium uppercase tracking-wider text-ink-muted hover:text-ink transition-colors"
                                 >
                                     Status
-                                    <ArrowUpDown className="w-3 h-3" />
+                                    <ArrowUpDown className="size-3.5" />
                                 </button>
                             </th>
-                            <th className="text-right px-6 py-4">
+                            <th className="px-6 py-3.5 text-right">
                                 <button
                                     onClick={() => onSort('grandTotal')}
-                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors ml-auto"
+                                    className="flex items-center gap-1.5 text-xs font-mono font-medium uppercase tracking-wider text-ink-muted hover:text-ink transition-colors ml-auto"
                                 >
                                     Amount
-                                    <ArrowUpDown className="w-3 h-3" />
+                                    <ArrowUpDown className="size-3.5" />
                                 </button>
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700">
+                    <tbody className="divide-y divide-line">
                         {documents.map((doc) => {
-                            const StatusIcon = statusConfig[doc.status] || statusConfig['draft'];
+                            const variant = statusTagVariant[doc.status] || 'neutral';
+                            const label = statusLabel[doc.status] || doc.status;
                             const TypeConfig = typeConfig[doc.type] || typeConfig['invoice'];
                             const TypeIcon = TypeConfig.icon;
                             const isLocked = (doc as any)._isLocked === true;
@@ -142,30 +152,30 @@ export default function LedgerTable({
                             const rowAmount = doc.type === 'receipt' ? (doc.amountPaid || doc.grandTotal || 0) : (doc.grandTotal || 0);
 
                             return (
-                                <tr key={doc.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors group">
+                                <tr key={doc.id} className="hover:bg-ground/50 transition-colors group">
                                     {isSelectMode && (
                                         <td className="px-6 py-4 w-10">
                                             <button
                                                 onClick={() => onToggleSelectDoc?.(doc.id)}
-                                                className="p-1 rounded-md text-neutral-400 hover:text-[#2d3748] dark:hover:text-neutral-200 transition-colors"
+                                                className="p-1 rounded text-ink-muted hover:text-ink transition-colors"
                                             >
                                                 {selectedDocIds.includes(doc.id) ? (
-                                                    <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                                    <CheckSquare className="size-4 text-primary-500" />
                                                 ) : (
-                                                    <Square className="w-4 h-4" />
+                                                    <Square className="size-4" />
                                                 )}
                                             </button>
                                         </td>
                                     )}
                                     <td className="px-6 py-4">
-                                        <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date || '')}</span>
+                                        <span className="text-sm font-mono text-ink-muted">{formatDate(doc.date || '')}</span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <div className={`p-1.5 rounded-md ${TypeConfig.bg} ${TypeConfig.color}`}>
-                                                <TypeIcon className="w-4 h-4" />
+                                            <div className={`p-1.5 rounded-ctl ${TypeConfig.bg} ${TypeConfig.color}`}>
+                                                <TypeIcon className="size-4" />
                                             </div>
-                                            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 capitalize">
+                                            <span className="text-sm font-medium text-ink capitalize">
                                                 {(doc.type || '').replace('-', ' ')}
                                             </span>
                                         </div>
@@ -173,29 +183,27 @@ export default function LedgerTable({
                                     <td className="px-6 py-4">
                                         <Link
                                             href={`/${doc.type}s/${doc.id}`}
-                                            className="text-sm font-medium text-[#2d3748] dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                            className="text-sm font-mono font-medium text-ink hover:text-primary-500 transition-colors inline-flex items-center gap-1"
                                         >
-                                            {doc.documentNumber || (isLocked ? '🔒 Encrypted' : 'Untitled')}
+                                            {isLocked && <Lock className="size-3.5 text-ink-muted" />}
+                                            {doc.documentNumber || (isLocked ? 'Encrypted' : 'Untitled')}
                                         </Link>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-600 flex items-center justify-center text-xs font-medium text-neutral-600 dark:text-neutral-300">
+                                            <div className="size-6 rounded-full bg-paper-2 border border-line flex items-center justify-center text-xs font-medium text-ink-muted">
                                                 {doc.customerName ? doc.customerName.charAt(0) : '?'}
                                             </div>
-                                            <span className="text-sm text-neutral-600 dark:text-neutral-300">
-                                                {doc.customerName || '-'}
+                                            <span className="text-sm text-ink">
+                                                {customerName}
                                             </span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${StatusIcon.bgClass} ${StatusIcon.textClass}`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${StatusIcon.dotClass}`}></span>
-                                            {StatusIcon.label}
-                                        </span>
+                                        <Tag variant={variant}>{label}</Tag>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <span className={`text-sm font-medium ${doc.status === 'cancelled' ? 'text-neutral-400 dark:text-neutral-500 line-through' : 'text-[#2d3748] dark:text-white'}`}>
+                                        <span className={`text-sm font-mono font-medium ${doc.status === 'cancelled' ? 'text-ink-muted line-through' : 'text-ink'}`}>
                                             {formatCurrency(rowAmount, currency)}
                                         </span>
                                     </td>
@@ -208,3 +216,4 @@ export default function LedgerTable({
         </div>
     );
 }
+

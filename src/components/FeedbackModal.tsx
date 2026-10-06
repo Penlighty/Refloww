@@ -14,7 +14,7 @@ import {
     ThumbsDown,
     CheckCircle,
     RefreshCw
-} from 'lucide-react';
+} from '@/components/icons';
 import { createFeedback } from '@/lib/firebase/admin';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { Modal, ModalFooter } from '@/components/ui';
@@ -94,12 +94,12 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
             {success ? (
                 <div className="py-12 text-center">
                     <div className="w-16 h-16 mx-auto mb-4 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center">
-                        <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+                        <CheckCircle className="size-8 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-[#2d3748] dark:text-white mb-2">
+                    <h3 className="text-lg font-semibold text-ink mb-2">
                         Thank you!
                     </h3>
-                    <p className="text-neutral-500 dark:text-neutral-400">
+                    <p className="text-ink-muted">
                         Your feedback has been submitted successfully.
                     </p>
                 </div>
@@ -121,13 +121,13 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                                         onClick={() => setCategory(cat.id)}
                                         className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${isSelected
                                             ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                                            : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600'
+                                            : 'border-line hover:border-neutral-300 dark:hover:border-neutral-600'
                                             }`}
                                     >
                                         <div className={`p-2 rounded-lg ${cat.color}`}>
-                                            <Icon className="w-4 h-4" />
+                                            <Icon className="size-4" />
                                         </div>
-                                        <span className={`text-xs font-medium ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-neutral-600 dark:text-neutral-400'
+                                        <span className={`text-xs font-medium ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-ink-muted'
                                             }`}>
                                             {cat.label}
                                         </span>
@@ -147,7 +147,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             rows={4}
-                            className="w-full px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white placeholder-neutral-400 transition-all resize-none"
+                            className="w-full px-4 py-3 bg-ground border border-line rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink placeholder-neutral-400 transition-all resize-none"
                             placeholder={
                                 category === 'bug'
                                     ? "Describe the bug you encountered. What were you trying to do? What happened instead?"
@@ -179,10 +179,10 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                                         onClick={() => setSentiment(s.id as any)}
                                         className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${isSelected
                                             ? s.color + ' border-current'
-                                            : 'border-neutral-200 dark:border-neutral-700 text-neutral-500 hover:border-neutral-300 dark:hover:border-neutral-600'
+                                            : 'border-line text-neutral-500 hover:border-neutral-300 dark:hover:border-neutral-600'
                                             }`}
                                     >
-                                        <Icon className="w-4 h-4" />
+                                        <Icon className="size-4" />
                                         <span className="text-sm font-medium">{s.label}</span>
                                     </button>
                                 );
@@ -192,7 +192,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
                     {/* User info note */}
                     {user && (
-                        <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                        <p className="text-xs text-ink-muted">
                             Submitting as {user.email}
                         </p>
                     )}
@@ -202,7 +202,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                             type="button"
                             onClick={handleClose}
                             disabled={loading}
-                            className="px-4 py-2 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-xl font-medium transition-colors"
+                            className="px-4 py-2 text-ink-muted hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-xl font-medium transition-colors"
                         >
                             Cancel
                         </button>
@@ -212,9 +212,9 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                             className="flex items-center gap-2 px-6 py-2 bg-[#2d3748] dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 rounded-xl font-medium transition-colors disabled:opacity-50"
                         >
                             {loading ? (
-                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                <RefreshCw className="size-4 rf-spin" />
                             ) : (
-                                <Send className="w-4 h-4" />
+                                <Send className="size-4" />
                             )}
                             Send Feedback
                         </button>

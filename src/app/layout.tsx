@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Bricolage_Grotesque, Playfair_Display, Courier_Prime, DM_Sans } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import KeyboardShortcuts from "@/components/KeyboardShortcuts";
@@ -6,6 +7,44 @@ import { AuthProvider } from "@/lib/contexts/AuthContext";
 import { EncryptionProvider } from "@/contexts/EncryptionContext";
 import EncryptionUnlockModal from "@/components/EncryptionUnlockModal";
 import AppShell from "@/components/AppShell";
+import { SwipeableToaster } from "@/components/ui/SwipeableToaster";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  variable: "--font-bricolage",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-playfair",
+  display: "swap",
+  preload: false,
+});
+
+const courier = Courier_Prime({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-courier",
+  display: "swap",
+  preload: false,
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-dm-sans",
+  display: "swap",
+  preload: false,
+});
 
 export const metadata: Metadata = {
   title: "Refloww - Financial Documentation Manager",
@@ -27,16 +66,14 @@ export const viewport: Viewport = {
   ],
 };
 
-import { SwipeableToaster } from "@/components/ui/SwipeableToaster";
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="light" suppressHydrationWarning>
-      <body className="antialiased font-display bg-background-light dark:bg-background-dark text-neutral-900 dark:text-neutral-100 h-screen flex overflow-hidden selection:bg-[#fc6d2d] selection:text-white transition-colors" suppressHydrationWarning>
+    <html lang="en" className={`light ${inter.variable} ${bricolage.variable} ${playfair.variable} ${courier.variable} ${dmSans.variable}`} suppressHydrationWarning>
+      <body className="antialiased font-display bg-ground text-ink h-screen flex overflow-hidden suppressHydrationWarning">
         <ThemeProvider>
           <AuthProvider>
             <EncryptionProvider>
@@ -54,3 +91,4 @@ export default function RootLayout({
     </html>
   );
 }
+

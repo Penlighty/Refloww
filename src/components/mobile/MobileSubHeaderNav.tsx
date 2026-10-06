@@ -12,7 +12,7 @@ import {
     ShoppingBag,
     Percent,
     BookOpen
-} from 'lucide-react';
+} from '@/components/icons';
 
 export default function MobileSubHeaderNav() {
     const pathname = usePathname();
@@ -36,7 +36,7 @@ export default function MobileSubHeaderNav() {
         ];
 
         return (
-            <div className="w-full overflow-x-auto no-scrollbar py-2 bg-white/95 dark:bg-[#121620]/95 backdrop-blur-md border-b border-[#e7e9e8] dark:border-neutral-800/80 px-3.5 shadow-xs">
+            <div className="w-full overflow-x-auto no-scrollbar py-2 bg-paper border-b border-line px-3.5">
                 <div className="flex items-center gap-1.5 min-w-max">
                     {docTabs.map((tab) => {
                         const Icon = tab.icon;
@@ -46,13 +46,14 @@ export default function MobileSubHeaderNav() {
                                 href={tab.href}
                                 title={tab.label}
                                 aria-label={tab.label}
-                                className={`py-1.5 text-xs font-bold transition-all flex items-center gap-1.5 rounded-xl ${
+                                aria-current={tab.active ? 'page' : undefined}
+                                className={`py-1.5 text-xs font-bold flex items-center gap-1.5 rounded-ctl ${
                                     tab.active
-                                        ? 'bg-[#fc6d2d] text-white shadow-xs px-3'
-                                        : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200/80 dark:border-neutral-700 hover:bg-neutral-50 px-2.5'
+                                        ? 'bg-primary-500 text-on-primary px-3'
+                                        : 'bg-paper-2 text-ink-muted border border-line hover:bg-paper-3 hover:text-ink px-2.5'
                                 }`}
                             >
-                                <Icon className="w-4 h-4 shrink-0" />
+                                <Icon className="size-4 shrink-0" />
                                 {tab.active && <span>{tab.label}</span>}
                             </Link>
                         );
@@ -72,7 +73,7 @@ export default function MobileSubHeaderNav() {
         ];
 
         return (
-            <div className="w-full overflow-x-auto no-scrollbar py-2 bg-white/95 dark:bg-[#121620]/95 backdrop-blur-md border-b border-[#e7e9e8] dark:border-neutral-800/80 px-3.5 shadow-xs">
+            <div className="w-full overflow-x-auto no-scrollbar py-2 bg-paper border-b border-line px-3.5">
                 <div className="flex items-center gap-1.5 min-w-max">
                     {mgmtTabs.map((tab) => {
                         const Icon = tab.icon;
@@ -82,13 +83,14 @@ export default function MobileSubHeaderNav() {
                                 href={tab.href}
                                 title={tab.label}
                                 aria-label={tab.label}
-                                className={`py-1.5 text-xs font-bold transition-all flex items-center gap-1.5 rounded-xl ${
+                                aria-current={tab.active ? 'page' : undefined}
+                                className={`py-1.5 text-xs font-bold flex items-center gap-1.5 rounded-ctl ${
                                     tab.active
-                                        ? 'bg-[#fc6d2d] text-white shadow-xs px-3'
-                                        : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200/80 dark:border-neutral-700 hover:bg-neutral-50 px-2.5'
+                                        ? 'bg-primary-500 text-on-primary px-3'
+                                        : 'bg-paper-2 text-ink-muted border border-line hover:bg-paper-3 hover:text-ink px-2.5'
                                 }`}
                             >
-                                <Icon className="w-4 h-4 shrink-0" />
+                                <Icon className="size-4 shrink-0" />
                                 {tab.active && <span>{tab.label}</span>}
                             </Link>
                         );

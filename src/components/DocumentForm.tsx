@@ -32,10 +32,12 @@ import {
     ChevronUp,
     ScanLine,
     Barcode as BarcodeIcon
-} from 'lucide-react';
+} from '@/components/icons';
 import { v4 as uuidv4 } from 'uuid';
-import BarcodeScannerModal from '@/components/BarcodeScannerModal';
+import dynamic from 'next/dynamic';
 import { playScanBeep } from '@/lib/utils/audio';
+
+const BarcodeScannerModal = dynamic(() => import('@/components/BarcodeScannerModal'), { ssr: false });
 
 interface DocumentFormProps {
     type: DocumentType;
@@ -706,17 +708,17 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                         href={backUrl}
                         className="p-2 rounded-lg text-neutral-500 hover:text-[#2d3748] dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                     >
-                        <ArrowLeft className="w-5 h-5" />
+                        <ArrowLeft className="size-5" />
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">{title}</h1>
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">{documentId ? 'Update details' : 'Fill in the details to generate your document'}</p>
+                        <h1 className="text-2xl font-bold text-ink">{title}</h1>
+                        <p className="text-sm text-ink-muted mt-0.5">{documentId ? 'Update details' : 'Fill in the details to generate your document'}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button
                         variant="outline"
-                        leftIcon={<Eye className="w-4 h-4" />}
+                        leftIcon={<Eye className="size-4" />}
                         iconOnlyMobile
                         onClick={() => setShowPreview(true)}
                         disabled={!selectedTemplateId}
@@ -724,7 +726,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                         Preview
                     </Button>
                     <Button
-                        leftIcon={<Save className="w-4 h-4" />}
+                        leftIcon={<Save className="size-4" />}
                         iconOnlyMobile
                         onClick={handleSubmit}
                         disabled={!selectedTemplateId || !selectedCustomerId || isSubmitting}
@@ -750,8 +752,8 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                 {/* Left Column - Form */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Template & Basic Info */}
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
-                        <h2 className="text-sm font-semibold text-[#2d3748] dark:text-white mb-4">Document Details</h2>
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-6">
+                        <h2 className="text-sm font-semibold text-ink mb-4">Document Details</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="flex flex-col gap-1.5 md:col-span-2">
@@ -773,7 +775,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                             setIsVisualTemplatePickerOpen(true);
                                         }}
                                         className="h-10 px-4 shrink-0"
-                                        leftIcon={<Eye className="w-4 h-4" />}
+                                        leftIcon={<Eye className="size-4" />}
                                         iconOnlyMobile
                                     >
                                         View Templates
@@ -788,8 +790,8 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                     readOnly
                                     disabled
                                     tabIndex={-1}
-                                    className="bg-neutral-100 dark:bg-neutral-800 text-neutral-500 font-mono cursor-not-allowed border-neutral-200 dark:border-neutral-700"
-                                    leftIcon={<Lock className="w-4 h-4 text-neutral-400" />}
+                                    className="bg-paper-2 text-neutral-500 font-mono cursor-not-allowed border-line"
+                                    leftIcon={<Lock className="size-4 text-neutral-400" />}
                                 />
                             </div>
 
@@ -812,8 +814,8 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
 
                         {/* Custom Fields Inputs */}
                         {selectedTemplate && selectedTemplate.fields.filter(f => f.type === 'custom' || f.type === 'text' || f.type === 'link-button').length > 0 && (
-                            <div className="mt-4 pt-4 border-t border-neutral-100 dark:border-neutral-700 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <h3 className="col-span-1 md:col-span-2 text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1">Mapped Custom Fields</h3>
+                            <div className="mt-4 pt-4 border-t border-line grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <h3 className="col-span-1 md:col-span-2 text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">Mapped Custom Fields</h3>
                                 {selectedTemplate.fields.filter(f => f.type === 'custom' || f.type === 'text' || f.type === 'link-button').map(field => (
                                     <Input
                                         key={field.id}
@@ -857,8 +859,8 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                     </div>
 
                     {/* Customer Selection */}
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
-                        <h2 className="text-sm font-semibold text-[#2d3748] dark:text-white mb-4">Customer</h2>
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-6">
+                        <h2 className="text-sm font-semibold text-ink mb-4">Customer</h2>
 
                         <Select
                             label="Select Customer"
@@ -871,17 +873,17 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                         {selectedCustomer && (
                             <div className="mt-4 p-4 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
+                                    <div className="size-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
                                         {selectedCustomer.name.charAt(0).toUpperCase()}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-[#2d3748] dark:text-white">{selectedCustomer.name}</p>
-                                        <p className="text-sm text-neutral-500 dark:text-neutral-400">{selectedCustomer.email}</p>
+                                        <p className="font-medium text-ink">{selectedCustomer.name}</p>
+                                        <p className="text-sm text-ink-muted">{selectedCustomer.email}</p>
                                         {selectedCustomer.phone && (
-                                            <p className="text-sm text-neutral-500 dark:text-neutral-400">{selectedCustomer.phone}</p>
+                                            <p className="text-sm text-ink-muted">{selectedCustomer.phone}</p>
                                         )}
                                         {selectedCustomer.address && (
-                                            <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{selectedCustomer.address}</p>
+                                            <p className="text-sm text-ink-muted mt-1">{selectedCustomer.address}</p>
                                         )}
                                     </div>
                                 </div>
@@ -891,13 +893,13 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
 
                     {/* Line Items Table */}
                     {hasLineItems && (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden">
-                            <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-between">
-                                <h2 className="text-sm font-semibold text-[#2d3748] dark:text-white">Line Items</h2>
+                        <div className="bg-paper border border-line rounded-panel shadow-xs overflow-hidden">
+                            <div className="px-6 py-4 border-b border-line flex items-center justify-between">
+                                <h2 className="text-sm font-semibold text-ink">Line Items</h2>
                                 <Button
                                     size="sm"
                                     variant="ghost"
-                                    leftIcon={<Plus className="w-4 h-4" />}
+                                    leftIcon={<Plus className="size-4" />}
                                     onClick={addLineItem}
                                     disabled={lineItemsField?.maxRows ? lineItems.length >= lineItemsField.maxRows : false}
                                 >
@@ -908,7 +910,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             {/* Quick POS Barcode Scan Bar */}
                             <div className="px-6 py-3 bg-blue-50/70 dark:bg-blue-950/30 border-b border-blue-100 dark:border-blue-900/50 flex flex-col sm:flex-row items-center justify-between gap-3">
                                 <div className="flex items-center gap-2 text-xs font-semibold text-blue-900 dark:text-blue-200 shrink-0">
-                                    <BarcodeIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                    <BarcodeIcon className="size-4 text-blue-600 dark:text-blue-400" />
                                     <span>POS Quick Scan</span>
                                 </div>
                                 <div className="flex items-center gap-2 w-full sm:w-auto flex-1 max-w-md">
@@ -927,7 +929,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                             value={quickBarcodeQuery}
                                             onChange={(e) => setQuickBarcodeQuery(e.target.value)}
                                             className="h-9 text-xs"
-                                            leftIcon={<BarcodeIcon className="w-3.5 h-3.5" />}
+                                            leftIcon={<BarcodeIcon className="size-3.5" />}
                                         />
                                         <Button type="submit" size="sm" variant="secondary" className="h-9 px-3 shrink-0 text-xs">
                                             Scan
@@ -938,8 +940,8 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                         size="sm"
                                         variant="outline"
                                         onClick={() => setIsBarcodeModalOpen(true)}
-                                        leftIcon={<ScanLine className="w-3.5 h-3.5 text-blue-600" />}
-                                        className="h-9 px-3 shrink-0 text-xs border-blue-200 dark:border-blue-800 bg-white dark:bg-neutral-900"
+                                        leftIcon={<ScanLine className="size-3.5 text-blue-600" />}
+                                        className="h-9 px-3 shrink-0 text-xs border-blue-200 dark:border-blue-800 bg-ground"
                                     >
                                         Camera Scanner
                                     </Button>
@@ -947,7 +949,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             </div>
 
                             {/* Table Header - Desktop Only */}
-                            <div className="hidden md:flex px-6 py-3 bg-secondary text-neutral-900 text-xs font-semibold uppercase tracking-wider relative">
+                            <div className="hidden md:flex px-6 py-3 bg-paper-2 text-ink-muted text-xs font-semibold uppercase tracking-wider relative">
                                 <div className="flex-1 flex">
                                     {tableColumns.map((col: any) => (
                                         <div key={col.id} style={{ width: `${col.width}%`, flexShrink: 0 }} className={`px-2 ${col.type === 'number' || col.type === 'currency' ? 'text-right' : 'text-left'}`}>
@@ -960,7 +962,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             </div>
 
                             {/* Table Body - Desktop Only */}
-                            <div className="hidden md:block divide-y divide-neutral-100 dark:divide-neutral-700">
+                            <div className="hidden md:block divide-y divide-line">
                                 {lineItems.map((item, index) => (
                                     <div key={item.id} className="flex px-6 py-3 items-start group hover:bg-neutral-50 dark:hover:bg-neutral-700/50 relative">
                                         <div className="flex-1 flex">
@@ -968,7 +970,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                 // 1. S/N
                                                 if (col.key === 'sn') {
                                                     return (
-                                                        <div key={col.id} style={{ width: `${col.width}%`, flexShrink: 0 }} className="pt-2.5 px-2 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                                                        <div key={col.id} style={{ width: `${col.width}%`, flexShrink: 0 }} className="pt-2.5 px-2 text-sm font-medium text-ink-muted">
                                                             {index + 1}
                                                         </div>
                                                     );
@@ -983,10 +985,10 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                             <select
                                                                 value={item.productId}
                                                                 onChange={(e) => updateLineItem(item.id, 'productId', e.target.value)}
-                                                                className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 ${
+                                                                className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-ground ${
                                                                     isOutOfStock
                                                                         ? 'border-amber-400 text-amber-900 dark:text-amber-300 bg-amber-50/50 dark:bg-amber-950/20 font-medium'
-                                                                        : 'border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100'
+                                                                        : 'border-line text-ink'
                                                                 }`}
                                                             >
                                                                 <option value="">Select item...</option>
@@ -994,7 +996,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                     const outOfStock = isProductOutOfStock(p);
                                                                     return (
                                                                         <option key={p.id} value={p.id}>
-                                                                            {p.name} {outOfStock ? `— ⚠️ Out of Stock (0 remaining)` : (p.stockQuantity !== undefined ? `(${p.stockQuantity} in stock)` : '')}
+                                                                            {p.name} {outOfStock ? `— Out of Stock (0 remaining)` : (p.stockQuantity !== undefined ? `(${p.stockQuantity} in stock)` : '')}
                                                                         </option>
                                                                     );
                                                                 })}
@@ -1003,7 +1005,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                             {product && isOutOfStock && (
                                                                 <div className="mt-1.5 p-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-lg flex items-center justify-between text-xs text-amber-900 dark:text-amber-200 gap-2">
                                                                     <div className="flex items-center gap-1 font-medium">
-                                                                        <span className="shrink-0 text-amber-600 dark:text-amber-400 font-bold">⚠️ Out of Stock</span>
+                                                                        <span className="shrink-0 text-amber-600 dark:text-amber-400 font-bold">Out of Stock</span>
                                                                         <span className="hidden xl:inline text-[11px]">Restock required to issue document</span>
                                                                     </div>
                                                                     <div className="flex items-center gap-1.5 shrink-0">
@@ -1013,7 +1015,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                             placeholder="Qty"
                                                                             value={restockQtyMap[product.id] || ''}
                                                                             onChange={(e) => setRestockQtyMap({ ...restockQtyMap, [product.id]: parseInt(e.target.value) || 0 })}
-                                                                            className="w-14 px-1.5 py-0.5 text-xs border border-amber-300 dark:border-amber-700 rounded bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-center font-bold"
+                                                                            className="w-14 px-1.5 py-0.5 text-xs border border-amber-300 dark:border-amber-700 rounded bg-ground text-ink text-center font-bold"
                                                                         />
                                                                         <button
                                                                             type="button"
@@ -1040,7 +1042,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                 min="1"
                                                                 value={item.quantity}
                                                                 onChange={(e) => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                                                                className="w-full px-3 py-2 text-sm text-center border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                                className="w-full px-3 py-2 text-sm text-center border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-ground text-ink"
                                                             />
                                                         </div>
                                                     );
@@ -1055,7 +1057,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                 min="0"
                                                                 value={item.unitPrice || ''}
                                                                 onChange={(e) => updateLineItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
-                                                                className="w-full px-3 py-2 text-sm text-right border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                                className="w-full px-3 py-2 text-sm text-right border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-ground text-ink"
                                                             />
                                                         </div>
                                                     );
@@ -1064,7 +1066,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                 if (col.key === 'subtotal') {
                                                     return (
                                                         <div key={col.id} style={{ width: `${col.width}%`, flexShrink: 0 }} className="px-2 pt-2.5 flex items-center justify-end">
-                                                            <span className="text-sm font-medium text-[#2d3748] dark:text-white">
+                                                            <span className="text-sm font-medium text-ink">
                                                                 {formatCurrency(item.subtotal, currency)}
                                                             </span>
                                                         </div>
@@ -1087,7 +1089,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                     };
                                                                 }));
                                                             }}
-                                                            className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                            className="w-full px-3 py-2 text-sm border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-ground text-ink"
                                                             placeholder={col.header}
                                                         />
                                                     </div>
@@ -1102,7 +1104,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                             title="Remove Item"
                                             disabled={lineItems.length === 1}
                                         >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Trash2 className="size-4" />
                                         </button>
                                     </div>
                                 ))}
@@ -1120,12 +1122,12 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                         <div 
                                             key={item.id} 
                                             className={`
-                                                border rounded-xl transition-all duration-200 bg-white dark:bg-neutral-800 overflow-hidden
+                                                border rounded-xl transition-all duration-200 bg-paper overflow-hidden
                                                 ${isOutOfStock
                                                     ? 'border-amber-400 ring-1 ring-amber-400/30'
                                                     : isExpanded 
                                                         ? 'border-blue-500 shadow-sm ring-1 ring-blue-500/20' 
-                                                        : 'border-neutral-200 dark:border-neutral-700'
+                                                        : 'border-line'
                                                 }
                                             `}
                                         >
@@ -1135,38 +1137,38 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                 className="flex items-center justify-between p-3 cursor-pointer select-none hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors"
                                             >
                                                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                                                    <span className="text-xs font-bold text-neutral-500 dark:text-neutral-400 shrink-0">#{index + 1}</span>
-                                                    <span className={`text-xs font-semibold truncate ${product ? (isOutOfStock ? 'text-amber-600 dark:text-amber-400' : 'text-[#2d3748] dark:text-white') : 'text-neutral-400 dark:text-neutral-500'}`}>
+                                                    <span className="text-xs font-bold text-ink-muted shrink-0">#{index + 1}</span>
+                                                    <span className={`text-xs font-semibold truncate ${product ? (isOutOfStock ? 'text-amber-600 dark:text-amber-400' : 'text-ink') : 'text-ink-muted'}`}>
                                                         {displayName}
                                                     </span>
                                                     {isOutOfStock ? (
                                                         <span className="text-[10px] bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-1.5 py-0.5 rounded font-bold shrink-0">
-                                                            ⚠️ Out of Stock
+                                                            Out of Stock
                                                         </span>
                                                     ) : (
-                                                        <span className="text-[10px] bg-neutral-100 dark:bg-neutral-700 px-1.5 py-0.5 rounded text-neutral-500 dark:text-neutral-400 shrink-0">
+                                                        <span className="text-[10px] bg-neutral-100 dark:bg-neutral-700 px-1.5 py-0.5 rounded text-ink-muted shrink-0">
                                                             Qty: {item.quantity}
                                                         </span>
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-2 ml-3 shrink-0">
-                                                    <span className="text-xs font-bold text-[#2d3748] dark:text-white">
+                                                    <span className="text-xs font-bold text-ink">
                                                         {formatCurrency(item.subtotal, currency)}
                                                     </span>
                                                     {isExpanded ? (
-                                                        <ChevronUp className="w-4 h-4 text-neutral-400" />
+                                                        <ChevronUp className="size-4 text-neutral-400" />
                                                     ) : (
-                                                        <ChevronDown className="w-4 h-4 text-neutral-400" />
+                                                        <ChevronDown className="size-4 text-neutral-400" />
                                                     )}
                                                 </div>
                                             </div>
 
                                             {/* Accordion Content (Edit Fields) */}
                                             {isExpanded && (
-                                                <div className="p-3.5 border-t border-neutral-100 dark:border-neutral-700/60 bg-neutral-50/50 dark:bg-neutral-900/10 space-y-3">
+                                                <div className="p-3.5 border-t border-line/60 bg-neutral-50/50 dark:bg-neutral-900/10 space-y-3">
                                                     {/* Top Row: Title & Delete */}
-                                                    <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-neutral-800/60">
-                                                        <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Editing Item #{index + 1}</span>
+                                                    <div className="flex items-center justify-between pb-2 border-b border-line/60">
+                                                        <span className="text-[10px] font-bold text-ink-muted uppercase tracking-wider">Editing Item #{index + 1}</span>
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
@@ -1176,7 +1178,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                             title="Remove Item"
                                                             disabled={lineItems.length === 1}
                                                         >
-                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                            <Trash2 className="size-3.5" />
                                                             Delete
                                                         </button>
                                                     </div>
@@ -1184,14 +1186,14 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                     {/* 1. Product select dropdown (Full width) */}
                                                     {tableColumns.some((col: any) => col.key === 'product' || col.key === 'productName' || col.key === 'description') && (
                                                         <div className="space-y-1">
-                                                            <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase">Item Description</label>
+                                                            <label className="text-[10px] font-bold text-ink-muted uppercase">Item Description</label>
                                                             <select
                                                                 value={item.productId}
                                                                 onChange={(e) => updateLineItem(item.id, 'productId', e.target.value)}
-                                                                className={`w-full px-2.5 py-1.5 text-xs border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 ${
+                                                                className={`w-full px-2.5 py-1.5 text-xs border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-ground ${
                                                                     isOutOfStock
                                                                         ? 'border-amber-400 text-amber-900 dark:text-amber-300 bg-amber-50/50 dark:bg-amber-950/20 font-medium'
-                                                                        : 'border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100'
+                                                                        : 'border-line text-ink'
                                                                 }`}
                                                             >
                                                                 <option value="">Select item...</option>
@@ -1199,7 +1201,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                     const outOfStock = isProductOutOfStock(p);
                                                                     return (
                                                                         <option key={p.id} value={p.id}>
-                                                                            {p.name} {outOfStock ? `— ⚠️ Out of Stock (0 remaining)` : (p.stockQuantity !== undefined ? `(${p.stockQuantity} in stock)` : '')}
+                                                                            {p.name} {outOfStock ? `— Out of Stock (0 remaining)` : (p.stockQuantity !== undefined ? `(${p.stockQuantity} in stock)` : '')}
                                                                         </option>
                                                                     );
                                                                 })}
@@ -1208,7 +1210,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                             {product && isOutOfStock && (
                                                                 <div className="mt-2 p-2.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between text-xs text-amber-900 dark:text-amber-200 gap-2">
                                                                     <div className="flex items-center gap-1.5 font-medium">
-                                                                        <span className="shrink-0 text-amber-600 dark:text-amber-400 font-bold">⚠️ Out of Stock</span>
+                                                                        <span className="shrink-0 text-amber-600 dark:text-amber-400 font-bold">Out of Stock</span>
                                                                         <span className="text-[11px]">Restock required before saving</span>
                                                                     </div>
                                                                     <div className="flex items-center gap-1.5 w-full sm:w-auto">
@@ -1218,7 +1220,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                             placeholder="Qty"
                                                                             value={restockQtyMap[product.id] || ''}
                                                                             onChange={(e) => setRestockQtyMap({ ...restockQtyMap, [product.id]: parseInt(e.target.value) || 0 })}
-                                                                            className="w-20 px-2 py-1 text-xs border border-amber-300 dark:border-amber-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-center font-bold"
+                                                                            className="w-20 px-2 py-1 text-xs border border-amber-300 dark:border-amber-700 rounded-lg bg-ground text-ink text-center font-bold"
                                                                         />
                                                                         <button
                                                                             type="button"
@@ -1246,13 +1248,13 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                             if (col.key === 'quantity') {
                                                                 return (
                                                                     <div key={col.id} className="space-y-1">
-                                                                        <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase">{col.header}</label>
+                                                                        <label className="text-[10px] font-bold text-ink-muted uppercase">{col.header}</label>
                                                                         <input
                                                                             type="number"
                                                                             min="1"
                                                                             value={item.quantity}
                                                                             onChange={(e) => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                                                                            className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                                            className="w-full px-2.5 py-1.5 text-xs border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-ground text-ink"
                                                                         />
                                                                     </div>
                                                                 );
@@ -1261,14 +1263,14 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                             if (col.key === 'unitPrice') {
                                                                 return (
                                                                     <div key={col.id} className="space-y-1">
-                                                                        <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase">{col.header}</label>
+                                                                        <label className="text-[10px] font-bold text-ink-muted uppercase">{col.header}</label>
                                                                         <input
                                                                             type="number"
                                                                             step="0.01"
                                                                             min="0"
                                                                             value={item.unitPrice || ''}
                                                                             onChange={(e) => updateLineItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
-                                                                            className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                                            className="w-full px-2.5 py-1.5 text-xs border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-ground text-ink"
                                                                         />
                                                                     </div>
                                                                 );
@@ -1277,7 +1279,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                             // Custom Columns
                                                             return (
                                                                 <div key={col.id} className="space-y-1">
-                                                                    <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase">{col.header}</label>
+                                                                    <label className="text-[10px] font-bold text-ink-muted uppercase">{col.header}</label>
                                                                     <input
                                                                         type={col.type === 'number' || col.type === 'currency' ? 'number' : 'text'}
                                                                         value={item.customValues?.[col.key] || ''}
@@ -1291,7 +1293,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                                 };
                                                                             }));
                                                                         }}
-                                                                        className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                                                                        className="w-full px-2.5 py-1.5 text-xs border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-ground text-ink"
                                                                         placeholder={col.header}
                                                                     />
                                                                 </div>
@@ -1309,9 +1311,9 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             <button
                                 onClick={addLineItem}
                                 disabled={lineItemsField?.maxRows ? lineItems.length >= lineItemsField.maxRows : false}
-                                className="w-full px-6 py-3 text-sm text-neutral-500 dark:text-neutral-400 hover:text-[#2d3748] dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 border-t border-neutral-100 dark:border-neutral-700"
+                                className="w-full px-6 py-3 text-sm text-ink-muted hover:text-[#2d3748] dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 border-t border-line"
                             >
-                                <Plus className="w-4 h-4" />
+                                <Plus className="size-4" />
                                 {lineItemsField?.maxRows && lineItems.length >= lineItemsField.maxRows ? 'Max Rows Reached' : 'Add another item'}
                             </button>
                         </div>
@@ -1319,8 +1321,8 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
 
                     {/* Notes */}
                     {hasNotes && (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
-                            <h2 className="text-sm font-semibold text-[#2d3748] dark:text-white mb-4">Notes</h2>
+                        <div className="bg-paper border border-line rounded-panel shadow-xs p-6">
+                            <h2 className="text-sm font-semibold text-ink mb-4">Notes</h2>
                             <Textarea
                                 placeholder="Add any notes or payment terms..."
                                 value={notes}
@@ -1333,15 +1335,15 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
 
                 {/* Right Column - Summary */}
                 <div className="lg:col-span-1">
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 sticky top-6">
-                        <h2 className="text-sm font-semibold text-[#2d3748] dark:text-white mb-4">Summary</h2>
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-6 sticky top-6">
+                        <h2 className="text-sm font-semibold text-ink mb-4">Summary</h2>
 
                         {/* Discount & Tax Inputs */}
                         <div className="space-y-3 mb-6">
                             {/* For receipts from source invoice: show source total (read-only) */}
                             {type === 'receipt' && sourceGrandTotal > 0 && (
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                    <label className="text-xs font-medium text-ink-muted flex items-center gap-1">
                                         Invoice Total
                                         <HelpTooltip termKey="invoice-total" />
                                     </label>
@@ -1388,7 +1390,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
 
                             {hasDiscount && (
                                 <div className="space-y-2">
-                                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                    <label className="text-xs font-medium text-ink-muted flex items-center gap-1">
                                         Discount
                                         <HelpTooltip termKey="discount" />
                                     </label>
@@ -1418,7 +1420,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                     />
                                     {discountPercent > 0 && (
                                         <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-100 dark:border-emerald-800">
-                                            <Tag className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                            <Tag className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                                             <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
                                                 {discountName} applied: {discountPercent}% off
                                             </span>
@@ -1436,7 +1438,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                         step="0.1"
                                         value={taxPercent || ''}
                                         onChange={(e) => setTaxPercent(parseFloat(e.target.value) || 0)}
-                                        leftIcon={<Percent className="w-4 h-4" />}
+                                        leftIcon={<Percent className="size-4" />}
                                     />
                                 </div>
                             )}
@@ -1454,7 +1456,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
 
                             {hasAmountPaid && (
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                    <label className="text-xs font-medium text-ink-muted flex items-center gap-1">
                                         {type === 'receipt' ? 'This Payment' : 'Amount Paid'}
                                         <HelpTooltip termKey={type === 'receipt' ? 'this-payment' : 'amount-paid'} />
                                     </label>
@@ -1470,15 +1472,15 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                         </div>
 
                         {/* Totals */}
-                        <div className="space-y-3 pt-4 border-t border-neutral-100 dark:border-neutral-700">
+                        <div className="space-y-3 pt-4 border-t border-line">
                             {/* Only show subtotal if different from grand total (i.e., has discount or tax) */}
                             {(hasDiscount || hasTax) && type !== 'receipt' && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                    <span className="text-sm text-ink-muted flex items-center gap-1">
                                         Subtotal
                                         <HelpTooltip termKey="subtotal" />
                                     </span>
-                                    <span className="text-sm font-medium text-[#2d3748] dark:text-white">{formatCurrency(subtotal, currency)}</span>
+                                    <span className="text-sm font-medium text-ink">{formatCurrency(subtotal, currency)}</span>
                                 </div>
                             )}
                             {hasDiscount && discountPercent > 0 && type !== 'receipt' && (
@@ -1492,27 +1494,27 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             )}
                             {hasTax && taxPercent > 0 && type !== 'receipt' && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                    <span className="text-sm text-ink-muted flex items-center gap-1">
                                         Tax ({taxPercent}%)
                                         <HelpTooltip termKey="tax" />
                                     </span>
-                                    <span className="text-sm font-medium text-[#2d3748] dark:text-white">{formatCurrency(taxAmount, currency)}</span>
+                                    <span className="text-sm font-medium text-ink">{formatCurrency(taxAmount, currency)}</span>
                                 </div>
                             )}
 
                             {/* Grand Total / Invoice Total */}
-                            <div className="flex items-center justify-between pt-3 border-t border-neutral-200 dark:border-neutral-700">
-                                <span className="text-base font-semibold text-[#2d3748] dark:text-white flex items-center gap-1.5">
+                            <div className="flex items-center justify-between pt-3 border-t border-line">
+                                <span className="text-base font-semibold text-ink flex items-center gap-1.5">
                                     {type === 'receipt' && sourceGrandTotal > 0 ? 'Invoice Total' : 'Grand Total'}
                                     <HelpTooltip termKey={type === 'receipt' && sourceGrandTotal > 0 ? 'invoice-total' : 'grand-total'} />
                                 </span>
-                                <span className="text-xl font-bold text-[#2d3748] dark:text-white">{formatCurrency(grandTotal, currency)}</span>
+                                <span className="text-xl font-bold text-ink">{formatCurrency(grandTotal, currency)}</span>
                             </div>
 
                             {/* Previous Payments - only for receipts with source invoice */}
                             {type === 'receipt' && sourceGrandTotal > 0 && previousPayments > 0 && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                    <span className="text-sm text-ink-muted flex items-center gap-1">
                                         Previous Payments
                                         <HelpTooltip termKey="previous-payments" />
                                     </span>
@@ -1523,7 +1525,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             {/* This Payment / Amount Paid */}
                             {hasAmountPaid && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                    <span className="text-sm text-ink-muted flex items-center gap-1">
                                         {type === 'receipt' ? 'This Payment' : 'Amount Paid'}
                                         <HelpTooltip termKey={type === 'receipt' ? 'this-payment' : 'amount-paid'} />
                                     </span>
@@ -1535,12 +1537,12 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
 
                             {/* Amount Due / Remaining Balance */}
                             {(hasAmountPaid || hasAmountDue) && (
-                                <div className="flex items-center justify-between pt-2 border-t border-dashed border-neutral-200 dark:border-neutral-700">
-                                    <span className="text-sm font-medium text-[#2d3748] dark:text-white flex items-center gap-1.5">
+                                <div className="flex items-center justify-between pt-2 border-t border-dashed border-line">
+                                    <span className="text-sm font-medium text-ink flex items-center gap-1.5">
                                         {type === 'receipt' ? 'Remaining Balance' : 'Amount Due'}
                                         <HelpTooltip termKey={type === 'receipt' ? 'remaining-balance' : 'amount-due'} />
                                     </span>
-                                    <span className={`text-lg font-bold ${amountDue === 0 ? 'text-emerald-600' : 'text-[#2d3748] dark:text-white'}`}>
+                                    <span className={`text-lg font-bold ${amountDue === 0 ? 'text-emerald-600' : 'text-ink'}`}>
                                         {formatCurrency(amountDue, currency)}
                                     </span>
                                 </div>
@@ -1551,7 +1553,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                         <div className="mt-6 space-y-2">
                             <Button
                                 fullWidth
-                                leftIcon={<Save className="w-4 h-4" />}
+                                leftIcon={<Save className="size-4" />}
                                 onClick={handleSubmit}
                                 disabled={!selectedTemplateId || !selectedCustomerId || isSubmitting}
                                 isLoading={isSubmitting}
@@ -1561,7 +1563,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             <Button
                                 variant="outline"
                                 fullWidth
-                                leftIcon={<Eye className="w-4 h-4" />}
+                                leftIcon={<Eye className="size-4" />}
                                 onClick={() => setShowPreview(true)}
                                 disabled={!selectedTemplateId}
                             >
@@ -1581,10 +1583,10 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
             >
                 <div className="text-center py-6">
                     <div className="w-16 h-16 mx-auto bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4">
-                        <Check className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+                        <Check className="size-8 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-[#2d3748] dark:text-white mb-2">{documentId ? 'Document Updated!' : 'Document Created!'}</h3>
-                    <p className="text-neutral-600 dark:text-neutral-400">Redirecting to list...</p>
+                    <h3 className="text-lg font-semibold text-ink mb-2">{documentId ? 'Document Updated!' : 'Document Created!'}</h3>
+                    <p className="text-ink-muted">Redirecting to list...</p>
                 </div>
             </Modal>
 
@@ -1598,13 +1600,13 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                     <ModalFooter>
                         <Button variant="ghost" onClick={() => setShowPreview(false)}>Close</Button>
                         <Button
-                            leftIcon={<Download className="w-4 h-4" />}
+                            leftIcon={<Download className="size-4" />}
                             onClick={() => downloadPdf('document-preview-modal', documentNumber)}
                         >
                             Download PDF
                         </Button>
                         <Button
-                            leftIcon={<Printer className="w-4 h-4" />}
+                            leftIcon={<Printer className="size-4" />}
                             onClick={() => printDocument('document-preview-modal')}
                         >
                             Print
@@ -1638,7 +1640,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                 footer={
                     <ModalFooter className="w-full flex items-center justify-between">
                         <Link href="/templates">
-                            <Button variant="outline" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
+                            <Button variant="outline" size="sm" leftIcon={<Plus className="size-4" />}>
                                 Create New
                             </Button>
                         </Link>
@@ -1668,11 +1670,11 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                     if (displayTemplates.length === 0) {
                         return (
                             <div className="text-center py-16">
-                                <div className="w-16 h-16 mx-auto bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mb-4">
-                                    <FileText className="w-8 h-8 text-neutral-400 dark:text-neutral-500" />
+                                <div className="w-16 h-16 mx-auto bg-paper-2 rounded-full flex items-center justify-center mb-4">
+                                    <FileText className="size-8 text-ink-muted" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-[#2d3748] dark:text-white mb-2">No Templates Found</h3>
-                                <p className="text-neutral-600 dark:text-neutral-400 mb-6 max-w-md mx-auto">
+                                <h3 className="text-lg font-semibold text-ink mb-2">No Templates Found</h3>
+                                <p className="text-ink-muted mb-6 max-w-md mx-auto">
                                     You don't have any templates set up yet. Upload or create a template to get started.
                                 </p>
                             </div>
@@ -1682,19 +1684,19 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                     return (
                         <div className="flex flex-col gap-4">
                             {/* Toggle view mode */}
-                            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-700/60">
-                                <span className="text-xs font-semibold text-neutral-500 dark:text-neutral-400">View Preference</span>
-                                <div className="flex rounded-lg bg-neutral-100 dark:bg-neutral-800 p-0.5 border border-neutral-200/50 dark:border-neutral-700/50">
+                            <div className="flex items-center justify-between pb-3 border-b border-line/60">
+                                <span className="text-xs font-semibold text-ink-muted">View Preference</span>
+                                <div className="flex rounded-lg bg-paper-2 p-0.5 border border-neutral-200/50 dark:border-neutral-700/50">
                                     <button
                                         type="button"
                                         onClick={() => setPickerViewMode('grid')}
                                         className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                                             pickerViewMode === 'grid'
                                                 ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-white shadow-sm'
-                                                : 'text-neutral-600 dark:text-neutral-400 hover:text-[#2d3748] dark:hover:text-white'
+                                                : 'text-ink-muted hover:text-[#2d3748] dark:hover:text-white'
                                         }`}
                                     >
-                                        <LayoutGrid className="w-3.5 h-3.5" />
+                                        <LayoutGrid className="size-3.5" />
                                         Grid
                                     </button>
                                     <button
@@ -1703,10 +1705,10 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                         className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                                             pickerViewMode === 'list'
                                                 ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-white shadow-sm'
-                                                : 'text-neutral-600 dark:text-neutral-400 hover:text-[#2d3748] dark:hover:text-white'
+                                                : 'text-ink-muted hover:text-[#2d3748] dark:hover:text-white'
                                         }`}
                                     >
-                                        <List className="w-3.5 h-3.5" />
+                                        <List className="size-3.5" />
                                         List
                                     </button>
                                 </div>
@@ -1729,14 +1731,14 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                 key={t.id}
                                                 onClick={() => setTempSelectedTemplateId(t.id)}
                                                 className={`
-                                                    cursor-pointer rounded-xl border-2 p-2 transition-all duration-200 bg-white dark:bg-neutral-800 flex flex-col group/picker
+                                                    cursor-pointer rounded-xl border-2 p-2 transition-all duration-200 bg-paper flex flex-col group/picker
                                                     ${isSelected
                                                         ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-md'
-                                                        : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 hover:shadow-sm'
+                                                        : 'border-line hover:border-neutral-300 dark:hover:border-neutral-600 hover:shadow-sm'
                                                     }
                                                 `}
                                             >
-                                                <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-neutral-50 dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-700/80 mb-2">
+                                                <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-paper-2 border border-line/80 mb-2">
                                                     {imageUrl ? (
                                                         <img
                                                             src={imageUrl}
@@ -1745,7 +1747,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center">
-                                                            <FileText className="w-10 h-10 text-neutral-300 dark:text-neutral-600" />
+                                                            <FileText className="size-10 text-neutral-300 dark:text-neutral-600" />
                                                         </div>
                                                     )}
                                                     
@@ -1753,32 +1755,32 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                     <div className="absolute top-2 left-2 flex gap-1 bg-black/60 backdrop-blur-sm p-1 rounded-lg z-10">
                                                         {(t.type === 'invoice' || t.variants?.['invoice']) && (
                                                             <span title="Invoice format supported">
-                                                                <FileText className="w-3.5 h-3.5 text-blue-400" />
+                                                                <FileText className="size-3.5 text-blue-400" />
                                                             </span>
                                                         )}
                                                         {(t.type === 'receipt' || t.variants?.['receipt']) && (
                                                             <span title="Receipt format supported">
-                                                                <Receipt className="w-3.5 h-3.5 text-emerald-400" />
+                                                                <Receipt className="size-3.5 text-emerald-400" />
                                                             </span>
                                                         )}
                                                         {(t.type === 'delivery-note' || t.variants?.['delivery-note']) && (
                                                             <span title="Delivery Note format supported">
-                                                                <Truck className="w-3.5 h-3.5 text-amber-400" />
+                                                                <Truck className="size-3.5 text-amber-400" />
                                                             </span>
                                                         )}
                                                     </div>
 
                                                     {isSelected && (
                                                         <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1 shadow z-10">
-                                                            <Check className="w-4 h-4" />
+                                                            <Check className="size-4" />
                                                         </div>
                                                     )}
                                                 </div>
                                                 <div className="px-1 py-0.5">
-                                                    <p className="font-semibold text-xs text-neutral-900 dark:text-white truncate">
+                                                    <p className="font-semibold text-xs text-ink truncate">
                                                         {t.name}
                                                     </p>
-                                                    <p className="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase mt-0.5 font-bold tracking-tight">
+                                                    <p className="text-[10px] text-ink-muted uppercase mt-0.5 font-bold tracking-tight">
                                                         {formattedType}
                                                     </p>
                                                 </div>
@@ -1802,16 +1804,16 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                 key={t.id}
                                                 onClick={() => setTempSelectedTemplateId(t.id)}
                                                 className={`
-                                                    cursor-pointer rounded-xl border-2 p-3 transition-all duration-200 bg-white dark:bg-neutral-800 flex items-center justify-between gap-4 group/picker
+                                                    cursor-pointer rounded-xl border-2 p-3 transition-all duration-200 bg-paper flex items-center justify-between gap-4 group/picker
                                                     ${isSelected
                                                         ? 'border-blue-500 bg-blue-50/10 dark:bg-blue-900/10 ring-2 ring-blue-500/20 shadow-sm'
-                                                        : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 hover:shadow-xs'
+                                                        : 'border-line hover:border-neutral-300 dark:hover:border-neutral-600 hover:shadow-xs'
                                                     }
                                                 `}
                                             >
                                                 <div className="flex items-center gap-4 min-w-0">
                                                     {/* Thumbnail */}
-                                                    <div className="relative w-12 h-16 rounded-lg overflow-hidden bg-neutral-50 dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-700/80 shrink-0">
+                                                    <div className="relative w-12 h-16 rounded-lg overflow-hidden bg-paper-2 border border-line/80 shrink-0">
                                                         {imageUrl ? (
                                                             <img
                                                                 src={imageUrl}
@@ -1820,33 +1822,33 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                             />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center">
-                                                                <FileText className="w-6 h-6 text-neutral-300 dark:text-neutral-600" />
+                                                                <FileText className="size-6 text-neutral-300 dark:text-neutral-600" />
                                                             </div>
                                                         )}
                                                     </div>
                                                     {/* Text details */}
                                                     <div className="min-w-0 flex-1">
-                                                        <h4 className="font-semibold text-sm text-neutral-900 dark:text-white truncate">
+                                                        <h4 className="font-semibold text-sm text-ink truncate">
                                                             {t.name}
                                                         </h4>
-                                                        <p className="text-xs text-neutral-500 dark:text-neutral-400 uppercase font-bold tracking-tight mt-0.5">
+                                                        <p className="text-xs text-ink-muted uppercase font-bold tracking-tight mt-0.5">
                                                             {formattedType}
                                                         </p>
                                                         {/* Supported Format Icons Inline */}
                                                         <div className="flex gap-2 mt-1 flex-wrap">
                                                             {(t.type === 'invoice' || t.variants?.['invoice']) && (
                                                                 <span className="flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 font-medium">
-                                                                    <FileText className="w-3 h-3" /> Invoice
+                                                                    <FileText className="size-3.5" /> Invoice
                                                                 </span>
                                                             )}
                                                             {(t.type === 'receipt' || t.variants?.['receipt']) && (
                                                                 <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-                                                                    <Receipt className="w-3 h-3" /> Receipt
+                                                                    <Receipt className="size-3.5" /> Receipt
                                                                 </span>
                                                             )}
                                                             {(t.type === 'delivery-note' || t.variants?.['delivery-note']) && (
                                                                 <span className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
-                                                                    <Truck className="w-3 h-3" /> Delivery
+                                                                    <Truck className="size-3.5" /> Delivery
                                                                 </span>
                                                             )}
                                                         </div>
@@ -1854,12 +1856,12 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                 </div>
                                                 {/* Selection Status */}
                                                 <div className="shrink-0 flex items-center justify-center">
-                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                    <div className={`size-5 rounded-full border-2 flex items-center justify-center transition-all ${
                                                         isSelected
                                                             ? 'border-blue-500 bg-blue-500 text-white'
                                                             : 'border-neutral-300 dark:border-neutral-600'
                                                     }`}>
-                                                        {isSelected && <Check className="w-3 h-3" />}
+                                                        {isSelected && <Check className="size-3.5" />}
                                                     </div>
                                                 </div>
                                             </div>

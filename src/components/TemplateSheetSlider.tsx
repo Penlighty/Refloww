@@ -9,7 +9,7 @@ import {
     Truck,
     Image as ImageIcon,
     Layers
-} from 'lucide-react';
+} from '@/components/icons';
 
 export interface TemplateSheet {
     id: string;
@@ -34,7 +34,7 @@ const typeColorMap: Record<string, string> = {
     'invoice': 'bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 border-blue-200 dark:border-blue-800',
     'receipt': 'bg-purple-50 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300 border-purple-200 dark:border-purple-800',
     'delivery-note': 'bg-amber-50 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-    'cover': 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700'
+    'cover': 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 border-line'
 };
 
 export default function TemplateSheetSlider({ sheets, className = '' }: TemplateSheetSliderProps) {
@@ -47,8 +47,8 @@ export default function TemplateSheetSlider({ sheets, className = '' }: Template
 
     if (!sheets || sheets.length === 0) {
         return (
-            <div className="w-full aspect-[4/3] rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-400">
-                <ImageIcon className="w-12 h-12 opacity-40" />
+            <div className="w-full aspect-[4/3] rounded-xl bg-paper-2 flex items-center justify-center text-neutral-400">
+                <ImageIcon className="size-12 opacity-40" />
             </div>
         );
     }
@@ -71,8 +71,8 @@ export default function TemplateSheetSlider({ sheets, className = '' }: Template
             {sheets.length > 1 && (
                 <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-none">
                     <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-neutral-400 dark:text-neutral-500 flex items-center gap-1">
-                            <Layers className="w-3.5 h-3.5 text-blue-500" />
+                        <span className="text-xs font-semibold text-ink-muted flex items-center gap-1">
+                            <Layers className="size-3.5 text-blue-500" />
                             Preview Sheets:
                         </span>
                         {sheets.map((sheet, index) => {
@@ -88,25 +88,25 @@ export default function TemplateSheetSlider({ sheets, className = '' }: Template
                                         inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all shrink-0
                                         ${isActive
                                             ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20 scale-[1.02]'
-                                            : 'bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-neutral-50 dark:hover:bg-neutral-700'
+                                            : 'bg-paper text-neutral-700 dark:text-neutral-300 border-line hover:border-blue-300 dark:hover:border-blue-700 hover:bg-neutral-50 dark:hover:bg-neutral-700'
                                         }
                                     `}
                                 >
-                                    <IconComponent className="w-3.5 h-3.5" />
+                                    <IconComponent className="size-3.5" />
                                     <span>{sheet.label}</span>
                                 </button>
                             );
                         })}
                     </div>
 
-                    <span className="text-xs font-mono text-neutral-400 dark:text-neutral-500 shrink-0">
+                    <span className="text-xs font-mono text-ink-muted shrink-0">
                         {activeIndex + 1} / {sheets.length}
                     </span>
                 </div>
             )}
 
             {/* Main Preview Container */}
-            <div className="relative group rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-900 shadow-inner flex items-center justify-center min-h-[260px] max-h-[460px]">
+            <div className="relative group rounded-xl overflow-hidden border border-line bg-neutral-900 shadow-inner flex items-center justify-center min-h-[260px] max-h-[460px]">
                 {/* Image */}
                 <img
                     src={activeSheet.imageUrl}
@@ -119,7 +119,7 @@ export default function TemplateSheetSlider({ sheets, className = '' }: Template
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border shadow-sm backdrop-blur-md ${typeColorMap[activeSheet.type] || typeColorMap['cover']}`}>
                         {(() => {
                             const IconComponent = typeIconMap[activeSheet.type] || ImageIcon;
-                            return <IconComponent className="w-3.5 h-3.5" />;
+                            return <IconComponent className="size-3.5" />;
                         })()}
                         {activeSheet.label}
                     </span>
@@ -134,7 +134,7 @@ export default function TemplateSheetSlider({ sheets, className = '' }: Template
                             className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-md transition-all opacity-80 group-hover:opacity-100 hover:scale-110 shadow-lg z-20"
                             title="Previous Sheet"
                         >
-                            <ChevronLeft className="w-5 h-5" />
+                            <ChevronLeft className="size-5" />
                         </button>
                         <button
                             type="button"
@@ -142,7 +142,7 @@ export default function TemplateSheetSlider({ sheets, className = '' }: Template
                             className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-md transition-all opacity-80 group-hover:opacity-100 hover:scale-110 shadow-lg z-20"
                             title="Next Sheet"
                         >
-                            <ChevronRight className="w-5 h-5" />
+                            <ChevronRight className="size-5" />
                         </button>
                     </>
                 )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from '@/components/ui';
-import { Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { Download, FileSpreadsheet, FileText } from '@/components/icons';
 
 interface ExportButtonsProps {
     onExportExcel: () => void;
@@ -14,7 +14,7 @@ export default function ExportButtons({ onExportExcel, onExportCSV }: ExportButt
             <Button
                 variant="secondary"
                 size="sm"
-                leftIcon={<FileSpreadsheet className="w-4 h-4" />}
+                leftIcon={<FileSpreadsheet className="size-4" />}
                 iconOnlyMobile
                 onClick={onExportExcel}
             >
@@ -23,7 +23,7 @@ export default function ExportButtons({ onExportExcel, onExportCSV }: ExportButt
             <Button
                 variant="outline"
                 size="sm"
-                leftIcon={<FileText className="w-4 h-4" />}
+                leftIcon={<FileText className="size-4" />}
                 iconOnlyMobile
                 onClick={onExportCSV}
             >

@@ -7,7 +7,7 @@ import LedgerTable from '@/components/ledger/LedgerTable';
 import LedgerFilters from '@/components/ledger/LedgerFilters';
 import ExportButtons from '@/components/ledger/ExportButtons';
 import { DateRangePicker, Button, Modal, ModalFooter } from '@/components/ui';
-import { Wallet, CheckSquare, Square, Trash2 } from 'lucide-react';
+import { Wallet, CheckSquare, Square, Trash2 } from '@/components/icons';
 import { formatCurrency, getEffectiveGrandTotal, sumEffectiveGrandTotals } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
 import * as XLSX from 'xlsx';
@@ -207,11 +207,11 @@ export default function LedgerPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white flex items-center gap-3">
-                        <Wallet className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                    <h1 className="text-2xl font-bold font-display text-ink flex items-center gap-3">
+                        <Wallet className="size-8 text-primary-text" />
                         General Ledger
                     </h1>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                    <p className="text-sm text-ink-muted mt-1">
                         A centralized view of all your business transactions.
                     </p>
                 </div>
@@ -223,17 +223,17 @@ export default function LedgerPage() {
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 p-4 rounded-2xl">
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium uppercase tracking-wider mb-1">Total Volume</p>
-                    <p className="text-2xl font-bold text-[#2d3748] dark:text-white">{stats.count}</p>
+                <div className="panel bg-paper border border-line p-4 rounded-panel">
+                    <p className="label mb-1">Total Volume</p>
+                    <p className="text-2xl font-bold money text-ink">{stats.count}</p>
                 </div>
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 p-4 rounded-2xl">
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium uppercase tracking-wider mb-1">Realized Revenue (Paid)</p>
-                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(stats.realizedRevenue, currency)}</p>
+                <div className="panel bg-paper border border-line p-4 rounded-panel">
+                    <p className="label mb-1">Realized Revenue (Paid)</p>
+                    <p className="text-2xl font-bold money text-status-paid">{formatCurrency(stats.realizedRevenue, currency)}</p>
                 </div>
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 p-4 rounded-2xl">
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium uppercase tracking-wider mb-1">Total Amount (Filtered)</p>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatCurrency(stats.totalFilteredAmount, currency)}</p>
+                <div className="panel bg-paper border border-line p-4 rounded-panel">
+                    <p className="label mb-1">Total Amount (Filtered)</p>
+                    <p className="text-2xl font-bold money text-ink">{formatCurrency(stats.totalFilteredAmount, currency)}</p>
                 </div>
             </div>
 
@@ -262,7 +262,7 @@ export default function LedgerPage() {
                             <Button
                                 variant="outline"
                                 size="md"
-                                leftIcon={<CheckSquare className="w-4 h-4 text-neutral-500" />}
+                                leftIcon={<CheckSquare className="size-4 text-neutral-500" />}
                                 onClick={() => setIsSelectMode(true)}
                             >
                                 Select
@@ -272,7 +272,7 @@ export default function LedgerPage() {
                                 <Button
                                     variant="secondary"
                                     size="md"
-                                    leftIcon={isAllSelected ? <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" /> : <Square className="w-4 h-4" />}
+                                    leftIcon={isAllSelected ? <CheckSquare className="size-4 text-blue-600 dark:text-blue-400" /> : <Square className="size-4" />}
                                     onClick={toggleSelectAll}
                                 >
                                     {isAllSelected ? `Deselect All (${filteredDocuments.length})` : 'Select All'}
@@ -293,7 +293,7 @@ export default function LedgerPage() {
                                     <Button
                                         variant="danger"
                                         size="md"
-                                        leftIcon={<Trash2 className="w-4 h-4" />}
+                                        leftIcon={<Trash2 className="size-4" />}
                                         onClick={() => setIsDeleteModalOpen(true)}
                                     >
                                         Delete Selected ({selectedDocIds.length})
@@ -326,10 +326,10 @@ export default function LedgerPage() {
                 size="sm"
             >
                 <div className="space-y-4">
-                    <p className="text-neutral-600 dark:text-neutral-300">
+                    <p className="text-ink-muted">
                         Are you sure you want to delete <strong className="text-red-600">{selectedDocIds.length}</strong> selected transaction(s)?
                     </p>
-                    <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                    <p className="text-xs text-ink-muted">
                         Warning: This will delete the underlying documents (Invoices, Receipts, or Delivery Notes) and their associated records. This action cannot be undone.
                     </p>
                 </div>

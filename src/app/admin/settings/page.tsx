@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { getSystemSettings, updateSystemSettings, SystemSettings } from '@/lib/firebase/admin';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { Settings, Shield, AlertTriangle, Save, Server, ToggleLeft } from 'lucide-react';
+import { Settings, Shield, AlertTriangle, Save, Server, ToggleLeft } from '@/components/icons';
 import { Button } from '@/components/ui/Button';
 
 export default function AdminSettingsPage() {
@@ -44,7 +44,7 @@ export default function AdminSettingsPage() {
     if (loading) {
         return (
             <div className="p-6 max-w-4xl mx-auto flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="rf-spin rounded-full size-8 border-b-2 border-blue-600"></div>
             </div>
         );
     }
@@ -56,7 +56,7 @@ export default function AdminSettingsPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <Settings className="w-6 h-6 text-slate-600" />
+                        <Settings className="size-6 text-slate-600" />
                         System Settings
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
@@ -68,7 +68,7 @@ export default function AdminSettingsPage() {
                     isLoading={saving}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                    <Save className="w-4 h-4 mr-2" />
+                    <Save className="size-4 mr-2" />
                     Save Changes
                 </Button>
             </div>
@@ -77,7 +77,7 @@ export default function AdminSettingsPage() {
                 {/* Core System State */}
                 <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                     <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-2">
-                        <Server className="w-5 h-5 text-slate-500" />
+                        <Server className="size-5 text-slate-500" />
                         <h2 className="font-semibold text-slate-800 dark:text-slate-200">Core Platform State</h2>
                     </div>
                     <div className="p-6 space-y-6">
@@ -85,7 +85,7 @@ export default function AdminSettingsPage() {
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <h3 className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                                    <AlertTriangle className={`w-4 h-4 ${settings.maintenanceMode ? 'text-red-500' : 'text-slate-400'}`} />
+                                    <AlertTriangle className={`size-4 ${settings.maintenanceMode ? 'text-red-500' : 'text-slate-400'}`} />
                                     Maintenance Mode
                                 </h3>
                                 <p className="text-sm text-slate-500 mt-1">
@@ -124,7 +124,7 @@ export default function AdminSettingsPage() {
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <h3 className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                                    <Shield className="w-4 h-4 text-emerald-500" />
+                                    <Shield className="size-4 text-emerald-500" />
                                     Allow New Registrations
                                 </h3>
                                 <p className="text-sm text-slate-500 mt-1">
@@ -147,7 +147,7 @@ export default function AdminSettingsPage() {
                 {/* Feature Flags */}
                 <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                     <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-2">
-                        <ToggleLeft className="w-5 h-5 text-slate-500" />
+                        <ToggleLeft className="size-5 text-slate-500" />
                         <h2 className="font-semibold text-slate-800 dark:text-slate-200">Global Feature Flags</h2>
                     </div>
                     <div className="p-6 space-y-6">

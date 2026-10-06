@@ -9,10 +9,12 @@ import { formatCurrency, formatDate, parseCSV, generateCSV, downloadCSV, readFil
 import { calculateReorderMetrics, getBatchExpiryStatus, generateAutoBatchNumber } from '@/lib/utils/inventoryUtils';
 import { Button, EmptyState, SearchInput, Modal, ModalFooter, Input, Textarea, Select, PageHelpModal, HelpTooltip, ImageUploader, SubTabs } from '@/components/ui';
 import { toast } from 'react-hot-toast';
+import dynamic from 'next/dynamic';
 import { generateSkuFromCategory, getStockColorCue } from '@/lib/utils/productUtils';
 import { validateContentPolicy } from '@/lib/utils/contentPolicy';
-import OcrBatchModal from '@/components/OcrBatchModal';
-import BarcodeScannerModal from '@/components/BarcodeScannerModal';
+
+const OcrBatchModal = dynamic(() => import('@/components/OcrBatchModal'), { ssr: false });
+const BarcodeScannerModal = dynamic(() => import('@/components/BarcodeScannerModal'), { ssr: false });
 
 import {
     Plus,
@@ -53,7 +55,7 @@ import {
     FileCode,
     Lock,
     HelpCircle
-} from 'lucide-react';
+} from '@/components/icons';
 
 type SortField = 'name' | 'productType' | 'category' | 'unitPrice' | 'stockQuantity' | 'sku' | 'createdAt';
 type SortOrder = 'asc' | 'desc';
@@ -555,7 +557,7 @@ export default function ProductsPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                     <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Inventory & Products Hub</h1>
+                        <h1 className="text-2xl font-bold text-ink">Inventory & Products Hub</h1>
                         <PageHelpModal
                             title="Inventory & Products Hub Overview"
                             description="Your central hub for managing physical goods, services, digital items, lot/batch tracking, sales velocity analytics, and stock audit logs."
@@ -571,14 +573,14 @@ export default function ProductsPage() {
                             ]}
                         />
                     </div>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                    <p className="text-sm text-ink-muted mt-1">
                         Manage physical inventory, services, batches, sales velocity, and product alternatives
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                     <Button
                         variant="outline"
-                        leftIcon={<Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" />}
+                        leftIcon={<Sparkles className="size-4 text-violet-600 dark:text-violet-400" />}
                         iconOnlyMobile
                         title="Scan Packaging / OCR Batch"
                         aria-label="Scan Packaging / OCR Batch"
@@ -589,7 +591,7 @@ export default function ProductsPage() {
                     <Link href="/storefront">
                         <Button
                             variant="outline"
-                            leftIcon={<Store className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                            leftIcon={<Store className="size-4 text-blue-600 dark:text-blue-400" />}
                             iconOnlyMobile
                             title="Storefront"
                             aria-label="Storefront"
@@ -599,7 +601,7 @@ export default function ProductsPage() {
                     </Link>
                     <Button
                         variant="outline"
-                        leftIcon={<Download className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />}
+                        leftIcon={<Download className="size-4 text-ink-muted" />}
                         iconOnlyMobile
                         title="Export CSV"
                         aria-label="Export CSV"
@@ -607,17 +609,17 @@ export default function ProductsPage() {
                     >
                         Export
                     </Button>
-                    <Button leftIcon={<Plus className="w-4 h-4" />} className="px-3 sm:px-4" onClick={openCreateModal}>
+                    <Button leftIcon={<Plus className="size-4" />} className="px-3 sm:px-4" onClick={openCreateModal}>
                         Add Product
                     </Button>
                 </div>
             </div>
 
             {/* Navigation Tabs */}
-            <div className="border-b border-neutral-200 dark:border-neutral-700 mb-6 pb-2">
+            <div className="border-b border-line mb-6 pb-2">
                 <SubTabs
                     activeTab={activeTab}
-                    onChangeTab={(tabId) => setActiveTab(tabId as any)}
+                    onChangeTab={(tabId: string) => setActiveTab(tabId as any)}
                     tabs={[
                         {
                             id: 'catalog',
@@ -715,7 +717,7 @@ export default function ProductsPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    leftIcon={<CheckSquare className="w-4 h-4 text-neutral-500" />}
+                                    leftIcon={<CheckSquare className="size-4 text-neutral-500" />}
                                     onClick={() => setIsSelectMode(true)}
                                 >
                                     Select
@@ -725,7 +727,7 @@ export default function ProductsPage() {
                                     <Button
                                         variant="secondary"
                                         size="sm"
-                                        leftIcon={isAllSelected ? <CheckSquare className="w-4 h-4 text-violet-600 dark:text-violet-400" /> : <Square className="w-4 h-4" />}
+                                        leftIcon={isAllSelected ? <CheckSquare className="size-4 text-violet-600 dark:text-violet-400" /> : <Square className="size-4" />}
                                         onClick={toggleSelectAll}
                                     >
                                         {isAllSelected ? `Deselect All (${filteredProducts.length})` : 'Select All'}
@@ -746,7 +748,7 @@ export default function ProductsPage() {
                                         <Button
                                             variant="danger"
                                             size="sm"
-                                            leftIcon={<Trash2 className="w-4 h-4" />}
+                                            leftIcon={<Trash2 className="size-4" />}
                                             onClick={() => setIsBulkDeleteModalOpen(true)}
                                         >
                                             Delete Selected ({selectedProductIds.length})
@@ -758,20 +760,20 @@ export default function ProductsPage() {
                     </div>
 
                     {filteredProducts.length === 0 ? (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12 text-center">
+                        <div className="bg-paper border border-line rounded-panel shadow-xs p-12 text-center">
                             <EmptyState
-                                icon={<Package className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                                icon={<Package className="size-8 text-neutral-400" />}
                                 title="No products found"
                                 description="Try adjusting your search or add a new product or service."
                                 action={
-                                    <Button leftIcon={<Plus className="w-4 h-4" />} onClick={openCreateModal}>
+                                    <Button leftIcon={<Plus className="size-4" />} onClick={openCreateModal}>
                                         Add Product / Service
                                     </Button>
                                 }
                             />
                         </div>
                     ) : (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16 overflow-hidden">
+                        <div className="bg-paper border border-line rounded-panel shadow-xs pb-16 overflow-hidden">
                             {/* Mobile Product Cards (< md) */}
                             <div className="block md:hidden space-y-3 p-3">
                                 {filteredProducts.map((product) => {
@@ -784,7 +786,7 @@ export default function ProductsPage() {
                                     return (
                                         <div
                                             key={`mobile-product-${product.id}`}
-                                            className={`bg-white dark:bg-neutral-800/90 border border-neutral-100 dark:border-neutral-700/80 rounded-2xl p-4 shadow-sm transition-all ${
+                                            className={`bg-paper/90 border border-line/80 rounded-2xl p-4 shadow-sm transition-all ${
                                                 isRowSelected ? 'ring-2 ring-violet-500 bg-violet-50/20' : ''
                                             }`}
                                         >
@@ -795,10 +797,10 @@ export default function ProductsPage() {
                                                             type="checkbox"
                                                             checked={isRowSelected}
                                                             onChange={(e) => toggleSelectRow(product.id, e as any)}
-                                                            className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-violet-600 focus:ring-violet-500"
+                                                            className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-violet-600 focus:ring-violet-500"
                                                         />
                                                     )}
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 overflow-hidden ${
+                                                    <div className={`size-10 rounded-xl flex items-center justify-center text-white shrink-0 overflow-hidden ${
                                                         product.productType === 'service'
                                                             ? 'bg-gradient-to-br from-emerald-400 to-teal-600'
                                                             : product.productType === 'digital'
@@ -808,19 +810,19 @@ export default function ProductsPage() {
                                                         {product.imageUrl ? (
                                                             <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                                                         ) : product.productType === 'service' ? (
-                                                            <Zap className="w-5 h-5" />
+                                                            <Zap className="size-5" />
                                                         ) : product.productType === 'digital' ? (
-                                                            <FileCode className="w-5 h-5" />
+                                                            <FileCode className="size-5" />
                                                         ) : (
-                                                            <Package className="w-5 h-5" />
+                                                            <Package className="size-5" />
                                                         )}
                                                     </div>
 
                                                     <div className="min-w-0">
-                                                        <Link href={`/products/${product.id}`} className="font-bold text-sm text-[#2d3748] dark:text-white truncate block">
+                                                        <Link href={`/products/${product.id}`} className="font-bold text-sm text-ink truncate block">
                                                             {product.name}
                                                         </Link>
-                                                        <span className="text-[10px] font-mono text-neutral-400 dark:text-neutral-500">
+                                                        <span className="text-[10px] font-mono text-ink-muted">
                                                             {product.sku || 'No SKU'}
                                                         </span>
                                                     </div>
@@ -835,7 +837,7 @@ export default function ProductsPage() {
                                                 </span>
                                             </div>
 
-                                            <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 my-2">
+                                            <div className="flex items-center justify-between text-xs text-ink-muted my-2">
                                                 <span>Category: <strong className="text-neutral-700 dark:text-neutral-300">{product.category || 'General'}</strong></span>
                                                 <div>
                                                     {(() => {
@@ -850,10 +852,10 @@ export default function ProductsPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center justify-between pt-2.5 border-t border-neutral-100 dark:border-neutral-700/60">
+                                            <div className="flex items-center justify-between pt-2.5 border-t border-line/60">
                                                 <div>
-                                                    <span className="text-[10px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">Price</span>
-                                                    <span className="font-bold text-sm text-neutral-900 dark:text-white">
+                                                    <span className="text-[10px] text-ink-muted uppercase tracking-wider block">Price</span>
+                                                    <span className="font-bold text-sm text-ink">
                                                         {formatCurrency(product.unitPrice, company.currency)}
                                                     </span>
                                                 </div>
@@ -861,7 +863,7 @@ export default function ProductsPage() {
                                                 <div className="flex items-center gap-2">
                                                     <Link
                                                         href={`/products/${product.id}`}
-                                                        className="px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 rounded-xl text-xs font-semibold hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                                                        className="px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 text-ink-muted rounded-xl text-xs font-semibold hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
                                                     >
                                                         View
                                                     </Link>
@@ -883,14 +885,14 @@ export default function ProductsPage() {
                             <div className="hidden md:block overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                                        <tr className="border-b border-line bg-neutral-50/50 dark:bg-neutral-800/50">
                                             {isSelectMode && (
                                                 <th className="px-4 py-4 w-10 text-center">
                                                     <input
                                                         type="checkbox"
                                                         checked={isAllSelected}
                                                         onChange={toggleSelectAll}
-                                                        className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-violet-600 focus:ring-violet-500 cursor-pointer"
+                                                        className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-violet-600 focus:ring-violet-500 cursor-pointer"
                                                     />
                                                 </th>
                                             )}
@@ -900,7 +902,7 @@ export default function ProductsPage() {
                                                     className="flex items-center gap-1.5 text-xs font-semibold text-neutral-400 uppercase tracking-wider hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                                 >
                                                     Item
-                                                    <ArrowUpDown className="w-3 h-3" />
+                                                    <ArrowUpDown className="size-3.5" />
                                                 </button>
                                             </th>
                                             <th className="text-left px-6 py-4">
@@ -909,7 +911,7 @@ export default function ProductsPage() {
                                                     className="flex items-center gap-1.5 text-xs font-semibold text-neutral-400 uppercase tracking-wider hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                                 >
                                                     Type
-                                                    <ArrowUpDown className="w-3 h-3" />
+                                                    <ArrowUpDown className="size-3.5" />
                                                 </button>
                                             </th>
                                             <th className="text-left px-6 py-4">
@@ -918,7 +920,7 @@ export default function ProductsPage() {
                                                     className="flex items-center gap-1.5 text-xs font-semibold text-neutral-400 uppercase tracking-wider hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                                 >
                                                     Category
-                                                    <ArrowUpDown className="w-3 h-3" />
+                                                    <ArrowUpDown className="size-3.5" />
                                                 </button>
                                             </th>
                                             <th className="text-left px-6 py-4">
@@ -927,7 +929,7 @@ export default function ProductsPage() {
                                                     className="flex items-center gap-1.5 text-xs font-semibold text-neutral-400 uppercase tracking-wider hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                                 >
                                                     Price
-                                                    <ArrowUpDown className="w-3 h-3" />
+                                                    <ArrowUpDown className="size-3.5" />
                                                 </button>
                                             </th>
                                             <th className="text-left px-6 py-4">
@@ -936,7 +938,7 @@ export default function ProductsPage() {
                                                     className="flex items-center gap-1.5 text-xs font-semibold text-neutral-400 uppercase tracking-wider hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                                 >
                                                     Stock Level
-                                                    <ArrowUpDown className="w-3 h-3" />
+                                                    <ArrowUpDown className="size-3.5" />
                                                 </button>
                                             </th>
                                             <th className="text-right px-6 py-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">Actions</th>
@@ -958,13 +960,13 @@ export default function ProductsPage() {
                                                                 type="checkbox"
                                                                 checked={isRowSelected}
                                                                 onChange={(e) => toggleSelectRow(product.id, e as any)}
-                                                                className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-violet-600 focus:ring-violet-500 cursor-pointer"
+                                                                className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-violet-600 focus:ring-violet-500 cursor-pointer"
                                                             />
                                                         </td>
                                                     )}
                                                     <td className="px-6 py-4">
                                                         <Link href={`/products/${product.id}`} className="flex items-center gap-3 group">
-                                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 overflow-hidden ${
+                                                            <div className={`size-10 rounded-xl flex items-center justify-center text-white shrink-0 overflow-hidden ${
                                                                 product.productType === 'service'
                                                                     ? 'bg-gradient-to-br from-emerald-400 to-teal-600'
                                                                     : product.productType === 'digital'
@@ -974,15 +976,15 @@ export default function ProductsPage() {
                                                                 {product.imageUrl ? (
                                                                     <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                                                                 ) : product.productType === 'service' ? (
-                                                                    <Zap className="w-5 h-5" />
+                                                                    <Zap className="size-5" />
                                                                 ) : product.productType === 'digital' ? (
-                                                                    <FileCode className="w-5 h-5" />
+                                                                    <FileCode className="size-5" />
                                                                 ) : (
-                                                                    <Package className="w-5 h-5" strokeWidth={1.75} />
+                                                                    <Package className="size-5" />
                                                                 )}
                                                             </div>
                                                             <div>
-                                                                <span className="font-medium text-[#2d3748] dark:text-white group-hover:text-violet-600 transition-colors block">
+                                                                <span className="font-medium text-ink group-hover:text-violet-600 transition-colors block">
                                                                     {product.name}
                                                                 </span>
                                                                 <code className="text-[11px] font-mono text-neutral-400">{product.sku}</code>
@@ -1000,10 +1002,10 @@ export default function ProductsPage() {
                                                             {product.productType === 'service' ? 'Service' : product.productType === 'digital' ? 'Digital' : 'Physical'}
                                                         </span>
                                                     </td>
-                                                    <td className="px-6 py-4 text-sm text-neutral-600 dark:text-neutral-300">
+                                                    <td className="px-6 py-4 text-sm text-ink-muted">
                                                         {product.category || '—'}
                                                     </td>
-                                                    <td className="px-6 py-4 text-sm font-semibold text-neutral-900 dark:text-white">
+                                                    <td className="px-6 py-4 text-sm font-semibold text-ink">
                                                         {formatCurrency(product.unitPrice, company.currency)}
                                                     </td>
                                                     <td className="px-6 py-4">
@@ -1019,10 +1021,10 @@ export default function ProductsPage() {
                                                                             {cue.label}
                                                                         </span>
                                                                         {cue.status === 'red' && (
-                                                                            <span title="Below set limit to restock"><AlertTriangle className="w-4 h-4 text-red-500 animate-bounce" /></span>
+                                                                            <span title="Below set limit to restock"><AlertTriangle className="size-4 text-red-500 animate-bounce" /></span>
                                                                         )}
                                                                         {cue.status === 'amber' && (
-                                                                            <span title="Getting low to limit"><AlertTriangle className="w-4 h-4 text-amber-500" /></span>
+                                                                            <span title="Getting low to limit"><AlertTriangle className="size-4 text-amber-500" /></span>
                                                                         )}
                                                                     </div>
                                                                 );
@@ -1047,7 +1049,7 @@ export default function ProductsPage() {
                                                                 size="sm"
                                                                 variant="outline"
                                                                 onClick={() => openEditModal(product)}
-                                                                leftIcon={<Edit2 className="w-3.5 h-3.5" />}
+                                                                leftIcon={<Edit2 className="size-3.5" />}
                                                             >
                                                                 Edit
                                                             </Button>
@@ -1083,7 +1085,7 @@ export default function ProductsPage() {
                                 className="px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-100 text-[#2d3748] font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
                                 onClick={() => openOcrForProduct()}
                             >
-                                <Sparkles className="w-4 h-4 text-violet-600 shrink-0" />
+                                <Sparkles className="size-4 text-violet-600 shrink-0" />
                                 <span className="text-[#2d3748] font-bold">Scan Packaging / OCR Batch</span>
                             </button>
                         </div>
@@ -1102,7 +1104,7 @@ export default function ProductsPage() {
                                 <Button
                                     variant="danger"
                                     size="sm"
-                                    leftIcon={<Trash2 className="w-4 h-4" />}
+                                    leftIcon={<Trash2 className="size-4" />}
                                     onClick={handleBulkDeleteBatches}
                                 >
                                     Delete Selected ({selectedBatchIds.length})
@@ -1112,30 +1114,30 @@ export default function ProductsPage() {
                     )}
 
                     {batchExpiryInfoList.length === 0 ? (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12 text-center">
+                        <div className="bg-paper border border-line rounded-panel shadow-xs p-12 text-center">
                             <EmptyState
-                                icon={<Layers className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                                icon={<Layers className="size-8 text-neutral-400" />}
                                 title="No active stock batches"
                                 description="Scan product packaging or delivery notes to record your first batch."
                                 action={
-                                    <Button leftIcon={<Sparkles className="w-4 h-4" />} onClick={() => openOcrForProduct()}>
+                                    <Button leftIcon={<Sparkles className="size-4" />} onClick={() => openOcrForProduct()}>
                                         Scan Packaging OCR
                                     </Button>
                                 }
                             />
                         </div>
                     ) : (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden">
+                        <div className="bg-paper border border-line rounded-panel shadow-xs overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                                        <tr className="border-b border-line bg-neutral-50/50 dark:bg-neutral-800/50">
                                             <th className="px-4 py-4 w-10 text-center">
                                                 <input
                                                     type="checkbox"
                                                     checked={isAllBatchesSelected}
                                                     onChange={toggleSelectAllBatches}
-                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-violet-600 focus:ring-violet-500 cursor-pointer"
+                                                    className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-violet-600 focus:ring-violet-500 cursor-pointer"
                                                 />
                                             </th>
                                             <th className="text-left px-6 py-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">Batch #</th>
@@ -1157,7 +1159,7 @@ export default function ProductsPage() {
                                                         type="checkbox"
                                                         checked={isRowSelected}
                                                         onChange={(e) => toggleSelectBatchRow(batch.id, e as any)}
-                                                        className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-violet-600 focus:ring-violet-500 cursor-pointer"
+                                                        className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-violet-600 focus:ring-violet-500 cursor-pointer"
                                                     />
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -1165,7 +1167,7 @@ export default function ProductsPage() {
                                                         {batch.batchNumber}
                                                     </code>
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-semibold text-neutral-900 dark:text-white">
+                                                <td className="px-6 py-4 text-sm font-semibold text-ink">
                                                     {product?.name || (products.length > 0 ? products[0].name : 'Product')}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-neutral-500">
@@ -1179,7 +1181,7 @@ export default function ProductsPage() {
                                                         {expiryInfo.label}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-right text-sm font-bold text-neutral-900 dark:text-white">
+                                                <td className="px-6 py-4 text-right text-sm font-bold text-ink">
                                                     {batch.remainingQuantity} / {batch.initialQuantity}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
@@ -1212,41 +1214,41 @@ export default function ProductsPage() {
             {activeTab === 'reorder' && (
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="p-5 bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl">
+                        <div className="p-5 bg-paper border border-line rounded-panel shadow-xs">
                             <div className="flex items-center gap-3 text-amber-500 mb-2">
-                                <AlertTriangle className="w-5 h-5" />
+                                <AlertTriangle className="size-5" />
                                 <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Reorder Required</span>
                             </div>
-                            <p className="text-3xl font-bold text-neutral-900 dark:text-white">{reorderNeededCount}</p>
+                            <p className="text-3xl font-bold text-ink">{reorderNeededCount}</p>
                             <p className="text-xs text-neutral-400 mt-1">Physical items below reorder threshold</p>
                         </div>
-                        <div className="p-5 bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl">
+                        <div className="p-5 bg-paper border border-line rounded-panel shadow-xs">
                             <div className="flex items-center gap-3 text-emerald-500 mb-2">
-                                <TrendingUp className="w-5 h-5" />
+                                <TrendingUp className="size-5" />
                                 <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Active Velocity</span>
                             </div>
-                            <p className="text-3xl font-bold text-neutral-900 dark:text-white">
+                            <p className="text-3xl font-bold text-ink">
                                 {reorderProductList.filter(r => r.metrics.dailySalesVelocity > 0).length}
                             </p>
                             <p className="text-xs text-neutral-400 mt-1">Active daily sales recorded</p>
                         </div>
-                        <div className="p-5 bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl">
+                        <div className="p-5 bg-paper border border-line rounded-panel shadow-xs">
                             <div className="flex items-center gap-3 text-blue-500 mb-2">
-                                <Truck className="w-5 h-5" />
+                                <Truck className="size-5" />
                                 <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Avg Lead Time</span>
                             </div>
-                            <p className="text-3xl font-bold text-neutral-900 dark:text-white">
+                            <p className="text-3xl font-bold text-ink">
                                 {averageLeadTimeDays} {averageLeadTimeDays === 1 ? 'Day' : 'Days'}
                             </p>
                             <p className="text-xs text-neutral-400 mt-1">Estimated supplier delivery window</p>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden">
+                    <div className="bg-paper border border-line rounded-panel shadow-xs overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="border-b border-neutral-100 dark:border-neutral-700">
+                                    <tr className="border-b border-line">
                                         <th className="text-left px-6 py-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">Product</th>
                                         <th className="text-left px-6 py-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">Daily Velocity</th>
                                         <th className="text-left px-6 py-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">Lead Time</th>
@@ -1259,7 +1261,7 @@ export default function ProductsPage() {
                                     {reorderProductList.map(({ product, metrics }) => (
                                         <tr key={product.id} className="border-b border-neutral-50 dark:border-neutral-700/50 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30">
                                             <td className="px-6 py-4">
-                                                <span className="font-semibold text-sm text-neutral-900 dark:text-white block">{product.name}</span>
+                                                <span className="font-semibold text-sm text-ink block">{product.name}</span>
                                                 <code className="text-[11px] font-mono text-neutral-400">{product.sku}</code>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
@@ -1300,19 +1302,19 @@ export default function ProductsPage() {
             {activeTab === 'movements' && (
                 <div className="space-y-6">
                     {displayMovements.length === 0 ? (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12 text-center">
+                        <div className="bg-paper border border-line rounded-panel shadow-xs p-12 text-center">
                             <EmptyState
-                                icon={<History className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                                icon={<History className="size-8 text-neutral-400" />}
                                 title="No stock movements recorded yet"
                                 description="Stock movements are logged automatically when sales, purchases, or adjustments occur."
                             />
                         </div>
                     ) : (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden">
+                        <div className="bg-paper border border-line rounded-panel shadow-xs overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="border-b border-neutral-100 dark:border-neutral-700">
+                                        <tr className="border-b border-line">
                                             <th className="text-left px-6 py-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">Date</th>
                                             <th className="text-left px-6 py-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">Product</th>
                                             <th className="text-left px-6 py-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">Type</th>
@@ -1331,7 +1333,7 @@ export default function ProductsPage() {
                                                     <td className="px-6 py-4 text-xs text-neutral-500">
                                                         {formatDate(mov.date)}
                                                     </td>
-                                                    <td className="px-6 py-4 text-sm font-semibold text-neutral-900 dark:text-white">
+                                                    <td className="px-6 py-4 text-sm font-semibold text-ink">
                                                         {prod?.name || 'Product'}
                                                         {mov.batchNumber && (
                                                             <span className="block text-[11px] font-mono text-neutral-400 font-normal">
@@ -1350,13 +1352,13 @@ export default function ProductsPage() {
                                                             {mov.type}
                                                         </span>
                                                     </td>
-                                                    <td className="px-6 py-4 text-sm text-neutral-600 dark:text-neutral-300">
+                                                    <td className="px-6 py-4 text-sm text-ink-muted">
                                                         {mov.reason}
                                                     </td>
                                                     <td className={`px-6 py-4 text-right font-bold text-sm ${isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
                                                         {isPositive ? `+${mov.quantity}` : mov.quantity}
                                                     </td>
-                                                    <td className="px-6 py-4 text-right font-bold text-sm text-neutral-900 dark:text-white">
+                                                    <td className="px-6 py-4 text-right font-bold text-sm text-ink">
                                                         {mov.newQuantity}
                                                     </td>
                                                 </tr>
@@ -1427,7 +1429,7 @@ export default function ProductsPage() {
                         <label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5 block">
                             Product Type *
                         </label>
-                        <div className="grid grid-cols-3 gap-2 p-1 bg-neutral-100 dark:bg-neutral-800 rounded-xl">
+                        <div className="grid grid-cols-3 gap-2 p-1 bg-paper-2 rounded-xl">
                             <button
                                 type="button"
                                 onClick={() => setFormData({ ...formData, productType: 'physical' })}
@@ -1437,7 +1439,7 @@ export default function ProductsPage() {
                                         : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
                                 }`}
                             >
-                                <Package className="w-3.5 h-3.5" />
+                                <Package className="size-3.5" />
                                 Physical Goods
                             </button>
                             <button
@@ -1449,7 +1451,7 @@ export default function ProductsPage() {
                                         : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
                                 }`}
                             >
-                                <Zap className="w-3.5 h-3.5" />
+                                <Zap className="size-3.5" />
                                 Service / Labor
                             </button>
                             <button
@@ -1461,7 +1463,7 @@ export default function ProductsPage() {
                                         : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
                                 }`}
                             >
-                                <FileCode className="w-3.5 h-3.5" />
+                                <FileCode className="size-3.5" />
                                 Digital Product
                             </button>
                         </div>
@@ -1469,7 +1471,7 @@ export default function ProductsPage() {
 
                     {formData.productType && formData.productType !== 'physical' && (
                         <div className="md:col-span-2 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <Zap className="size-4 text-emerald-600 shrink-0" />
                             <span>This is a non-tangible <strong>{formData.productType}</strong> item. Physical inventory counts, batch tracking, and reorder alerts are bypassed.</span>
                         </div>
                     )}
@@ -1485,13 +1487,13 @@ export default function ProductsPage() {
                                 setIsCategoryListOpen(true);
                             }}
                             onFocus={() => setIsCategoryListOpen(true)}
-                            leftIcon={<Tag className="w-4 h-4 text-blue-500" />}
-                            rightIcon={<ChevronDown className="w-4 h-4 text-neutral-400" />}
+                            leftIcon={<Tag className="size-4 text-blue-500" />}
+                            rightIcon={<ChevronDown className="size-4 text-neutral-400" />}
                         />
 
                         {isCategoryListOpen && (
-                            <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-2xl z-50 max-h-72 overflow-y-auto p-1.5 text-xs divide-y divide-neutral-100 dark:divide-neutral-700/50">
-                                <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                            <div className="absolute left-0 right-0 top-full mt-1 bg-paper border border-line rounded-panel shadow-xs shadow-2xl z-50 max-h-72 overflow-y-auto p-1.5 text-xs divide-y divide-line/50">
+                                <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-ink-muted">
                                     Product Categories ({allCategories.length})
                                 </div>
                                 {allCategories.filter(cat => 
@@ -1508,11 +1510,11 @@ export default function ProductsPage() {
                                         className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${
                                             formData.category === cat
                                                 ? 'bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-semibold'
-                                                : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700/60'
+                                                : 'text-ink-muted hover:bg-neutral-100 dark:hover:bg-neutral-700/60'
                                         }`}
                                     >
                                         <span>{cat}</span>
-                                        {formData.category === cat && <Check className="w-3.5 h-3.5 text-violet-600" />}
+                                        {formData.category === cat && <Check className="size-3.5 text-violet-600" />}
                                     </button>
                                 ))}
                                 {allCategories.filter(cat => !formData.category || cat.toLowerCase().includes(formData.category.toLowerCase())).length === 0 && (
@@ -1543,7 +1545,7 @@ export default function ProductsPage() {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         error={formErrors.name}
-                        leftIcon={<Package className="w-4 h-4" />}
+                        leftIcon={<Package className="size-4" />}
                     />
 
                     {/* SKU (Auto-generated) */}
@@ -1554,8 +1556,8 @@ export default function ProductsPage() {
                             readOnly
                             disabled
                             tabIndex={-1}
-                            className="bg-neutral-100 dark:bg-neutral-800 text-neutral-500 font-mono cursor-not-allowed border-neutral-200 dark:border-neutral-700"
-                            leftIcon={<Lock className="w-4 h-4 text-neutral-400" />}
+                            className="bg-paper-2 text-neutral-500 font-mono cursor-not-allowed border-line"
+                            leftIcon={<Lock className="size-4 text-neutral-400" />}
                         />
                     </div>
 
@@ -1567,16 +1569,16 @@ export default function ProductsPage() {
                                 placeholder="Scan or enter..."
                                 value={formData.barcode || ''}
                                 onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                                leftIcon={<BarcodeIcon className="w-4 h-4" />}
+                                leftIcon={<BarcodeIcon className="size-4" />}
                             />
                         </div>
                         <button
                             type="button"
                             onClick={() => setIsScannerOpen(true)}
-                            className="h-10 px-4 rounded-lg bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition-colors border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0"
+                            className="h-10 px-4 rounded-lg bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition-colors border border-line flex items-center justify-center shrink-0"
                             title="Scan Barcode"
                         >
-                            <ScanLine className="w-4 h-4" />
+                            <ScanLine className="size-4" />
                         </button>
                     </div>
 
@@ -1590,7 +1592,7 @@ export default function ProductsPage() {
                         value={formData.unitPrice || ''}
                         onChange={(e) => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) || 0 })}
                         error={formErrors.unitPrice}
-                        leftIcon={<DollarSign className="w-4 h-4 text-emerald-500" />}
+                        leftIcon={<DollarSign className="size-4 text-emerald-500" />}
                     />
 
                     {/* Cost Price - Hidden for Cashiers */}
@@ -1603,16 +1605,16 @@ export default function ProductsPage() {
                             placeholder="0.00"
                             value={formData.costPrice || ''}
                             onChange={(e) => setFormData({ ...formData, costPrice: parseFloat(e.target.value) || 0 })}
-                            leftIcon={<DollarSign className="w-4 h-4 text-amber-500" />}
+                            leftIcon={<DollarSign className="size-4 text-amber-500" />}
                         />
                     )}
 
                     {/* Physical inventory fields only shown if Physical Product */}
                     {(!formData.productType || formData.productType === 'physical') && (
                         <>
-                            <div className="md:col-span-2 flex items-center justify-between pt-1 pb-0.5 border-t border-neutral-100 dark:border-neutral-700/60 mt-1">
-                                <span className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
-                                    <Layers className="w-3.5 h-3.5 text-violet-500" />
+                            <div className="md:col-span-2 flex items-center justify-between pt-1 pb-0.5 border-t border-line/60 mt-1">
+                                <span className="text-xs font-semibold text-ink-muted flex items-center gap-1.5">
+                                    <Layers className="size-3.5 text-violet-500" />
                                     Physical Inventory Setup
                                 </span>
                                 <button
@@ -1621,9 +1623,9 @@ export default function ProductsPage() {
                                     className="flex items-center gap-1 text-xs text-neutral-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors py-0.5 px-2 rounded-md hover:bg-violet-50 dark:hover:bg-violet-950/40"
                                     title="Toggle inventory info"
                                 >
-                                    <HelpCircle className="w-3.5 h-3.5" />
+                                    <HelpCircle className="size-3.5" />
                                     <span className="text-[11px] font-medium">{showInventoryHelp ? 'Hide info' : 'What is this?'}</span>
-                                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showInventoryHelp ? 'rotate-180' : ''}`} />
+                                    <ChevronDown className={`size-3.5 transition-transform duration-200 ${showInventoryHelp ? 'rotate-180' : ''}`} />
                                 </button>
                             </div>
 
@@ -1632,7 +1634,7 @@ export default function ProductsPage() {
                                 <div className="md:col-span-2 p-3.5 bg-violet-50/80 dark:bg-violet-950/40 border border-violet-200/80 dark:border-violet-800/60 rounded-xl text-xs space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="flex items-center justify-between font-semibold text-violet-900 dark:text-violet-200">
                                         <span className="flex items-center gap-1.5">
-                                            <Layers className="w-3.5 h-3.5 text-violet-600" />
+                                            <Layers className="size-3.5 text-violet-600" />
                                             Simple Mode vs. Batch Mode
                                         </span>
                                         <button
@@ -1640,7 +1642,7 @@ export default function ProductsPage() {
                                             onClick={() => setShowInventoryHelp(false)}
                                             className="text-violet-400 hover:text-violet-600 dark:hover:text-violet-200 p-0.5 rounded"
                                         >
-                                            <X className="w-3.5 h-3.5" />
+                                            <X className="size-3.5" />
                                         </button>
                                     </div>
                                     <p className="text-violet-700 dark:text-violet-300 leading-relaxed">
@@ -1679,7 +1681,7 @@ export default function ProductsPage() {
                                 value={formData.leadTimeDays || ''}
                                 onChange={(e) => setFormData({ ...formData, leadTimeDays: parseInt(e.target.value, 10) || 7 })}
                                 hint="Estimated days for supplier to deliver restock"
-                                leftIcon={<Truck className="w-4 h-4 text-blue-500" />}
+                                leftIcon={<Truck className="size-4 text-blue-500" />}
                             />
 
                             <Input
@@ -1690,7 +1692,7 @@ export default function ProductsPage() {
                                 value={formData.minReorderPoint || ''}
                                 onChange={(e) => setFormData({ ...formData, minReorderPoint: parseInt(e.target.value, 10) || 5 })}
                                 hint="Static baseline stock trigger level"
-                                leftIcon={<AlertTriangle className="w-4 h-4 text-amber-500" />}
+                                leftIcon={<AlertTriangle className="size-4 text-amber-500" />}
                             />
                         </>
                     )}

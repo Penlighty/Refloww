@@ -17,7 +17,7 @@ import {
     Maximize2,
     Sparkles,
     Image as ImageIcon
-} from 'lucide-react';
+} from '@/components/icons';
 import { toast } from 'react-hot-toast';
 import { Modal } from './Modal';
 import { Input } from './Input';
@@ -154,12 +154,12 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             {/* Header Label (Clean, concise, no awkward badge crowding text) */}
             {label && (
                 <div className="flex items-center justify-between">
-                    <label className="block text-[11px] font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-wider truncate">
+                    <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-wider truncate">
                         {label}
                     </label>
                     {value && (
                         <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                            <Check className="w-3 h-3" /> Attached
+                            <Check className="size-3.5" /> Attached
                         </span>
                     )}
                 </div>
@@ -169,7 +169,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             {value ? (
                 /* STATE A: HAS IMAGE VALUE */
                 <div
-                    className={`relative ${aspectContainerClass} bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xs group transition-all duration-200`}
+                    className={`relative ${aspectContainerClass} bg-neutral-900 rounded-2xl overflow-hidden border border-line shadow-xs group transition-all duration-200`}
                 >
                     <img
                         src={value}
@@ -187,7 +187,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                 className="p-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl backdrop-blur-md transition-colors"
                                 title="Inspect Fullscreen"
                             >
-                                <Maximize2 className="w-3.5 h-3.5" />
+                                <Maximize2 className="size-3.5" />
                             </button>
                         </div>
 
@@ -199,7 +199,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                 className="px-2.5 py-1.5 bg-white text-neutral-900 rounded-xl text-xs font-bold shadow-md hover:bg-neutral-100 transition-all flex items-center gap-1 cursor-pointer"
                                 title="Change photo"
                             >
-                                <Upload className="w-3 h-3 text-[#fc6d2d]" />
+                                <Upload className="size-3.5 text-[#fc6d2d]" />
                                 <span>Change</span>
                             </button>
 
@@ -209,7 +209,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                 className="p-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl backdrop-blur-md transition-colors"
                                 title="Take new photo"
                             >
-                                <Camera className="w-3.5 h-3.5" />
+                                <Camera className="size-3.5" />
                             </button>
 
                             <button
@@ -221,7 +221,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                 className="p-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl backdrop-blur-md transition-colors"
                                 title="Edit URL"
                             >
-                                <LinkIcon className="w-3.5 h-3.5" />
+                                <LinkIcon className="size-3.5" />
                             </button>
 
                             <button
@@ -230,7 +230,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                 className="p-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-xl backdrop-blur-md transition-colors"
                                 title="Remove photo"
                             >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash2 className="size-3.5" />
                             </button>
                         </div>
                     </div>
@@ -245,27 +245,27 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                     className={`relative ${aspectContainerClass} border-2 border-dashed rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer select-none transition-all duration-200 overflow-hidden group ${
                         isDragging
                             ? 'border-[#fc6d2d] bg-[#fc6d2d]/10 scale-[1.01] ring-4 ring-[#fc6d2d]/15'
-                            : 'border-neutral-200 dark:border-neutral-700/80 hover:border-[#fc6d2d] dark:hover:border-[#fc6d2d] bg-neutral-50/60 dark:bg-neutral-800/30 hover:bg-orange-50/30 dark:hover:bg-orange-950/10'
+                            : 'border-line/80 hover:border-[#fc6d2d] dark:hover:border-[#fc6d2d] bg-neutral-50/60 dark:bg-neutral-800/30 hover:bg-orange-50/30 dark:hover:bg-orange-950/10'
                     } ${isCompressing ? 'opacity-70 cursor-wait' : ''}`}
                 >
                     {isCompressing ? (
                         <div className="flex flex-col items-center gap-1.5 text-blue-600 dark:text-blue-400 p-2">
-                            <Loader2 className="w-6 h-6 animate-spin" />
+                            <Loader2 className="size-6 rf-spin" />
                             <span className="text-[11px] font-bold">Optimizing image...</span>
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-full w-full gap-2">
                             {/* Graphic Icon Circle */}
                             <div className="w-9 h-9 rounded-2xl bg-white dark:bg-neutral-700/80 border border-neutral-200/80 dark:border-neutral-600 flex items-center justify-center shadow-2xs group-hover:scale-110 group-hover:border-[#fc6d2d]/40 transition-all duration-200">
-                                <Plus className="w-4 h-4 text-neutral-400 dark:text-neutral-300 group-hover:text-[#fc6d2d]" />
+                                <Plus className="size-4 text-neutral-400 dark:text-neutral-300 group-hover:text-[#fc6d2d]" />
                             </div>
 
                             {/* Dropzone Primary Text */}
                             <div className="space-y-0.5">
-                                <p className="text-xs font-bold text-neutral-700 dark:text-neutral-200 group-hover:text-[#fc6d2d] transition-colors">
+                                <p className="text-xs font-bold text-ink-muted group-hover:text-[#fc6d2d] transition-colors">
                                     Upload Photo
                                 </p>
-                                <p className="text-[10px] text-neutral-400 dark:text-neutral-500 hidden sm:block">
+                                <p className="text-[10px] text-ink-muted hidden sm:block">
                                     Drag & drop or click
                                 </p>
                             </div>
@@ -278,20 +278,20 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="px-2 py-1 bg-white dark:bg-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-200 rounded-lg text-[10px] font-bold border border-neutral-200 dark:border-neutral-600 shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
+                                    className="px-2 py-1 bg-white dark:bg-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-600 text-ink-muted rounded-lg text-[10px] font-bold border border-neutral-200 dark:border-neutral-600 shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
                                     title="Choose Local File"
                                 >
-                                    <Upload className="w-3 h-3 text-[#fc6d2d]" />
+                                    <Upload className="size-3.5 text-[#fc6d2d]" />
                                     <span>Browse</span>
                                 </button>
 
                                 <button
                                     type="button"
                                     onClick={() => cameraInputRef.current?.click()}
-                                    className="p-1 bg-white dark:bg-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-200 rounded-lg border border-neutral-200 dark:border-neutral-600 shadow-2xs transition-all cursor-pointer"
+                                    className="p-1 bg-white dark:bg-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-600 text-ink-muted rounded-lg border border-neutral-200 dark:border-neutral-600 shadow-2xs transition-all cursor-pointer"
                                     title="Take Camera Photo"
                                 >
-                                    <Camera className="w-3 h-3 text-purple-500" />
+                                    <Camera className="size-3.5 text-purple-500" />
                                 </button>
 
                                 <button
@@ -300,10 +300,10 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                         setUrlInput('');
                                         setIsUrlModalOpen(true);
                                     }}
-                                    className="p-1 bg-white dark:bg-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-200 rounded-lg border border-neutral-200 dark:border-neutral-600 shadow-2xs transition-all cursor-pointer"
+                                    className="p-1 bg-white dark:bg-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-600 text-ink-muted rounded-lg border border-neutral-200 dark:border-neutral-600 shadow-2xs transition-all cursor-pointer"
                                     title="Paste Image Link / URL"
                                 >
-                                    <LinkIcon className="w-3 h-3 text-emerald-500" />
+                                    <LinkIcon className="size-3.5 text-emerald-500" />
                                 </button>
                             </div>
                         </div>
@@ -311,7 +311,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 </div>
             )}
 
-            {hint && <p className="text-[10px] text-neutral-400 dark:text-neutral-500">{hint}</p>}
+            {hint && <p className="text-[10px] text-ink-muted">{hint}</p>}
 
             {/* Modal 1: URL Entry Drawer / Modal */}
             <Modal
@@ -321,7 +321,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 size="sm"
             >
                 <div className="space-y-4 py-2">
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="text-xs text-ink-muted">
                         Paste a direct HTTPS image URL from the web (e.g. Unsplash, Cloudinary, Shopify).
                     </p>
 
@@ -332,14 +332,14 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                         onChange={(e) => setUrlInput(e.target.value)}
                         placeholder="https://images.unsplash.com/photo-..."
                         autoFocus
-                        leftIcon={<LinkIcon className="w-4 h-4 text-neutral-400" />}
+                        leftIcon={<LinkIcon className="size-4 text-neutral-400" />}
                     />
 
-                    <div className="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800">
+                    <div className="flex items-center justify-end gap-2 pt-3 border-t border-line">
                         <button
                             type="button"
                             onClick={() => setIsUrlModalOpen(false)}
-                            className="px-3.5 py-2 text-xs font-semibold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors cursor-pointer"
+                            className="px-3.5 py-2 text-xs font-semibold text-ink-muted hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors cursor-pointer"
                         >
                             Cancel
                         </button>
@@ -371,7 +371,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                             />
                         </div>
 
-                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800 text-xs">
+                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-line text-xs">
                             <span className="font-mono text-neutral-400 truncate max-w-xs sm:max-w-md">
                                 {value}
                             </span>
@@ -380,9 +380,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                     href={value}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="px-3 py-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white font-bold inline-flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-xl bg-paper-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white font-bold inline-flex items-center gap-1.5"
                                 >
-                                    <ExternalLink className="w-3.5 h-3.5" /> Full URL
+                                    <ExternalLink className="size-3.5" /> Full URL
                                 </a>
                                 <button
                                     type="button"

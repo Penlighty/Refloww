@@ -35,7 +35,7 @@ import {
     Award,
     RotateCcw,
     Clock
-} from 'lucide-react';
+} from '@/components/icons';
 
 type SortField = 'name' | 'email' | 'address' | 'createdAt';
 type SortOrder = 'asc' | 'desc';
@@ -88,7 +88,7 @@ function CustomerRowMenu({
                 className="p-2 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
                 title="Actions"
             >
-                <MoreVertical className="w-4 h-4" />
+                <MoreVertical className="size-4" />
             </button>
 
             <FixedDropdownMenu
@@ -102,7 +102,7 @@ function CustomerRowMenu({
                     onClick={() => setIsOpen(false)}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                 >
-                    <Eye className="w-4 h-4 text-blue-500" />
+                    <Eye className="size-4 text-blue-500" />
                     <span>View Details</span>
                 </Link>
                 <button
@@ -112,7 +112,7 @@ function CustomerRowMenu({
                     }}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors text-left cursor-pointer"
                 >
-                    <Edit2 className="w-4 h-4 text-amber-500" />
+                    <Edit2 className="size-4 text-amber-500" />
                     <span>Edit Customer</span>
                 </button>
                 <Link
@@ -120,7 +120,7 @@ function CustomerRowMenu({
                     onClick={() => setIsOpen(false)}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                 >
-                    <FileText className="w-4 h-4 text-emerald-500" />
+                    <FileText className="size-4 text-emerald-500" />
                     <span>View Documents</span>
                 </Link>
                 <div className="h-px bg-neutral-100 dark:bg-neutral-700 my-1" />
@@ -131,7 +131,7 @@ function CustomerRowMenu({
                     }}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors text-left cursor-pointer"
                 >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="size-4" />
                     <span>Delete</span>
                 </button>
             </FixedDropdownMenu>
@@ -498,7 +498,7 @@ export default function CustomersPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                     <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Customers</h1>
+                        <h1 className="text-2xl font-bold text-ink">Customers</h1>
                         <PageHelpModal
                             title="Customer Directory Overview"
                             description="Centralized directory of all client profiles, contact information, billing addresses, and historical transaction documents."
@@ -511,14 +511,14 @@ export default function CustomersPage() {
                             ]}
                         />
                     </div>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                    <p className="text-sm text-ink-muted mt-1">
                         Manage your client database
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button
                         variant="outline"
-                        leftIcon={<Download className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />}
+                        leftIcon={<Download className="size-4 text-ink-muted" />}
                         iconOnlyMobile
                         title="Export CSV"
                         aria-label="Export CSV"
@@ -528,7 +528,7 @@ export default function CustomersPage() {
                     </Button>
                     <Button
                         variant="outline"
-                        leftIcon={<Upload className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />}
+                        leftIcon={<Upload className="size-4 text-ink-muted" />}
                         iconOnlyMobile
                         title="Import CSV"
                         aria-label="Import CSV"
@@ -536,7 +536,7 @@ export default function CustomersPage() {
                     >
                         Import CSV
                     </Button>
-                    <Button leftIcon={<Plus className="w-4 h-4" />} className="px-3 sm:px-4" onClick={openCreateModal}>
+                    <Button leftIcon={<Plus className="size-4" />} className="px-3 sm:px-4" onClick={openCreateModal}>
                         Add Customer
                     </Button>
                 </div>
@@ -558,7 +558,7 @@ export default function CustomersPage() {
                         className={`px-3 py-1.5 rounded-xl font-medium transition-colors cursor-pointer ${
                             segmentFilter === 'all'
                                 ? 'bg-blue-600 text-white shadow-sm'
-                                : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700'
+                                : 'bg-paper text-ink-muted hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-line'
                         }`}
                     >
                         All ({customers.length})
@@ -568,10 +568,10 @@ export default function CustomersPage() {
                         className={`px-3 py-1.5 rounded-xl font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
                             segmentFilter === 'high_value'
                                 ? 'bg-amber-600 text-white shadow-sm'
-                                : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700'
+                                : 'bg-paper text-ink-muted hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-line'
                         }`}
                     >
-                        <Award className="w-3.5 h-3.5" />
+                        <Award className="size-3.5" />
                         <span>High Value</span>
                     </button>
                     <button
@@ -579,10 +579,10 @@ export default function CustomersPage() {
                         className={`px-3 py-1.5 rounded-xl font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
                             segmentFilter === 'repeat'
                                 ? 'bg-blue-600 text-white shadow-sm'
-                                : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700'
+                                : 'bg-paper text-ink-muted hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-line'
                         }`}
                     >
-                        <RotateCcw className="w-3.5 h-3.5" />
+                        <RotateCcw className="size-3.5" />
                         <span>Repeat</span>
                     </button>
                     <button
@@ -590,10 +590,10 @@ export default function CustomersPage() {
                         className={`px-3 py-1.5 rounded-xl font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
                             segmentFilter === 'dormant'
                                 ? 'bg-rose-600 text-white shadow-sm'
-                                : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700'
+                                : 'bg-paper text-ink-muted hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-line'
                         }`}
                     >
-                        <Clock className="w-3.5 h-3.5" />
+                        <Clock className="size-3.5" />
                         <span>Dormant</span>
                     </button>
 
@@ -603,7 +603,7 @@ export default function CustomersPage() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                leftIcon={<CheckSquare className="w-4 h-4 text-neutral-500" />}
+                                leftIcon={<CheckSquare className="size-4 text-neutral-500" />}
                                 onClick={() => setIsSelectMode(true)}
                             >
                                 Select
@@ -613,7 +613,7 @@ export default function CustomersPage() {
                                 <Button
                                     variant="secondary"
                                     size="sm"
-                                    leftIcon={isAllSelected ? <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" /> : <Square className="w-4 h-4" />}
+                                    leftIcon={isAllSelected ? <CheckSquare className="size-4 text-blue-600 dark:text-blue-400" /> : <Square className="size-4" />}
                                     onClick={toggleSelectAll}
                                 >
                                     {isAllSelected ? `Deselect All (${filteredCustomers.length})` : 'Select All'}
@@ -634,7 +634,7 @@ export default function CustomersPage() {
                                     <Button
                                         variant="danger"
                                         size="sm"
-                                        leftIcon={<Trash2 className="w-4 h-4" />}
+                                        leftIcon={<Trash2 className="size-4" />}
                                         onClick={() => setIsBulkDeleteModalOpen(true)}
                                     >
                                         Delete Selected ({selectedCustomerIds.length})
@@ -648,17 +648,17 @@ export default function CustomersPage() {
 
             {/* Customer List */}
             {customers.length === 0 ? (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12">
+                <div className="bg-paper border border-line rounded-panel shadow-xs p-12">
                     <EmptyState
-                        icon={<Users className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                        icon={<Users className="size-8 text-neutral-400" />}
                         title="No customers yet"
                         description="Add your first customer to start creating personalized documents."
                         action={
                             <div className="flex items-center gap-2">
-                                <Button variant="outline" leftIcon={<Upload className="w-4 h-4" />} onClick={() => fileInputRef.current?.click()}>
+                                <Button variant="outline" leftIcon={<Upload className="size-4" />} onClick={() => fileInputRef.current?.click()}>
                                     Import CSV
                                 </Button>
-                                <Button leftIcon={<Plus className="w-4 h-4" />} onClick={openCreateModal}>
+                                <Button leftIcon={<Plus className="size-4" />} onClick={openCreateModal}>
                                     Add Customer
                                 </Button>
                             </div>
@@ -666,14 +666,14 @@ export default function CustomersPage() {
                     />
                 </div>
             ) : filteredCustomers.length === 0 ? (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12">
+                <div className="bg-paper border border-line rounded-panel shadow-xs p-12">
                     <EmptyState
                         title="No customers found"
                         description={`No customers match "${searchQuery}". Try a different search term.`}
                     />
                 </div>
             ) : (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16 overflow-hidden">
+                <div className="bg-paper border border-line rounded-panel shadow-xs pb-16 overflow-hidden">
                     {/* Mobile Customer Cards (< md) */}
                     <div className="block md:hidden space-y-3 p-3">
                         {filteredCustomers.map((customer) => {
@@ -685,12 +685,12 @@ export default function CustomersPage() {
                                 <div
                                     key={`mobile-customer-${customer.id}`}
                                     onClick={() => setExpandedCustomerId(isExpanded ? null : customer.id)}
-                                    className={`bg-white dark:bg-neutral-800/90 border rounded-2xl p-4 shadow-sm transition-all cursor-pointer ${
+                                    className={`bg-paper/90 border rounded-2xl p-4 shadow-sm transition-all cursor-pointer ${
                                         isRowSelected
                                             ? 'ring-2 ring-blue-500 bg-blue-50/20 border-blue-200'
                                             : isExpanded
                                             ? 'border-neutral-300 dark:border-neutral-600 bg-neutral-50/40 dark:bg-neutral-800/95 shadow-md'
-                                            : 'border-neutral-100 dark:border-neutral-700/80 hover:border-neutral-200 dark:hover:border-neutral-700'
+                                            : 'border-line/80 hover:border-neutral-200 dark:hover:border-neutral-700'
                                     }`}
                                 >
                                     <div className="flex items-start justify-between gap-3 mb-2.5">
@@ -701,21 +701,21 @@ export default function CustomersPage() {
                                                     checked={isRowSelected}
                                                     onClick={(e) => e.stopPropagation()}
                                                     onChange={(e) => toggleSelectRow(customer.id, e as any)}
-                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 shrink-0"
+                                                    className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 shrink-0"
                                                 />
                                             )}
-                                            <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(customer.name)} flex items-center justify-center text-white font-semibold text-sm shrink-0 shadow-sm`}>
+                                            <div className={`size-10 rounded-full bg-gradient-to-br ${getAvatarColor(customer.name)} flex items-center justify-center text-white font-semibold text-sm shrink-0 shadow-sm`}>
                                                 {customer.name.charAt(0).toUpperCase()}
                                             </div>
                                             <div className="min-w-0">
                                                 <Link
                                                     href={`/customers/${customer.id}`}
                                                     onClick={(e) => e.stopPropagation()}
-                                                    className="font-bold text-sm text-[#2d3748] dark:text-white truncate block hover:underline"
+                                                    className="font-bold text-sm text-ink truncate block hover:underline"
                                                 >
                                                     {customer.name}
                                                 </Link>
-                                                <span className="text-[11px] font-mono text-neutral-400 dark:text-neutral-500 font-medium block">
+                                                <span className="text-[11px] font-mono text-ink-muted font-medium block">
                                                     {customer.customerNumber || getNextDocumentNumber('customer', { details: { customerName: customer.name } })}
                                                 </span>
                                             </div>
@@ -742,32 +742,32 @@ export default function CustomersPage() {
 
                                     {/* Contact Details - Shown only when card is selected/expanded */}
                                     {isExpanded && (
-                                        <div className="space-y-1.5 text-xs text-neutral-600 dark:text-neutral-300 py-2.5 border-t border-b border-neutral-100 dark:border-neutral-700/60 my-2">
+                                        <div className="space-y-1.5 text-xs text-ink-muted py-2.5 border-t border-b border-line/60 my-2">
                                             {customer.email && (
                                                 <div className="flex items-center gap-2 truncate">
-                                                    <Mail className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                                                    <Mail className="size-3.5 text-neutral-400 shrink-0" />
                                                     <a href={`mailto:${customer.email}`} onClick={(e) => e.stopPropagation()} className="hover:underline text-blue-600 dark:text-blue-400 truncate">{customer.email}</a>
                                                 </div>
                                             )}
                                             {customer.phone && (
                                                 <div className="flex items-center gap-2">
-                                                    <Phone className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                                                    <Phone className="size-3.5 text-neutral-400 shrink-0" />
                                                     <a href={`tel:${customer.phone}`} onClick={(e) => e.stopPropagation()} className="hover:underline text-neutral-700 dark:text-neutral-300">{formatPhone(customer.phone)}</a>
                                                 </div>
                                             )}
                                             {customer.address && (
                                                 <div className="flex items-start gap-2 truncate">
-                                                    <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0 mt-0.5" />
-                                                    <span className="text-neutral-500 dark:text-neutral-400 truncate">{customer.address}</span>
+                                                    <MapPin className="size-3.5 text-neutral-400 shrink-0 mt-0.5" />
+                                                    <span className="text-ink-muted truncate">{customer.address}</span>
                                                 </div>
                                             )}
                                         </div>
                                     )}
 
-                                    {!isExpanded && <div className="border-t border-neutral-100 dark:border-neutral-700/60 my-2" />}
+                                    {!isExpanded && <div className="border-t border-line/60 my-2" />}
 
                                     <div className="flex items-center justify-between pt-0.5">
-                                        <span className="text-[11px] text-neutral-400 dark:text-neutral-500">
+                                        <span className="text-[11px] text-ink-muted">
                                             Added {formatDate(customer.createdAt)}
                                         </span>
                                         <Link
@@ -787,55 +787,55 @@ export default function CustomersPage() {
                     <div className="hidden md:block overflow-x-auto min-h-[300px]">
                         <table className="w-full min-w-full">
                             <thead>
-                                <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                                <tr className="border-b border-line bg-neutral-50/50 dark:bg-neutral-800/50">
                                     {isSelectMode && (
                                         <th className="px-4 py-4 w-10 text-center">
                                             <input
                                                 type="checkbox"
                                                 checked={isAllSelected}
                                                 onChange={toggleSelectAll}
-                                                className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                             />
                                         </th>
                                     )}
                                     <th className="text-left px-6 py-4">
                                         <button
                                             onClick={() => handleSort('name')}
-                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                         >
                                             Customer
-                                            <ArrowUpDown className="w-3 h-3" />
+                                            <ArrowUpDown className="size-3.5" />
                                         </button>
                                     </th>
                                     <th className="text-left px-6 py-4">
                                         <button
                                             onClick={() => handleSort('email')}
-                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                         >
                                             Contact
-                                            <ArrowUpDown className="w-3 h-3" />
+                                            <ArrowUpDown className="size-3.5" />
                                         </button>
                                     </th>
                                     <th className="text-left px-6 py-4 hidden lg:table-cell">
                                         <button
                                             onClick={() => handleSort('address')}
-                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                         >
                                             Address
-                                            <ArrowUpDown className="w-3 h-3" />
+                                            <ArrowUpDown className="size-3.5" />
                                         </button>
                                     </th>
                                     <th className="text-left px-6 py-4 hidden md:table-cell">
                                         <button
                                             onClick={() => handleSort('createdAt')}
-                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                            className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                         >
                                             Added
-                                            <ArrowUpDown className="w-3 h-3" />
+                                            <ArrowUpDown className="size-3.5" />
                                         </button>
                                     </th>
                                     <th className="text-right px-6 py-4">
-                                        <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                        <span className="text-xs font-medium uppercase tracking-wider text-ink-muted">
                                             Actions
                                         </span>
                                     </th>
@@ -855,25 +855,25 @@ export default function CustomersPage() {
                                                     type="checkbox"
                                                     checked={isRowSelected}
                                                     onChange={(e) => toggleSelectRow(customer.id, e as any)}
-                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                    className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                 />
                                             </td>
                                         )}
                                         <td className="px-6 py-4">
                                             <Link href={`/customers/${customer.id}`} className="flex items-center gap-3 group">
-                                                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(customer.name)} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0`}>
+                                                <div className={`size-10 rounded-full bg-gradient-to-br ${getAvatarColor(customer.name)} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0`}>
                                                     {customer.name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                                        <span className="font-medium text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{customer.name}</span>
+                                                        <span className="font-medium text-ink group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{customer.name}</span>
                                                         {calculateCustomerSegmentMetrics(customer, documents, customers).badges.map((b) => (
                                                             <span key={b.label} className={`px-1.5 py-0.5 text-[10px] font-bold rounded-md ${b.bgClass} ${b.textClass}`}>
                                                                 {b.icon} {b.label}
                                                             </span>
                                                         ))}
                                                     </div>
-                                                    <code className="text-[11px] font-mono text-neutral-400 dark:text-neutral-500 font-medium">
+                                                    <code className="text-[11px] font-mono text-ink-muted font-medium">
                                                         {customer.customerNumber || getNextDocumentNumber('customer', { details: { customerName: customer.name } })}
                                                     </code>
                                                 </div>
@@ -881,21 +881,21 @@ export default function CustomersPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-0.5">
-                                                <span className="text-sm text-neutral-600 dark:text-neutral-300">{customer.email}</span>
+                                                <span className="text-sm text-ink-muted">{customer.email}</span>
                                                 {customer.phone && (
-                                                    <span className="text-xs text-neutral-400 dark:text-neutral-500">{formatPhone(customer.phone)}</span>
+                                                    <span className="text-xs text-ink-muted">{formatPhone(customer.phone)}</span>
                                                 )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 hidden lg:table-cell">
                                             {customer.address ? (
-                                                <span className="text-sm text-neutral-500 dark:text-neutral-400 truncate block max-w-[200px]">{customer.address}</span>
+                                                <span className="text-sm text-ink-muted truncate block max-w-[200px]">{customer.address}</span>
                                             ) : (
-                                                <span className="text-sm text-neutral-400 dark:text-neutral-500">—</span>
+                                                <span className="text-sm text-ink-muted">—</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 hidden md:table-cell">
-                                            <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(customer.createdAt)}</span>
+                                            <span className="text-sm text-ink-muted">{formatDate(customer.createdAt)}</span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <CustomerRowMenu
@@ -925,7 +925,7 @@ export default function CustomersPage() {
                     {/* Duplicate Customer Warning Banner */}
                     {duplicateWarning && (
                         <div className="md:col-span-2 bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 p-3.5 rounded-xl flex items-start gap-3 text-xs text-amber-800 dark:text-amber-300">
-                            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                            <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                             <div>
                                 <span className="font-semibold block text-amber-900 dark:text-amber-200 mb-0.5">Potential Duplicate Customer</span>
                                 <span className="leading-relaxed">{duplicateWarning}</span>
@@ -944,7 +944,7 @@ export default function CustomersPage() {
                             </span>
                         </div>
                         <div className="text-right">
-                            <span className="text-[11px] text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800 px-2.5 py-1 rounded-lg border border-neutral-200/80 dark:border-neutral-700 font-medium shadow-2xs">
+                            <span className="text-[11px] text-ink-muted bg-paper px-2.5 py-1 rounded-lg border border-neutral-200/80 dark:border-neutral-700 font-medium shadow-2xs">
                                 ⚡ Auto-generated
                             </span>
                         </div>
@@ -956,7 +956,7 @@ export default function CustomersPage() {
                         value={formData.name}
                         onChange={(e) => handleNameChange(e.target.value)}
                         error={formErrors.name}
-                        leftIcon={<User className="w-4 h-4" />}
+                        leftIcon={<User className="size-4" />}
                     />
                     <div className="pointer-events-none select-none opacity-80">
                         <Input
@@ -965,8 +965,8 @@ export default function CustomersPage() {
                             readOnly
                             disabled
                             tabIndex={-1}
-                            className="bg-neutral-100 dark:bg-neutral-800 text-neutral-500 font-mono cursor-not-allowed border-neutral-200 dark:border-neutral-700"
-                            leftIcon={<Lock className="w-4 h-4 text-neutral-400" />}
+                            className="bg-paper-2 text-neutral-500 font-mono cursor-not-allowed border-line"
+                            leftIcon={<Lock className="size-4 text-neutral-400" />}
                         />
                     </div>
                     <Input
@@ -976,14 +976,14 @@ export default function CustomersPage() {
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         error={formErrors.email}
-                        leftIcon={<Mail className="w-4 h-4" />}
+                        leftIcon={<Mail className="size-4" />}
                     />
                     <Input
                         label="Company Name"
                         placeholder="e.g. Acme Corp"
                         value={formData.companyName}
                         onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                        leftIcon={<Building className="w-4 h-4" />}
+                        leftIcon={<Building className="size-4" />}
                     />
                     <Input
                         label="Phone Number"
@@ -991,14 +991,14 @@ export default function CustomersPage() {
                         placeholder="e.g. (555) 123-4567"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        leftIcon={<Phone className="w-4 h-4" />}
+                        leftIcon={<Phone className="size-4" />}
                     />
                     <Input
                         label="Address"
                         placeholder="e.g. 123 Main St, City, State"
                         value={formData.address}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                        leftIcon={<MapPin className="w-4 h-4" />}
+                        leftIcon={<MapPin className="size-4" />}
                     />
                     <div className="md:col-span-2">
                         <Textarea
@@ -1056,7 +1056,7 @@ export default function CustomersPage() {
                 {importSuccess ? (
                     <div className="text-center py-6">
                         <div className="w-16 h-16 mx-auto bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-                            <Check className="w-8 h-8 text-emerald-600" />
+                            <Check className="size-8 text-emerald-600" />
                         </div>
                         <h3 className="text-lg font-semibold text-[#2d3748] mb-2">Import Successful!</h3>
                         <p className="text-neutral-600">
@@ -1068,7 +1068,7 @@ export default function CustomersPage() {
                         {importErrors.length > 0 && (
                             <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
                                 <div className="flex items-start gap-3">
-                                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                    <AlertCircle className="size-5 text-red-500 flex-shrink-0 mt-0.5" />
                                     <div>
                                         <p className="text-sm font-medium text-red-800 mb-1">
                                             {importErrors.length} error{importErrors.length !== 1 ? 's' : ''} found
@@ -1103,9 +1103,9 @@ export default function CustomersPage() {
                                         <tbody>
                                             {importData.slice(0, 10).map((customer, i) => (
                                                 <tr key={i} className="border-b border-neutral-100 last:border-b-0">
-                                                    <td className="py-2 text-[#2d3748] dark:text-white">{customer.name}</td>
-                                                    <td className="py-2 text-neutral-600 dark:text-neutral-300">{customer.email}</td>
-                                                    <td className="py-2 text-neutral-500 dark:text-neutral-400 hidden sm:table-cell">{customer.phone || '—'}</td>
+                                                    <td className="py-2 text-ink">{customer.name}</td>
+                                                    <td className="py-2 text-ink-muted">{customer.email}</td>
+                                                    <td className="py-2 text-ink-muted hidden sm:table-cell">{customer.phone || '—'}</td>
                                                 </tr>
                                             ))}
                                             {importData.length > 10 && (

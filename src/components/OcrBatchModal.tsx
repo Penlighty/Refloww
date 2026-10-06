@@ -20,7 +20,7 @@ import {
     Loader2,
     Wand2,
     Camera
-} from 'lucide-react';
+} from '@/components/icons';
 
 interface OcrBatchModalProps {
     isOpen: boolean;
@@ -200,11 +200,11 @@ export default function OcrBatchModal({
                     <div className="bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border border-violet-100 dark:border-violet-800/40 rounded-xl p-4">
                         <div className="flex items-start gap-3">
                             <div className="p-2 bg-violet-600 text-white rounded-lg shrink-0">
-                                <Sparkles className="w-5 h-5" />
+                                <Sparkles className="size-5" />
                             </div>
                             <div>
-                                <h4 className="text-sm font-semibold text-neutral-900 dark:text-white">Smart Packaging & Document OCR Scanner</h4>
-                                <p className="text-xs text-neutral-600 dark:text-neutral-300 mt-1">
+                                <h4 className="text-sm font-semibold text-ink">Smart Packaging & Document OCR Scanner</h4>
+                                <p className="text-xs text-ink-muted mt-1">
                                     Snap or upload a picture of the <strong>product box, bottle label, price tag, or delivery receipt</strong>. Our browser-based AI automatically detects batch number, expiry date, supplier, and price!
                                 </p>
                             </div>
@@ -213,12 +213,12 @@ export default function OcrBatchModal({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Option 1: OCR Scan Image */}
-                        <div className="p-5 border-2 border-dashed border-violet-200 dark:border-violet-800 rounded-2xl bg-white dark:bg-neutral-800 hover:border-violet-500 transition-colors flex flex-col items-center justify-center text-center">
-                            <div className="w-12 h-12 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 flex items-center justify-center mb-3">
-                                <Camera className="w-6 h-6" />
+                        <div className="p-5 border-2 border-dashed border-violet-200 dark:border-violet-800 rounded-2xl bg-paper hover:border-violet-500 transition-colors flex flex-col items-center justify-center text-center">
+                            <div className="size-12 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 flex items-center justify-center mb-3">
+                                <Camera className="size-6" />
                             </div>
-                            <h4 className="text-sm font-semibold text-neutral-900 dark:text-white mb-1">Scan Picture with OCR</h4>
-                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-4">Upload or capture photo of bottle, box, label, or invoice</p>
+                            <h4 className="text-sm font-semibold text-ink mb-1">Scan Picture with OCR</h4>
+                            <p className="text-xs text-ink-muted mb-4">Upload or capture photo of bottle, box, label, or invoice</p>
 
                             <ImageUploader
                                 value=""
@@ -229,12 +229,12 @@ export default function OcrBatchModal({
                         </div>
 
                         {/* Option 2: Quick Manual Entry */}
-                        <div className="p-5 border border-neutral-200 dark:border-neutral-700 rounded-2xl bg-neutral-50/50 dark:bg-neutral-800/50 flex flex-col items-center justify-center text-center">
-                            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
-                                <Wand2 className="w-6 h-6" />
+                        <div className="p-5 border border-line rounded-2xl bg-neutral-50/50 dark:bg-neutral-800/50 flex flex-col items-center justify-center text-center">
+                            <div className="size-12 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
+                                <Wand2 className="size-6" />
                             </div>
-                            <h4 className="text-sm font-semibold text-neutral-900 dark:text-white mb-1">Quick 1-Click Auto Batch</h4>
-                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-4">Skip scanning and auto-generate batch code instantly</p>
+                            <h4 className="text-sm font-semibold text-ink mb-1">Quick 1-Click Auto Batch</h4>
+                            <p className="text-xs text-ink-muted mb-4">Skip scanning and auto-generate batch code instantly</p>
 
                             <Button
                                 variant="outline"
@@ -245,7 +245,7 @@ export default function OcrBatchModal({
                                     }));
                                     setMode('form');
                                 }}
-                                leftIcon={<Wand2 className="w-4 h-4 text-violet-600" />}
+                                leftIcon={<Wand2 className="size-4 text-violet-600" />}
                                 className="w-full"
                             >
                                 Auto-Generate Batch
@@ -258,11 +258,11 @@ export default function OcrBatchModal({
             {isScanning && (
                 <div className="py-12 flex flex-col items-center justify-center text-center">
                     <div className="relative w-20 h-20 mb-6 flex items-center justify-center">
-                        <Loader2 className="w-16 h-16 text-violet-600 animate-spin" />
-                        <Scan className="w-8 h-8 text-violet-500 absolute" />
+                        <Loader2 className="w-16 h-16 text-violet-600 rf-spin" />
+                        <Scan className="size-8 text-violet-500 absolute" />
                     </div>
-                    <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">Analyzing Image with Tesseract OCR...</h3>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">{scanStatusText}</p>
+                    <h3 className="text-lg font-bold text-ink mb-2">Analyzing Image with Tesseract OCR...</h3>
+                    <p className="text-sm text-ink-muted mb-6">{scanStatusText}</p>
 
                     <div className="w-full max-w-xs bg-neutral-200 dark:bg-neutral-700 h-2 rounded-full overflow-hidden">
                         <div
@@ -270,7 +270,7 @@ export default function OcrBatchModal({
                             style={{ width: `${scanProgress}%` }}
                         />
                     </div>
-                    <span className="text-xs font-semibold text-neutral-600 dark:text-neutral-300 mt-2">{scanProgress}%</span>
+                    <span className="text-xs font-semibold text-ink-muted mt-2">{scanProgress}%</span>
                 </div>
             )}
 
@@ -278,7 +278,7 @@ export default function OcrBatchModal({
                 <div className="space-y-4">
                     {scannedImage && (
                         <div className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl">
-                            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                            <CheckCircle2 className="size-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">
                                     OCR Detection Completed ({ocrConfidence}% confidence)
@@ -301,7 +301,7 @@ export default function OcrBatchModal({
                                     onClick={handleAutoGenerateBatch}
                                     className="text-xs text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1 font-medium"
                                 >
-                                    <Wand2 className="w-3 h-3" /> Auto-Generate
+                                    <Wand2 className="size-3.5" /> Auto-Generate
                                 </button>
                             </div>
                             <Input
@@ -309,7 +309,7 @@ export default function OcrBatchModal({
                                 value={formData.batchNumber}
                                 onChange={(e) => setFormData({ ...formData, batchNumber: e.target.value.toUpperCase() })}
                                 error={errors.batchNumber}
-                                leftIcon={<Hash className="w-4 h-4 text-violet-500" />}
+                                leftIcon={<Hash className="size-4 text-violet-500" />}
                             />
                         </div>
 
@@ -320,7 +320,7 @@ export default function OcrBatchModal({
                             value={formData.receivedDate}
                             onChange={(e) => setFormData({ ...formData, receivedDate: e.target.value })}
                             error={errors.receivedDate}
-                            leftIcon={<Calendar className="w-4 h-4 text-blue-500" />}
+                            leftIcon={<Calendar className="size-4 text-blue-500" />}
                         />
 
                         {/* Expiry Date with Presets */}
@@ -341,7 +341,7 @@ export default function OcrBatchModal({
                                 type="date"
                                 value={formData.expiryDate}
                                 onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                                leftIcon={<Calendar className="w-4 h-4 text-rose-500" />}
+                                leftIcon={<Calendar className="size-4 text-rose-500" />}
                             />
                         </div>
 
@@ -354,7 +354,7 @@ export default function OcrBatchModal({
                             value={formData.initialQuantity || ''}
                             onChange={(e) => setFormData({ ...formData, initialQuantity: parseInt(e.target.value, 10) || 0 })}
                             error={errors.initialQuantity}
-                            leftIcon={<Package className="w-4 h-4 text-emerald-500" />}
+                            leftIcon={<Package className="size-4 text-emerald-500" />}
                         />
 
                         {/* Cost Price */}
@@ -366,7 +366,7 @@ export default function OcrBatchModal({
                             placeholder="0.00"
                             value={formData.costPrice || ''}
                             onChange={(e) => setFormData({ ...formData, costPrice: parseFloat(e.target.value) || 0 })}
-                            leftIcon={<DollarSign className="w-4 h-4 text-amber-500" />}
+                            leftIcon={<DollarSign className="size-4 text-amber-500" />}
                         />
 
                         {/* Supplier */}
@@ -376,7 +376,7 @@ export default function OcrBatchModal({
                                 placeholder="e.g. Acme Pharmaceuticals Ltd"
                                 value={formData.supplier}
                                 onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
-                                leftIcon={<Truck className="w-4 h-4 text-purple-500" />}
+                                leftIcon={<Truck className="size-4 text-purple-500" />}
                             />
                         </div>
 
@@ -397,7 +397,7 @@ export default function OcrBatchModal({
             <ModalFooter>
                 <Button variant="ghost" onClick={handleResetAndClose}>Cancel</Button>
                 {mode === 'form' && (
-                    <Button onClick={handleSubmit} leftIcon={<CheckCircle2 className="w-4 h-4" />}>
+                    <Button onClick={handleSubmit} leftIcon={<CheckCircle2 className="size-4" />}>
                         Save Batch & Add Stock
                     </Button>
                 )}

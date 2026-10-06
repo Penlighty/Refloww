@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useProductStore, useDocumentStore, useSettingsStore, useOrganizationStore } from '@/lib/store';
 import { calculateReorderMetrics } from '@/lib/utils/inventoryUtils';
 import { formatCurrency } from '@/lib/utils';
-import { AlertTriangle, Clock, ArrowRight, Package, DollarSign, CheckCircle2, ChevronDown, ChevronUp, Zap, X } from 'lucide-react';
+import { AlertTriangle, Clock, ArrowRight, Package, DollarSign, CheckCircle2, ChevronDown, ChevronUp, Zap, X } from '@/components/icons';
+
+import { Tag } from '@/components/ui';
 
 export default function DashboardActionBanner() {
     const { products, getFilteredProducts } = useProductStore();
@@ -50,28 +52,26 @@ export default function DashboardActionBanner() {
     }
 
     return (
-        <div className="bg-amber-50/50 dark:bg-neutral-800/80 border border-amber-200/80 dark:border-amber-900/60 rounded-2xl p-2.5 sm:p-3.5 shadow-xs transition-all duration-200">
+        <div className="panel bg-paper-2 border border-line rounded-panel p-3.5">
             {/* Header / Toggle Bar */}
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                    <div className="p-1.5 sm:p-2 bg-amber-500/15 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
-                        <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <div className="p-1.5 sm:p-2 bg-paper border border-line text-ink rounded-ctl shrink-0">
+                        <Zap className="size-4" />
                     </div>
                     <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                        <span className="text-xs font-bold text-neutral-900 dark:text-white truncate">
+                        <span className="text-xs font-bold text-ink truncate">
                             Actions Needed
                         </span>
                         {hasLowStock && (
-                            <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 flex items-center gap-1">
-                                <AlertTriangle className="w-3 h-3" />
-                                <span>{lowStockItems.length} Low Stock</span>
-                            </span>
+                            <Tag tone="warning" icon={AlertTriangle}>
+                                {lowStockItems.length} Low Stock
+                            </Tag>
                         )}
                         {hasOverdue && (
-                            <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                <span>{overdueData.count} Overdue</span>
-                            </span>
+                            <Tag tone="overdue" icon={Clock}>
+                                {overdueData.count} Overdue
+                            </Tag>
                         )}
                     </div>
                 </div>
@@ -79,49 +79,49 @@ export default function DashboardActionBanner() {
                 <div className="flex items-center gap-1.5 shrink-0">
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-100/60 dark:bg-amber-950/60 hover:bg-amber-200/60 dark:hover:bg-amber-900/60 rounded-xl transition-colors cursor-pointer"
+                        className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-ink bg-paper border border-line hover:bg-paper-3 rounded-ctl transition-colors cursor-pointer"
                     >
-                        <span className="text-[11px] sm:text-xs">{isExpanded ? 'Hide' : `Details (${totalActions})`}</span>
-                        {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        <span>{isExpanded ? 'Hide' : `Details (${totalActions})`}</span>
+                        {isExpanded ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
                     </button>
 
                     <button
                         type="button"
                         onClick={() => setIsDismissed(true)}
-                        className="p-1.5 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50 rounded-xl transition-colors"
+                        className="p-1.5 text-ink-muted hover:text-ink hover:bg-paper-3 rounded-ctl transition-colors"
                         title="Dismiss banner"
                     >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="size-3.5" />
                     </button>
                 </div>
             </div>
 
             {/* Expandable Decision Cards Container */}
             {isExpanded && (
-                <div className="mt-3 pt-3 border-t border-neutral-100 dark:border-neutral-700/60 grid grid-cols-1 md:grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="mt-3 pt-3 border-t border-line grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Low Stock Decision Card */}
                     {hasLowStock && (
-                        <div className="p-3.5 bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 rounded-xl flex flex-col justify-between">
+                        <div className="p-3.5 bg-paper border border-line rounded-ctl flex flex-col justify-between">
                             <div className="flex items-start gap-2.5">
-                                <div className="p-2 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 rounded-lg shrink-0">
-                                    <AlertTriangle className="w-4 h-4" />
+                                <div className="p-2 bg-paper-2 border border-line text-status-warning rounded-ctl shrink-0">
+                                    <AlertTriangle className="size-4" />
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                                    <h4 className="text-xs font-bold text-ink">
                                         Restock Required
                                     </h4>
-                                    <p className="text-[11px] text-amber-800 dark:text-amber-300 mt-0.5 leading-relaxed">
+                                    <p className="text-[11px] text-ink-muted mt-0.5 leading-relaxed">
                                         <strong>{lowStockItems[0].name}</strong> ({lowStockItems[0].stockQuantity || 0} left) and {lowStockItems.length - 1 > 0 ? `${lowStockItems.length - 1} other item(s)` : 'this item'} are below reorder level.
                                     </p>
                                 </div>
                             </div>
-                            <div className="mt-2.5 pt-2 border-t border-amber-200/50 dark:border-amber-800/40 flex justify-end">
+                            <div className="mt-2.5 pt-2 border-t border-line flex justify-end">
                                 <Link
                                     href="/products"
-                                    className="inline-flex items-center gap-1 text-xs font-bold text-amber-900 dark:text-amber-200 hover:underline"
+                                    className="inline-flex items-center gap-1 text-xs font-bold text-primary-text hover:underline"
                                 >
                                     <span>Restock Now</span>
-                                    <ArrowRight className="w-3 h-3" />
+                                    <ArrowRight className="size-3.5" />
                                 </Link>
                             </div>
                         </div>
@@ -129,27 +129,27 @@ export default function DashboardActionBanner() {
 
                     {/* Overdue Collection Decision Card */}
                     {hasOverdue && (
-                        <div className="p-3.5 bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/60 rounded-xl flex flex-col justify-between">
+                        <div className="p-3.5 bg-paper border border-line rounded-ctl flex flex-col justify-between">
                             <div className="flex items-start gap-2.5">
-                                <div className="p-2 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 rounded-lg shrink-0">
-                                    <Clock className="w-4 h-4" />
+                                <div className="p-2 bg-paper-2 border border-line text-status-overdue rounded-ctl shrink-0">
+                                    <Clock className="size-4" />
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-bold text-rose-900 dark:text-rose-200">
+                                    <h4 className="text-xs font-bold text-ink">
                                         Overdue Collection
                                     </h4>
-                                    <p className="text-[11px] text-rose-800 dark:text-rose-300 mt-0.5 leading-relaxed">
-                                        <strong className="font-mono">{formatCurrency(overdueData.total, company.currency)}</strong> across {overdueData.count} invoice(s) needs collection follow-up.
+                                    <p className="text-[11px] text-ink-muted mt-0.5 leading-relaxed">
+                                        <strong className="money font-bold text-ink">{formatCurrency(overdueData.total, company.currency)}</strong> across {overdueData.count} invoice(s) needs collection follow-up.
                                     </p>
                                 </div>
                             </div>
-                            <div className="mt-2.5 pt-2 border-t border-rose-200/50 dark:border-rose-800/40 flex justify-end">
+                            <div className="mt-2.5 pt-2 border-t border-line flex justify-end">
                                 <Link
                                     href="/invoices"
-                                    className="inline-flex items-center gap-1 text-xs font-bold text-rose-900 dark:text-rose-200 hover:underline"
+                                    className="inline-flex items-center gap-1 text-xs font-bold text-status-overdue hover:underline"
                                 >
                                     <span>Send Reminders</span>
-                                    <ArrowRight className="w-3 h-3" />
+                                    <ArrowRight className="size-3.5" />
                                 </Link>
                             </div>
                         </div>

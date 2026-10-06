@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { clsx } from 'clsx';
-import { X } from 'lucide-react';
+import { X } from '@/components/icons';
 
 interface ModalProps {
     isOpen: boolean;
@@ -79,9 +79,8 @@ export function Modal({
             ref={overlayRef}
             onClick={handleOverlayClick}
             className={clsx(
-                'fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4',
-                'bg-black/60 backdrop-blur-xs',
-                'animate-in fade-in duration-200'
+                'fixed inset-0 z-[200] flex items-end md:items-center justify-center p-0 md:p-4',
+                'bg-scrim animate-fade'
             )}
         >
             <div
@@ -91,19 +90,22 @@ export function Modal({
                 aria-labelledby={title ? 'modal-title' : undefined}
                 aria-describedby={description ? 'modal-description' : undefined}
                 className={clsx(
-                    'relative w-full bg-white dark:bg-[#161a24] rounded-t-[28px] sm:rounded-2xl shadow-2xl border border-neutral-200/80 dark:border-neutral-800',
-                    'animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200 flex flex-col max-h-[85vh] sm:max-h-[90vh] pb-4 sm:pb-0',
+                    'relative w-full bg-paper rounded-t-sheet md:rounded-sheet shadow-sheet border border-line',
+                    'animate-sheet-in md:animate-modal-in flex flex-col max-h-[88dvh] md:max-h-[90vh]',
                     sizeStyles[size]
                 )}
             >
+                {/* Mobile Drag Grabber */}
+                <div className="w-9 h-1 bg-line-strong rounded-full mx-auto mt-2.5 mb-1 md:hidden shrink-0" />
+
                 {/* Header */}
                 {(title || showCloseButton) && (
-                    <div className="flex items-start justify-between p-4 sm:p-6 pb-0 flex-none">
-                        <div>
+                    <div className="flex items-start justify-between p-4 md:p-5 pb-0 shrink-0">
+                        <div className="min-w-0 pr-4">
                             {title && (
                                 <h2
                                     id="modal-title"
-                                    className="text-base sm:text-xl font-bold text-neutral-900 dark:text-white"
+                                    className="font-heading text-title font-semibold text-ink"
                                 >
                                     {title}
                                 </h2>
@@ -111,7 +113,7 @@ export function Modal({
                             {description && (
                                 <p
                                     id="modal-description"
-                                    className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400"
+                                    className="mt-1 text-caption text-ink-3"
                                 >
                                     {description}
                                 </p>
@@ -120,20 +122,21 @@ export function Modal({
                         {showCloseButton && (
                             <button
                                 onClick={onClose}
-                                className="p-1.5 rounded-full text-neutral-400 dark:text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 bg-neutral-100 dark:bg-neutral-800 transition-colors"
+                                className="size-8 rounded-ctl flex items-center justify-center text-ink-3 hover:bg-paper-2 hover:text-ink transition-colors shrink-0"
+                                aria-label="Close modal"
                             >
-                                <X className="w-4 h-4" strokeWidth={2} />
+                                <X className="size-4" />
                             </button>
                         )}
                     </div>
                 )}
 
                 {/* Content */}
-                <div className="p-4 sm:p-6 overflow-y-auto flex-1 custom-scrollbar">{children}</div>
+                <div className="p-4 md:p-5 overflow-y-auto flex-1">{children}</div>
 
                 {/* Footer */}
                 {footer && (
-                    <div className="px-4 pb-4 sm:px-6 sm:pb-6 flex-none">
+                    <div className="px-4 pb-4 md:px-5 md:pb-5 border-t border-line pt-4 shrink-0">
                         {footer}
                     </div>
                 )}
@@ -143,7 +146,6 @@ export function Modal({
     );
 }
 
-// Modal footer component for action buttons
 interface ModalFooterProps {
     children: React.ReactNode;
     className?: string;
@@ -153,7 +155,7 @@ export function ModalFooter({ children, className }: ModalFooterProps) {
     return (
         <div
             className={clsx(
-                'flex items-center justify-end gap-3 pt-4 mt-4 border-t border-neutral-100 dark:border-neutral-700',
+                'flex items-center justify-end gap-2.5',
                 className
             )}
         >

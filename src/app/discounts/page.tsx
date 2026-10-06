@@ -18,7 +18,7 @@ import {
     XCircle,
     CheckSquare,
     Square
-} from 'lucide-react';
+} from '@/components/icons';
 
 type SortField = 'name' | 'percentage' | 'isActive';
 type SortOrder = 'asc' | 'desc';
@@ -171,13 +171,13 @@ export default function DiscountsPage() {
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Discounts</h1>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                    <h1 className="text-2xl font-bold text-ink">Discounts</h1>
+                    <p className="text-sm text-ink-muted mt-1">
                         Manage your promotional discounts
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button leftIcon={<Plus className="w-4 h-4" />} onClick={openCreateModal}>
+                    <Button leftIcon={<Plus className="size-4" />} onClick={openCreateModal}>
                         Add Discount
                     </Button>
                 </div>
@@ -192,7 +192,7 @@ export default function DiscountsPage() {
                     className="flex-1 max-w-md"
                 />
                 <div className="flex items-center gap-2">
-                    <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300">
+                    <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-neutral-100 dark:bg-neutral-700 text-ink-muted">
                         {discounts.length} {discounts.length === 1 ? 'discount' : 'discounts'}
                     </span>
 
@@ -201,7 +201,7 @@ export default function DiscountsPage() {
                         <Button
                             variant="outline"
                             size="sm"
-                            leftIcon={<CheckSquare className="w-4 h-4 text-neutral-500" />}
+                            leftIcon={<CheckSquare className="size-4 text-neutral-500" />}
                             onClick={() => setIsSelectMode(true)}
                         >
                             Select
@@ -211,7 +211,7 @@ export default function DiscountsPage() {
                             <Button
                                 variant="secondary"
                                 size="sm"
-                                leftIcon={isAllSelected ? <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" /> : <Square className="w-4 h-4" />}
+                                leftIcon={isAllSelected ? <CheckSquare className="size-4 text-blue-600 dark:text-blue-400" /> : <Square className="size-4" />}
                                 onClick={toggleSelectAll}
                             >
                                 {isAllSelected ? `Deselect All (${filteredDiscounts.length})` : 'Select All'}
@@ -232,7 +232,7 @@ export default function DiscountsPage() {
                                 <Button
                                     variant="danger"
                                     size="sm"
-                                    leftIcon={<Trash2 className="w-4 h-4" />}
+                                    leftIcon={<Trash2 className="size-4" />}
                                     onClick={() => setIsBulkDeleteModalOpen(true)}
                                 >
                                     Delete Selected ({selectedDiscountIds.length})
@@ -245,70 +245,70 @@ export default function DiscountsPage() {
 
             {/* Discount List */}
             {discounts.length === 0 ? (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12">
+                <div className="bg-paper border border-line rounded-panel shadow-xs p-12">
                     <EmptyState
-                        icon={<Percent className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                        icon={<Percent className="size-8 text-neutral-400" />}
                         title="No discounts yet"
                         description="Create your first discount to apply to documents."
                         action={
-                            <Button leftIcon={<Plus className="w-4 h-4" />} onClick={openCreateModal}>
+                            <Button leftIcon={<Plus className="size-4" />} onClick={openCreateModal}>
                                 Add Discount
                             </Button>
                         }
                     />
                 </div>
             ) : filteredDiscounts.length === 0 ? (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12">
+                <div className="bg-paper border border-line rounded-panel shadow-xs p-12">
                     <EmptyState
                         title="No discounts found"
                         description={`No discounts match "${searchQuery}".`}
                     />
                 </div>
             ) : (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16">
+                <div className="bg-paper border border-line rounded-panel shadow-xs pb-16">
                     <div className="overflow-x-auto min-h-[300px]">
                         <table className="w-full min-w-[600px] md:min-w-full">
                             <thead>
-                            <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                            <tr className="border-b border-line bg-neutral-50/50 dark:bg-neutral-800/50">
                                 {isSelectMode && (
                                     <th className="px-4 py-4 w-10 text-center">
                                         <input
                                             type="checkbox"
                                             checked={isAllSelected}
                                             onChange={toggleSelectAll}
-                                            className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                            className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                         />
                                     </th>
                                 )}
                                 <th className="text-left px-6 py-4">
                                     <button
                                         onClick={() => handleSort('name')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                     >
                                         Name
-                                        <ArrowUpDown className="w-3 h-3" />
+                                        <ArrowUpDown className="size-3.5" />
                                     </button>
                                 </th>
                                 <th className="text-left px-6 py-4">
                                     <button
                                         onClick={() => handleSort('percentage')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                     >
                                         Percentage
-                                        <ArrowUpDown className="w-3 h-3" />
+                                        <ArrowUpDown className="size-3.5" />
                                     </button>
                                 </th>
                                 <th className="text-left px-6 py-4">
                                     <button
                                         onClick={() => handleSort('isActive')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                     >
                                         Status
-                                        <ArrowUpDown className="w-3 h-3" />
+                                        <ArrowUpDown className="size-3.5" />
                                     </button>
                                 </th>
                                 <th className="text-right px-6 py-4">
-                                    <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                    <span className="text-xs font-medium uppercase tracking-wider text-ink-muted">
                                         Actions
                                     </span>
                                 </th>
@@ -330,16 +330,16 @@ export default function DiscountsPage() {
                                                 type="checkbox"
                                                 checked={isRowSelected}
                                                 onChange={(e) => toggleSelectRow(discount.id, e as any)}
-                                                className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                             />
                                         </td>
                                     )}
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                                                <Tag className="w-5 h-5" />
+                                            <div className="size-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                                <Tag className="size-5" />
                                             </div>
-                                            <span className="font-medium text-[#2d3748] dark:text-white">{discount.name}</span>
+                                            <span className="font-medium text-ink">{discount.name}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -352,11 +352,11 @@ export default function DiscountsPage() {
                                             }`}>
                                             {discount.isActive ? (
                                                 <>
-                                                    <CheckCircle className="w-3 h-3" /> Active
+                                                    <CheckCircle className="size-3.5" /> Active
                                                 </>
                                             ) : (
                                                 <>
-                                                    <XCircle className="w-3 h-3" /> Inactive
+                                                    <XCircle className="size-3.5" /> Inactive
                                                 </>
                                             )}
                                         </span>
@@ -367,10 +367,10 @@ export default function DiscountsPage() {
                                                 onClick={() => setOpenMenuId(openMenuId === discount.id ? null : discount.id)}
                                                 className="p-2 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                                             >
-                                                <MoreVertical className="w-4 h-4" />
+                                                <MoreVertical className="size-4" />
                                             </button>
                                             {openMenuId === discount.id && (
-                                                <div className={`absolute right-0 ${popupPosClass} w-44 bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 py-1 z-[100]`}>
+                                                <div className={`absolute right-0 ${popupPosClass} w-44 bg-paper rounded-xl shadow-2xl border border-line py-1 z-[100]`}>
                                                     <button
                                                         onClick={() => {
                                                             updateDiscount(discount.id, { isActive: !discount.isActive });
@@ -379,14 +379,14 @@ export default function DiscountsPage() {
                                                         }}
                                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                     >
-                                                        {discount.isActive ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                                                        {discount.isActive ? <XCircle className="size-4" /> : <CheckCircle className="size-4" />}
                                                         {discount.isActive ? 'Deactivate' : 'Activate'}
                                                     </button>
                                                     <button
                                                         onClick={() => openEditModal(discount)}
                                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                     >
-                                                        <Edit2 className="w-4 h-4" />
+                                                        <Edit2 className="size-4" />
                                                         Edit
                                                     </button>
                                                     <div className="h-px bg-neutral-100 dark:bg-neutral-700 my-1" />
@@ -394,7 +394,7 @@ export default function DiscountsPage() {
                                                         onClick={() => openDeleteModal(discount)}
                                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                                                     >
-                                                        <Trash2 className="w-4 h-4" />
+                                                        <Trash2 className="size-4" />
                                                         Delete
                                                     </button>
                                                 </div>
@@ -425,7 +425,7 @@ export default function DiscountsPage() {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         error={formErrors.name as string}
-                        leftIcon={<Tag className="w-4 h-4" />}
+                        leftIcon={<Tag className="size-4" />}
                     />
                     <div className="grid grid-cols-2 gap-4">
                         <Input
@@ -436,10 +436,10 @@ export default function DiscountsPage() {
                             placeholder="0"
                             value={formData.percentage}
                             onChange={(e) => setFormData({ ...formData, percentage: parseFloat(e.target.value) || 0 })}
-                            leftIcon={<Percent className="w-4 h-4" />}
+                            leftIcon={<Percent className="size-4" />}
                         />
                         <div>
-                            <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">Status</label>
+                            <label className="block text-xs font-medium text-ink-muted mb-1.5">Status</label>
                             <Select
                                 options={[
                                     { value: 'active', label: 'Active' },
@@ -468,8 +468,8 @@ export default function DiscountsPage() {
                 title="Delete Discount"
                 size="sm"
             >
-                <p className="text-neutral-600 dark:text-neutral-300">
-                    Are you sure you want to delete <strong className="text-neutral-900 dark:text-white">{discountToDelete?.name}</strong>?
+                <p className="text-ink-muted">
+                    Are you sure you want to delete <strong className="text-ink">{discountToDelete?.name}</strong>?
                     This action cannot be undone.
                 </p>
                 <ModalFooter>
@@ -489,7 +489,7 @@ export default function DiscountsPage() {
                 title="Delete Selected Discounts"
                 size="sm"
             >
-                <p className="text-neutral-600 dark:text-neutral-300">
+                <p className="text-ink-muted">
                     Are you sure you want to delete <strong>{selectedDiscountIds.length}</strong> selected discount(s)? This action cannot be undone.
                 </p>
                 <ModalFooter>

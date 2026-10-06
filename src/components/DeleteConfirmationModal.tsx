@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from '@/components/icons';
 
 interface DeleteConfirmationModalProps {
     isOpen: boolean;
@@ -35,7 +35,7 @@ export function DeleteConfirmationModal({
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="w-full max-w-md p-6 bg-white rounded-2xl shadow-xl dark:bg-gray-800">
                 <div className="flex items-center gap-3 mb-4 text-red-600 dark:text-red-500">
-                    <AlertTriangle className="w-8 h-8" />
+                    <AlertTriangle className="size-8" />
                     <h2 className="text-xl font-bold">{title}</h2>
                 </div>
                 

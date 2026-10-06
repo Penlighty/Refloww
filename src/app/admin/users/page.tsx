@@ -22,7 +22,7 @@ import {
     ActivitySquare,
     Ban,
     CheckCircle2
-} from 'lucide-react';
+} from '@/components/icons';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
@@ -108,8 +108,8 @@ export default function UserManagementPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Users</h1>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">View and monitor registered user accounts.</p>
+                    <h1 className="text-2xl font-bold text-ink">Users</h1>
+                    <p className="text-sm text-ink-muted mt-1">View and monitor registered user accounts.</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
@@ -117,11 +117,11 @@ export default function UserManagementPage() {
                         className="p-2 text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                         title="Refresh List"
                     >
-                        <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`size-5 ${loading ? 'rf-spin' : ''}`} />
                     </button>
                     {/* Placeholder buttons using standard styles */}
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-700 font-medium text-sm transition-colors shadow-sm">
-                        <Filter className="w-4 h-4" />
+                    <button className="flex items-center gap-2 px-4 py-2 bg-paper border border-line text-neutral-700 dark:text-neutral-300 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-700 font-medium text-sm transition-colors shadow-sm">
+                        <Filter className="size-4" />
                         Filter
                     </button>
                     <button className="bg-[#2d3748] dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-4 py-2 rounded-xl font-medium text-sm transition-colors shadow-lg shadow-neutral-900/20">
@@ -132,22 +132,22 @@ export default function UserManagementPage() {
 
             {/* Search Bar */}
             <div className="max-w-md relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
                 <input
                     type="text"
                     placeholder="Search users by name or email..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white placeholder-neutral-400 shadow-sm transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-paper border border-line rounded-panel shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink placeholder-neutral-400 shadow-sm transition-all"
                 />
             </div>
 
             {/* Users Table */}
-            <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-paper border border-line rounded-panel shadow-xs shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse min-w-[800px] md:min-w-full">
                         <thead>
-                            <tr className="bg-neutral-50/50 dark:bg-neutral-800/50 border-b border-neutral-100 dark:border-neutral-700 text-xs font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                            <tr className="bg-neutral-50/50 dark:bg-neutral-800/50 border-b border-line text-xs font-semibold text-ink-muted uppercase tracking-wider">
                                 <th className="px-6 py-4">User</th>
                                 <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4">Joined</th>
@@ -160,7 +160,7 @@ export default function UserManagementPage() {
                         <tbody className="divide-y divide-neutral-50 dark:divide-neutral-700/50">
                             {filteredUsers.length === 0 && !loading ? (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-neutral-500 dark:text-neutral-400">
+                                    <td colSpan={7} className="px-6 py-12 text-center text-ink-muted">
                                         No users found matching your search.
                                     </td>
                                 </tr>
@@ -169,7 +169,7 @@ export default function UserManagementPage() {
                                     <tr key={user.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30 transition-colors group relative">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center text-neutral-500 dark:text-neutral-400 font-bold overflow-hidden border border-neutral-200 dark:border-neutral-600">
+                                                <div className="size-10 rounded-full bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center text-ink-muted font-bold overflow-hidden border border-neutral-200 dark:border-neutral-600">
                                                     {user.photoURL ? (
                                                         <img src={user.photoURL} alt={user.displayName || user.email} className="w-full h-full object-cover" />
                                                     ) : (
@@ -177,8 +177,8 @@ export default function UserManagementPage() {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <div className="font-medium text-[#2d3748] dark:text-white">{user.displayName || 'Unnamed User'}</div>
-                                                    <div className="text-sm text-neutral-500 dark:text-neutral-400">{user.email}</div>
+                                                    <div className="font-medium text-ink">{user.displayName || 'Unnamed User'}</div>
+                                                    <div className="text-sm text-ink-muted">{user.email}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -188,24 +188,24 @@ export default function UserManagementPage() {
                                             </Badge>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-neutral-600 dark:text-neutral-300">
+                                            <div className="text-sm text-ink-muted">
                                                 {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-neutral-600 dark:text-neutral-300">
+                                            <div className="text-sm text-ink-muted">
                                                 {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            <div className="inline-flex items-center gap-1.5 text-sm text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-700/50 px-2.5 py-1 rounded-lg border border-neutral-100 dark:border-neutral-700">
-                                                <FileText className="w-3.5 h-3.5 text-neutral-400" />
+                                            <div className="inline-flex items-center gap-1.5 text-sm text-ink-muted bg-neutral-50 dark:bg-neutral-700/50 px-2.5 py-1 rounded-lg border border-line">
+                                                <FileText className="size-3.5 text-neutral-400" />
                                                 {user.metadata?.documentCount ?? 0}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            <div className="inline-flex items-center gap-1.5 text-sm text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-700/50 px-2.5 py-1 rounded-lg border border-neutral-100 dark:border-neutral-700">
-                                                <LayoutTemplate className="w-3.5 h-3.5 text-neutral-400" />
+                                            <div className="inline-flex items-center gap-1.5 text-sm text-ink-muted bg-neutral-50 dark:bg-neutral-700/50 px-2.5 py-1 rounded-lg border border-line">
+                                                <LayoutTemplate className="size-3.5 text-neutral-400" />
                                                 {user.metadata?.templateCount ?? 0}
                                             </div>
                                         </td>
@@ -218,7 +218,7 @@ export default function UserManagementPage() {
                                                     }}
                                                     className="p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                                                 >
-                                                    <MoreHorizontal className="w-5 h-5" />
+                                                    <MoreHorizontal className="size-5" />
                                                 </button>
                                             </div>
                                         </td>
@@ -230,21 +230,21 @@ export default function UserManagementPage() {
                 </div>
 
                 {/* Pagination Footer */}
-                <div className="px-6 py-4 border-t border-neutral-100 dark:border-neutral-700 bg-neutral-50/30 dark:bg-neutral-800/30 flex items-center justify-between">
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                <div className="px-6 py-4 border-t border-line bg-neutral-50/30 dark:bg-neutral-800/30 flex items-center justify-between">
+                    <p className="text-sm text-ink-muted">
                         Showing {filteredUsers.length} users
                     </p>
                     <div className="flex gap-2">
                         <button
                             disabled={true}
-                            className="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-400 dark:text-neutral-600 rounded-lg text-sm font-medium disabled:opacity-50 cursor-not-allowed"
+                            className="px-3 py-1.5 border border-line bg-paper text-neutral-400 dark:text-neutral-600 rounded-lg text-sm font-medium disabled:opacity-50 cursor-not-allowed"
                         >
                             Previous
                         </button>
                         <button
                             onClick={() => loadUsers()}
                             disabled={!lastDoc || loading}
-                            className="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+                            className="px-3 py-1.5 border border-line bg-paper text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
                         >
                             {loading ? 'Loading...' : 'Next'}
                         </button>
@@ -261,7 +261,7 @@ export default function UserManagementPage() {
                 {selectedUser && (
                     <div className="p-6 space-y-6">
                         <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700 flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center font-bold text-neutral-500 overflow-hidden shrink-0">
+                            <div className="size-12 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center font-bold text-neutral-500 overflow-hidden shrink-0">
                                 {selectedUser.photoURL ? (
                                     <img src={selectedUser.photoURL} alt="" className="w-full h-full object-cover" />
                                 ) : (
@@ -279,7 +279,7 @@ export default function UserManagementPage() {
 
                         <div className="space-y-3">
                             <h4 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                <Shield className="w-4 h-4 text-blue-500" />
+                                <Shield className="size-4 text-blue-500" />
                                 Administrative Role
                             </h4>
                             <div className="grid grid-cols-2 gap-2">
@@ -308,7 +308,7 @@ export default function UserManagementPage() {
 
                         <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
                             <h4 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                <ActivitySquare className="w-4 h-4 text-orange-500" />
+                                <ActivitySquare className="size-4 text-orange-500" />
                                 Account Status
                             </h4>
                             {selectedUser.accountStatus === 'active' ? (
@@ -318,7 +318,7 @@ export default function UserManagementPage() {
                                     isLoading={actionLoading}
                                     className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
                                 >
-                                    <Ban className="w-4 h-4 mr-2" />
+                                    <Ban className="size-4 mr-2" />
                                     Deactivate User
                                 </Button>
                             ) : (
@@ -327,7 +327,7 @@ export default function UserManagementPage() {
                                     isLoading={actionLoading}
                                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                                 >
-                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                    <CheckCircle2 className="size-4 mr-2" />
                                     Reactivate User
                                 </Button>
                             )}

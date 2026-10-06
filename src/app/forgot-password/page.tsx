@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { Button, Input } from '@/components/ui';
-import { Mail, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Mail, AlertCircle, CheckCircle, ArrowLeft } from '@/components/icons';
 
 export default function ForgotPasswordPage() {
     const router = useRouter();
@@ -50,9 +50,9 @@ export default function ForgotPasswordPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+            <div className="min-h-screen flex items-center justify-center bg-paper-2">
                 <div className="animate-pulse flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-blue-500/20 mb-4"></div>
+                    <div className="size-12 rounded-full bg-blue-500/20 mb-4"></div>
                     <div className="h-4 w-24 bg-neutral-200 dark:bg-neutral-700 rounded"></div>
                 </div>
             </div>
@@ -62,14 +62,14 @@ export default function ForgotPasswordPage() {
     const displayError = localError || error;
 
     return (
-        <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900 p-4">
+        <div className="w-full min-h-screen flex items-center justify-center bg-paper-2 p-4">
             <div className="w-full max-w-md">
                 {/* Back Link */}
                 <Link
                     href="/login"
                     className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 mb-6 transition-colors"
                 >
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="size-4" />
                     Back to login
                 </Link>
 
@@ -82,28 +82,28 @@ export default function ForgotPasswordPage() {
                             className="h-8 w-auto object-contain"
                         />
                     </div>
-                    <h1 className="text-3xl font-bold text-[#2d3748] dark:text-white">
+                    <h1 className="text-3xl font-bold text-ink">
                         Reset Password
                     </h1>
-                    <p className="text-neutral-500 dark:text-neutral-400 mt-2">
+                    <p className="text-ink-muted mt-2">
                         Enter your email and we'll send you a reset link
                     </p>
                 </div>
 
                 {/* Card */}
-                <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl border border-neutral-100 dark:border-neutral-700 p-8">
+                <div className="bg-paper rounded-2xl shadow-xl border border-line p-8">
                     {success ? (
                         // Success State
                         <div className="text-center py-4">
                             <div className="w-16 h-16 mx-auto mb-4 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+                                <CheckCircle className="size-8 text-green-600 dark:text-green-400" />
                             </div>
-                            <h2 className="text-xl font-semibold text-[#2d3748] dark:text-white mb-2">
+                            <h2 className="text-xl font-semibold text-ink mb-2">
                                 Check your email
                             </h2>
-                            <p className="text-neutral-500 dark:text-neutral-400 mb-6">
+                            <p className="text-ink-muted mb-6">
                                 We've sent a password reset link to<br />
-                                <strong className="text-[#2d3748] dark:text-white">{email}</strong>
+                                <strong className="text-ink">{email}</strong>
                             </p>
                             <Button
                                 variant="outline"
@@ -120,7 +120,7 @@ export default function ForgotPasswordPage() {
                             {/* Error Message */}
                             {displayError && (
                                 <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start gap-3">
-                                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                    <AlertCircle className="size-5 text-red-500 flex-shrink-0 mt-0.5" />
                                     <p className="text-sm text-red-600 dark:text-red-400">{displayError}</p>
                                 </div>
                             )}
@@ -133,7 +133,7 @@ export default function ForgotPasswordPage() {
                                     placeholder="you@example.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    leftIcon={<Mail className="w-4 h-4" />}
+                                    leftIcon={<Mail className="size-4" />}
                                     autoComplete="email"
                                 />
 

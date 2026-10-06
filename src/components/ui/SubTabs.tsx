@@ -6,7 +6,7 @@ import PageHelpModal from './PageHelpModal';
 export interface TabItem<T extends string = string> {
     id: T;
     label: string;
-    icon: React.ComponentType<{ className?: string }>;
+    icon?: React.ComponentType<any>;
     count?: number | string;
     badge?: React.ReactNode;
     helpModal?: {
@@ -25,59 +25,42 @@ export interface SubTabsProps<T extends string = string> {
     className?: string;
 }
 
-/**
- * Universal Horizontal SubTabs component for Refloww.
- * 
- * Rules:
- * - Inactive tabs display ONLY their icon with tooltips/aria-labels for space optimization & visual clarity.
- * - Active tabs expand to show Icon + Label + Badge/Count.
- * - Secondary variant uses high-contrast dark/white pills (no orange #FC6D2D).
- * - Primary variant uses brand orange (#FC6D2D) for main top section navigation.
- */
 export function SubTabs<T extends string = string>({
     tabs,
     activeTab,
     onChangeTab,
-    variant = 'secondary',
     className = ''
 }: SubTabsProps<T>) {
     return (
-        <div className={`flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-none ${className}`}>
+        <div className={`flex items-center gap-4 md:gap-6 border-b border-line overflow-x-auto h-10 scrollbar-none ${className}`}>
             {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
 
-                const activeStyles =
-                    variant === 'primary'
-                        ? 'bg-[#fc6d2d] text-white shadow-md shadow-orange-500/20 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold'
-                        : 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-md px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold';
-
-                const inactiveStyles =
-                    'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 p-2 sm:px-2.5 sm:py-2 border border-neutral-200/80 dark:border-neutral-700/60 rounded-xl';
-
-                const displayTitle = `${tab.label}${tab.count !== undefined ? ` (${tab.count})` : ''}`;
-
                 return (
-                    <div key={tab.id} className="flex items-center gap-1 shrink-0">
+                    <div key={tab.id} className="flex items-center gap-1 shrink-0 h-full">
                         <button
                             type="button"
                             onClick={() => onChangeTab(tab.id)}
-                            title={displayTitle}
-                            aria-label={displayTitle}
-                            className={`flex items-center gap-2 transition-all duration-200 whitespace-nowrap cursor-pointer ${
-                                isActive ? activeStyles : inactiveStyles
+                            data-active={isActive ? "true" : undefined}
+                            aria-current={isActive ? "page" : undefined}
+                            className={`relative flex items-center gap-2 h-full px-1 text-body transition-colors whitespace-nowrap cursor-pointer ${
+                                isActive
+                                    ? 'text-ink font-medium'
+                                    : 'text-ink-3 hover:text-ink font-normal'
                             }`}
                         >
-                            <Icon className="w-4 h-4 shrink-0" />
                             {isActive && (
-                                <>
-                                    <span>
-                                        {tab.label}
-                                        {tab.count !== undefined && ` (${tab.count})`}
-                                    </span>
-                                    {tab.badge}
-                                </>
+                                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500 rounded-full" />
                             )}
+                            {Icon && <Icon className="size-4 shrink-0" weight={isActive ? "bold" : "regular"} />}
+                            <span>{tab.label}</span>
+                            {tab.count !== undefined && (
+                                <span className="text-micro money text-ink-3 bg-paper-2 px-1.5 py-0.5 rounded-tag border border-line">
+                                    {tab.count}
+                                </span>
+                            )}
+                            {tab.badge}
                         </button>
                         {tab.helpModal && (
                             <PageHelpModal

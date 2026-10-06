@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    optimizePackageImports: ['date-fns', 'clsx', 'uuid']
+  },
   serverExternalPackages: ['firebase', '@grpc/proto-loader', 'protobufjs']
 };
 

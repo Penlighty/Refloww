@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Lock, Key, Eye, EyeOff, RefreshCw, ShieldCheck, Info } from 'lucide-react';
+import { Lock, Key, Eye, EyeOff, RefreshCw, ShieldCheck, Info } from '@/components/icons';
 import { Button, Input, Modal, ModalFooter } from '@/components/ui';
 import { useEncryption } from '@/contexts/EncryptionContext';
 import { toast } from 'react-hot-toast';
@@ -53,7 +53,7 @@ export default function EncryptionUnlockModal() {
             <div className="space-y-4">
                 {/* Friendly welcome message */}
                 <div className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
-                    <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                    <ShieldCheck className="size-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                     <div>
                         <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
                             Your data is protected
@@ -78,7 +78,7 @@ export default function EncryptionUnlockModal() {
                                 setError('');
                             }}
                             placeholder="Enter your encryption password"
-                            leftIcon={<Key className="w-4 h-4 text-neutral-400" />}
+                            leftIcon={<Key className="size-4 text-neutral-400" />}
                             onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
                             autoFocus
                         />
@@ -87,7 +87,7 @@ export default function EncryptionUnlockModal() {
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
                         >
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                         </button>
                     </div>
                     {error && (
@@ -96,11 +96,11 @@ export default function EncryptionUnlockModal() {
                 </div>
 
                 {/* Password reminder info */}
-                <div className="flex items-start gap-2 text-xs text-neutral-500 dark:text-neutral-400">
-                    <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 text-xs text-ink-muted">
+                    <Info className="size-4 flex-shrink-0 mt-0.5" />
                     <p>
                         This prompt appears periodically to help you remember your encryption password.
-                        <strong className="text-neutral-600 dark:text-neutral-300"> There is no password recovery</strong> —
+                        <strong className="text-ink-muted"> There is no password recovery</strong> —
                         if forgotten, your encrypted data cannot be accessed.
                     </p>
                 </div>
@@ -116,7 +116,7 @@ export default function EncryptionUnlockModal() {
                 <Button
                     onClick={handleUnlock}
                     disabled={!password || isLoading}
-                    leftIcon={isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+                    leftIcon={isLoading ? <RefreshCw className="size-4 rf-spin" /> : <Lock className="size-4" />}
                 >
                     {isLoading ? 'Unlocking...' : 'Unlock'}
                 </Button>

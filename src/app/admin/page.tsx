@@ -13,7 +13,7 @@ import {
     ArrowRight,
     TrendingUp,
     Clock
-} from 'lucide-react';
+} from '@/components/icons';
 import { StatCard } from '@/components/admin/StatCard';
 import { getPlatformStats, getNewFeedback, AdminStats, Feedback } from '@/lib/firebase/admin';
 
@@ -74,14 +74,14 @@ export default function AdminDashboard() {
                         disabled={loading}
                         className="flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 text-white rounded-xl font-medium text-sm transition-all hover:scale-105 active:scale-95"
                     >
-                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`size-4 ${loading ? 'rf-spin' : ''}`} />
                         Refresh Data
                     </button>
                     <Link
                         href="/"
                         className="flex items-center gap-2 px-5 py-2.5 bg-white text-neutral-900 hover:bg-neutral-100 rounded-xl font-medium text-sm transition-all hover:scale-105 active:scale-95 shadow-lg"
                     >
-                        <Store className="w-4 h-4" />
+                        <Store className="size-4" />
                         Live App
                     </Link>
                 </div>
@@ -133,13 +133,13 @@ export default function AdminDashboard() {
             {/* Secondary Section - Feedback & Alerts */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Feedback Summary */}
-                <div className="lg:col-span-2 bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden flex flex-col h-full admin-card">
-                    <div className="p-6 border-b border-neutral-100 dark:border-neutral-700/0 admin-header-glass flex items-center justify-between">
+                <div className="lg:col-span-2 bg-paper rounded-2xl border border-line shadow-sm overflow-hidden flex flex-col h-full admin-card">
+                    <div className="p-6 border-b border-line/0 admin-header-glass flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
-                                <MessageSquare className="w-5 h-5" />
+                                <MessageSquare className="size-5" />
                             </div>
-                            <h2 className="text-lg font-bold text-[#2d3748] dark:text-white">Recent Feedback</h2>
+                            <h2 className="text-lg font-bold text-ink">Recent Feedback</h2>
                         </div>
                         <span className={`text-xs font-bold px-3 py-1 rounded-full ${(stats?.pendingFeedback ?? 0) > 0
                             ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800'
@@ -152,23 +152,23 @@ export default function AdminDashboard() {
                     <div className="flex-1">
                         {feedbackLoading ? (
                             <div className="p-12 text-center flex flex-col items-center justify-center h-full">
-                                <RefreshCw className="w-8 h-8 animate-spin text-neutral-300 dark:text-neutral-600 mb-4" />
+                                <RefreshCw className="size-8 rf-spin text-neutral-300 dark:text-neutral-600 mb-4" />
                                 <p className="text-neutral-400">Loading feedback...</p>
                             </div>
                         ) : recentFeedback.length === 0 ? (
-                            <div className="p-12 text-center text-neutral-400 dark:text-neutral-500 flex flex-col items-center justify-center h-full">
-                                <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mb-4">
-                                    <MessageSquare className="w-8 h-8 text-neutral-300 dark:text-neutral-600" />
+                            <div className="p-12 text-center text-ink-muted flex flex-col items-center justify-center h-full">
+                                <div className="w-16 h-16 bg-paper-2 rounded-full flex items-center justify-center mb-4">
+                                    <MessageSquare className="size-8 text-neutral-300 dark:text-neutral-600" />
                                 </div>
-                                <h3 className="text-neutral-900 dark:text-white font-medium mb-1">No feedback yet</h3>
+                                <h3 className="text-ink font-medium mb-1">No feedback yet</h3>
                                 <p>When users submit feedback, it will appear here.</p>
                             </div>
                         ) : (
-                            <div className="divide-y divide-neutral-100 dark:divide-neutral-700/0">
+                            <div className="divide-y divide-line/0">
                                 {recentFeedback.map((item) => (
                                     <div key={item.id} className="p-5 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors group admin-table-row">
                                         <div className="flex items-start gap-4">
-                                            <div className={`mt-1 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shadow-sm ${item.sentiment === 'positive'
+                                            <div className={`mt-1 size-10 rounded-xl flex items-center justify-center text-sm font-bold shadow-sm ${item.sentiment === 'positive'
                                                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                                                 : item.sentiment === 'negative'
                                                     ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
@@ -178,12 +178,12 @@ export default function AdminDashboard() {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between mb-1">
-                                                    <h4 className="text-sm font-semibold text-[#2d3748] dark:text-white truncate">
+                                                    <h4 className="text-sm font-semibold text-ink truncate">
                                                         {item.userEmail || 'Anonymous User'}
                                                     </h4>
                                                     <div className="flex items-center gap-2">
                                                         {item.category && (
-                                                            <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400 rounded-md">
+                                                            <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 bg-neutral-100 dark:bg-neutral-700 text-ink-muted rounded-md">
                                                                 {item.category}
                                                             </span>
                                                         )}
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <p className="text-sm text-neutral-600 dark:text-neutral-300 line-clamp-2 leading-relaxed">
+                                                <p className="text-sm text-ink-muted line-clamp-2 leading-relaxed">
                                                     "{item.message}"
                                                 </p>
                                             </div>
@@ -203,38 +203,38 @@ export default function AdminDashboard() {
                         )}
                     </div>
 
-                    <div className="p-4 border-t border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                    <div className="p-4 border-t border-line bg-neutral-50/50 dark:bg-neutral-800/50">
                         <Link
                             href="/admin/feedback"
                             className="flex items-center justify-center w-full py-2.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors"
                         >
                             View All Feedback
-                            <ArrowRight className="w-4 h-4 ml-1.5" />
+                            <ArrowRight className="size-4 ml-1.5" />
                         </Link>
                     </div>
                 </div>
 
                 {/* System Health / Quick Status */}
                 <div className="space-y-6">
-                    <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-sm p-6 admin-card">
+                    <div className="bg-paper rounded-2xl border border-line shadow-sm p-6 admin-card">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
-                                <Activity className="w-5 h-5" />
+                                <Activity className="size-5" />
                             </div>
-                            <h2 className="text-lg font-bold text-[#2d3748] dark:text-white">System Status</h2>
+                            <h2 className="text-lg font-bold text-ink">System Status</h2>
                         </div>
 
                         <div className="space-y-6">
                             <div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Firestore Services</span>
+                                    <span className="text-sm font-medium text-ink-muted">Firestore Services</span>
                                     <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full border border-emerald-100 dark:border-emerald-900/50">
                                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                                         OPERATIONAL
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Storage Buckets</span>
+                                    <span className="text-sm font-medium text-ink-muted">Storage Buckets</span>
                                     <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full border border-emerald-100 dark:border-emerald-900/50">
                                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                                         OPERATIONAL
@@ -242,10 +242,10 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
 
-                            <div className="pt-6 border-t border-neutral-100 dark:border-neutral-700">
+                            <div className="pt-6 border-t border-line">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">User Activity (30d)</span>
-                                    <span className="text-lg font-bold text-[#2d3748] dark:text-white">
+                                    <span className="text-lg font-bold text-ink">
                                         {stats && stats.totalUsers ? Math.round(((stats.activeUsers30Days || 0) / stats.totalUsers) * 100) : 0}%
                                     </span>
                                 </div>
@@ -269,11 +269,11 @@ export default function AdminDashboard() {
                             >
                                 <span className="flex items-center gap-3">
                                     <div className="p-1.5 bg-white/10 rounded-lg">
-                                        <Users className="w-4 h-4 text-neutral-300" />
+                                        <Users className="size-4 text-neutral-300" />
                                     </div>
                                     <span className="font-medium text-sm">Manage Users</span>
                                 </span>
-                                <ArrowRight className="w-4 h-4 text-neutral-400 group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight className="size-4 text-neutral-400 group-hover:translate-x-1 transition-transform" />
                             </Link>
                             <Link
                                 href="/admin/notifications"
@@ -281,11 +281,11 @@ export default function AdminDashboard() {
                             >
                                 <span className="flex items-center gap-3">
                                     <div className="p-1.5 bg-white/10 rounded-lg">
-                                        <MessageSquare className="w-4 h-4 text-neutral-300" />
+                                        <MessageSquare className="size-4 text-neutral-300" />
                                     </div>
                                     <span className="font-medium text-sm">Post Announcement</span>
                                 </span>
-                                <ArrowRight className="w-4 h-4 text-neutral-400 group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight className="size-4 text-neutral-400 group-hover:translate-x-1 transition-transform" />
                             </Link>
                         </div>
                     </div>

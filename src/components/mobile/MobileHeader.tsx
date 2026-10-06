@@ -25,7 +25,7 @@ import {
     ArrowRight,
     Package,
     FileText
-} from 'lucide-react';
+} from '@/components/icons';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useSettingsStore, useStorefrontStore, useOrganizationStore, useProductStore, useDocumentStore } from '@/lib/store';
 import { ThemeToggleSimple } from '@/components/ThemeToggle';
@@ -125,11 +125,11 @@ export default function MobileHeader({
                                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-100/90 dark:bg-neutral-800/90 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/80 transition-colors max-w-[160px] min-w-0"
                                 title="Switch Organization"
                             >
-                                <Building className="w-3.5 h-3.5 text-[#fc6d2d] shrink-0" />
+                                <Building className="size-3.5 text-[#fc6d2d] shrink-0" />
                                 <span className="text-xs font-bold truncate">
                                     {activeOrg?.name || 'My Business'}
                                 </span>
-                                <ChevronDown className="w-3.5 h-3.5 text-neutral-400 shrink-0 ml-0.5" />
+                                <ChevronDown className="size-3.5 text-neutral-400 shrink-0 ml-0.5" />
                             </button>
                         </div>
                     ) : computedVariant === 'creation' ? (
@@ -137,11 +137,11 @@ export default function MobileHeader({
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 flex items-center justify-center shrink-0"
+                                className="size-8 rounded-xl bg-paper-2 text-ink-muted flex items-center justify-center shrink-0"
                             >
-                                <ArrowLeft className="w-4 h-4" />
+                                <ArrowLeft className="size-4" />
                             </button>
-                            <h2 className="text-xs font-bold text-neutral-900 dark:text-white truncate max-w-[140px]">
+                            <h2 className="text-xs font-bold text-ink truncate max-w-[140px]">
                                 {title || 'Create Record'}
                             </h2>
                         </div>
@@ -149,10 +149,10 @@ export default function MobileHeader({
                         <div className="flex items-center gap-2 min-w-0">
                             <Link
                                 href="/"
-                                className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 flex items-center justify-center shrink-0 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                                className="size-8 rounded-xl bg-paper-2 text-ink-muted flex items-center justify-center shrink-0 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
                                 title="Return to Home Dashboard"
                             >
-                                <ArrowLeft className="w-4 h-4" />
+                                <ArrowLeft className="size-4" />
                             </Link>
 
                             {/* Replace Overview title with Full Logo if title is Overview or omitted */}
@@ -165,7 +165,7 @@ export default function MobileHeader({
                                     />
                                 </Link>
                             ) : (
-                                <h2 className="text-sm sm:text-base font-bold text-neutral-900 dark:text-white truncate max-w-[140px] sm:max-w-xs">
+                                <h2 className="text-sm sm:text-base font-bold text-ink truncate max-w-[140px] sm:max-w-xs">
                                     {title}
                                 </h2>
                             )}
@@ -178,22 +178,22 @@ export default function MobileHeader({
                         <button
                             type="button"
                             onClick={() => setIsSearchOpen(true)}
-                            className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 flex items-center justify-center transition-colors"
+                            className="size-8 rounded-xl bg-paper-2 text-ink-muted flex items-center justify-center transition-colors"
                             title="Search"
                         >
-                            <Search className="w-4 h-4" />
+                            <Search className="size-4" />
                         </button>
 
                         {/* 2. Notifications Bell Button */}
                         <button
                             type="button"
                             onClick={() => setIsNotificationsOpen(true)}
-                            className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 flex items-center justify-center transition-colors relative"
+                            className="size-8 rounded-xl bg-paper-2 text-ink-muted flex items-center justify-center transition-colors relative"
                             title="Notifications & Alerts"
                         >
-                            <Bell className="w-4 h-4" />
+                            <Bell className="size-4" />
                             {totalNotificationCount > 0 && (
-                                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white dark:border-neutral-900 animate-pulse">
+                                <span className="absolute -top-1 -right-1 size-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white dark:border-neutral-900 animate-pulse">
                                     {totalNotificationCount}
                                 </span>
                             )}
@@ -202,12 +202,12 @@ export default function MobileHeader({
                         {/* 3. Global Cart Button */}
                         <Link
                             href="/pos"
-                            className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 flex items-center justify-center transition-colors relative"
+                            className="size-8 rounded-xl bg-paper-2 text-ink-muted flex items-center justify-center transition-colors relative"
                             title="Cart"
                         >
-                            <ShoppingBag className="w-4 h-4" />
+                            <ShoppingBag className="size-4" />
                             {cartTotalCount > 0 && (
-                                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#fc6d2d] text-white text-[9px] font-bold flex items-center justify-center border-2 border-white dark:border-neutral-900">
+                                <span className="absolute -top-1 -right-1 size-4 rounded-full bg-[#fc6d2d] text-white text-[9px] font-bold flex items-center justify-center border-2 border-white dark:border-neutral-900">
                                     {cartTotalCount}
                                 </span>
                             )}
@@ -226,7 +226,7 @@ export default function MobileHeader({
                                 disabled={isSubmitting}
                                 className="h-8 px-3 bg-[#fc6d2d] hover:bg-[#d9531d] text-white text-xs font-semibold rounded-xl flex items-center gap-1 shrink-0 shadow-xs active:scale-95 disabled:opacity-50 ml-1"
                             >
-                                <Check className="w-3.5 h-3.5" />
+                                <Check className="size-3.5" />
                                 <span>{isSubmitting ? 'Saving...' : 'Save'}</span>
                             </button>
                         )}
@@ -238,24 +238,24 @@ export default function MobileHeader({
             {/* Portaled Mobile Global Search Modal */}
             {mounted && isSearchOpen && createPortal(
                 <div className="fixed inset-0 z-[150] md:hidden bg-black/60 backdrop-blur-xs p-4 flex flex-col pt-12 animate-in fade-in duration-150">
-                    <div className="bg-white dark:bg-[#161a24] rounded-2xl p-4 space-y-3 border border-neutral-200 dark:border-neutral-800 shadow-2xl">
-                        <div className="flex items-center justify-between gap-2 border-b border-neutral-100 dark:border-neutral-800 pb-2">
+                    <div className="bg-white dark:bg-[#161a24] rounded-2xl p-4 space-y-3 border border-line shadow-2xl">
+                        <div className="flex items-center justify-between gap-2 border-b border-line pb-2">
                             <div className="flex items-center gap-2 flex-1">
-                                <Search className="w-4 h-4 text-neutral-400" />
+                                <Search className="size-4 text-neutral-400" />
                                 <input
                                     type="text"
                                     autoFocus
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Search transactions, customers, docs..."
-                                    className="w-full text-xs text-neutral-900 dark:text-white bg-transparent focus:outline-none"
+                                    className="w-full text-xs text-ink bg-transparent focus:outline-none"
                                 />
                             </div>
                             <button
                                 onClick={() => setIsSearchOpen(false)}
                                 className="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="size-4" />
                             </button>
                         </div>
                         <div className="text-xs text-neutral-400 py-2 text-center">
@@ -281,24 +281,24 @@ export default function MobileHeader({
                 <div className="fixed inset-0 z-[150] md:hidden flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
                     <div className="fixed inset-0" onClick={() => setIsNotificationsOpen(false)} />
                     
-                    <div className="relative bg-white dark:bg-[#161a24] rounded-t-[28px] p-5 space-y-4 min-h-[50vh] max-h-[85vh] flex flex-col border-t border-neutral-200 dark:border-neutral-800 shadow-2xl animate-in slide-in-from-bottom duration-200 z-[151]">
+                    <div className="relative bg-white dark:bg-[#161a24] rounded-t-[28px] p-5 space-y-4 min-h-[50vh] max-h-[85vh] flex flex-col border-t border-line shadow-2xl animate-in slide-in-from-bottom duration-200 z-[151]">
                         <div className="w-12 h-1 bg-neutral-300 dark:bg-neutral-700 rounded-full mx-auto mb-1 flex-shrink-0" />
 
-                        <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-800 flex-shrink-0">
+                        <div className="flex items-center justify-between pb-3 border-b border-line flex-shrink-0">
                             <div className="flex items-center gap-2">
                                 <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                                    <Bell className="w-4 h-4" />
+                                    <Bell className="size-4" />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-bold text-neutral-900 dark:text-white">Notifications & Alerts</h3>
+                                    <h3 className="text-sm font-bold text-ink">Notifications & Alerts</h3>
                                     <p className="text-[11px] text-neutral-400">{totalNotificationCount} active operational notice(s)</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setIsNotificationsOpen(false)}
-                                className="p-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
+                                className="p-1.5 rounded-full bg-paper-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="size-4" />
                             </button>
                         </div>
 
@@ -308,7 +308,7 @@ export default function MobileHeader({
                                 <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-2xl space-y-2">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-xs">
-                                            <AlertTriangle className="w-4 h-4 text-amber-600" />
+                                            <AlertTriangle className="size-4 text-amber-600" />
                                             <span>{lowStockItems.length} Product(s) Low Stock</span>
                                         </div>
                                     </div>
@@ -329,7 +329,7 @@ export default function MobileHeader({
                                         className="inline-flex items-center gap-1 text-xs font-bold text-[#fc6d2d] hover:underline pt-2"
                                     >
                                         <span>Manage Inventory & Restock</span>
-                                        <ArrowRight className="w-3.5 h-3.5" />
+                                        <ArrowRight className="size-3.5" />
                                     </Link>
                                 </div>
                             )}
@@ -339,7 +339,7 @@ export default function MobileHeader({
                                 <div className="p-3.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 rounded-2xl space-y-2">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-bold text-xs">
-                                            <Clock className="w-4 h-4 text-rose-600" />
+                                            <Clock className="size-4 text-rose-600" />
                                             <span>{overdueDocs.length} Overdue Invoice(s)</span>
                                         </div>
                                     </div>
@@ -360,15 +360,15 @@ export default function MobileHeader({
                                         className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:underline pt-2"
                                     >
                                         <span>View Overdue Invoices</span>
-                                        <ArrowRight className="w-3.5 h-3.5" />
+                                        <ArrowRight className="size-3.5" />
                                     </Link>
                                 </div>
                             )}
 
                             {totalNotificationCount === 0 && (
                                 <div className="text-center py-10 space-y-2 my-auto">
-                                    <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
-                                        <Check className="w-6 h-6" />
+                                    <div className="size-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+                                        <Check className="size-6" />
                                     </div>
                                     <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">All Caught Up!</h4>
                                     <p className="text-[11px] text-neutral-400 max-w-xs mx-auto">
@@ -387,23 +387,23 @@ export default function MobileHeader({
                 <div className="fixed inset-0 z-[150] md:hidden flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
                     <div className="fixed inset-0" onClick={() => setIsOrgDrawerOpen(false)} />
                     
-                    <div className="relative bg-white dark:bg-[#161a24] rounded-t-[28px] p-6 space-y-4 min-h-[50vh] max-h-[85vh] flex flex-col border-t border-neutral-200 dark:border-neutral-800 shadow-2xl animate-in slide-in-from-bottom duration-200 z-[151]">
+                    <div className="relative bg-white dark:bg-[#161a24] rounded-t-[28px] p-6 space-y-4 min-h-[50vh] max-h-[85vh] flex flex-col border-t border-line shadow-2xl animate-in slide-in-from-bottom duration-200 z-[151]">
                         <div className="w-12 h-1 bg-neutral-300 dark:bg-neutral-700 rounded-full mx-auto mb-1 flex-shrink-0" />
 
                         {/* Profile Info */}
-                        <div className="flex items-center gap-3 pb-3 border-b border-neutral-100 dark:border-neutral-800 flex-shrink-0">
-                            <div className="w-10 h-10 rounded-full bg-[#fc6d2d] text-white flex items-center justify-center font-bold text-sm">
+                        <div className="flex items-center gap-3 pb-3 border-b border-line flex-shrink-0">
+                            <div className="size-10 rounded-full bg-[#fc6d2d] text-white flex items-center justify-center font-bold text-sm">
                                 {displayName.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0 flex-1">
-                                <h3 className="text-sm font-bold text-neutral-900 dark:text-white truncate">{displayName}</h3>
-                                <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">{user?.email}</p>
+                                <h3 className="text-sm font-bold text-ink truncate">{displayName}</h3>
+                                <p className="text-xs text-ink-muted truncate">{user?.email}</p>
                             </div>
                             <button
                                 onClick={() => setIsOrgDrawerOpen(false)}
-                                className="p-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-400"
+                                className="p-1.5 rounded-full bg-paper-2 text-neutral-400"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="size-4" />
                             </button>
                         </div>
 
@@ -425,11 +425,11 @@ export default function MobileHeader({
                                             className={`w-full p-3 rounded-2xl flex items-center justify-between text-left transition-all ${
                                                 org.id === activeOrganizationId
                                                     ? 'bg-[#fff0e9] dark:bg-[#fc6d2d]/15 border border-[#fc6d2d]/40 text-[#fc6d2d]'
-                                                    : 'bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-100 dark:border-neutral-800 text-neutral-700 dark:text-neutral-200'
+                                                    : 'bg-paper-2/60 border border-line text-ink-muted'
                                             }`}
                                         >
                                             <div className="flex items-center gap-2.5">
-                                                <Building className="w-4 h-4" />
+                                                <Building className="size-4" />
                                                 <span className="text-xs font-bold">{org.name}</span>
                                             </div>
                                             {org.id === activeOrganizationId && (
@@ -443,13 +443,13 @@ export default function MobileHeader({
                             </div>
 
                             {/* Quick Account Links */}
-                            <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800 space-y-2">
+                            <div className="pt-2 border-t border-line space-y-2">
                                 <Link
                                     href="/settings"
                                     onClick={() => setIsOrgDrawerOpen(false)}
-                                    className="flex items-center gap-2.5 p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-800/60 text-xs font-bold text-neutral-700 dark:text-neutral-200"
+                                    className="flex items-center gap-2.5 p-3 rounded-2xl bg-paper-2/60 text-xs font-bold text-ink-muted"
                                 >
-                                    <Settings className="w-4 h-4 text-neutral-500" />
+                                    <Settings className="size-4 text-neutral-500" />
                                     <span>Business Settings</span>
                                 </Link>
 
@@ -460,7 +460,7 @@ export default function MobileHeader({
                                     }}
                                     className="w-full flex items-center gap-2.5 p-3 rounded-2xl bg-red-50 dark:bg-red-950/30 text-xs font-bold text-red-600 dark:text-red-400 text-left"
                                 >
-                                    <LogOut className="w-4 h-4" />
+                                    <LogOut className="size-4" />
                                     <span>Sign Out</span>
                                 </button>
                             </div>

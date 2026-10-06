@@ -17,7 +17,7 @@ import {
     Download,
     RefreshCw,
     Database
-} from 'lucide-react';
+} from '@/components/icons';
 import { Button, Input, Modal, ModalFooter } from '@/components/ui';
 import { encryptionService, EncryptionConfig, isEncryptionSupported } from '@/lib/crypto';
 import { encryptExistingData, decryptExistingData, CollectionName } from '@/lib/firebase';
@@ -237,12 +237,12 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
 
     if (!isSupported) {
         return (
-            <section className={`bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm ${className}`}>
+            <section className={`bg-paper border border-line rounded-panel shadow-xs p-6 shadow-sm ${className}`}>
                 <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg">
-                        <ShieldAlert className="w-5 h-5" />
+                        <ShieldAlert className="size-5" />
                     </div>
-                    <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">End-to-End Encryption</h2>
+                    <h2 className="text-lg font-semibold text-ink">End-to-End Encryption</h2>
                 </div>
                 <p className="text-sm text-red-600 dark:text-red-400">
                     Your browser does not support the Web Crypto API required for client-side encryption.
@@ -254,16 +254,16 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
 
     return (
         <>
-            <section className={`bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm ${className}`}>
+            <section className={`bg-paper border border-line rounded-panel shadow-xs p-6 shadow-sm ${className}`}>
                 <div className="flex items-center gap-3 mb-6">
                     <div className={`p-2 rounded-lg ${isEnabled
                         ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400'}`}>
-                        {isEnabled ? <ShieldCheck className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
+                        : 'bg-neutral-100 dark:bg-neutral-700 text-ink-muted'}`}>
+                        {isEnabled ? <ShieldCheck className="size-5" /> : <Shield className="size-5" />}
                     </div>
                     <div>
-                        <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">End-to-End Encryption</h2>
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                        <h2 className="text-lg font-semibold text-ink">End-to-End Encryption</h2>
+                        <p className="text-xs text-ink-muted">
                             Zero-knowledge encryption for maximum data privacy
                         </p>
                     </div>
@@ -277,7 +277,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                         }`}>
                         {isEnabled ? (
                             <>
-                                <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                <ShieldCheck className="size-5 text-emerald-600 dark:text-emerald-400" />
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">End-to-End Encryption Active</p>
                                     <p className="text-xs text-emerald-600 dark:text-emerald-400">
@@ -290,19 +290,19 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                                     className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                                     onClick={() => setShowDisableModal(true)}
                                 >
-                                    <ShieldAlert className="w-4 h-4 mr-1" />
+                                    <ShieldAlert className="size-4 mr-1" />
                                     Disable
                                 </Button>
                             </>
                         ) : (
                             <>
-                                <Shield className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
+                                <Shield className="size-5 text-ink-muted" />
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Standard Protection</p>
-                                    <p className="text-xs text-neutral-500 dark:text-neutral-400">Data is encrypted by Firebase (server-side)</p>
+                                    <p className="text-xs text-ink-muted">Data is encrypted by Firebase (server-side)</p>
                                 </div>
                                 <Button size="sm" onClick={() => setShowSetupModal(true)}>
-                                    <ShieldCheck className="w-4 h-4 mr-1" />
+                                    <ShieldCheck className="size-4 mr-1" />
                                     Enable E2EE
                                 </Button>
                             </>
@@ -314,7 +314,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                 <div className="space-y-3">
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
                         <div className="flex items-start gap-3">
-                            <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                            <Info className="size-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                             <div>
                                 <p className="text-sm font-medium text-blue-700 dark:text-blue-300">What is End-to-End Encryption?</p>
                                 <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
@@ -328,7 +328,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                     {!isEnabled && (
                         <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
                             <div className="flex items-start gap-3">
-                                <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                                <AlertTriangle className="size-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                                 <div>
                                     <p className="text-sm font-medium text-amber-700 dark:text-amber-300">Current Protection Level</p>
                                     <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
@@ -343,7 +343,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
 
                 {/* Disable option - only shown when enabled */}
                 {isEnabled && (
-                    <div className="mt-6 pt-6 border-t border-neutral-100 dark:border-neutral-700">
+                    <div className="mt-6 pt-6 border-t border-line">
                         <button
                             onClick={() => setShowDisableModal(true)}
                             className="text-sm text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
@@ -370,24 +370,24 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                     {/* Benefits */}
                     <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
                         <h4 className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 mb-3 flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4" />
+                            <CheckCircle2 className="size-4" />
                             Benefits
                         </h4>
                         <ul className="space-y-2 text-xs text-emerald-600 dark:text-emerald-400">
                             <li className="flex items-start gap-2">
-                                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                <CheckCircle2 className="size-3.5 mt-0.5 flex-shrink-0" />
                                 <span><strong>Zero-Knowledge Privacy:</strong> Your financial data is encrypted before leaving your device</span>
                             </li>
                             <li className="flex items-start gap-2">
-                                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                <CheckCircle2 className="size-3.5 mt-0.5 flex-shrink-0" />
                                 <span><strong>Only You Have Access:</strong> No one else can read your data — not even us or cloud providers</span>
                             </li>
                             <li className="flex items-start gap-2">
-                                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                <CheckCircle2 className="size-3.5 mt-0.5 flex-shrink-0" />
                                 <span><strong>Military-Grade Security:</strong> AES-256-GCM encryption, the same standard used by banks</span>
                             </li>
                             <li className="flex items-start gap-2">
-                                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                <CheckCircle2 className="size-3.5 mt-0.5 flex-shrink-0" />
                                 <span><strong>All Existing Data Protected:</strong> Your current templates, customers, products, and documents will be encrypted automatically</span>
                             </li>
                         </ul>
@@ -396,20 +396,20 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                     {/* Warnings */}
                     <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
                         <h4 className="text-sm font-semibold text-red-700 dark:text-red-300 mb-3 flex items-center gap-2">
-                            <AlertTriangle className="w-4 h-4" />
+                            <AlertTriangle className="size-4" />
                             Important Warnings
                         </h4>
                         <ul className="space-y-2 text-xs text-red-600 dark:text-red-400">
                             <li className="flex items-start gap-2">
-                                <XCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                <XCircle className="size-3.5 mt-0.5 flex-shrink-0" />
                                 <span><strong>Password Lost = Data Lost:</strong> If you forget your encryption password, your data <strong>CANNOT be recovered</strong> by anyone</span>
                             </li>
                             <li className="flex items-start gap-2">
-                                <XCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                <XCircle className="size-3.5 mt-0.5 flex-shrink-0" />
                                 <span><strong>No Password Reset:</strong> We cannot reset your encryption password — there is no recovery option</span>
                             </li>
                             <li className="flex items-start gap-2">
-                                <XCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                <XCircle className="size-3.5 mt-0.5 flex-shrink-0" />
                                 <span><strong>Your Responsibility:</strong> You are solely responsible for remembering your password and securing your data</span>
                             </li>
                         </ul>
@@ -427,14 +427,14 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Enter a strong password (min 8 characters)"
-                                    leftIcon={<Key className="w-4 h-4 text-neutral-400" />}
+                                    leftIcon={<Key className="size-4 text-neutral-400" />}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
                                 >
-                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                                 </button>
                             </div>
                             {password && (
@@ -467,7 +467,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 placeholder="Re-enter your password"
-                                leftIcon={<Key className="w-4 h-4 text-neutral-400" />}
+                                leftIcon={<Key className="size-4 text-neutral-400" />}
                             />
                             {confirmPassword && password !== confirmPassword && (
                                 <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
@@ -479,7 +479,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                     {migrationProgress && (
                         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
                             <div className="flex items-center gap-3 mb-3">
-                                <Database className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-pulse" />
+                                <Database className="size-5 text-blue-600 dark:text-blue-400 animate-pulse" />
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
                                         Encrypting Your Data
@@ -510,7 +510,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                             className="mt-1 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
                             disabled={!!migrationProgress}
                         />
-                        <span className="text-xs text-neutral-600 dark:text-neutral-400">
+                        <span className="text-xs text-ink-muted">
                             I understand that <strong>I am solely responsible for my encryption password</strong>.
                             If I lose or forget my password, my data <strong>cannot be recovered</strong> by anyone,
                             including Refloww support. I accept full responsibility for my encrypted data.
@@ -533,7 +533,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                     <Button
                         onClick={handleSetupEncryption}
                         disabled={!password || password.length < 8 || password !== confirmPassword || !agreedToTerms || isLoading}
-                        leftIcon={isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                        leftIcon={isLoading ? <RefreshCw className="size-4 rf-spin" /> : <ShieldCheck className="size-4" />}
                     >
                         {isLoading ? 'Enabling...' : 'Enable Encryption'}
                     </Button>
@@ -556,7 +556,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                     {/* Warning */}
                     <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
                         <div className="flex items-start gap-3">
-                            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                            <AlertTriangle className="size-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
                             <div>
                                 <p className="text-sm font-medium text-amber-700 dark:text-amber-300">What will happen:</p>
                                 <ul className="text-xs text-amber-600 dark:text-amber-400 mt-2 space-y-1">
@@ -573,7 +573,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                     {migrationProgress && (
                         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
                             <div className="flex items-center gap-3 mb-3">
-                                <Database className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-pulse" />
+                                <Database className="size-5 text-blue-600 dark:text-blue-400 animate-pulse" />
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
                                         Decrypting Your Data
@@ -607,7 +607,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Enter your encryption password"
-                                    leftIcon={<Key className="w-4 h-4 text-neutral-400" />}
+                                    leftIcon={<Key className="size-4 text-neutral-400" />}
                                     onKeyDown={(e) => e.key === 'Enter' && handleDisableEncryption()}
                                 />
                                 <button
@@ -615,7 +615,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
                                 >
-                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                                 </button>
                             </div>
                         </div>
@@ -637,7 +637,7 @@ export default function EncryptionSettings({ className }: EncryptionSettingsProp
                         variant="danger"
                         onClick={handleDisableEncryption}
                         disabled={!password || isLoading}
-                        leftIcon={isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldAlert className="w-4 h-4" />}
+                        leftIcon={isLoading ? <RefreshCw className="size-4 rf-spin" /> : <ShieldAlert className="size-4" />}
                     >
                         {isLoading ? 'Decrypting...' : 'Disable Encryption'}
                     </Button>

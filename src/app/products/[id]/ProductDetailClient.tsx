@@ -43,7 +43,7 @@ import {
     Lock,
     HelpCircle,
     ChevronDown
-} from 'lucide-react';
+} from '@/components/icons';
 import BarcodeScannerModal from '@/components/BarcodeScannerModal';
 import { AlternativeMatchType, ProductType, ProductFormData } from '@/lib/types';
 
@@ -145,7 +145,7 @@ export default function ProductDetailClient() {
             <div className="max-w-4xl mx-auto">
                 <div className="bg-white border border-neutral-100 rounded-2xl p-12">
                     <EmptyState
-                        icon={<Package className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                        icon={<Package className="size-8 text-neutral-400" />}
                         title="Product not found"
                         description="The product you're looking for doesn't exist or has been deleted."
                         action={
@@ -230,7 +230,7 @@ export default function ProductDetailClient() {
                 href="/products"
                 className="inline-flex items-center gap-2 text-sm font-medium text-neutral-500 hover:text-[#2d3748] transition-colors"
             >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="size-4" />
                 Back to Inventory
             </Link>
 
@@ -247,16 +247,16 @@ export default function ProductDetailClient() {
                         {product.imageUrl ? (
                             <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                         ) : product.productType === 'service' ? (
-                            <Zap className="w-8 h-8" />
+                            <Zap className="size-8" />
                         ) : product.productType === 'digital' ? (
-                            <FileCode className="w-8 h-8" />
+                            <FileCode className="size-8" />
                         ) : (
-                            <Package className="w-8 h-8" strokeWidth={1.5} />
+                            <Package className="size-8" />
                         )}
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">{product.name}</h1>
+                            <h1 className="text-2xl font-bold text-ink">{product.name}</h1>
                             <PageHelpModal
                                 title={`Product Details: ${product.name}`}
                                 description="Detailed overview showing stock level, active FEFO batches, sales velocity calculations, stock movement timeline, and linked alternative substitutes."
@@ -267,7 +267,7 @@ export default function ProductDetailClient() {
                             />
                         </div>
                         <div className="flex flex-wrap items-center gap-2 mt-1">
-                            <code className="text-sm font-mono text-neutral-600 bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-300 px-2 py-0.5 rounded">
+                            <code className="text-sm font-mono text-neutral-600 bg-paper-2 dark:text-neutral-300 px-2 py-0.5 rounded">
                                 {product.sku}
                             </code>
                             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
@@ -280,7 +280,7 @@ export default function ProductDetailClient() {
                                 {product.productType === 'service' ? 'Service' : product.productType === 'digital' ? 'Digital' : 'Physical Goods'}
                             </span>
                             {product.category && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-paper-2 text-neutral-700 dark:text-neutral-300">
                                     {product.category}
                                 </span>
                             )}
@@ -292,19 +292,19 @@ export default function ProductDetailClient() {
                     {(!product.productType || product.productType === 'physical') && (
                         <Button
                             variant="outline"
-                            leftIcon={<Sparkles className="w-4 h-4 text-violet-600" />}
+                            leftIcon={<Sparkles className="size-4 text-violet-600" />}
                             onClick={() => setIsOcrModalOpen(true)}
                         >
                             Scan Packaging / Add Batch
                         </Button>
                     )}
-                    <Button variant="ghost" leftIcon={<Copy className="w-4 h-4" />} onClick={handleDuplicate}>
+                    <Button variant="ghost" leftIcon={<Copy className="size-4" />} onClick={handleDuplicate}>
                         Duplicate
                     </Button>
-                    <Button variant="outline" leftIcon={<Edit2 className="w-4 h-4" />} onClick={openEditModal}>
+                    <Button variant="outline" leftIcon={<Edit2 className="size-4" />} onClick={openEditModal}>
                         Edit Item
                     </Button>
-                    <Button variant="danger" leftIcon={<Trash2 className="w-4 h-4" />} onClick={() => setIsDeleteModalOpen(true)}>
+                    <Button variant="danger" leftIcon={<Trash2 className="size-4" />} onClick={() => setIsDeleteModalOpen(true)}>
                         Delete
                     </Button>
                 </div>
@@ -338,15 +338,15 @@ export default function ProductDetailClient() {
 
                     {/* Reorder & Velocity Stats (Physical Only) */}
                     {reorderMetrics && !isService && (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 space-y-4">
-                            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
-                                <TrendingUp className="w-4 h-4 text-violet-600" />
+                        <div className="bg-paper border border-line rounded-panel shadow-xs p-6 space-y-4">
+                            <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
+                                <TrendingUp className="size-4 text-violet-600" />
                                 Smart Reorder Metrics
                             </h3>
                             <div className="grid grid-cols-2 gap-3 text-xs">
                                 <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
                                     <span className="text-neutral-400 block mb-1">Daily Sales Velocity</span>
-                                    <strong className="text-base text-neutral-900 dark:text-white">{reorderMetrics.dailySalesVelocity}</strong> units/day
+                                    <strong className="text-base text-ink">{reorderMetrics.dailySalesVelocity}</strong> units/day
                                 </div>
                                 <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
                                     <span className="text-neutral-400 block mb-1">Calculated ROP</span>
@@ -361,10 +361,10 @@ export default function ProductDetailClient() {
                     )}
 
                     {/* Alternatives Card */}
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
-                                <RefreshCw className="w-4 h-4 text-blue-600" />
+                            <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
+                                <RefreshCw className="size-4 text-blue-600" />
                                 Linked Alternatives ({productAlternatives.length})
                             </h3>
                             <Button size="sm" variant="outline" onClick={() => setIsAltModalOpen(true)}>+ Link</Button>
@@ -380,9 +380,9 @@ export default function ProductDetailClient() {
                                     if (!altProd) return null;
 
                                     return (
-                                        <div key={alt.id} className="p-3 rounded-xl border border-neutral-100 dark:border-neutral-700 flex items-center justify-between gap-2">
+                                        <div key={alt.id} className="p-3 rounded-xl border border-line flex items-center justify-between gap-2">
                                             <div>
-                                                <span className="font-semibold text-xs text-neutral-900 dark:text-white block">{altProd.name}</span>
+                                                <span className="font-semibold text-xs text-ink block">{altProd.name}</span>
                                                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300">
                                                     {alt.matchType === 'exact_equivalent' ? 'Exact Match' : 'Similar'}
                                                 </span>
@@ -392,7 +392,7 @@ export default function ProductDetailClient() {
                                                 className="text-neutral-400 hover:text-red-500 text-xs"
                                                 title="Remove alternative link"
                                             >
-                                                <X className="w-3.5 h-3.5" />
+                                                <X className="size-3.5" />
                                             </button>
                                         </div>
                                     );
@@ -405,33 +405,33 @@ export default function ProductDetailClient() {
                 {/* Right Column: Details & Batches / Movements */}
                 <div className="space-y-6 lg:col-span-2">
                     {/* Item Description & Information */}
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
-                        <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-4">Item Details</h3>
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-6">
+                        <h3 className="text-sm font-semibold text-ink mb-4">Item Details</h3>
                         <div className="grid grid-cols-2 gap-4 text-xs">
                             <div>
                                 <span className="text-neutral-400 block mb-1">SKU / Item Code</span>
-                                <code className="font-mono text-neutral-900 dark:text-white font-bold">{product.sku}</code>
+                                <code className="font-mono text-ink font-bold">{product.sku}</code>
                             </div>
                             {product.barcode && (
                                 <div>
                                     <span className="text-neutral-400 block mb-1">Barcode / UPC</span>
-                                    <span className="font-mono text-neutral-900 dark:text-white font-medium">{product.barcode}</span>
+                                    <span className="font-mono text-ink font-medium">{product.barcode}</span>
                                 </div>
                             )}
                             {product.costPrice ? (
                                 <div>
                                     <span className="text-neutral-400 block mb-1">Cost / Expense Rate</span>
-                                    <span className="font-bold text-neutral-900 dark:text-white">{formatCurrency(product.costPrice, currency)}</span>
+                                    <span className="font-bold text-ink">{formatCurrency(product.costPrice, currency)}</span>
                                 </div>
                             ) : null}
                             {product.category && (
                                 <div>
                                     <span className="text-neutral-400 block mb-1">Category</span>
-                                    <span className="font-medium text-neutral-900 dark:text-white">{product.category}</span>
+                                    <span className="font-medium text-ink">{product.category}</span>
                                 </div>
                             )}
                             {product.description && (
-                                <div className="col-span-2 pt-3 border-t border-neutral-100 dark:border-neutral-700">
+                                <div className="col-span-2 pt-3 border-t border-line">
                                     <span className="text-neutral-400 block mb-1">Description</span>
                                     <p className="text-neutral-700 dark:text-neutral-300 text-sm leading-relaxed">{product.description}</p>
                                 </div>
@@ -441,13 +441,13 @@ export default function ProductDetailClient() {
 
                     {/* Active Batches Table (Physical Only) */}
                     {!isService && (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
+                        <div className="bg-paper border border-line rounded-panel shadow-xs p-6">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-sm font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
-                                    <Layers className="w-4 h-4 text-violet-600" />
+                                <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
+                                    <Layers className="size-4 text-violet-600" />
                                     Stock Batches ({productBatches.length})
                                 </h3>
-                                <Button size="sm" leftIcon={<Sparkles className="w-3.5 h-3.5" />} onClick={() => setIsOcrModalOpen(true)}>
+                                <Button size="sm" leftIcon={<Sparkles className="size-3.5" />} onClick={() => setIsOcrModalOpen(true)}>
                                     Scan / Add Batch
                                 </Button>
                             </div>
@@ -461,7 +461,7 @@ export default function ProductDetailClient() {
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-xs">
                                         <thead>
-                                            <tr className="border-b border-neutral-100 dark:border-neutral-700 text-neutral-400 uppercase">
+                                            <tr className="border-b border-line text-neutral-400 uppercase">
                                                 <th className="text-left py-2">Batch #</th>
                                                 <th className="text-left py-2">Received</th>
                                                 <th className="text-left py-2">Expiry Date</th>
@@ -482,7 +482,7 @@ export default function ProductDetailClient() {
                                                                 {statusInfo.label}
                                                             </span>
                                                         </td>
-                                                        <td className="py-2.5 text-right font-bold text-neutral-900 dark:text-white">
+                                                        <td className="py-2.5 text-right font-bold text-ink">
                                                             {b.remainingQuantity} / {b.initialQuantity}
                                                         </td>
                                                     </tr>
@@ -496,9 +496,9 @@ export default function ProductDetailClient() {
                     )}
 
                     {/* Stock Movements History */}
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
-                        <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
-                            <History className="w-4 h-4 text-blue-600" />
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-6">
+                        <h3 className="text-sm font-semibold text-ink mb-4 flex items-center gap-2">
+                            <History className="size-4 text-blue-600" />
                             Movement History Timeline ({productMovements.length})
                         </h3>
 
@@ -515,7 +515,7 @@ export default function ProductDetailClient() {
                                                 }`}>
                                                     {m.type}
                                                 </span>
-                                                <span className="font-medium text-neutral-900 dark:text-white">{m.reason}</span>
+                                                <span className="font-medium text-ink">{m.reason}</span>
                                             </div>
                                             <span className="text-[11px] text-neutral-400 mt-0.5 block">{formatDate(m.date)}</span>
                                         </div>
@@ -596,7 +596,7 @@ export default function ProductDetailClient() {
                         <label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5 block">
                             Product Type *
                         </label>
-                        <div className="grid grid-cols-3 gap-2 p-1 bg-neutral-100 dark:bg-neutral-800 rounded-xl">
+                        <div className="grid grid-cols-3 gap-2 p-1 bg-paper-2 rounded-xl">
                             <button
                                 type="button"
                                 onClick={() => setFormData({ ...formData, productType: 'physical' })}
@@ -606,7 +606,7 @@ export default function ProductDetailClient() {
                                         : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
                                 }`}
                             >
-                                <Package className="w-3.5 h-3.5" />
+                                <Package className="size-3.5" />
                                 Physical Goods
                             </button>
                             <button
@@ -618,7 +618,7 @@ export default function ProductDetailClient() {
                                         : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
                                 }`}
                             >
-                                <Zap className="w-3.5 h-3.5" />
+                                <Zap className="size-3.5" />
                                 Service / Labor
                             </button>
                             <button
@@ -630,7 +630,7 @@ export default function ProductDetailClient() {
                                         : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
                                 }`}
                             >
-                                <FileCode className="w-3.5 h-3.5" />
+                                <FileCode className="size-3.5" />
                                 Digital Product
                             </button>
                         </div>
@@ -638,7 +638,7 @@ export default function ProductDetailClient() {
 
                     {formData.productType && formData.productType !== 'physical' && (
                         <div className="md:col-span-2 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <Zap className="size-4 text-emerald-600 shrink-0" />
                             <span>This is a non-tangible <strong>{formData.productType}</strong> item. Physical inventory counts, batch tracking, and reorder alerts are bypassed.</span>
                         </div>
                     )}
@@ -654,13 +654,13 @@ export default function ProductDetailClient() {
                                 setIsCategoryListOpen(true);
                             }}
                             onFocus={() => setIsCategoryListOpen(true)}
-                            leftIcon={<Tag className="w-4 h-4 text-blue-500" />}
-                            rightIcon={<ChevronDown className="w-4 h-4 text-neutral-400" />}
+                            leftIcon={<Tag className="size-4 text-blue-500" />}
+                            rightIcon={<ChevronDown className="size-4 text-neutral-400" />}
                         />
 
                         {isCategoryListOpen && (
-                            <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-2xl z-50 max-h-36 overflow-y-auto p-1.5 text-xs divide-y divide-neutral-100 dark:divide-neutral-700/50">
-                                <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                            <div className="absolute left-0 right-0 top-full mt-1 bg-paper border border-line rounded-panel shadow-xs shadow-2xl z-50 max-h-36 overflow-y-auto p-1.5 text-xs divide-y divide-line/50">
+                                <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-ink-muted">
                                     Product Categories ({allCategories.length})
                                 </div>
                                 {allCategories.filter(cat => 
@@ -677,11 +677,11 @@ export default function ProductDetailClient() {
                                         className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${
                                             formData.category === cat
                                                 ? 'bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-semibold'
-                                                : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700/60'
+                                                : 'text-ink-muted hover:bg-neutral-100 dark:hover:bg-neutral-700/60'
                                         }`}
                                     >
                                         <span>{cat}</span>
-                                        {formData.category === cat && <Check className="w-3.5 h-3.5 text-violet-600" />}
+                                        {formData.category === cat && <Check className="size-3.5 text-violet-600" />}
                                     </button>
                                 ))}
                                 {allCategories.filter(cat => !formData.category || cat.toLowerCase().includes(formData.category.toLowerCase())).length === 0 && (
@@ -700,7 +700,7 @@ export default function ProductDetailClient() {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         error={formErrors.name}
-                        leftIcon={<Package className="w-4 h-4" />}
+                        leftIcon={<Package className="size-4" />}
                     />
 
                     {/* SKU (Auto-generated) */}
@@ -711,8 +711,8 @@ export default function ProductDetailClient() {
                             readOnly
                             disabled
                             tabIndex={-1}
-                            className="bg-neutral-100 dark:bg-neutral-800 text-neutral-500 font-mono cursor-not-allowed border-neutral-200 dark:border-neutral-700"
-                            leftIcon={<Lock className="w-4 h-4 text-neutral-400" />}
+                            className="bg-paper-2 text-neutral-500 font-mono cursor-not-allowed border-line"
+                            leftIcon={<Lock className="size-4 text-neutral-400" />}
                         />
                     </div>
 
@@ -722,7 +722,7 @@ export default function ProductDetailClient() {
                         placeholder="Scan or enter..."
                         value={formData.barcode || ''}
                         onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                        leftIcon={<BarcodeIcon className="w-4 h-4" />}
+                        leftIcon={<BarcodeIcon className="size-4" />}
                     />
 
                     {/* Unit Selling Price */}
@@ -735,7 +735,7 @@ export default function ProductDetailClient() {
                         value={formData.unitPrice || ''}
                         onChange={(e) => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) || 0 })}
                         error={formErrors.unitPrice}
-                        leftIcon={<DollarSign className="w-4 h-4 text-emerald-500" />}
+                        leftIcon={<DollarSign className="size-4 text-emerald-500" />}
                     />
 
                     {/* Cost Price */}
@@ -747,15 +747,15 @@ export default function ProductDetailClient() {
                         placeholder="0.00"
                         value={formData.costPrice || ''}
                         onChange={(e) => setFormData({ ...formData, costPrice: parseFloat(e.target.value) || 0 })}
-                        leftIcon={<DollarSign className="w-4 h-4 text-amber-500" />}
+                        leftIcon={<DollarSign className="size-4 text-amber-500" />}
                     />
 
                     {/* Physical inventory fields only shown if Physical Product */}
                     {(!formData.productType || formData.productType === 'physical') && (
                         <>
-                            <div className="md:col-span-2 flex items-center justify-between pt-1 pb-0.5 border-t border-neutral-100 dark:border-neutral-700/60 mt-1">
-                                <span className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
-                                    <Layers className="w-3.5 h-3.5 text-violet-500" />
+                            <div className="md:col-span-2 flex items-center justify-between pt-1 pb-0.5 border-t border-line/60 mt-1">
+                                <span className="text-xs font-semibold text-ink-muted flex items-center gap-1.5">
+                                    <Layers className="size-3.5 text-violet-500" />
                                     Physical Inventory Setup
                                 </span>
                                 <button
@@ -764,9 +764,9 @@ export default function ProductDetailClient() {
                                     className="flex items-center gap-1 text-xs text-neutral-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors py-0.5 px-2 rounded-md hover:bg-violet-50 dark:hover:bg-violet-950/40"
                                     title="Toggle inventory info"
                                 >
-                                    <HelpCircle className="w-3.5 h-3.5" />
+                                    <HelpCircle className="size-3.5" />
                                     <span className="text-[11px] font-medium">{showInventoryHelp ? 'Hide info' : 'What is this?'}</span>
-                                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showInventoryHelp ? 'rotate-180' : ''}`} />
+                                    <ChevronDown className={`size-3.5 transition-transform duration-200 ${showInventoryHelp ? 'rotate-180' : ''}`} />
                                 </button>
                             </div>
 
@@ -775,7 +775,7 @@ export default function ProductDetailClient() {
                                 <div className="md:col-span-2 p-3.5 bg-violet-50/80 dark:bg-violet-950/40 border border-violet-200/80 dark:border-violet-800/60 rounded-xl text-xs space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="flex items-center justify-between font-semibold text-violet-900 dark:text-violet-200">
                                         <span className="flex items-center gap-1.5">
-                                            <Layers className="w-3.5 h-3.5 text-violet-600" />
+                                            <Layers className="size-3.5 text-violet-600" />
                                             Simple Mode vs. Batch Mode
                                         </span>
                                         <button
@@ -783,7 +783,7 @@ export default function ProductDetailClient() {
                                             onClick={() => setShowInventoryHelp(false)}
                                             className="text-violet-400 hover:text-violet-600 dark:hover:text-violet-200 p-0.5 rounded"
                                         >
-                                            <X className="w-3.5 h-3.5" />
+                                            <X className="size-3.5" />
                                         </button>
                                     </div>
                                     <p className="text-violet-700 dark:text-violet-300 leading-relaxed">

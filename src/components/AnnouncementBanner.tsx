@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { X, Megaphone, Gift, Bell, AlertTriangle, ExternalLink } from 'lucide-react';
+import { X, Megaphone, Gift, Bell, AlertTriangle, ExternalLink } from '@/components/icons';
 import {
     subscribeToActiveAnnouncements,
     incrementAnnouncementView,
@@ -135,7 +135,7 @@ export function AnnouncementBanner({ position = 'top', className = '' }: Announc
                     {/* Left side - Icon & Message */}
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="flex-shrink-0 p-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
-                            <Icon className="w-4 h-4" />
+                            <Icon className="size-4" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">
@@ -153,7 +153,7 @@ export function AnnouncementBanner({ position = 'top', className = '' }: Announc
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg text-sm font-medium transition-colors"
                             >
                                 {current.ctaText}
-                                <ExternalLink className="w-3.5 h-3.5" />
+                                <ExternalLink className="size-3.5" />
                             </button>
                         )}
                         <button
@@ -161,7 +161,7 @@ export function AnnouncementBanner({ position = 'top', className = '' }: Announc
                             className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
                             aria-label="Dismiss announcement"
                         >
-                            <X className="w-4 h-4" />
+                            <X className="size-4" />
                         </button>
                     </div>
                 </div>

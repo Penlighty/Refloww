@@ -17,7 +17,7 @@ import {
     Copy,
     Download,
     Layers
-} from 'lucide-react';
+} from '@/components/icons';
 import { useState } from 'react';
 import { Modal, ModalFooter } from '@/components/ui';
 import { toast } from 'react-hot-toast';
@@ -64,7 +64,7 @@ export default function TemplateDetailClient() {
             <div className="max-w-4xl mx-auto">
                 <div className="bg-white border border-neutral-100 rounded-2xl p-12">
                     <EmptyState
-                        icon={<Layers className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                        icon={<Layers className="size-8 text-neutral-400" />}
                         title="Template not found"
                         description="The template you're looking for doesn't exist or has been deleted."
                         action={
@@ -97,7 +97,7 @@ export default function TemplateDetailClient() {
                 href="/templates"
                 className="inline-flex items-center gap-2 text-sm font-medium text-neutral-500 hover:text-[#2d3748] transition-colors mb-6"
             >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="size-4" />
                 Back to Templates
             </Link>
 
@@ -114,7 +114,7 @@ export default function TemplateDetailClient() {
                                 Edit Fields →
                             </Link>
                         </div>
-                        <div className="p-6 bg-neutral-50 dark:bg-neutral-900/50">
+                        <div className="p-6 bg-paper-2/50">
                             <TemplateSheetSlider sheets={extractTemplateSheets(template)} />
                         </div>
                     </div>
@@ -126,11 +126,11 @@ export default function TemplateDetailClient() {
                     <div className="bg-white border border-neutral-100 rounded-2xl p-6">
                         <div className="flex items-start justify-between mb-4">
                             <div className={`p-3 rounded-xl ${config.bgColor}`}>
-                                <TypeIcon className={`w-6 h-6 ${config.textColor}`} />
+                                <TypeIcon className={`size-6 ${config.textColor}`} />
                             </div>
                             {template.isDefault && (
                                 <Badge variant="success" size="sm">
-                                    <Star className="w-3 h-3 mr-1" />
+                                    <Star className="size-3.5 mr-1" />
                                     Default
                                 </Badge>
                             )}
@@ -157,27 +157,27 @@ export default function TemplateDetailClient() {
                     {/* Actions Card */}
                     <div className="bg-white border border-neutral-100 rounded-2xl p-4 space-y-2">
                         <Link href={`/templates/${templateId}/edit`}>
-                            <Button variant="primary" fullWidth leftIcon={<Settings className="w-4 h-4" />}>
+                            <Button variant="primary" fullWidth leftIcon={<Settings className="size-4" />}>
                                 Edit Field Mapping
                             </Button>
                         </Link>
 
                         {!template.isDefault && (
-                            <Button variant="outline" fullWidth leftIcon={<Star className="w-4 h-4" />} onClick={handleSetDefault}>
+                            <Button variant="outline" fullWidth leftIcon={<Star className="size-4" />} onClick={handleSetDefault}>
                                 Set as Default
                             </Button>
                         )}
 
-                        <Button variant="ghost" fullWidth leftIcon={<Copy className="w-4 h-4" />} onClick={handleDuplicate}>
+                        <Button variant="ghost" fullWidth leftIcon={<Copy className="size-4" />} onClick={handleDuplicate}>
                             Duplicate Template
                         </Button>
 
-                        <Button variant="ghost" fullWidth leftIcon={<Download className="w-4 h-4" />}>
+                        <Button variant="ghost" fullWidth leftIcon={<Download className="size-4" />}>
                             Download Image
                         </Button>
 
                         <div className="pt-2 border-t border-neutral-100 mt-2">
-                            <Button variant="danger" fullWidth leftIcon={<Trash2 className="w-4 h-4" />} onClick={() => setIsDeleteModalOpen(true)}>
+                            <Button variant="danger" fullWidth leftIcon={<Trash2 className="size-4" />} onClick={() => setIsDeleteModalOpen(true)}>
                                 Delete Template
                             </Button>
                         </div>

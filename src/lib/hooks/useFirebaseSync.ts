@@ -265,7 +265,7 @@ export function useFirebaseSync() {
                     toast.error('Unable to save: Please unlock encryption first', {
                         id: 'encryption-locked-error',
                         duration: 5000,
-                        icon: '🔒',
+                        icon: 'Lock',
                     });
 
                     window.dispatchEvent(new CustomEvent('encryption-unlock-required'));
@@ -536,7 +536,7 @@ export function useFirebaseSync() {
                     toast.success(`You have ${invitations.length} pending organization invitation(s)!`, {
                         id: 'pending-org-invite-alert',
                         duration: 6000,
-                        icon: '🏢'
+                        icon: 'Building'
                     });
                 });
             }

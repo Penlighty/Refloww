@@ -38,7 +38,7 @@ export function FixedDropdownMenu({
             if (!triggerRef.current) return;
             const rect = triggerRef.current.getBoundingClientRect();
             const spaceBelow = window.innerHeight - rect.bottom;
-            const menuHeight = 220; // Estimated max height for table action dropdown
+            const menuHeight = 220;
             const placement: 'bottom' | 'top' = spaceBelow < menuHeight && rect.top > menuHeight ? 'top' : 'bottom';
 
             const top = placement === 'bottom'
@@ -56,9 +56,7 @@ export function FixedDropdownMenu({
 
         updatePosition();
 
-        // Close on window resize or scroll
-        const handleScrollOrResize = (e: Event) => {
-            // Only update position on scroll if target is scrolling container, or close
+        const handleScrollOrResize = () => {
             updatePosition();
         };
 
@@ -114,7 +112,7 @@ export function FixedDropdownMenu({
         <div
             ref={menuRef}
             style={style}
-            className={`w-48 bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 py-1.5 animate-in fade-in zoom-in-95 duration-150 ${className}`}
+            className={`w-48 bg-paper rounded-panel shadow-pop border border-line p-1 animate-pop ${className}`}
         >
             {children}
         </div>,

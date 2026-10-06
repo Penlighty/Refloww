@@ -1,7 +1,7 @@
 "use client";
 
 import { clsx } from 'clsx';
-import { Search, X } from 'lucide-react';
+import { Search, X } from '@/components/icons';
 import { useState } from 'react';
 
 interface SearchInputProps {
@@ -22,16 +22,15 @@ export function SearchInput({
     return (
         <div
             className={clsx(
-                'relative flex items-center transition-all duration-200',
+                'relative flex items-center w-full',
                 className
             )}
         >
             <Search
                 className={clsx(
-                    'absolute left-3 w-4 h-4 transition-colors duration-200',
-                    isFocused ? 'text-neutral-600 dark:text-neutral-300' : 'text-neutral-400 dark:text-neutral-500'
+                    'absolute left-3 size-4 transition-colors shrink-0',
+                    isFocused ? 'text-ink' : 'text-ink-3'
                 )}
-                strokeWidth={2}
             />
             <input
                 type="text"
@@ -41,19 +40,20 @@ export function SearchInput({
                 onBlur={() => setIsFocused(false)}
                 placeholder={placeholder}
                 className={clsx(
-                    'w-full h-10 pl-10 pr-10 text-sm rounded-lg border transition-all duration-200',
-                    'bg-white dark:bg-neutral-800',
-                    'text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500',
-                    'focus:outline-none focus:ring-2 focus:ring-neutral-500/10 dark:focus:ring-neutral-400/10 focus:border-neutral-400 dark:focus:border-neutral-500',
-                    'border-neutral-200 dark:border-neutral-700'
+                    'w-full h-10 pl-9 pr-9 text-body rounded-ctl border bg-paper text-ink transition-colors',
+                    'placeholder:text-ink-3 hover:border-ink-4',
+                    'focus-visible:outline-none focus-visible:border-ink focus-visible:ring-[3px] focus-visible:ring-primary-500/20',
+                    'border-line-strong'
                 )}
             />
             {value && (
                 <button
+                    type="button"
                     onClick={() => onChange('')}
-                    className="absolute right-3 p-1 rounded-md text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                    className="absolute right-2.5 p-1 rounded-ctl text-ink-3 hover:text-ink hover:bg-paper-2 transition-colors cursor-pointer"
+                    aria-label="Clear search"
                 >
-                    <X className="w-3.5 h-3.5" strokeWidth={2} />
+                    <X className="size-3.5" />
                 </button>
             )}
         </div>

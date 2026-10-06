@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { checkAdminAccess } from '@/lib/firebase/admin';
-import { ShieldAlert, RefreshCw } from 'lucide-react';
+import { ShieldAlert, RefreshCw } from '@/components/icons';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const { user, loading: authLoading } = useAuth();
@@ -53,7 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         return (
             <div className="h-screen w-screen flex items-center justify-center bg-slate-50 dark:bg-neutral-900">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="size-10 border-4 border-blue-600 border-t-transparent rounded-full rf-spin"></div>
                     <p className="text-sm text-slate-500 dark:text-neutral-400 font-medium">
                         Verifying admin access...
                     </p>
@@ -66,14 +66,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (error || !isAuthorized) {
         return (
             <div className="h-screen w-screen flex items-center justify-center bg-slate-50 dark:bg-neutral-900 p-4">
-                <div className="max-w-md w-full bg-white dark:bg-neutral-800 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-700 p-8 text-center">
+                <div className="max-w-md w-full bg-paper rounded-2xl shadow-xl border border-line p-8 text-center">
                     <div className="w-16 h-16 mx-auto mb-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                        <ShieldAlert className="w-8 h-8 text-red-600 dark:text-red-400" />
+                        <ShieldAlert className="size-8 text-red-600 dark:text-red-400" />
                     </div>
-                    <h1 className="text-xl font-bold text-[#2d3748] dark:text-white mb-2">
+                    <h1 className="text-xl font-bold text-ink mb-2">
                         Access Denied
                     </h1>
-                    <p className="text-neutral-500 dark:text-neutral-400 mb-6">
+                    <p className="text-ink-muted mb-6">
                         {error || 'You do not have permission to access the admin panel.'}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -85,9 +85,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         </button>
                         <button
                             onClick={() => window.location.reload()}
-                            className="flex items-center justify-center gap-2 px-6 py-2.5 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 rounded-xl font-medium transition-colors"
+                            className="flex items-center justify-center gap-2 px-6 py-2.5 border border-line text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 rounded-xl font-medium transition-colors"
                         >
-                            <RefreshCw className="w-4 h-4" />
+                            <RefreshCw className="size-4" />
                             Retry
                         </button>
                     </div>
@@ -100,7 +100,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     return (
-        <div className="flex h-screen w-full bg-neutral-50 dark:bg-neutral-900 font-sans overflow-hidden admin-layout">
+        <div className="flex h-screen w-full bg-paper-2 font-sans overflow-hidden admin-layout">
             <AdminSidebar />
 
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">

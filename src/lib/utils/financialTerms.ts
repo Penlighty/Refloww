@@ -162,10 +162,10 @@ export function getTermDefinition(key: string): FinancialTermDefinition | null {
 export function formatHelpContent(term: FinancialTermDefinition): string {
     let content = term.definition;
     if (term.calculation) {
-        content += `\n\n📊 Calculation: ${term.calculation}`;
+        content += `\n\n Calculation: ${term.calculation}`;
     }
     if (term.example) {
-        content += `\n\n💡 Example: ${term.example}`;
+        content += `\n\nExample: ${term.example}`;
     }
     return content;
 }

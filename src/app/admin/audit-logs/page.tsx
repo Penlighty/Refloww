@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { getAuditLogs, AuditLogEntry } from '@/lib/firebase/admin';
-import { Shield, Search, Filter, RefreshCw, Activity, User, Settings, ShoppingBag, Building2, Megaphone } from 'lucide-react';
+import { Shield, Search, Filter, RefreshCw, Activity, User, Settings, ShoppingBag, Building2, Megaphone } from '@/components/icons';
 
 export default function AdminAuditLogsPage() {
     const [logs, setLogs] = useState<AuditLogEntry[]>([]);
@@ -47,12 +47,12 @@ export default function AdminAuditLogsPage() {
 
     const getResourceIcon = (type: AuditLogEntry['resourceType']) => {
         switch (type) {
-            case 'user': return <User className="w-4 h-4 text-blue-500" />;
-            case 'organization': return <Building2 className="w-4 h-4 text-purple-500" />;
-            case 'settings': return <Settings className="w-4 h-4 text-slate-500" />;
-            case 'marketplace': return <ShoppingBag className="w-4 h-4 text-emerald-500" />;
-            case 'announcement': return <Megaphone className="w-4 h-4 text-orange-500" />;
-            default: return <Activity className="w-4 h-4 text-slate-400" />;
+            case 'user': return <User className="size-4 text-blue-500" />;
+            case 'organization': return <Building2 className="size-4 text-purple-500" />;
+            case 'settings': return <Settings className="size-4 text-slate-500" />;
+            case 'marketplace': return <ShoppingBag className="size-4 text-emerald-500" />;
+            case 'announcement': return <Megaphone className="size-4 text-orange-500" />;
+            default: return <Activity className="size-4 text-slate-400" />;
         }
     };
 
@@ -66,7 +66,7 @@ export default function AdminAuditLogsPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <Shield className="w-6 h-6 text-slate-700" />
+                        <Shield className="size-6 text-slate-700" />
                         Audit Logs
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
@@ -80,10 +80,10 @@ export default function AdminAuditLogsPage() {
                         className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                         title="Refresh Logs"
                     >
-                        <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`size-5 ${loading ? 'rf-spin' : ''}`} />
                     </button>
                     <div className="relative flex-1 sm:w-72">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                         <input
                             type="text"
                             placeholder="Search logs by admin, action..."

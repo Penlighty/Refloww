@@ -37,7 +37,7 @@ import {
     Trash2,
     AlertTriangle,
     ShieldAlert
-} from 'lucide-react';
+} from '@/components/icons';
 import { toast } from 'react-hot-toast';
 import { UserRole } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
@@ -339,7 +339,7 @@ export default function SettingsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 md:mb-6">
                     <div>
                         <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white font-sans tracking-tight">
+                            <h1 className="text-2xl font-bold text-ink font-sans tracking-tight">
                                 Settings
                             </h1>
                             <PageHelpModal
@@ -351,7 +351,7 @@ export default function SettingsPage() {
                                 ]}
                             />
                         </div>
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 hidden sm:block">
+                        <p className="text-sm text-ink-muted mt-1 hidden sm:block">
                             Configure personal account preferences or manage settings for your organizations.
                         </p>
                     </div>
@@ -361,7 +361,7 @@ export default function SettingsPage() {
                 {/* Mobile Navigation Bar */}
                 <div className="md:hidden space-y-2.5 mt-1 pb-2 border-b border-neutral-200/60 dark:border-neutral-700/60">
                     {/* Category Switcher: User Account vs Organization */}
-                    <div className="flex bg-neutral-100 dark:bg-neutral-800/80 p-1 rounded-xl">
+                    <div className="flex bg-paper-2/80 p-1 rounded-xl">
                         <button
                             type="button"
                             onClick={() => {
@@ -372,10 +372,10 @@ export default function SettingsPage() {
                             className={`flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                                 isUserCategory
                                     ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+                                    : 'text-ink-muted hover:text-neutral-800 dark:hover:text-neutral-200'
                             }`}
                         >
-                            <User className="w-3.5 h-3.5" />
+                            <User className="size-3.5" />
                             <span>User Account</span>
                         </button>
 
@@ -389,10 +389,10 @@ export default function SettingsPage() {
                             className={`flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                                 !isUserCategory
                                     ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+                                    : 'text-ink-muted hover:text-neutral-800 dark:hover:text-neutral-200'
                             }`}
                         >
-                            <Building className="w-3.5 h-3.5" />
+                            <Building className="size-3.5" />
                             <span>Organization</span>
                         </button>
                     </div>
@@ -409,10 +409,10 @@ export default function SettingsPage() {
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all text-xs font-semibold cursor-pointer ${
                                         isActive
                                             ? 'bg-blue-600 text-white shadow-sm'
-                                            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                                            : 'bg-paper-2 text-ink-muted hover:bg-neutral-200 dark:hover:bg-neutral-700'
                                     }`}
                                 >
-                                    <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={isActive ? 2 : 1.75} />
+                                    <Icon className="size-3.5 shrink-0" />
                                     <span>{tab.label}</span>
                                 </button>
                             );
@@ -426,8 +426,8 @@ export default function SettingsPage() {
                 <div className="hidden md:flex md:flex-col gap-6 w-64 flex-shrink-0 overflow-y-auto pr-1">
                     {/* User Account Section */}
                     <div>
-                        <div className="px-3 mb-2 flex items-center gap-2 text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-                            <User className="w-3.5 h-3.5" />
+                        <div className="px-3 mb-2 flex items-center gap-2 text-xs font-bold text-ink-muted uppercase tracking-wider">
+                            <User className="size-3.5" />
                             <span>User Account</span>
                         </div>
                         <div className="space-y-1">
@@ -440,10 +440,10 @@ export default function SettingsPage() {
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm ${isActive
                                             ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold shadow-sm'
-                                            : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 font-medium'
+                                            : 'text-ink-muted hover:bg-neutral-50 dark:hover:bg-neutral-800 font-medium'
                                             }`}
                                     >
-                                        <Icon className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2 : 1.75} />
+                                        <Icon className="size-4 shrink-0" />
                                         <span>{tab.label}</span>
                                     </button>
                                 );
@@ -454,8 +454,8 @@ export default function SettingsPage() {
                     {/* Organization Section */}
                     <div>
                         <div className="px-3 mb-2 flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-                                <Building className="w-3.5 h-3.5" />
+                            <div className="flex items-center gap-2 text-xs font-bold text-ink-muted uppercase tracking-wider">
+                                <Building className="size-3.5" />
                                 <span>Organizations</span>
                             </div>
                             <button
@@ -463,7 +463,7 @@ export default function SettingsPage() {
                                 onClick={() => setIsCreateOrgModalOpen(true)}
                                 className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5 cursor-pointer"
                             >
-                                <Plus className="w-3 h-3" /> New
+                                <Plus className="size-3.5" /> New
                             </button>
                         </div>
                         <div className="space-y-1">
@@ -476,10 +476,10 @@ export default function SettingsPage() {
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm ${isActive
                                             ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold shadow-sm'
-                                            : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 font-medium'
+                                            : 'text-ink-muted hover:bg-neutral-50 dark:hover:bg-neutral-800 font-medium'
                                             }`}
                                     >
-                                        <Icon className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2 : 1.75} />
+                                        <Icon className="size-4 shrink-0" />
                                         <span>{tab.label}</span>
                                     </button>
                                 );
@@ -495,7 +495,7 @@ export default function SettingsPage() {
                         <div className="bg-gradient-to-r from-blue-50/80 via-neutral-50/80 to-purple-50/80 dark:from-blue-950/30 dark:via-neutral-800/50 dark:to-purple-950/30 border border-blue-100 dark:border-blue-900/50 rounded-2xl p-4 mb-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-blue-600 text-white rounded-xl shadow-md shrink-0">
-                                    <Building className="w-5 h-5" />
+                                    <Building className="size-5" />
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
@@ -506,7 +506,7 @@ export default function SettingsPage() {
                                             {activeOrg?.roleInOrg === 'admin' ? 'Owner / Admin' : activeOrg?.roleInOrg || 'Member'}
                                         </span>
                                     </div>
-                                    <h3 className="text-base font-bold text-neutral-900 dark:text-white">
+                                    <h3 className="text-base font-bold text-ink">
                                         {activeOrg?.name || 'Primary Organization'}
                                     </h3>
                                 </div>
@@ -519,7 +519,7 @@ export default function SettingsPage() {
                                         setActiveOrganization(e.target.value);
                                         toast.success('Switched active organization');
                                     }}
-                                    className="px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs font-semibold text-neutral-800 dark:text-neutral-200 shadow-sm focus:outline-none focus:border-blue-500 cursor-pointer"
+                                    className="px-3 py-2 bg-paper border border-line rounded-panel shadow-xs text-xs font-semibold text-neutral-800 dark:text-neutral-200 shadow-sm focus:outline-none focus:border-blue-500 cursor-pointer"
                                 >
                                     {organizations.map((org) => (
                                         <option key={org.id} value={org.id}>
@@ -533,7 +533,7 @@ export default function SettingsPage() {
                                     onClick={() => setIsCreateOrgModalOpen(true)}
                                     className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors flex items-center gap-1 shrink-0"
                                 >
-                                    <Plus className="w-3.5 h-3.5" />
+                                    <Plus className="size-3.5" />
                                     <span>New Org</span>
                                 </button>
                             </div>
@@ -547,14 +547,14 @@ export default function SettingsPage() {
                     {/* My Profile Tab */}
                     {activeTab === 'user-profile' && (
                         <div className="space-y-6 max-w-3xl animate-in fade-in slide-in-from-right-4 duration-300">
-                            <section className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm">
+                            <section className="bg-paper border border-line rounded-panel shadow-xs p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
-                                        <User className="w-5 h-5" />
+                                        <User className="size-5" />
                                     </div>
                                     <div>
-                                        <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">Personal User Profile</h2>
-                                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                        <h2 className="text-lg font-semibold text-ink">Personal User Profile</h2>
+                                        <p className="text-xs text-ink-muted">
                                             Manage your personal display name, profile avatar, and user account information across all organizations.
                                         </p>
                                     </div>
@@ -584,7 +584,7 @@ export default function SettingsPage() {
                                                 setIsUserDirty(true);
                                             }}
                                             placeholder="John Doe"
-                                            leftIcon={<User className="w-4 h-4 text-neutral-400" />}
+                                            leftIcon={<User className="size-4 text-neutral-400" />}
                                         />
                                     </div>
 
@@ -595,7 +595,7 @@ export default function SettingsPage() {
                                         <Input
                                             value={user?.email || ''}
                                             disabled
-                                            leftIcon={<Mail className="w-4 h-4 text-neutral-400" />}
+                                            leftIcon={<Mail className="size-4 text-neutral-400" />}
                                         />
                                         <p className="text-xs text-neutral-400 mt-1">
                                             Your login email is managed via your authentication provider.
@@ -610,14 +610,14 @@ export default function SettingsPage() {
                     {/* Appearance & Display Tab */}
                     {activeTab === 'appearance' && (
                         <div className="space-y-6 max-w-3xl animate-in fade-in slide-in-from-right-4 duration-300">
-                            <section className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm">
+                            <section className="bg-paper border border-line rounded-panel shadow-xs p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="p-2 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg">
-                                        <Palette className="w-5 h-5" />
+                                        <Palette className="size-5" />
                                     </div>
                                     <div>
-                                        <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">Theme & Display</h2>
-                                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                        <h2 className="text-lg font-semibold text-ink">Theme & Display</h2>
+                                        <p className="text-xs text-ink-muted">
                                             Personalize your user interface appearance and document typography.
                                         </p>
                                     </div>
@@ -638,17 +638,17 @@ export default function SettingsPage() {
                                                     onClick={() => setTheme(value as any)}
                                                     className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${theme === value
                                                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                                        : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 text-neutral-600 dark:text-neutral-400'
+                                                        : 'border-line hover:border-neutral-300 dark:hover:border-neutral-600 text-ink-muted'
                                                         }`}
                                                 >
-                                                    <Icon className="w-6 h-6" />
+                                                    <Icon className="size-6" />
                                                     <span className="text-xs font-bold">{label}</span>
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
 
-                                    <div className="pt-6 border-t border-neutral-100 dark:border-neutral-700">
+                                    <div className="pt-6 border-t border-line">
                                         <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
                                             Document Font Preset
                                         </label>
@@ -664,19 +664,19 @@ export default function SettingsPage() {
                                                     onClick={() => handleOrgChange('defaultFont', font.value)}
                                                     className={`flex flex-col items-start p-4 rounded-xl border-2 transition-all text-left cursor-pointer ${orgFormData.defaultFont === font.value
                                                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-1 ring-blue-500/20'
-                                                        : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                                                        : 'border-line hover:border-neutral-300 dark:hover:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800'
                                                         }`}
                                                 >
                                                     <div className="flex items-center justify-between w-full mb-1">
-                                                        <span className="font-semibold text-sm text-[#2d3748] dark:text-white" style={font.style}>
+                                                        <span className="font-semibold text-sm text-ink" style={font.style}>
                                                             {font.label}
                                                         </span>
                                                         {orgFormData.defaultFont === font.value && (
                                                             <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
                                                         )}
                                                     </div>
-                                                    <span className="text-xs text-neutral-500 dark:text-neutral-400 mb-3">{font.description}</span>
-                                                    <div className="w-full p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-100 dark:border-neutral-700">
+                                                    <span className="text-xs text-ink-muted mb-3">{font.description}</span>
+                                                    <div className="w-full p-3 bg-ground rounded-lg border border-line">
                                                         <p className="text-lg font-bold" style={font.style}>
                                                             $1,234.56
                                                         </p>
@@ -697,14 +697,14 @@ export default function SettingsPage() {
                     {/* User Account Security Tab */}
                     {activeTab === 'user-security' && (
                         <div className="space-y-6 max-w-3xl animate-in fade-in slide-in-from-right-4 duration-300">
-                            <section className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm">
+                            <section className="bg-paper border border-line rounded-panel shadow-xs p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg">
-                                        <Key className="w-5 h-5" />
+                                        <Key className="size-5" />
                                     </div>
                                     <div>
-                                        <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">Account Authentication & Security</h2>
-                                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                        <h2 className="text-lg font-semibold text-ink">Account Authentication & Security</h2>
+                                        <p className="text-xs text-ink-muted">
                                             Manage your user credentials and login authentication status.
                                         </p>
                                     </div>
@@ -713,19 +713,19 @@ export default function SettingsPage() {
                                 <div className="space-y-4">
                                     <div className="p-4 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl border border-neutral-200/60 dark:border-neutral-700 flex items-center justify-between">
                                         <div>
-                                            <p className="text-xs font-bold text-neutral-900 dark:text-white">Logged-in User Account</p>
-                                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">{user?.email}</p>
+                                            <p className="text-xs font-bold text-ink">Logged-in User Account</p>
+                                            <p className="text-xs text-ink-muted mt-0.5">{user?.email}</p>
                                             <p className="text-[10px] text-neutral-400 font-mono mt-1">UID: {user?.uid}</p>
                                         </div>
                                         <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-xl font-bold">
-                                            <CheckCircle2 className="w-4 h-4" />
+                                            <CheckCircle2 className="size-4" />
                                             <span>Authenticated</span>
                                         </div>
                                     </div>
 
                                     <div className="p-4 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl border border-neutral-200/60 dark:border-neutral-700">
-                                        <p className="text-xs font-bold text-neutral-900 dark:text-white mb-1">Password Management</p>
-                                        <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-3">
+                                        <p className="text-xs font-bold text-ink mb-1">Password Management</p>
+                                        <p className="text-xs text-ink-muted mb-3">
                                             If you registered with email and password, click below to trigger a password reset link to your email.
                                         </p>
                                         <Button
@@ -742,21 +742,21 @@ export default function SettingsPage() {
                                     {/* Danger Zone: Account Deletion */}
                                     <div className="p-5 bg-red-50/60 dark:bg-red-950/20 rounded-xl border border-red-200 dark:border-red-900/50 mt-6">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <ShieldAlert className="w-4 h-4 text-red-600 dark:text-red-400" />
+                                            <ShieldAlert className="size-4 text-red-600 dark:text-red-400" />
                                             <h3 className="text-xs font-bold text-red-900 dark:text-red-300 uppercase tracking-wider">
                                                 Danger Zone
                                             </h3>
                                         </div>
-                                        <h4 className="text-sm font-bold text-neutral-900 dark:text-white mb-1">
+                                        <h4 className="text-sm font-bold text-ink mb-1">
                                             Delete User Account
                                         </h4>
-                                        <p className="text-xs text-neutral-600 dark:text-neutral-400 mb-4">
+                                        <p className="text-xs text-ink-muted mb-4">
                                             Permanently delete your user account, authentication profile, and personal user data across Refloww. This action is irreversible.
                                         </p>
                                         <Button
                                             variant="danger"
                                             size="sm"
-                                            leftIcon={<Trash2 className="w-4 h-4" />}
+                                            leftIcon={<Trash2 className="size-4" />}
                                             onClick={() => {
                                                 setDeleteAccountStep(1);
                                                 setDeleteAccountConfirmInput('');
@@ -779,12 +779,12 @@ export default function SettingsPage() {
                     {activeTab === 'general' && (
                         <div className="space-y-6 max-w-3xl animate-in fade-in slide-in-from-right-4 duration-300">
                             {/* Logo Section */}
-                            <section className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm">
+                            <section className="bg-paper border border-line rounded-panel shadow-xs p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg">
-                                        <ImageIcon className="w-5 h-5" />
+                                        <ImageIcon className="size-5" />
                                     </div>
-                                    <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">
+                                    <h2 className="text-lg font-semibold text-ink">
                                         Organization Logo ({activeOrg?.name})
                                     </h2>
                                 </div>
@@ -801,12 +801,12 @@ export default function SettingsPage() {
                             </section>
 
                             {/* Company Info Section */}
-                            <section className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm">
+                            <section className="bg-paper border border-line rounded-panel shadow-xs p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
-                                        <Building className="w-5 h-5" />
+                                        <Building className="size-5" />
                                     </div>
-                                    <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">Organization Details</h2>
+                                    <h2 className="text-lg font-semibold text-ink">Organization Details</h2>
                                 </div>
 
                                 <div className="space-y-4">
@@ -819,7 +819,7 @@ export default function SettingsPage() {
                                                 value={orgFormData.name}
                                                 onChange={(e) => handleOrgChange('name', e.target.value)}
                                                 placeholder="Spice City"
-                                                leftIcon={<Building className="w-4 h-4 text-neutral-400" />}
+                                                leftIcon={<Building className="size-4 text-neutral-400" />}
                                             />
                                         </div>
                                         <div>
@@ -830,7 +830,7 @@ export default function SettingsPage() {
                                                 value={orgFormData.website}
                                                 onChange={(e) => handleOrgChange('website', e.target.value)}
                                                 placeholder="www.spicecity.com"
-                                                leftIcon={<Globe className="w-4 h-4 text-neutral-400" />}
+                                                leftIcon={<Globe className="size-4 text-neutral-400" />}
                                             />
                                         </div>
                                     </div>
@@ -844,7 +844,7 @@ export default function SettingsPage() {
                                                 value={orgFormData.email}
                                                 onChange={(e) => handleOrgChange('email', e.target.value)}
                                                 placeholder="contact@spicecity.com"
-                                                leftIcon={<Mail className="w-4 h-4 text-neutral-400" />}
+                                                leftIcon={<Mail className="size-4 text-neutral-400" />}
                                             />
                                         </div>
                                         <div>
@@ -855,7 +855,7 @@ export default function SettingsPage() {
                                                 value={orgFormData.phone}
                                                 onChange={(e) => handleOrgChange('phone', e.target.value)}
                                                 placeholder="+1 (555) 000-0000"
-                                                leftIcon={<Phone className="w-4 h-4 text-neutral-400" />}
+                                                leftIcon={<Phone className="size-4 text-neutral-400" />}
                                             />
                                         </div>
                                     </div>
@@ -865,7 +865,7 @@ export default function SettingsPage() {
                                             Address
                                         </label>
                                         <textarea
-                                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-blue-500 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 text-sm min-h-[100px] bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                                            className="w-full px-4 py-2.5 rounded-xl border border-line focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-blue-500 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 text-sm min-h-[100px] bg-paper text-ink"
                                             value={orgFormData.address}
                                             onChange={(e) => handleOrgChange('address', e.target.value)}
                                             placeholder="123 Business Street&#10;City, State 10001"
@@ -876,7 +876,7 @@ export default function SettingsPage() {
                                         <Button
                                             onClick={handleSaveOrgSettings}
                                             disabled={!isOrgDirty}
-                                            leftIcon={<Save className="w-4 h-4" />}
+                                            leftIcon={<Save className="size-4" />}
                                         >
                                             Save Changes
                                         </Button>
@@ -889,13 +889,13 @@ export default function SettingsPage() {
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-lg">
-                                            <ShieldAlert className="w-5 h-5" />
+                                            <ShieldAlert className="size-5" />
                                         </div>
                                         <div>
                                             <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400">
                                                 Danger Zone
                                             </span>
-                                            <h2 className="text-base font-bold text-neutral-900 dark:text-white">
+                                            <h2 className="text-base font-bold text-ink">
                                                 Delete Organization ({activeOrg?.name})
                                             </h2>
                                         </div>
@@ -908,7 +908,7 @@ export default function SettingsPage() {
                                     )}
                                 </div>
 
-                                <p className="text-xs text-neutral-600 dark:text-neutral-400 mb-4">
+                                <p className="text-xs text-ink-muted mb-4">
                                     Permanently delete this organization, remove member access, and disassociate organization configurations.
                                 </p>
 
@@ -916,7 +916,7 @@ export default function SettingsPage() {
                                     <Button
                                         variant="danger"
                                         size="sm"
-                                        leftIcon={<Trash2 className="w-4 h-4" />}
+                                        leftIcon={<Trash2 className="size-4" />}
                                         onClick={() => {
                                             setDeleteOrgStep(1);
                                             setDeleteOrgConfirmInput('');
@@ -926,7 +926,7 @@ export default function SettingsPage() {
                                         Delete Organization...
                                     </Button>
                                 ) : (
-                                    <p className="text-xs italic text-neutral-500 dark:text-neutral-400">
+                                    <p className="text-xs italic text-ink-muted">
                                         Only Organization Owners / Admins are permitted to delete this organization.
                                     </p>
                                 )}
@@ -937,24 +937,24 @@ export default function SettingsPage() {
                     {/* Team & Staff Tab */}
                     {activeTab === 'team' && (
                         <div className="space-y-6 max-w-3xl animate-in fade-in slide-in-from-right-4 duration-300">
-                            <section className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm">
+                            <section className="bg-paper border border-line rounded-panel shadow-xs p-6 shadow-sm">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
-                                            <Users className="w-5 h-5" />
+                                            <Users className="size-5" />
                                         </div>
                                         <div>
-                                            <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">
+                                            <h2 className="text-lg font-semibold text-ink">
                                                 Team & Staff Invitations ({activeOrg?.name})
                                             </h2>
-                                            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                            <p className="text-xs text-ink-muted">
                                                 Invite team members to manage this specific organization.
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center gap-2 self-start sm:self-auto bg-purple-50 dark:bg-purple-950/40 px-3 py-1.5 rounded-xl border border-purple-200/60 dark:border-purple-800">
-                                        <Shield className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                                        <Shield className="size-3.5 text-purple-600 dark:text-purple-400" />
                                         <span className="text-xs font-bold text-purple-900 dark:text-purple-300">
                                             Your Role: {activeOrg?.roleInOrg === 'admin' ? 'Owner / Admin' : activeOrg?.roleInOrg}
                                         </span>
@@ -963,7 +963,7 @@ export default function SettingsPage() {
 
                                 {/* Send Staff Invite Form */}
                                 <div className="p-5 bg-neutral-50/70 dark:bg-neutral-700/50 rounded-2xl border border-neutral-200/60 dark:border-neutral-700/60 mb-6 space-y-3">
-                                    <h3 className="text-xs font-bold text-neutral-900 dark:text-white">
+                                    <h3 className="text-xs font-bold text-ink">
                                         Invite New Staff Member to {activeOrg?.name}
                                     </h3>
 
@@ -974,14 +974,14 @@ export default function SettingsPage() {
                                                 value={inviteEmail}
                                                 onChange={(e) => setInviteEmail(e.target.value)}
                                                 placeholder="Enter staff email address (e.g. attendant@store.com)..."
-                                                className="w-full px-3.5 py-2.5 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-blue-500"
+                                                className="w-full px-3.5 py-2.5 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-ink placeholder-neutral-400 focus:outline-none focus:border-blue-500"
                                             />
                                         </div>
                                         <div className="sm:col-span-4">
                                             <select
                                                 value={inviteRole}
                                                 onChange={(e) => setInviteRole(e.target.value as UserRole)}
-                                                className="w-full px-3.5 py-2.5 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs font-semibold text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500 cursor-pointer"
+                                                className="w-full px-3.5 py-2.5 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs font-semibold text-ink focus:outline-none focus:border-blue-500 cursor-pointer"
                                             >
                                                 <option value="cashier">Cashier / Sales Attendant</option>
                                                 <option value="inventory_manager">Inventory Manager</option>
@@ -994,7 +994,7 @@ export default function SettingsPage() {
                                                 onClick={handleSendInvite}
                                                 className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                                             >
-                                                <UserPlus className="w-4 h-4" />
+                                                <UserPlus className="size-4" />
                                                 <span>Send Invite</span>
                                             </button>
                                         </div>
@@ -1003,7 +1003,7 @@ export default function SettingsPage() {
 
                                 {/* Active Organization Team Table */}
                                 <div>
-                                    <h3 className="text-xs font-bold text-neutral-900 dark:text-white mb-2">
+                                    <h3 className="text-xs font-bold text-ink mb-2">
                                         Members in {activeOrg?.name} ({activeOrg?.members?.length || 0})
                                     </h3>
 
@@ -1011,15 +1011,15 @@ export default function SettingsPage() {
                                         {activeOrg?.members?.map((member) => (
                                             <div
                                                 key={member.id}
-                                                className="flex items-center justify-between p-3 rounded-xl bg-neutral-50/50 dark:bg-neutral-700/30 border border-neutral-100 dark:border-neutral-700/60"
+                                                className="flex items-center justify-between p-3 rounded-xl bg-neutral-50/50 dark:bg-neutral-700/30 border border-line/60"
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                                    <div className="size-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                                                         {member.email.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-xs font-bold text-neutral-900 dark:text-white">
+                                                            <span className="text-xs font-bold text-ink">
                                                                 {member.name || member.email}
                                                             </span>
                                                             <span className={`px-1.5 py-0.2 text-[10px] font-bold rounded-md ${member.status === 'active'
@@ -1029,7 +1029,7 @@ export default function SettingsPage() {
                                                                 {member.status === 'active' ? 'Active' : 'Pending Invite'}
                                                             </span>
                                                         </div>
-                                                        <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                                                        <span className="text-[11px] text-ink-muted">
                                                             {member.email}
                                                         </span>
                                                     </div>
@@ -1056,7 +1056,7 @@ export default function SettingsPage() {
                                                             className="p-1 text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
                                                             title="Revoke access"
                                                         >
-                                                            <X className="w-4 h-4" />
+                                                            <X className="size-4" />
                                                         </button>
                                                     )}
                                                 </div>
@@ -1071,12 +1071,12 @@ export default function SettingsPage() {
                     {/* Financial Tab */}
                     {activeTab === 'financial' && (
                         <div className="space-y-6 max-w-3xl animate-in fade-in slide-in-from-right-4 duration-300">
-                            <section className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 shadow-sm">
+                            <section className="bg-paper border border-line rounded-panel shadow-xs p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="p-2 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg">
-                                        <DollarSign className="w-5 h-5" />
+                                        <DollarSign className="size-5" />
                                     </div>
-                                    <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">
+                                    <h2 className="text-lg font-semibold text-ink">
                                         Financial Defaults ({activeOrg?.name})
                                     </h2>
                                 </div>
@@ -1091,7 +1091,7 @@ export default function SettingsPage() {
                                             value={orgFormData.currency}
                                             onChange={(v) => handleOrgChange('currency', v)}
                                         />
-                                        <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5">
+                                        <p className="text-xs text-ink-muted mt-1.5">
                                             Currency for new invoices and receipts in {activeOrg?.name}.
                                         </p>
                                     </div>
@@ -1105,7 +1105,7 @@ export default function SettingsPage() {
                                             value={orgFormData.taxRate}
                                             onChange={(e) => handleOrgChange('taxRate', parseFloat(e.target.value) || 0)}
                                             placeholder="10"
-                                            leftIcon={<Percent className="w-4 h-4 text-neutral-400" />}
+                                            leftIcon={<Percent className="size-4 text-neutral-400" />}
                                         />
                                     </div>
 
@@ -1133,7 +1133,7 @@ export default function SettingsPage() {
                                             value={orgFormData.defaultDueDateDays ?? 30}
                                             onChange={(e) => handleOrgChange('defaultDueDateDays', parseInt(e.target.value) || 0)}
                                             placeholder="30"
-                                            leftIcon={<Calendar className="w-4 h-4 text-neutral-400" />}
+                                            leftIcon={<Calendar className="size-4 text-neutral-400" />}
                                         />
                                     </div>
 
@@ -1169,7 +1169,7 @@ export default function SettingsPage() {
                 size="md"
             >
                 <div className="space-y-4 py-2">
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="text-xs text-ink-muted">
                         Enter a business name for your new organization. You will be set as the Owner and can invite staff members to it.
                     </p>
 
@@ -1181,7 +1181,7 @@ export default function SettingsPage() {
                             value={newOrgName}
                             onChange={(e) => setNewOrgName(e.target.value)}
                             placeholder="e.g. Spice City Philadelphia, TechStore, etc."
-                            leftIcon={<Building className="w-4 h-4 text-neutral-400" />}
+                            leftIcon={<Building className="size-4 text-neutral-400" />}
                         />
                     </div>
                 </div>
@@ -1212,7 +1212,7 @@ export default function SettingsPage() {
                 {deleteAccountStep === 1 ? (
                     <div className="space-y-4 py-2">
                         <div className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl flex items-start gap-3">
-                            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+                            <AlertTriangle className="size-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
                             <div>
                                 <h4 className="text-xs font-bold text-red-900 dark:text-red-300 uppercase tracking-wider">
                                     Permanent Action Warning
@@ -1223,9 +1223,9 @@ export default function SettingsPage() {
                             </div>
                         </div>
 
-                        <div className="space-y-2 text-xs text-neutral-600 dark:text-neutral-300">
-                            <p className="font-semibold text-neutral-900 dark:text-white">What will happen when you delete your account:</p>
-                            <ul className="list-disc list-inside space-y-1 pl-1 text-neutral-500 dark:text-neutral-400">
+                        <div className="space-y-2 text-xs text-ink-muted">
+                            <p className="font-semibold text-ink">What will happen when you delete your account:</p>
+                            <ul className="list-disc list-inside space-y-1 pl-1 text-ink-muted">
                                 <li>Your login authentication credentials will be erased.</li>
                                 <li>Your personal profile details will be permanently removed.</li>
                                 <li>You will be logged out immediately across all active sessions.</li>
@@ -1234,8 +1234,8 @@ export default function SettingsPage() {
                     </div>
                 ) : (
                     <div className="space-y-4 py-2">
-                        <p className="text-xs text-neutral-600 dark:text-neutral-300">
-                            To confirm deletion, please type your email address <strong className="text-neutral-900 dark:text-white font-mono">{user?.email}</strong> or <strong className="text-neutral-900 dark:text-white font-mono">DELETE MY ACCOUNT</strong> in the field below:
+                        <p className="text-xs text-ink-muted">
+                            To confirm deletion, please type your email address <strong className="text-ink font-mono">{user?.email}</strong> or <strong className="text-ink font-mono">DELETE MY ACCOUNT</strong> in the field below:
                         </p>
 
                         <div>
@@ -1306,7 +1306,7 @@ export default function SettingsPage() {
                 {deleteOrgStep === 1 ? (
                     <div className="space-y-4 py-2">
                         <div className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl flex items-start gap-3">
-                            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+                            <AlertTriangle className="size-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
                             <div>
                                 <h4 className="text-xs font-bold text-red-900 dark:text-red-300 uppercase tracking-wider">
                                     Warning: Organization Deletion
@@ -1317,9 +1317,9 @@ export default function SettingsPage() {
                             </div>
                         </div>
 
-                        <div className="space-y-2 text-xs text-neutral-600 dark:text-neutral-300">
-                            <p className="font-semibold text-neutral-900 dark:text-white">Consequences of deleting this organization:</p>
-                            <ul className="list-disc list-inside space-y-1 pl-1 text-neutral-500 dark:text-neutral-400">
+                        <div className="space-y-2 text-xs text-ink-muted">
+                            <p className="font-semibold text-ink">Consequences of deleting this organization:</p>
+                            <ul className="list-disc list-inside space-y-1 pl-1 text-ink-muted">
                                 <li>This organization profile will be removed from your list of organizations.</li>
                                 <li>Staff members invited to this organization will lose access.</li>
                                 <li>Your active workspace will switch to another organization.</li>
@@ -1328,8 +1328,8 @@ export default function SettingsPage() {
                     </div>
                 ) : (
                     <div className="space-y-4 py-2">
-                        <p className="text-xs text-neutral-600 dark:text-neutral-300">
-                            To confirm deletion, please type the exact organization name <strong className="text-neutral-900 dark:text-white font-semibold">&quot;{activeOrg?.name}&quot;</strong> below:
+                        <p className="text-xs text-ink-muted">
+                            To confirm deletion, please type the exact organization name <strong className="text-ink font-semibold">&quot;{activeOrg?.name}&quot;</strong> below:
                         </p>
 
                         <div>
@@ -1386,7 +1386,7 @@ export default function SettingsPage() {
                 <div className="fixed bottom-20 right-4 sm:bottom-8 sm:right-8 z-[90] animate-in fade-in slide-in-from-bottom-4 duration-200">
                     <Button
                         onClick={isUserCategory ? handleSaveUserProfile : handleSaveOrgSettings}
-                        leftIcon={<Save className="w-4 h-4" />}
+                        leftIcon={<Save className="size-4" />}
                         className="shadow-2xl font-bold px-5 py-3 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-95 text-white shadow-orange-500/30 ring-4 ring-orange-500/20 transition-all flex items-center gap-2"
                     >
                         Save Changes

@@ -9,9 +9,9 @@ interface CardProps {
 
 const paddingStyles = {
     none: '',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
+    sm: 'p-3 md:p-4',
+    md: 'p-4 md:p-5',
+    lg: 'p-5 md:p-6',
 };
 
 export function Card({
@@ -23,8 +23,8 @@ export function Card({
     return (
         <div
             className={clsx(
-                'bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-100 dark:border-neutral-700',
-                hover && 'hover:border-neutral-200 dark:hover:border-neutral-600 transition-all duration-200',
+                'panel',
+                hover && 'hover:border-line-strong transition-colors duration-150',
                 paddingStyles[padding],
                 className
             )}
@@ -38,18 +38,19 @@ interface CardHeaderProps {
     title: string;
     description?: string;
     action?: React.ReactNode;
+    className?: string;
 }
 
-export function CardHeader({ title, description, action }: CardHeaderProps) {
+export function CardHeader({ title, description, action, className }: CardHeaderProps) {
     return (
-        <div className="flex items-start justify-between mb-6">
-            <div>
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">{title}</h3>
+        <div className={clsx('flex items-start justify-between gap-4 mb-4', className)}>
+            <div className="min-w-0">
+                <h3 className="font-heading text-lead font-semibold text-ink truncate">{title}</h3>
                 {description && (
-                    <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{description}</p>
+                    <p className="mt-1 text-caption text-ink-3">{description}</p>
                 )}
             </div>
-            {action}
+            {action && <div className="shrink-0">{action}</div>}
         </div>
     );
 }

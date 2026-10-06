@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { useProductStore, useDocumentStore, useSettingsStore, useOrganizationStore } from '@/lib/store';
 import { formatCurrency } from '@/lib/utils';
-import { TrendingUp, AlertCircle, Package, ArrowUpRight, Flame, Hourglass } from 'lucide-react';
+import { TrendingUp, AlertCircle, Package, ArrowUpRight, Flame, Hourglass } from '@/components/icons';
 
 export default function ProductVelocityWidget() {
     const { products, getFilteredProducts } = useProductStore();
@@ -61,14 +61,14 @@ export default function ProductVelocityWidget() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Bestsellers Card */}
-            <div className="bg-white dark:bg-neutral-800 p-5 rounded-2xl border border-neutral-100 dark:border-neutral-700/70 shadow-sm flex flex-col justify-between">
+            <div className="bg-paper p-5 rounded-2xl border border-line/70 shadow-sm flex flex-col justify-between">
                 <div>
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <div className="p-2 bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-xl">
-                                <Flame className="w-4 h-4" />
+                                <Flame className="size-4" />
                             </div>
-                            <h3 className="text-sm font-bold text-[#2d3748] dark:text-white">
+                            <h3 className="text-sm font-bold text-ink">
                                 Top Bestsellers
                             </h3>
                         </div>
@@ -78,22 +78,22 @@ export default function ProductVelocityWidget() {
                     </div>
 
                     {bestsellers.length === 0 ? (
-                        <div className="py-6 text-center text-xs text-neutral-400 dark:text-neutral-500">
+                        <div className="py-6 text-center text-xs text-ink-muted">
                             No product sales logged yet.
                         </div>
                     ) : (
                         <div className="space-y-2.5">
                             {bestsellers.map((item, idx) => (
-                                <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-100 dark:border-neutral-700/50">
+                                <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-700/50 border border-line/50">
                                     <div className="flex items-center gap-3">
-                                        <span className="w-5 h-5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold flex items-center justify-center">
+                                        <span className="size-5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold flex items-center justify-center">
                                             #{idx + 1}
                                         </span>
                                         <div>
                                             <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
                                                 {item.name}
                                             </p>
-                                            <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                                            <p className="text-[11px] text-ink-muted">
                                                 {item.unitsSold} unit(s) sold
                                             </p>
                                         </div>
@@ -109,14 +109,14 @@ export default function ProductVelocityWidget() {
             </div>
 
             {/* Slow Moving Products Card */}
-            <div className="bg-white dark:bg-neutral-800 p-5 rounded-2xl border border-neutral-100 dark:border-neutral-700/70 shadow-sm flex flex-col justify-between">
+            <div className="bg-paper p-5 rounded-2xl border border-line/70 shadow-sm flex flex-col justify-between">
                 <div>
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <div className="p-2 bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
-                                <Hourglass className="w-4 h-4" />
+                                <Hourglass className="size-4" />
                             </div>
-                            <h3 className="text-sm font-bold text-[#2d3748] dark:text-white">
+                            <h3 className="text-sm font-bold text-ink">
                                 Slow-Moving Products
                             </h3>
                         </div>
@@ -126,22 +126,22 @@ export default function ProductVelocityWidget() {
                     </div>
 
                     {slowMoving.length === 0 ? (
-                        <div className="py-6 text-center text-xs text-neutral-400 dark:text-neutral-500">
+                        <div className="py-6 text-center text-xs text-ink-muted">
                             No slow-moving inventory detected.
                         </div>
                     ) : (
                         <div className="space-y-2.5">
                             {slowMoving.map((item) => (
-                                <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-100 dark:border-neutral-700/50">
+                                <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-700/50 border border-line/50">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-lg text-neutral-500 dark:text-neutral-400">
-                                            <Package className="w-3.5 h-3.5" />
+                                        <div className="p-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-lg text-ink-muted">
+                                            <Package className="size-3.5" />
                                         </div>
                                         <div>
                                             <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
                                                 {item.name}
                                             </p>
-                                            <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                                            <p className="text-[11px] text-ink-muted">
                                                 {item.stockQuantity} in stock • {item.unitsSold} sold
                                             </p>
                                         </div>

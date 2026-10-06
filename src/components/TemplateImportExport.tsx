@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui';
 import { useTemplateStore } from '@/lib/store';
 import { Template, MappedField } from '@/lib/types';
-import { Download, Upload, Loader2, FileJson } from 'lucide-react';
+import { Download, Upload, Loader2, FileJson } from '@/components/icons';
 
 interface TemplateImportExportProps {
     onImportSuccess?: () => void;
@@ -98,7 +98,7 @@ export default function TemplateImportExport({ onImportSuccess }: TemplateImport
             />
             <Button
                 variant="outline"
-                leftIcon={isImporting ? <Loader2 className="w-4 h-4 animate-spin text-neutral-600 dark:text-neutral-300" /> : <Upload className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />}
+                leftIcon={isImporting ? <Loader2 className="size-4 rf-spin text-ink-muted" /> : <Upload className="size-4 text-ink-muted" />}
                 iconOnlyMobile
                 title="Import Template"
                 aria-label="Import Template"

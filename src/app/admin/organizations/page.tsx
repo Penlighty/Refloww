@@ -15,7 +15,7 @@ import {
     Ban, 
     CheckCircle2, 
     TrendingUp 
-} from 'lucide-react';
+} from '@/components/icons';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 
@@ -83,7 +83,7 @@ export default function AdminOrganizationsPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <Building2 className="w-6 h-6 text-blue-600" />
+                        <Building2 className="size-6 text-blue-600" />
                         Organizations
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
@@ -92,7 +92,7 @@ export default function AdminOrganizationsPage() {
                 </div>
                 
                 <div className="relative w-full sm:w-72">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                     <input
                         type="text"
                         placeholder="Search organizations..."
@@ -158,7 +158,7 @@ export default function AdminOrganizationsPage() {
                                                     ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
                                                     : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                             }`}>
-                                                {org.status === 'active' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}
+                                                {org.status === 'active' ? <CheckCircle2 className="size-3.5" /> : <Ban className="size-3.5" />}
                                                 {org.status.charAt(0).toUpperCase() + org.status.slice(1)}
                                             </span>
                                         </td>
@@ -173,7 +173,7 @@ export default function AdminOrganizationsPage() {
                                                 }}
                                                 className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                                             >
-                                                <MoreVertical className="w-5 h-5" />
+                                                <MoreVertical className="size-5" />
                                             </button>
                                         </td>
                                     </tr>
@@ -201,7 +201,7 @@ export default function AdminOrganizationsPage() {
 
                         <div className="space-y-3">
                             <h4 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                <TrendingUp className="w-4 h-4 text-blue-500" />
+                                <TrendingUp className="size-4 text-blue-500" />
                                 Subscription Tier
                             </h4>
                             <div className="flex gap-2">
@@ -224,7 +224,7 @@ export default function AdminOrganizationsPage() {
 
                         <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
                             <h4 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                <Shield className="w-4 h-4 text-red-500" />
+                                <Shield className="size-4 text-red-500" />
                                 Platform Access
                             </h4>
                             {selectedOrg.status === 'active' ? (
@@ -234,7 +234,7 @@ export default function AdminOrganizationsPage() {
                                     isLoading={actionLoading}
                                     className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
                                 >
-                                    <Ban className="w-4 h-4 mr-2" />
+                                    <Ban className="size-4 mr-2" />
                                     Suspend Organization
                                 </Button>
                             ) : (
@@ -243,7 +243,7 @@ export default function AdminOrganizationsPage() {
                                     isLoading={actionLoading}
                                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                                 >
-                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                    <CheckCircle2 className="size-4 mr-2" />
                                     Restore Access
                                 </Button>
                             )}

@@ -90,10 +90,10 @@ export default function AppShell({ children }: AppShellProps) {
     // Loading state
     if (loading) {
         return (
-            <div className="w-full h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+            <div className="w-full h-screen flex items-center justify-center bg-ground text-ink">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">Loading...</p>
+                    <div className="size-10 border-4 border-primary-500 border-t-transparent rounded-full rf-spin"></div>
+                    <p className="text-sm text-ink-muted">Loading...</p>
                 </div>
             </div>
         );
@@ -107,10 +107,10 @@ export default function AppShell({ children }: AppShellProps) {
     // Not authenticated and not on public page - will redirect
     if (!user) {
         return (
-            <div className="w-full h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+            <div className="w-full h-screen flex items-center justify-center bg-ground text-ink">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">Redirecting...</p>
+                    <div className="size-10 border-4 border-primary-500 border-t-transparent rounded-full rf-spin"></div>
+                    <p className="text-sm text-ink-muted">Redirecting...</p>
                 </div>
             </div>
         );
@@ -124,7 +124,7 @@ export default function AppShell({ children }: AppShellProps) {
     // Authenticated - show full app with sidebar, header, announcement banner, and Firebase sync
     return (
         <FirebaseSyncProvider>
-            <div className="flex flex-col h-screen w-full overflow-hidden bg-[#F4F5F3] dark:bg-[#0B0F19]">
+            <div className="flex flex-col h-screen w-full overflow-hidden bg-ground text-ink">
                 {/* Announcement Banner - Real-time from Firebase */}
                 <AnnouncementBanner />
 
@@ -137,7 +137,7 @@ export default function AppShell({ children }: AppShellProps) {
                 {/* Main App Layout */}
                 <div className="flex-1 flex overflow-hidden">
                     <Sidebar />
-                    <main className="flex-1 flex flex-col min-w-0 bg-[#F4F5F3] dark:bg-[#0B0F19] relative overflow-hidden transition-colors">
+                    <main className="flex-1 flex flex-col min-w-0 bg-ground relative overflow-hidden">
                         {/* Desktop Header */}
                         <div className="hidden md:block flex-shrink-0">
                             <Header />

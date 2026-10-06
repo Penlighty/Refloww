@@ -27,7 +27,7 @@ import {
     ArrowUpDown,
     Lock,
     Building
-} from 'lucide-react';
+} from '@/components/icons';
 import TemplateImportExport, { downloadTemplate } from '@/components/TemplateImportExport';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -343,7 +343,7 @@ export default function TemplatesPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                     <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Templates</h1>
+                        <h1 className="text-2xl font-bold text-ink">Templates</h1>
                         <PageHelpModal
                             title="Design Templates Marketplace & Customizer"
                             description="Upload custom document designs (PDF/images) or use pre-built template layouts for invoices, receipts, and delivery notes."
@@ -355,11 +355,11 @@ export default function TemplatesPage() {
                         />
                     </div>
                     <div className="flex items-center gap-2 mt-1">
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                        <p className="text-sm text-ink-muted">
                             Upload and manage document templates for
                         </p>
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700">
-                            <Building className="w-3 h-3 text-blue-500" />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-paper-2 text-neutral-700 dark:text-neutral-300 border border-line">
+                            <Building className="size-3.5 text-blue-500" />
                             {activeOrg?.name || 'Active Organization'}
                         </span>
                     </div>
@@ -367,7 +367,7 @@ export default function TemplatesPage() {
                 <div className="flex items-center gap-2">
                     <TemplateImportExport />
                     <Button
-                        leftIcon={<Plus className="w-4 h-4" />}
+                        leftIcon={<Plus className="size-4" />}
                         className="px-3 sm:px-4"
                         onClick={() => fileInputRef.current?.click()}
                     >
@@ -393,7 +393,7 @@ export default function TemplatesPage() {
                         mb-10 p-16 rounded-[2.5rem] border-2 border-dashed transition-all duration-500 relative overflow-hidden group/main-drop
                         ${isDragging
                             ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/10'
-                            : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/20 hover:border-blue-300 dark:hover:border-blue-800'
+                            : 'border-line bg-ground/20 hover:border-blue-300 dark:hover:border-blue-800'
                         }
                     `}
                 >
@@ -406,22 +406,22 @@ export default function TemplatesPage() {
                             w-24 h-24 rounded-3xl flex items-center justify-center mb-8 transition-all duration-500 shadow-xl
                             ${isDragging
                                 ? 'bg-blue-500 text-white scale-110 rotate-3 shadow-blue-500/20'
-                                : 'bg-white dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500 group-hover/main-drop:text-blue-500 dark:group-hover/main-drop:text-blue-400 group-hover/main-drop:scale-105'
+                                : 'bg-paper text-ink-muted group-hover/main-drop:text-blue-500 dark:group-hover/main-drop:text-blue-400 group-hover/main-drop:scale-105'
                             }
                         `}>
                             {isDragging ? (
-                                <Plus className="w-12 h-12" strokeWidth={2.5} />
+                                <Plus className="size-12" />
                             ) : (
-                                <Upload className="w-12 h-12" strokeWidth={1.5} />
+                                <Upload className="size-12" />
                             )}
                         </div>
-                        <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-3">
+                        <h3 className="text-2xl font-bold text-ink mb-3">
                             {isDragging ? 'Ready to drop!' : 'Upload your template'}
                         </h3>
-                        <p className="text-neutral-500 dark:text-neutral-400 mb-8 max-w-lg text-lg leading-relaxed">
+                        <p className="text-ink-muted mb-8 max-w-lg text-lg leading-relaxed">
                             Drag and drop your bank invoice, receipt, or delivery note design. We support PDF, PNG, JPG, and SVG.
                             <br />
-                            <span className="text-sm text-neutral-400 dark:text-neutral-500 mt-2 block">
+                            <span className="text-sm text-ink-muted mt-2 block">
                                 <strong>Note:</strong> PDF templates will display a placeholder in the editor. For the best experience, use a PNG or JPG image.
                             </span>
                         </p>
@@ -429,7 +429,7 @@ export default function TemplatesPage() {
                             <Button
                                 size="lg"
                                 className="rounded-2xl shadow-lg hover:shadow-xl transition-all"
-                                leftIcon={<FolderOpen className="w-5 h-5" />}
+                                leftIcon={<FolderOpen className="size-5" />}
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 Browse Files
@@ -459,24 +459,24 @@ export default function TemplatesPage() {
                                 onChange={setFilterType}
                                 className="w-40"
                             />
-                            <div className="flex items-center bg-neutral-100 dark:bg-neutral-800 rounded-xl p-1 shadow-inner">
+                            <div className="flex items-center bg-paper-2 rounded-xl p-1 shadow-inner">
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p-2 rounded-lg transition-all duration-200 ${viewMode === 'grid'
                                         ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                        : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300'
+                                        : 'text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300'
                                         }`}
                                 >
-                                    <Grid className="w-4 h-4" />
+                                    <Grid className="size-4" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
                                     className={`p-2 rounded-lg transition-all duration-200 ${viewMode === 'list'
                                         ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                        : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300'
+                                        : 'text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300'
                                         }`}
                                 >
-                                    <List className="w-4 h-4" />
+                                    <List className="size-4" />
                                 </button>
                             </div>
                         </div>
@@ -492,24 +492,24 @@ export default function TemplatesPage() {
                             mb-8 p-6 rounded-2xl border-2 border-dashed transition-all duration-300 flex items-center justify-center gap-4 cursor-pointer group/drop relative overflow-hidden
                             ${isDragging
                                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg shadow-blue-500/10 scale-[1.01]'
-                                : 'border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/30 hover:border-blue-300 dark:hover:border-blue-800 hover:bg-white dark:hover:bg-neutral-800 hover:shadow-md'
+                                : 'border-line bg-white/50 dark:bg-neutral-900/30 hover:border-blue-300 dark:hover:border-blue-800 hover:bg-white dark:hover:bg-neutral-800 hover:shadow-md'
                             }
                         `}
                     >
                         <div className={`
-                            w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300
+                            size-12 rounded-xl flex items-center justify-center transition-all duration-300
                             ${isDragging
                                 ? 'bg-blue-500 text-white rotate-6'
-                                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 group-hover/drop:bg-blue-50 dark:group-hover/drop:bg-blue-900/30 group-hover/drop:text-blue-500 group-hover/drop:-rotate-6'
+                                : 'bg-paper-2 text-neutral-400 group-hover/drop:bg-blue-50 dark:group-hover/drop:bg-blue-900/30 group-hover/drop:text-blue-500 group-hover/drop:-rotate-6'
                             }
                         `}>
-                            <Upload className="w-6 h-6" />
+                            <Upload className="size-6" />
                         </div>
                         <div className="flex flex-col">
-                            <span className={`text-base transition-colors ${isDragging ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-neutral-700 dark:text-neutral-200 font-semibold'}`}>
+                            <span className={`text-base transition-colors ${isDragging ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-ink-muted font-semibold'}`}>
                                 {isDragging ? 'Drop to upload!' : 'Quick Upload'}
                             </span>
-                            <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                            <span className="text-xs text-ink-muted">
                                 Drag files here or click to browse
                             </span>
                         </div>
@@ -517,7 +517,7 @@ export default function TemplatesPage() {
 
                     {/* Template Grid/List */}
                     {filteredTemplates.length === 0 ? (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12 shadow-sm">
+                        <div className="bg-paper border border-line rounded-panel shadow-xs p-12 shadow-sm">
                             <EmptyState
                                 title="No templates found"
                                 description={`No templates match your search. Try a different filter.`}
@@ -531,8 +531,8 @@ export default function TemplatesPage() {
                                 const TypeIcon = config ? config.icon : Lock;
 
                                 return (
-                                    <div key={template.id} className={`bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 shadow-sm relative ${openMenuId === template.id ? 'z-30' : ''}`}>
-                                        <div className="relative aspect-square bg-neutral-100 dark:bg-neutral-900 overflow-hidden rounded-t-2xl border-b border-neutral-100 dark:border-neutral-700">
+                                    <div key={template.id} className={`bg-paper border border-line rounded-panel shadow-xs group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 shadow-sm relative ${openMenuId === template.id ? 'z-30' : ''}`}>
+                                        <div className="relative aspect-square bg-neutral-100 dark:bg-neutral-900 overflow-hidden rounded-t-2xl border-b border-line">
                                             {(template.coverImage || template.imageUrl) ? (
                                                 <img
                                                     src={template.coverImage || template.imageUrl}
@@ -540,11 +540,11 @@ export default function TemplatesPage() {
                                                     className={`w-full h-full object-cover ${isLocked ? 'blur-sm opacity-50' : ''}`}
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+                                                <div className="w-full h-full flex items-center justify-center bg-paper-2">
                                                     {isLocked ? (
-                                                        <Lock className="w-12 h-12 text-neutral-300 dark:text-neutral-700" strokeWidth={1} />
+                                                        <Lock className="size-12 text-neutral-300 dark:text-neutral-700" />
                                                     ) : (
-                                                        <Image className="w-12 h-12 text-neutral-300 dark:text-neutral-700" strokeWidth={1} />
+                                                        <Image className="size-12 text-neutral-300 dark:text-neutral-700" />
                                                     )}
                                                 </div>
                                             )}
@@ -557,18 +557,18 @@ export default function TemplatesPage() {
                                                             className="p-3 rounded-xl bg-white/90 text-[#2d3748] hover:bg-white transition-colors"
                                                             title="Edit Fields"
                                                         >
-                                                            <Edit2 className="w-5 h-5" />
+                                                            <Edit2 className="size-5" />
                                                         </Link>
                                                         <Link
                                                             href={`/templates/${template.id}`}
                                                             className="p-3 rounded-xl bg-white/90 text-[#2d3748] hover:bg-white transition-colors"
                                                         >
-                                                            <Eye className="w-5 h-5" />
+                                                            <Eye className="size-5" />
                                                         </Link>
                                                     </>
                                                 ) : (
                                                     <span className="px-3 py-1.5 rounded-lg bg-white/90 text-neutral-700 font-medium text-sm flex items-center gap-2">
-                                                        <Lock className="w-4 h-4" />
+                                                        <Lock className="size-4" />
                                                         Locked
                                                     </span>
                                                 )}
@@ -577,7 +577,7 @@ export default function TemplatesPage() {
                                             {template.isDefault && (
                                                 <div className="absolute top-3 left-3">
                                                     <Badge variant="success" size="sm">
-                                                        <Star className="w-3 h-3 mr-1" />
+                                                        <Star className="size-3.5 mr-1" />
                                                         Default
                                                     </Badge>
                                                 </div>
@@ -603,7 +603,7 @@ export default function TemplatesPage() {
                                                             className={`p-2 rounded-lg ${config.bgColor} shadow-sm border border-white/20 dark:border-white/10`}
                                                             title={documentTypeOptions.find(o => o.value === type)?.label}
                                                         >
-                                                            <TypeIcon className={`w-4 h-4 ${config.textColor}`} />
+                                                            <TypeIcon className={`size-4 ${config.textColor}`} />
                                                         </div>
                                                     );
                                                 })}
@@ -613,11 +613,11 @@ export default function TemplatesPage() {
                                         <div className="p-4">
                                             <div className="flex items-start justify-between">
                                                 <div>
-                                                    <h3 className="font-semibold text-[#2d3748] dark:text-white truncate">
+                                                    <h3 className="font-semibold text-ink truncate">
                                                         {template.name}
                                                     </h3>
 
-                                                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                                                    <p className="text-xs text-ink-muted mt-1">
                                                         {(() => {
                                                             let totalFields = template.fields?.length || 0;
                                                             if (template.variants) {
@@ -634,15 +634,15 @@ export default function TemplatesPage() {
                                                         onClick={() => setOpenMenuId(openMenuId === template.id ? null : template.id)}
                                                         className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                                                     >
-                                                        <MoreVertical className="w-4 h-4" />
+                                                        <MoreVertical className="size-4" />
                                                     </button>
                                                     {openMenuId === template.id && (
-                                                        <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-neutral-800 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-1 z-20">
+                                                        <div className="absolute right-0 top-full mt-1 w-44 bg-paper rounded-xl shadow-xl border border-line py-1 z-20">
                                                             <Link
                                                                 href={`/templates/${template.id}/edit`}
                                                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                             >
-                                                                <Edit2 className="w-4 h-4" />
+                                                                <Edit2 className="size-4" />
                                                                 Edit Fields
                                                             </Link>
                                                             {!template.isDefault && (
@@ -650,7 +650,7 @@ export default function TemplatesPage() {
                                                                     onClick={() => handleSetDefault(template.id, template.type)}
                                                                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                                 >
-                                                                    <Star className="w-4 h-4" />
+                                                                    <Star className="size-4" />
                                                                     Set as Default
                                                                 </button>
                                                             )}
@@ -663,7 +663,7 @@ export default function TemplatesPage() {
                                                                 }}
                                                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                             >
-                                                                <Download className="w-4 h-4" />
+                                                                <Download className="size-4" />
                                                                 Export .rfw
                                                             </button>
                                                             <div className="h-px bg-neutral-100 dark:bg-neutral-700 my-1" />
@@ -671,7 +671,7 @@ export default function TemplatesPage() {
                                                                 onClick={() => openDeleteModal(template.id)}
                                                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                                                             >
-                                                                <Trash2 className="w-4 h-4" />
+                                                                <Trash2 className="size-4" />
                                                                 Delete
                                                             </button>
                                                         </div>
@@ -684,48 +684,48 @@ export default function TemplatesPage() {
                             })}
                         </div>
                     ) : (
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden shadow-sm">
+                        <div className="bg-paper border border-line rounded-panel shadow-xs overflow-hidden shadow-sm">
                             <div className="overflow-x-auto">
                                 <table className="w-full min-w-[700px] md:min-w-full">
                                 <thead>
-                                    <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                                    <tr className="border-b border-line bg-neutral-50/50 dark:bg-neutral-800/50">
                                         <th className="text-left px-6 py-4">
                                             <button
                                                 onClick={() => handleSort('name')}
-                                                className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                                className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                             >
                                                 Template
-                                                <ArrowUpDown className="w-3 h-3" />
+                                                <ArrowUpDown className="size-3.5" />
                                             </button>
                                         </th>
                                         <th className="text-left px-6 py-4">
                                             <button
                                                 onClick={() => handleSort('type')}
-                                                className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                                className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                             >
                                                 Type
-                                                <ArrowUpDown className="w-3 h-3" />
+                                                <ArrowUpDown className="size-3.5" />
                                             </button>
                                         </th>
                                         <th className="text-left px-6 py-4 hidden md:table-cell">
                                             <button
                                                 onClick={() => handleSort('fields')}
-                                                className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                                className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                             >
                                                 Fields
-                                                <ArrowUpDown className="w-3 h-3" />
+                                                <ArrowUpDown className="size-3.5" />
                                             </button>
                                         </th>
                                         <th className="text-left px-6 py-4 hidden lg:table-cell">
                                             <button
                                                 onClick={() => handleSort('createdAt')}
-                                                className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                                className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                             >
                                                 Created
-                                                <ArrowUpDown className="w-3 h-3" />
+                                                <ArrowUpDown className="size-3.5" />
                                             </button>
                                         </th>
-                                        <th className="text-right px-6 py-4 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Actions</th>
+                                        <th className="text-right px-6 py-4 text-xs font-medium text-ink-muted uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -742,15 +742,15 @@ export default function TemplatesPage() {
                                                             {/* Locked Content */}
                                                             <div className="w-12 h-16 rounded-lg bg-neutral-100 dark:bg-neutral-900 overflow-hidden flex-shrink-0 shadow-sm relative">
                                                                 <div className="w-full h-full flex items-center justify-center">
-                                                                    <Lock className="w-5 h-5 text-neutral-300 dark:text-neutral-700" />
+                                                                    <Lock className="size-5 text-neutral-300 dark:text-neutral-700" />
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                <span className="font-medium text-neutral-500 dark:text-neutral-400">
+                                                                <span className="font-medium text-ink-muted">
                                                                     {template.name || 'Encrypted Template'}
                                                                 </span>
                                                                 <Badge variant="warning" size="sm">
-                                                                    <Lock className="w-3 h-3 mr-1" />
+                                                                    <Lock className="size-3.5 mr-1" />
                                                                     Locked
                                                                 </Badge>
                                                             </div>
@@ -767,26 +767,26 @@ export default function TemplatesPage() {
                                                                 ) : (
                                                                     <div className="w-full h-full flex items-center justify-center">
                                                                         {isLocked ? (
-                                                                            <Lock className="w-5 h-5 text-neutral-300 dark:text-neutral-700" />
+                                                                            <Lock className="size-5 text-neutral-300 dark:text-neutral-700" />
                                                                         ) : (
-                                                                            <Image className="w-5 h-5 text-neutral-300 dark:text-neutral-700" strokeWidth={1} />
+                                                                            <Image className="size-5 text-neutral-300 dark:text-neutral-700" />
                                                                         )}
                                                                     </div>
                                                                 )}
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                <span className="font-medium text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                                <span className="font-medium text-ink group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                                                     {template.name || 'Encrypted Template'}
                                                                 </span>
                                                                 {template.isDefault && (
                                                                     <Badge variant="success" size="sm">
-                                                                        <Star className="w-3 h-3 mr-1" />
+                                                                        <Star className="size-3.5 mr-1" />
                                                                         Default
                                                                     </Badge>
                                                                 )}
                                                                 {isLocked && (
                                                                     <Badge variant="warning" size="sm">
-                                                                        <Lock className="w-3 h-3 mr-1" />
+                                                                        <Lock className="size-3.5 mr-1" />
                                                                         Locked
                                                                     </Badge>
                                                                 )}
@@ -813,7 +813,7 @@ export default function TemplatesPage() {
                                                                         className={`relative p-1.5 rounded-lg ${config.bgColor} shadow-sm border border-white dark:border-neutral-800 ${isMain ? 'z-10' : ''}`}
                                                                         title={documentTypeOptions.find(o => o.value === type)?.label}
                                                                     >
-                                                                        <VIcon className={`w-3.5 h-3.5 ${config.textColor}`} />
+                                                                        <VIcon className={`size-3.5 ${config.textColor}`} />
                                                                     </div>
                                                                 );
                                                             })}
@@ -830,7 +830,7 @@ export default function TemplatesPage() {
                                                                     // Determine z-index based on order if needed, but flex row is fine
                                                                     return (
                                                                         <div key={vType} className={`relative p-1.5 rounded-lg ${vConfig.bgColor} shadow-sm border border-white dark:border-neutral-800`} title={documentTypeOptions.find(o => o.value === vType)?.label}>
-                                                                            <VIcon className={`w-3.5 h-3.5 ${vConfig.textColor}`} />
+                                                                            <VIcon className={`size-3.5 ${vConfig.textColor}`} />
                                                                         </div>
                                                                     );
                                                                 })
@@ -838,10 +838,10 @@ export default function TemplatesPage() {
                                                         </div>
 
                                                         <div className="flex flex-col">
-                                                            <span className="text-sm text-neutral-600 dark:text-neutral-300 capitalize">
+                                                            <span className="text-sm text-ink-muted capitalize">
                                                                 {template.type ? template.type.replace('-', ' ') : 'Encrypted'}
                                                                 {template.mode === 'connected' && template.variants && Object.keys(template.variants).length > 0 && (
-                                                                    <span className="text-neutral-400 dark:text-neutral-500 text-xs ml-1">
+                                                                    <span className="text-ink-muted text-xs ml-1">
                                                                         + {Object.keys(template.variants).filter(k => k !== template.type).length}
                                                                     </span>
                                                                 )}
@@ -861,14 +861,14 @@ export default function TemplatesPage() {
                                                             });
                                                         }
                                                         return (
-                                                            <span className="text-sm text-neutral-600 dark:text-neutral-300">
+                                                            <span className="text-sm text-ink-muted">
                                                                 {totalFields}
                                                             </span>
                                                         );
                                                     })()}
                                                 </td>
                                                 <td className="px-6 py-4 hidden lg:table-cell">
-                                                    <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(template.createdAt)}</span>
+                                                    <span className="text-sm text-ink-muted">{formatDate(template.createdAt)}</span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="flex items-center justify-end gap-1">
@@ -882,14 +882,14 @@ export default function TemplatesPage() {
                                                                     className="p-2 rounded-lg text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
                                                                     title="Export .rfw"
                                                                 >
-                                                                    <Download className="w-4 h-4" />
+                                                                    <Download className="size-4" />
                                                                 </button>
                                                                 <Link
                                                                     href={`/templates/${template.id}/edit`}
                                                                     className="p-2 rounded-lg text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
                                                                     title="Edit Fields"
                                                                 >
-                                                                    <Edit2 className="w-4 h-4" />
+                                                                    <Edit2 className="size-4" />
                                                                 </Link>
                                                             </>
                                                         )}
@@ -918,7 +918,7 @@ export default function TemplatesPage() {
                 <div className="space-y-4">
                     {/* Preview */}
                     {uploadPreview && (
-                        <div className="aspect-[3/4] max-h-64 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden bg-neutral-100 dark:bg-neutral-900">
+                        <div className="aspect-[3/4] max-h-64 rounded-xl border border-line overflow-hidden bg-neutral-100 dark:bg-neutral-900">
                             <img
                                 src={uploadPreview}
                                 alt="Preview"
@@ -930,7 +930,7 @@ export default function TemplatesPage() {
                     {uploadPreview === '/pdf-placeholder.png' && (
                         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg p-3 flex gap-3">
                             <div className="shrink-0 text-blue-600 dark:text-blue-400">
-                                <FileText className="w-5 h-5" />
+                                <FileText className="size-5" />
                             </div>
                             <div className="text-sm">
                                 <p className="font-medium text-blue-900 dark:text-blue-100">PDF Template Detected</p>
@@ -973,7 +973,7 @@ export default function TemplatesPage() {
                 title="Delete Template"
                 size="sm"
             >
-                <p className="text-neutral-600 dark:text-neutral-400">
+                <p className="text-ink-muted">
                     Are you sure you want to delete this template? All field mappings will be lost. This action cannot be undone.
                 </p>
                 <ModalFooter>

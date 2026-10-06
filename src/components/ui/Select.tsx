@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
-import { ChevronDown, Check, Search } from 'lucide-react';
+import { ChevronDown, Check, Search, AlertTriangle } from '@/components/icons';
 
 export interface SelectOption {
     value: string;
@@ -46,7 +46,6 @@ export function Select({
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Type-ahead state
     const typeSearchRef = useRef('');
     const typeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -82,7 +81,6 @@ export function Select({
         }
     }, [isOpen, searchable]);
 
-    // Clear timeout on unmount
     useEffect(() => {
         return () => {
             if (typeTimeoutRef.current) clearTimeout(typeTimeoutRef.current);
@@ -98,14 +96,12 @@ export function Select({
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (disabled) return;
 
-        // Space or Enter to open/close
         if (e.key === 'Enter' || (e.key === ' ' && !searchable && !isOpen)) {
             e.preventDefault();
             setIsOpen(!isOpen);
             return;
         }
 
-        // Only capture single characters, not special keys
         if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
             if (searchable && isOpen) return;
 
@@ -137,64 +133,65 @@ export function Select({
     };
 
     return (
-        <div className={clsx('flex flex-col gap-1.5', className, isOpen && 'relative z-50')} ref={containerRef}>
+        <div className={clsx('flex flex-col gap-1.5 w-full', className, isOpen && 'relative z-50')} ref={containerRef}>
             {label && (
-                <label className="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
+                <label className="label">
                     {label}
                 </label>
             )}
-            <div className={clsx('relative', isOpen && 'z-50')}>
+            <div className={clsx('relative w-full', isOpen && 'z-50')}>
                 <button
                     type="button"
                     onClick={() => !disabled && setIsOpen(!isOpen)}
                     onKeyDown={handleKeyDown}
                     disabled={disabled}
                     className={clsx(
-                        'dropdown-trigger',
-                        isOpen && 'dropdown-trigger-open',
-                        error && '!border-red-500 !ring-red-500/20',
-                        disabled && 'opacity-50 cursor-not-allowed'
+                        'w-full h-10 px-3 text-body rounded-ctl border bg-paper text-ink transition-colors flex items-center justify-between text-left cursor-pointer',
+                        'placeholder:text-ink-3 hover:border-ink-4',
+                        'focus-visible:outline-none focus-visible:border-ink focus-visible:ring-[3px] focus-visible:ring-primary-500/20',
+                        error ? 'border-danger-solid ring-1 ring-danger-solid/15' : 'border-line-strong',
+                        disabled && 'bg-paper-2 text-ink-4 cursor-not-allowed'
                     )}
                 >
                     <div className="flex items-center gap-2.5 truncate">
                         {selectedOption?.icon && (
-                            <span className="shrink-0 flex items-center justify-center">{selectedOption.icon}</span>
+                            <span className="shrink-0 flex items-center justify-center text-ink-3">{selectedOption.icon}</span>
                         )}
                         {selectedOption?.imageUrl && (
-                            <img src={selectedOption.imageUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
+                            <img src={selectedOption.imageUrl} alt="" className="size-5 rounded-full object-cover shrink-0" />
                         )}
-                        <span className={selectedOption ? 'text-neutral-900 dark:text-white font-medium' : 'text-neutral-400'}>
+                        <span className={selectedOption ? 'text-ink font-medium' : 'text-ink-3'}>
                             {selectedOption?.label || placeholder}
                         </span>
                     </div>
                     <ChevronDown
                         className={clsx(
-                            'w-4 h-4 text-neutral-400 transition-transform duration-200 shrink-0 ml-2',
-                            isOpen && 'rotate-180 text-[#fc6d2d]'
+                            'size-4 text-ink-3 transition-transform duration-150 shrink-0 ml-2',
+                            isOpen && 'rotate-180 text-ink'
                         )}
                     />
                 </button>
 
                 {isOpen && (
-                    <div className="dropdown-menu-panel">
+                    <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-paper border border-line rounded-panel shadow-pop p-1 animate-pop min-w-full">
                         {searchable && (
-                            <div className="dropdown-search-container">
+                            <div className="p-1 mb-1 border-b border-line">
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-ink-3" />
                                     <input
                                         ref={inputRef}
                                         type="text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder={searchPlaceholder}
-                                        className="dropdown-search-input"
+                                        className="w-full h-8 pl-8 pr-2.5 text-body rounded-ctl border border-line bg-paper-2 text-ink focus-visible:outline-none focus-visible:border-ink"
                                     />
                                 </div>
                             </div>
                         )}
-                        <div className={clsx("dropdown-options-list overflow-y-auto py-1", maxHeightClass)}>
+                        <div className={clsx("overflow-y-auto", maxHeightClass)}>
                             {filteredOptions.length === 0 ? (
-                                <div className="px-4 py-3.5 text-xs text-neutral-400 dark:text-neutral-500 text-center">
+                                <div className="px-3 py-3 text-caption text-ink-3 text-center">
                                     No options found
                                 </div>
                             ) : (
@@ -207,28 +204,30 @@ export function Select({
                                             type="button"
                                             onClick={() => handleSelect(option.value)}
                                             className={clsx(
-                                                'dropdown-option-item',
-                                                isSelected && 'dropdown-option-item-selected'
+                                                'w-full min-h-[36px] px-2.5 py-1.5 rounded-ctl text-left text-body flex items-center justify-between gap-2.5 transition-colors cursor-pointer',
+                                                isSelected
+                                                    ? 'bg-paper-2 text-ink font-medium'
+                                                    : 'text-ink-2 hover:bg-paper-2 hover:text-ink'
                                             )}
                                         >
-                                            <div className="flex items-center gap-3 truncate">
+                                            <div className="flex items-center gap-2.5 truncate">
                                                 {option.icon && (
-                                                    <span className="shrink-0 flex items-center justify-center text-base">{option.icon}</span>
+                                                    <span className="shrink-0 flex items-center justify-center text-ink-3">{option.icon}</span>
                                                 )}
                                                 {option.imageUrl && (
-                                                    <img src={option.imageUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
+                                                    <img src={option.imageUrl} alt="" className="size-5 rounded-full object-cover shrink-0" />
                                                 )}
                                                 <div className="truncate">
-                                                    <div className="font-medium text-xs">{option.label}</div>
+                                                    <div className="text-body">{option.label}</div>
                                                     {option.description && (
-                                                        <div className="text-[11px] text-neutral-400 mt-0.5 font-normal">
+                                                        <div className="text-micro text-ink-3 mt-0.5">
                                                             {option.description}
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
                                             {isSelected && (
-                                                <Check className="w-4 h-4 text-[#fc6d2d] shrink-0 ml-2" />
+                                                <Check className="size-4 text-primary-500 shrink-0 ml-2" />
                                             )}
                                         </button>
                                     );
@@ -238,7 +237,12 @@ export function Select({
                     </div>
                 )}
             </div>
-            {error && <p className="text-xs text-red-500 dark:text-red-400">{error}</p>}
+            {error && (
+                <p className="flex items-center gap-1 text-micro text-danger-text">
+                    <AlertTriangle className="size-3.5 shrink-0" />
+                    <span>{error}</span>
+                </p>
+            )}
         </div>
     );
 }

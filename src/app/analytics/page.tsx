@@ -5,7 +5,7 @@
 import React, { useMemo, useState } from 'react';
 import { useDocumentStore, useSettingsStore, useTemplateStore, useOrganizationStore, useTransactionStore } from '@/lib/store';
 import { formatCurrency, getEffectiveGrandTotal, calculatePaymentSpeedDistribution } from '@/lib/utils';
-import { X, Lightbulb, DollarSign, Clock, FileText, Zap, TrendingUp } from 'lucide-react';
+import { X, Lightbulb, DollarSign, Clock, FileText, Zap, TrendingUp } from '@/components/icons';
 import { DocumentStatus } from '@/lib/types';
 import RevenueChart from "@/components/dashboard/RevenueChart";
 import ProductVelocityWidget from "@/components/ProductVelocityWidget";
@@ -37,21 +37,21 @@ function SummaryCard({ metric }: { metric: SummaryMetric }) {
             : 'bg-white dark:bg-[#121620] border border-neutral-200/90 dark:border-neutral-800/80 shadow-xs p-3.5 sm:p-5 hover:border-neutral-300 dark:hover:border-neutral-700'
             } rounded-2xl transition-all duration-200`}>
             <div className="flex items-center justify-between mb-2">
-                <p className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${isFeatured ? 'text-neutral-300' : 'text-neutral-500 dark:text-neutral-400'}`}>
+                <p className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${isFeatured ? 'text-neutral-300' : 'text-ink-muted'}`}>
                     {metric.label}
                 </p>
                 <div className={`p-1.5 sm:p-2 rounded-xl ${isFeatured
                     ? 'bg-[#16A86B]/20 text-[#16A86B]'
-                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300'
+                    : 'bg-paper-2 text-ink-muted'
                     }`}>
                     {metric.icon}
                 </div>
             </div>
             <div className="flex flex-col gap-0.5">
-                <h3 className={`${isFeatured ? 'text-2xl sm:text-3xl md:text-4xl text-[#16A86B]' : 'text-sm sm:text-lg md:text-xl text-neutral-900 dark:text-white'} font-extrabold font-money tracking-tight`}>
+                <h3 className={`${isFeatured ? 'text-2xl sm:text-3xl md:text-4xl text-[#16A86B]' : 'text-sm sm:text-lg md:text-xl text-ink'} font-extrabold font-money tracking-tight`}>
                     {metric.value}
                 </h3>
-                <p className={`text-[10px] sm:text-xs mt-1 ${isFeatured ? 'text-neutral-400' : 'text-neutral-400 dark:text-neutral-500'}`}>
+                <p className={`text-[10px] sm:text-xs mt-1 ${isFeatured ? 'text-neutral-400' : 'text-ink-muted'}`}>
                     {metric.description}
                 </p>
             </div>
@@ -74,7 +74,7 @@ function StatusDonut({ counts }: { counts: Record<DocumentStatus, number> }) {
     if (total === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-8 text-neutral-400">
-                <div className="w-32 h-32 rounded-full border-4 border-neutral-100 dark:border-neutral-800 mb-4"></div>
+                <div className="w-32 h-32 rounded-full border-4 border-line mb-4"></div>
                 <p className="text-sm">No data yet</p>
             </div>
         );
@@ -108,9 +108,9 @@ function StatusDonut({ counts }: { counts: Record<DocumentStatus, number> }) {
                     className="w-full h-full rounded-full"
                     style={{ background: gradientString }}
                 />
-                <div className="absolute inset-4 bg-white dark:bg-neutral-800 rounded-full flex items-center justify-center">
+                <div className="absolute inset-4 bg-paper rounded-full flex items-center justify-center">
                     <div className="text-center">
-                        <span className="block text-2xl font-bold text-neutral-900 dark:text-white">{total}</span>
+                        <span className="block text-2xl font-bold text-ink">{total}</span>
                         <span className="text-xs text-neutral-500 uppercase tracking-wider">Invoices</span>
                     </div>
                 </div>
@@ -124,9 +124,9 @@ function StatusDonut({ counts }: { counts: Record<DocumentStatus, number> }) {
                         <div key={status} className="flex items-center justify-between text-sm">
                             <div className="flex items-center gap-2">
                                 <span className="w-2 md:w-3 h-2 md:h-3 rounded-full" style={{ backgroundColor: colors[status] }}></span>
-                                <span className="capitalize text-neutral-600 dark:text-neutral-300">{status}</span>
+                                <span className="capitalize text-ink-muted">{status}</span>
                             </div>
-                            <span className="font-semibold text-neutral-900 dark:text-white">{count}</span>
+                            <span className="font-semibold text-ink">{count}</span>
                         </div>
                     )
                 })}
@@ -142,18 +142,18 @@ function HintCard({ title, description, badge, onClose }: { title: string, descr
                 onClick={onClose}
                 className="absolute top-3 right-3 p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 opacity-0 group-hover:opacity-100 transition-opacity"
             >
-                <X className="w-4 h-4" />
+                <X className="size-4" />
             </button>
             <div className="flex items-start gap-4">
                 <div className="p-2 bg-white dark:bg-indigo-900/50 rounded-xl text-indigo-500 dark:text-indigo-300 shadow-sm">
-                    <Lightbulb className="w-5 h-5" strokeWidth={2} />
+                    <Lightbulb className="size-5" />
                 </div>
                 <div>
                     <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-semibold text-neutral-900 dark:text-white">{title}</h4>
+                        <h4 className="font-semibold text-ink">{title}</h4>
                         {badge && <span className="text-[10px] uppercase font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/50 px-1.5 py-0.5 rounded">{badge}</span>}
                     </div>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">{description}</p>
+                    <p className="text-sm text-ink-muted leading-relaxed">{description}</p>
                 </div>
             </div>
         </div>
@@ -226,26 +226,26 @@ export default function AnalyticsPage() {
             label: 'Money Received',
             value: formatCurrency(metrics.paidThisMonth, company.currency),
             description: 'This month',
-            icon: <DollarSign className="w-4 h-4" strokeWidth={2} />,
+            icon: <DollarSign className="size-4" />,
             variant: 'featured'
         },
         {
             label: 'Money Waiting',
             value: formatCurrency(metrics.waiting, company.currency),
             description: 'Sent & Overdue Invoices',
-            icon: <Clock className="w-4 h-4" strokeWidth={2} />
+            icon: <Clock className="size-4" />
         },
         {
             label: 'Invoices Sent',
             value: metrics.sentCount.toString(),
             description: 'All time active',
-            icon: <FileText className="w-4 h-4" strokeWidth={2} />
+            icon: <FileText className="size-4" />
         },
         {
             label: 'Avg Payment Time',
             value: `${metrics.avgDays} Days`,
             description: 'From sent to paid',
-            icon: <Zap className="w-4 h-4" strokeWidth={2} />
+            icon: <Zap className="size-4" />
         }
     ];
 
@@ -371,7 +371,7 @@ export default function AnalyticsPage() {
             {/* Header */}
             <header className="mb-6">
                 <div className="flex items-center gap-2">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white">Analytics</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-ink">Analytics</h1>
                     <PageHelpModal
                         title="Revenue & Cashflow Analytics"
                         description="Detailed insights into monthly revenue streams, pending payments, payment speed trends, top customers, and best-selling products."
@@ -382,7 +382,7 @@ export default function AnalyticsPage() {
                         ]}
                     />
                 </div>
-                <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">Quiet insights to help you invoice better.</p>
+                <p className="text-xs sm:text-sm text-ink-muted mt-0.5">Quiet insights to help you invoice better.</p>
             </header>
 
             {/* 1. Top Summary Cards (Compressed 3-column row on mobile) */}
@@ -411,10 +411,10 @@ export default function AnalyticsPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                 {/* 2. Invoice Flow */}
-                <section className="lg:col-span-2 bg-white dark:bg-neutral-800 p-6 rounded-2xl border border-neutral-100 dark:border-neutral-700">
+                <section className="lg:col-span-2 bg-paper p-6 rounded-2xl border border-line">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Invoice Flow</h2>
+                            <h2 className="text-lg font-bold text-ink">Invoice Flow</h2>
                             <p className="text-sm text-neutral-500">Where are your invoices right now?</p>
                         </div>
                     </div>
@@ -423,13 +423,13 @@ export default function AnalyticsPage() {
                             <h3 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-4">Status Breakdown</h3>
                             <StatusDonut counts={statusCounts} />
                         </div>
-                        <div className="flex-1 border-t md:border-t-0 md:border-l border-neutral-100 dark:border-neutral-700 pt-6 md:pt-0 md:pl-8">
+                        <div className="flex-1 border-t md:border-t-0 md:border-l border-line pt-6 md:pt-0 md:pl-8">
                             <h3 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-4">Payment Speed</h3>
                             <div className="space-y-4">
                                 <div>
                                     <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-neutral-600 dark:text-neutral-300">Fast (&le; 7 days)</span>
-                                        <span className="font-medium text-neutral-900 dark:text-white">
+                                        <span className="text-ink-muted">Fast (&le; 7 days)</span>
+                                        <span className="font-medium text-ink">
                                             {paymentSpeed.fastCount} ({paymentSpeed.fastPercent}%)
                                         </span>
                                     </div>
@@ -442,8 +442,8 @@ export default function AnalyticsPage() {
                                 </div>
                                 <div>
                                     <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-neutral-600 dark:text-neutral-300">Average (8–30 days)</span>
-                                        <span className="font-medium text-neutral-900 dark:text-white">
+                                        <span className="text-ink-muted">Average (8–30 days)</span>
+                                        <span className="font-medium text-ink">
                                             {paymentSpeed.avgCount} ({paymentSpeed.avgPercent}%)
                                         </span>
                                     </div>
@@ -456,8 +456,8 @@ export default function AnalyticsPage() {
                                 </div>
                                 <div>
                                     <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-neutral-600 dark:text-neutral-300">Slow (&gt; 30 days)</span>
-                                        <span className="font-medium text-neutral-900 dark:text-white">
+                                        <span className="text-ink-muted">Slow (&gt; 30 days)</span>
+                                        <span className="font-medium text-ink">
                                             {paymentSpeed.slowCount} ({paymentSpeed.slowPercent}%)
                                         </span>
                                     </div>
@@ -481,7 +481,7 @@ export default function AnalyticsPage() {
                 {/* 5. Smart Hints (Stacked to right on large screens) */}
                 <section className="space-y-4">
                     <div className="mb-4">
-                        <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Smart Hints</h2>
+                        <h2 className="text-lg font-bold text-ink">Smart Hints</h2>
                         <p className="text-sm text-neutral-500">Suggestions to improve cashflow</p>
                     </div>
                     {generatedHints.length > 0 ? (
@@ -493,7 +493,7 @@ export default function AnalyticsPage() {
                             />
                         ))
                     ) : (
-                        <div className="p-6 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl text-center">
+                        <div className="p-6 bg-paper-2/50 rounded-2xl text-center">
                             <p className="text-sm text-neutral-500">Everything looks good! No new suggestions.</p>
                         </div>
                     )}
@@ -502,10 +502,10 @@ export default function AnalyticsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* 3. Customers */}
-                <section className="bg-white dark:bg-neutral-800 p-6 rounded-2xl border border-neutral-100 dark:border-neutral-700">
+                <section className="bg-paper p-6 rounded-2xl border border-line">
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Customers</h2>
+                            <h2 className="text-lg font-bold text-ink">Customers</h2>
                             <p className="text-sm text-neutral-500">Who contributes to cashflow</p>
                         </div>
                         <div className="px-3 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-xs font-semibold rounded-full">
@@ -516,14 +516,14 @@ export default function AnalyticsPage() {
                         {customerInsights.top.length > 0 ? customerInsights.top.map((c, i) => (
                             <div key={i} className="flex items-center justify-between group">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center text-xs font-bold text-neutral-500">
+                                    <div className="size-8 rounded-full bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center text-xs font-bold text-neutral-500">
                                         {c.name.substring(0, 2).toUpperCase()}
                                     </div>
-                                    <span className="font-medium text-neutral-700 dark:text-neutral-200 group-hover:text-neutral-900 transition-colors">
+                                    <span className="font-medium text-ink-muted group-hover:text-neutral-900 transition-colors">
                                         {c.name}
                                     </span>
                                 </div>
-                                <span className="font-bold text-neutral-900 dark:text-white">
+                                <span className="font-bold text-ink">
                                     {formatCurrency(c.total, company.currency)}
                                 </span>
                             </div>
@@ -534,10 +534,10 @@ export default function AnalyticsPage() {
                 </section>
 
                 {/* 4. Products / Services */}
-                <section className="bg-white dark:bg-neutral-800 p-6 rounded-2xl border border-neutral-100 dark:border-neutral-700">
+                <section className="bg-paper p-6 rounded-2xl border border-line">
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Products</h2>
+                            <h2 className="text-lg font-bold text-ink">Products</h2>
                             <p className="text-sm text-neutral-500">What you sell most</p>
                         </div>
                     </div>
@@ -545,8 +545,8 @@ export default function AnalyticsPage() {
                         {productInsights.length > 0 ? productInsights.map((p, i) => (
                             <div key={i}>
                                 <div className="flex items-center justify-between mb-1">
-                                    <span className="font-medium text-neutral-700 dark:text-neutral-200">{p.name}</span>
-                                    <span className="text-sm font-semibold text-neutral-900 dark:text-white">{p.count} sold</span>
+                                    <span className="font-medium text-ink-muted">{p.name}</span>
+                                    <span className="text-sm font-semibold text-ink">{p.count} sold</span>
                                 </div>
                                 <div className="flex items-center justify-between text-xs text-neutral-400">
                                     <span>Typical price range</span>

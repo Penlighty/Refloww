@@ -27,7 +27,7 @@ import {
     Hash,
     Lock,
     Download
-} from 'lucide-react';
+} from '@/components/icons';
 import { generateCustomerStatementPdf } from '@/lib/utils/statementPdf';
 
 export default function CustomerDetailComponent() {
@@ -96,9 +96,9 @@ export default function CustomerDetailComponent() {
     if (!customer) {
         return (
             <div className="max-w-4xl mx-auto">
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12">
+                <div className="bg-paper border border-line rounded-panel shadow-xs p-12">
                     <EmptyState
-                        icon={<User className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                        icon={<User className="size-8 text-neutral-400" />}
                         title="Customer not found"
                         description="The customer you're looking for doesn't exist or has been deleted."
                         action={
@@ -151,7 +151,7 @@ export default function CustomerDetailComponent() {
                 href="/customers"
                 className="inline-flex items-center gap-2 text-sm font-medium text-neutral-500 hover:text-[#2d3748] dark:hover:text-white transition-colors mb-6"
             >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="size-4" />
                 Back to Customers
             </Link>
 
@@ -163,12 +163,12 @@ export default function CustomerDetailComponent() {
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">{customer.name}</h1>
-                            <code className="text-sm font-mono text-neutral-600 bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-300 px-2 py-0.5 rounded font-medium">
+                            <h1 className="text-2xl font-bold text-ink">{customer.name}</h1>
+                            <code className="text-sm font-mono text-neutral-600 bg-paper-2 dark:text-neutral-300 px-2 py-0.5 rounded font-medium">
                                 {customer.customerNumber || getNextDocumentNumber('customer', { details: { customerName: customer.name } })}
                             </code>
                         </div>
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                        <p className="text-sm text-ink-muted mt-1">
                             Customer since {formatDate(customer.createdAt)}
                         </p>
                     </div>
@@ -176,13 +176,13 @@ export default function CustomerDetailComponent() {
                 <div className="flex items-center gap-2">
                     <Button
                         variant="outline"
-                        leftIcon={<Download className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                        leftIcon={<Download className="size-4 text-blue-600 dark:text-blue-400" />}
                         onClick={() => generateCustomerStatementPdf(customer, customerDocuments, company)}
                     >
                         Export Statement (PDF)
                     </Button>
-                    <Button variant="outline" leftIcon={<Edit2 className="w-4 h-4" />} onClick={openEditModal}>Edit</Button>
-                    <Button variant="danger" leftIcon={<Trash2 className="w-4 h-4" />} onClick={() => setIsDeleteModalOpen(true)}>Delete</Button>
+                    <Button variant="outline" leftIcon={<Edit2 className="size-4" />} onClick={openEditModal}>Edit</Button>
+                    <Button variant="danger" leftIcon={<Trash2 className="size-4" />} onClick={() => setIsDeleteModalOpen(true)}>Delete</Button>
                 </div>
             </div>
 
@@ -190,40 +190,40 @@ export default function CustomerDetailComponent() {
                 {/* Left Column - Contact Info */}
                 <div className="lg:col-span-1 space-y-6">
                     {/* Contact Details Card */}
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
-                        <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white mb-4">Contact Information</h3>
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-6">
+                        <h3 className="text-sm font-semibold text-ink mb-4">Contact Information</h3>
                         <div className="space-y-4">
                             {customer.companyName && (
                                 <div className="flex items-start gap-3">
-                                    <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400">
-                                        <Building className="w-4 h-4" />
+                                    <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-ink-muted">
+                                        <Building className="size-4" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-0.5">Company</p>
-                                        <p className="text-sm text-[#2d3748] dark:text-white font-medium">{customer.companyName}</p>
+                                        <p className="text-xs text-ink-muted mb-0.5">Company</p>
+                                        <p className="text-sm text-ink font-medium">{customer.companyName}</p>
                                     </div>
                                 </div>
                             )}
 
                             <div className="flex items-start gap-3">
-                                <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400">
-                                    <Mail className="w-4 h-4" />
+                                <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-ink-muted">
+                                    <Mail className="size-4" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-0.5">Email</p>
-                                    <a href={`mailto:${customer.email}`} className="text-sm text-[#2d3748] dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                    <p className="text-xs text-ink-muted mb-0.5">Email</p>
+                                    <a href={`mailto:${customer.email}`} className="text-sm text-ink hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                         {customer.email}
                                     </a>
                                 </div>
                             </div>
                             {customer.phone && (
                                 <div className="flex items-start gap-3">
-                                    <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400">
-                                        <Phone className="w-4 h-4" />
+                                    <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-ink-muted">
+                                        <Phone className="size-4" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-0.5">Phone</p>
-                                        <a href={`tel:${customer.phone}`} className="text-sm text-[#2d3748] dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                        <p className="text-xs text-ink-muted mb-0.5">Phone</p>
+                                        <a href={`tel:${customer.phone}`} className="text-sm text-ink hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                             {formatPhone(customer.phone)}
                                         </a>
                                     </div>
@@ -231,43 +231,43 @@ export default function CustomerDetailComponent() {
                             )}
                             {customer.address && (
                                 <div className="flex items-start gap-3">
-                                    <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400">
-                                        <MapPin className="w-4 h-4" />
+                                    <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-ink-muted">
+                                        <MapPin className="size-4" />
                                     </div>
                                     <div>
                                         <p className="text-xs text-neutral-400 dark:text-neutral-5 mb-0.5">Address</p>
-                                        <p className="text-sm text-[#2d3748] dark:text-white">{customer.address}</p>
+                                        <p className="text-sm text-ink">{customer.address}</p>
                                     </div>
                                 </div>
                             )}
                         </div>
                         {customer.notes && (
-                            <div className="mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-700">
-                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-2">Notes</p>
-                                <p className="text-sm text-neutral-600 dark:text-neutral-300">{customer.notes}</p>
+                            <div className="mt-6 pt-4 border-t border-line">
+                                <p className="text-xs text-ink-muted mb-2">Notes</p>
+                                <p className="text-sm text-ink-muted">{customer.notes}</p>
                             </div>
                         )}
                     </div>
 
                     {/* Stats Card */}
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6">
-                        <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white mb-4">Statistics</h3>
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-6">
+                        <h3 className="text-sm font-semibold text-ink mb-4">Statistics</h3>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
-                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-1">Total Spent</p>
-                                <p className="text-lg font-bold text-[#2d3748] dark:text-white">{formatCurrency(stats.totalSpent, currency)}</p>
+                                <p className="text-xs text-ink-muted mb-1">Total Spent</p>
+                                <p className="text-lg font-bold text-ink">{formatCurrency(stats.totalSpent, currency)}</p>
                             </div>
                             <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
-                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-1">Pending</p>
+                                <p className="text-xs text-ink-muted mb-1">Pending</p>
                                 <p className="text-lg font-bold text-amber-600 dark:text-amber-500">{formatCurrency(stats.pendingAmount, currency)}</p>
                             </div>
                             <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
-                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-1">Invoices</p>
-                                <p className="text-lg font-bold text-[#2d3748] dark:text-white">{stats.invoiceCount}</p>
+                                <p className="text-xs text-ink-muted mb-1">Invoices</p>
+                                <p className="text-lg font-bold text-ink">{stats.invoiceCount}</p>
                             </div>
                             <div className="p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
-                                <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-1">Receipts</p>
-                                <p className="text-lg font-bold text-[#2d3748] dark:text-white">{stats.receiptCount}</p>
+                                <p className="text-xs text-ink-muted mb-1">Receipts</p>
+                                <p className="text-lg font-bold text-ink">{stats.receiptCount}</p>
                             </div>
                         </div>
                     </div>
@@ -275,14 +275,14 @@ export default function CustomerDetailComponent() {
 
                 {/* Right Column - Documents */}
                 <div className="lg:col-span-2 h-[calc(100vh-140px)] min-h-[500px]">
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden h-full flex flex-col">
-                        <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-between flex-shrink-0">
-                            <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white">Documents</h3>
+                    <div className="bg-paper border border-line rounded-panel shadow-xs overflow-hidden h-full flex flex-col">
+                        <div className="px-6 py-4 border-b border-line flex items-center justify-between flex-shrink-0">
+                            <h3 className="text-sm font-semibold text-ink">Documents</h3>
                             <div className="relative">
                                 <Button
                                     size="sm"
-                                    leftIcon={<Plus className="w-3.5 h-3.5" />}
-                                    rightIcon={<ChevronDown className="w-3.5 h-3.5" />}
+                                    leftIcon={<Plus className="size-3.5" />}
+                                    rightIcon={<ChevronDown className="size-3.5" />}
                                     onClick={() => setIsDocMenuOpen(!isDocMenuOpen)}
                                 >
                                     New Document
@@ -294,26 +294,26 @@ export default function CustomerDetailComponent() {
                                             className="fixed inset-0 z-10"
                                             onClick={() => setIsDocMenuOpen(false)}
                                         />
-                                        <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-neutral-800 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-1 z-20">
+                                        <div className="absolute right-0 top-full mt-1 w-48 bg-paper rounded-xl shadow-xl border border-line py-1 z-20">
                                             <Link
                                                 href={`/invoices/new?customerId=${customerId}`}
                                                 className="flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                             >
-                                                <FileText className="w-4 h-4 text-blue-500" />
+                                                <FileText className="size-4 text-blue-500" />
                                                 Invoice
                                             </Link>
                                             <Link
                                                 href={`/receipts/new?customerId=${customerId}`}
                                                 className="flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                             >
-                                                <Receipt className="w-4 h-4 text-emerald-500" />
+                                                <Receipt className="size-4 text-emerald-500" />
                                                 Receipt
                                             </Link>
                                             <Link
                                                 href={`/delivery-notes/new?customerId=${customerId}`}
                                                 className="flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                             >
-                                                <Truck className="w-4 h-4 text-amber-500" />
+                                                <Truck className="size-4 text-amber-500" />
                                                 Delivery Note
                                             </Link>
                                         </div>
@@ -326,19 +326,19 @@ export default function CustomerDetailComponent() {
                             {customerDocuments.length === 0 ? (
                                 <div className="p-12">
                                     <EmptyState
-                                        icon={<FileText className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                                        icon={<FileText className="size-8 text-neutral-400" />}
                                         title="No documents yet"
                                         description="Create your first document for this customer."
                                     />
                                 </div>
                             ) : (
                                 <table className="w-full relative">
-                                    <thead className="sticky top-0 bg-white dark:bg-neutral-800 z-10 shadow-sm shadow-neutral-100 dark:shadow-neutral-900/50">
-                                        <tr className="border-b border-neutral-100 dark:border-neutral-700">
-                                            <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Document</th>
-                                            <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Date</th>
-                                            <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Status</th>
-                                            <th className="text-right px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Amount</th>
+                                    <thead className="sticky top-0 bg-paper z-10 shadow-sm shadow-neutral-100 dark:shadow-neutral-900/50">
+                                        <tr className="border-b border-line">
+                                            <th className="text-left px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Document</th>
+                                            <th className="text-left px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Date</th>
+                                            <th className="text-left px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Status</th>
+                                            <th className="text-right px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -349,16 +349,16 @@ export default function CustomerDetailComponent() {
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-3">
                                                             <div className={`p-2 rounded-lg ${docTypeConfig[doc.type].bgClass} ${docTypeConfig[doc.type].textClass}`}>
-                                                                <TypeIcon className="w-4 h-4" strokeWidth={1.75} />
+                                                                <TypeIcon className="size-4" />
                                                             </div>
                                                             <div>
-                                                                <span className="font-medium text-[#2d3748] dark:text-white block">{doc.documentNumber}</span>
-                                                                <span className="text-xs text-neutral-500 dark:text-neutral-400">{docTypeConfig[doc.type].label}</span>
+                                                                <span className="font-medium text-ink block">{doc.documentNumber}</span>
+                                                                <span className="text-xs text-ink-muted">{docTypeConfig[doc.type].label}</span>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date)}</span>
+                                                        <span className="text-sm text-ink-muted">{formatDate(doc.date)}</span>
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig[doc.status].bgClass} ${statusConfig[doc.status].textClass}`}>
@@ -367,7 +367,7 @@ export default function CustomerDetailComponent() {
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
-                                                        <span className="font-semibold text-[#2d3748] dark:text-white">{formatCurrency(doc.grandTotal, currency)}</span>
+                                                        <span className="font-semibold text-ink">{formatCurrency(doc.grandTotal, currency)}</span>
                                                     </td>
                                                 </tr>
                                             );
@@ -394,7 +394,7 @@ export default function CustomerDetailComponent() {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         error={formErrors.name}
-                        leftIcon={<User className="w-4 h-4" />}
+                        leftIcon={<User className="size-4" />}
                     />
                     <div className="pointer-events-none select-none opacity-80">
                         <Input
@@ -403,8 +403,8 @@ export default function CustomerDetailComponent() {
                             readOnly
                             disabled
                             tabIndex={-1}
-                            className="bg-neutral-100 dark:bg-neutral-800 text-neutral-500 font-mono cursor-not-allowed border-neutral-200 dark:border-neutral-700"
-                            leftIcon={<Lock className="w-4 h-4 text-neutral-400" />}
+                            className="bg-paper-2 text-neutral-500 font-mono cursor-not-allowed border-line"
+                            leftIcon={<Lock className="size-4 text-neutral-400" />}
                         />
                     </div>
                     <Input
@@ -414,14 +414,14 @@ export default function CustomerDetailComponent() {
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         error={formErrors.email}
-                        leftIcon={<Mail className="w-4 h-4" />}
+                        leftIcon={<Mail className="size-4" />}
                     />
                     <Input
                         label="Company Name"
                         placeholder="e.g. Acme Corp"
                         value={formData.companyName}
                         onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                        leftIcon={<Building className="w-4 h-4" />}
+                        leftIcon={<Building className="size-4" />}
                     />
                     <Input
                         label="Phone Number"
@@ -429,14 +429,14 @@ export default function CustomerDetailComponent() {
                         placeholder="e.g. (555) 123-4567"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        leftIcon={<Phone className="w-4 h-4" />}
+                        leftIcon={<Phone className="size-4" />}
                     />
                     <Input
                         label="Address"
                         placeholder="e.g. 123 Main St, City, State"
                         value={formData.address}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                        leftIcon={<MapPin className="w-4 h-4" />}
+                        leftIcon={<MapPin className="size-4" />}
                     />
                     <div className="md:col-span-2">
                         <Textarea
@@ -461,8 +461,8 @@ export default function CustomerDetailComponent() {
                 title="Delete Customer"
                 size="sm"
             >
-                <p className="text-neutral-600 dark:text-neutral-400">
-                    Are you sure you want to delete <strong className="text-[#2d3748] dark:text-white">{customer.name}</strong>?\n                    This will also affect any associated documents. This action cannot be undone.
+                <p className="text-ink-muted">
+                    Are you sure you want to delete <strong className="text-ink">{customer.name}</strong>?\n                    This will also affect any associated documents. This action cannot be undone.
                 </p>
                 <ModalFooter>
                     <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>

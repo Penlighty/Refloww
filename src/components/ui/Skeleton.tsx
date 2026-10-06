@@ -7,7 +7,7 @@ interface SkeletonProps {
     variant?: 'text' | 'circular' | 'rectangular' | 'rounded';
     width?: string | number;
     height?: string | number;
-    animation?: 'pulse' | 'wave' | 'none';
+    animation?: 'hold' | 'none';
 }
 
 export function Skeleton({
@@ -15,16 +15,15 @@ export function Skeleton({
     variant = 'text',
     width,
     height,
-    animation = 'pulse'
+    animation = 'hold'
 }: SkeletonProps) {
     const baseClasses = clsx(
-        'bg-neutral-200',
-        animation === 'pulse' && 'animate-pulse',
-        animation === 'wave' && 'animate-shimmer',
-        variant === 'text' && 'rounded h-4',
+        'bg-paper-2',
+        animation === 'hold' && 'animate-hold',
+        variant === 'text' && 'rounded-ctl h-4',
         variant === 'circular' && 'rounded-full',
         variant === 'rectangular' && 'rounded-none',
-        variant === 'rounded' && 'rounded-xl',
+        variant === 'rounded' && 'rounded-ctl',
         className
     );
 
@@ -36,10 +35,9 @@ export function Skeleton({
     return <div className={baseClasses} style={style} />;
 }
 
-// Pre-built skeleton components for common patterns
 export function SkeletonCard() {
     return (
-        <div className="bg-white border border-neutral-100 rounded-2xl p-6 space-y-4">
+        <div className="panel p-5 space-y-4">
             <Skeleton variant="text" width="60%" height={20} />
             <Skeleton variant="text" width="40%" height={16} />
             <div className="space-y-2">
@@ -53,20 +51,20 @@ export function SkeletonCard() {
 
 export function SkeletonTableRow() {
     return (
-        <tr className="border-b border-neutral-50">
-            <td className="px-6 py-4">
+        <tr className="border-b border-line">
+            <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
                     <Skeleton variant="circular" width={32} height={32} />
                     <Skeleton variant="text" width={100} height={16} />
                 </div>
             </td>
-            <td className="px-6 py-4">
+            <td className="px-4 py-3">
                 <Skeleton variant="text" width={80} height={14} />
             </td>
-            <td className="px-6 py-4">
-                <Skeleton variant="rounded" width={60} height={24} />
+            <td className="px-4 py-3">
+                <Skeleton variant="rounded" width={60} height={22} />
             </td>
-            <td className="px-6 py-4 text-right">
+            <td className="px-4 py-3 text-right">
                 <Skeleton variant="text" width={70} height={16} />
             </td>
         </tr>
@@ -75,20 +73,20 @@ export function SkeletonTableRow() {
 
 export function SkeletonTable({ rows = 5 }: { rows?: number }) {
     return (
-        <div className="bg-white border border-neutral-100 rounded-2xl overflow-hidden">
+        <div className="panel overflow-hidden">
             <table className="w-full">
                 <thead>
-                    <tr className="border-b border-neutral-100">
-                        <th className="text-left px-6 py-4">
+                    <tr className="border-b border-line">
+                        <th className="text-left px-4 py-3">
                             <Skeleton variant="text" width={80} height={12} />
                         </th>
-                        <th className="text-left px-6 py-4">
+                        <th className="text-left px-4 py-3">
                             <Skeleton variant="text" width={60} height={12} />
                         </th>
-                        <th className="text-left px-6 py-4">
+                        <th className="text-left px-4 py-3">
                             <Skeleton variant="text" width={50} height={12} />
                         </th>
-                        <th className="text-right px-6 py-4">
+                        <th className="text-right px-4 py-3">
                             <Skeleton variant="text" width={60} height={12} />
                         </th>
                     </tr>
@@ -105,10 +103,10 @@ export function SkeletonTable({ rows = 5 }: { rows?: number }) {
 
 export function SkeletonStats() {
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="panel grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-line">
             {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-white border border-neutral-100 rounded-2xl p-6">
-                    <Skeleton variant="text" width="40%" height={12} className="mb-3" />
+                <div key={i} className="p-4 md:p-5">
+                    <Skeleton variant="text" width="40%" height={12} className="mb-2" />
                     <Skeleton variant="text" width="70%" height={28} />
                 </div>
             ))}
@@ -118,13 +116,13 @@ export function SkeletonStats() {
 
 export function SkeletonChart() {
     return (
-        <div className="bg-white border border-neutral-100 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
+        <div className="panel p-5">
+            <div className="flex items-center justify-between mb-5">
                 <div>
                     <Skeleton variant="text" width={120} height={18} />
                     <Skeleton variant="text" width={80} height={12} className="mt-1" />
                 </div>
-                <Skeleton variant="rounded" width={60} height={24} />
+                <Skeleton variant="rounded" width={60} height={22} />
             </div>
             <div className="flex items-end gap-2 h-32">
                 {Array.from({ length: 7 }).map((_, i) => (
@@ -132,7 +130,7 @@ export function SkeletonChart() {
                         <Skeleton
                             variant="rounded"
                             className="w-full"
-                            height={`${20 + Math.random() * 80}%`}
+                            height={`${20 + ((i * 15) % 70)}%`}
                         />
                         <Skeleton variant="text" width={24} height={10} />
                     </div>

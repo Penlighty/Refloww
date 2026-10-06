@@ -1,7 +1,7 @@
 "use client";
 
 import { useSettingsStore } from '@/lib/store';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon, Monitor } from '@/components/icons';
 
 export function ThemeToggle() {
     const { theme, setTheme } = useSettingsStore();
@@ -13,18 +13,18 @@ export function ThemeToggle() {
     ];
 
     return (
-        <div className="flex items-center gap-1 p-1 bg-neutral-100 dark:bg-neutral-800 rounded-xl">
+        <div className="flex items-center gap-1 p-1 bg-paper-2 rounded-xl">
             {themes.map(({ value, icon: Icon, label }) => (
                 <button
                     key={value}
                     onClick={() => setTheme(value)}
                     className={`p-2 rounded-lg transition-all ${theme === value
                             ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                            : 'text-ink-muted hover:text-neutral-700 dark:hover:text-neutral-200'
                         }`}
                     title={label}
                 >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="size-4" />
                 </button>
             ))}
         </div>
@@ -43,10 +43,10 @@ export function ThemeToggleSimple() {
     return (
         <button
             onClick={toggleTheme}
-            className="p-2 rounded-xl text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+            className="p-2 rounded-xl text-ink-muted hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
             title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
-            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
         </button>
     );
 }

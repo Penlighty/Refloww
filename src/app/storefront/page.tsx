@@ -39,7 +39,7 @@ import {
     Phone,
     CreditCard,
     Building2
-} from 'lucide-react';
+} from '@/components/icons';
 
 const THEME_PRESETS = [
     {
@@ -276,7 +276,7 @@ export default function StorefrontAdminPage() {
                         <Button
                             variant="outline"
                             onClick={handleCopyLink}
-                            leftIcon={copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-neutral-300" />}
+                            leftIcon={copiedLink ? <Check className="size-4 text-emerald-500" /> : <Copy className="size-4 text-neutral-300" />}
                             iconOnlyMobile
                             title={copiedLink ? 'Copied Catalog Link!' : 'Copy Catalog Link'}
                             aria-label="Copy Catalog Link"
@@ -285,7 +285,7 @@ export default function StorefrontAdminPage() {
                             {copiedLink ? 'Copied Link!' : 'Copy Link'}
                         </Button>
                         <Link href={`/s/${settings.storeSlug}`} target="_blank">
-                            <Button variant="primary" leftIcon={<ExternalLink className="w-4 h-4" />} className="shadow-lg shadow-blue-500/20 px-3 sm:px-4">
+                            <Button variant="primary" leftIcon={<ExternalLink className="size-4" />} className="shadow-lg shadow-blue-500/20 px-3 sm:px-4">
                                 Open Storefront
                             </Button>
                         </Link>
@@ -317,10 +317,10 @@ export default function StorefrontAdminPage() {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="border-b border-neutral-200 dark:border-neutral-700 pb-2">
+            <div className="border-b border-line pb-2">
                 <SubTabs
                     activeTab={activeTab}
-                    onChangeTab={(tabId) => setActiveTab(tabId as any)}
+                    onChangeTab={(tabId: string) => setActiveTab(tabId as any)}
                     tabs={[
                         {
                             id: 'products',
@@ -371,16 +371,16 @@ export default function StorefrontAdminPage() {
             {activeTab === 'products' && (
                 <div className="space-y-6">
                     {/* Filters & Search */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-neutral-800 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-700">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-paper p-4 rounded-2xl border border-line">
                         <div className="relative flex-1 flex items-center">
-                            <Search className="absolute left-3.5 w-4 h-4 text-neutral-400 pointer-events-none z-10" />
+                            <Search className="absolute left-3.5 size-4 text-neutral-400 pointer-events-none z-10" />
                             <input
                                 type="text"
                                 placeholder="Search storefront products by name or SKU..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 style={{ paddingLeft: '2.5rem' }}
-                                className="w-full pr-4 py-2.5 text-sm bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-[#2d3748] dark:text-white"
+                                className="w-full pr-4 py-2.5 text-sm bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-ink"
                             />
                         </div>
 
@@ -390,7 +390,7 @@ export default function StorefrontAdminPage() {
                                     onClick={() => setSelectedCategory('all')}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-nowrap ${selectedCategory === 'all'
                                             ? 'bg-blue-600 text-white'
-                                            : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600'
+                                            : 'bg-neutral-100 dark:bg-neutral-700 text-ink-muted hover:bg-neutral-200 dark:hover:bg-neutral-600'
                                         }`}
                                 >
                                     All Categories
@@ -401,7 +401,7 @@ export default function StorefrontAdminPage() {
                                         onClick={() => setSelectedCategory(cat)}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-nowrap ${selectedCategory === cat
                                                 ? 'bg-blue-600 text-white'
-                                                : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600'
+                                                : 'bg-neutral-100 dark:bg-neutral-700 text-ink-muted hover:bg-neutral-200 dark:hover:bg-neutral-600'
                                             }`}
                                     >
                                         {cat}
@@ -420,9 +420,9 @@ export default function StorefrontAdminPage() {
                             return (
                                 <div
                                     key={product.id}
-                                    className={`group bg-white dark:bg-neutral-800 border rounded-2xl overflow-hidden transition-all duration-200 flex flex-col hover:shadow-lg ${isPublished
-                                            ? 'border-neutral-200 dark:border-neutral-700'
-                                            : 'border-neutral-200/60 dark:border-neutral-700/60 opacity-60 bg-neutral-50/50 dark:bg-neutral-900/50'
+                                    className={`group bg-paper border rounded-2xl overflow-hidden transition-all duration-200 flex flex-col hover:shadow-lg ${isPublished
+                                            ? 'border-line'
+                                            : 'border-neutral-200/60 dark:border-neutral-700/60 opacity-60 bg-paper-2'
                                         }`}
                                 >
                                     {/* Product Image Box */}
@@ -435,7 +435,7 @@ export default function StorefrontAdminPage() {
                                             />
                                         ) : (
                                             <div className="text-neutral-400 flex flex-col items-center gap-1">
-                                                <ImageIcon className="w-8 h-8" />
+                                                <ImageIcon className="size-8" />
                                                 <span className="text-[11px]">No Photo</span>
                                             </div>
                                         )}
@@ -455,10 +455,10 @@ export default function StorefrontAdminPage() {
                                         {/* Publish Toggle Button */}
                                         <button
                                             onClick={(e) => togglePublishState(product, e)}
-                                            className="absolute top-3 right-3 p-2 bg-white/90 dark:bg-neutral-800/90 rounded-full text-neutral-700 dark:text-neutral-200 hover:scale-110 transition-transform shadow-md"
+                                            className="absolute top-3 right-3 p-2 bg-white/90 dark:bg-neutral-800/90 rounded-full text-ink-muted hover:scale-110 transition-transform shadow-md"
                                             title={isPublished ? 'Hide from Storefront' : 'Publish to Storefront'}
                                         >
-                                            {isPublished ? <Eye className="w-4 h-4 text-emerald-600" /> : <EyeOff className="w-4 h-4 text-neutral-400" />}
+                                            {isPublished ? <Eye className="size-4 text-emerald-600" /> : <EyeOff className="size-4 text-neutral-400" />}
                                         </button>
                                     </div>
 
@@ -466,19 +466,19 @@ export default function StorefrontAdminPage() {
                                     <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between space-y-2 sm:space-y-4">
                                         <div>
                                             <div className="flex items-center justify-between gap-2 mb-1">
-                                                <span className="text-xs font-mono text-neutral-400 dark:text-neutral-500 uppercase">{product.sku}</span>
+                                                <span className="text-xs font-mono text-ink-muted uppercase">{product.sku}</span>
                                                 {product.category && (
                                                     <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
                                                         {product.category}
                                                     </span>
                                                 )}
                                             </div>
-                                            <h3 className="font-bold text-[#2d3748] dark:text-white line-clamp-1 group-hover:text-blue-600 transition-colors">{product.name}</h3>
-                                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2">{product.storeDescription || product.description || 'No description added.'}</p>
+                                            <h3 className="font-bold text-ink line-clamp-1 group-hover:text-blue-600 transition-colors">{product.name}</h3>
+                                            <p className="text-xs text-ink-muted mt-1 line-clamp-2">{product.storeDescription || product.description || 'No description added.'}</p>
                                         </div>
 
                                         {/* Pricing & Controls */}
-                                        <div className="pt-3 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between">
+                                        <div className="pt-3 border-t border-line flex items-center justify-between">
                                             <div>
                                                 {hasDiscount ? (
                                                     <div className="flex flex-col items-start leading-tight">
@@ -490,7 +490,7 @@ export default function StorefrontAdminPage() {
                                                         </span>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-lg font-bold text-[#2d3748] dark:text-white">
+                                                    <span className="text-lg font-bold text-ink">
                                                         {formatCurrency(product.unitPrice, activeCurrency)}
                                                     </span>
                                                 )}
@@ -502,7 +502,7 @@ export default function StorefrontAdminPage() {
                                                 className="p-2 text-neutral-500 hover:text-blue-600 dark:text-neutral-400 dark:hover:text-blue-400 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 rounded-xl transition-colors"
                                                 title="Edit Store Info"
                                             >
-                                                <Edit2 className="w-4 h-4" />
+                                                <Edit2 className="size-4" />
                                             </button>
                                         </div>
                                     </div>
@@ -515,67 +515,67 @@ export default function StorefrontAdminPage() {
 
             {/* TAB 2: STORE ORDERS */}
             {activeTab === 'orders' && (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl overflow-hidden shadow-sm">
-                    <div className="p-6 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-between">
+                <div className="bg-paper border border-line rounded-panel shadow-xs overflow-hidden shadow-sm">
+                    <div className="p-6 border-b border-line flex items-center justify-between">
                         <div>
-                            <h2 className="text-lg font-bold text-[#2d3748] dark:text-white">Storefront Orders</h2>
-                            <p className="text-xs text-neutral-500 dark:text-neutral-400">Orders submitted by customers via your public storefront catalog.</p>
+                            <h2 className="text-lg font-bold text-ink">Storefront Orders</h2>
+                            <p className="text-xs text-ink-muted">Orders submitted by customers via your public storefront catalog.</p>
                         </div>
                     </div>
 
                     {displayOrders.length === 0 ? (
                         <div className="p-12 text-center space-y-3">
-                            <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-700 text-neutral-400 rounded-full flex items-center justify-center mx-auto">
-                                <ShoppingBag className="w-6 h-6" />
+                            <div className="size-12 bg-neutral-100 dark:bg-neutral-700 text-neutral-400 rounded-full flex items-center justify-center mx-auto">
+                                <ShoppingBag className="size-6" />
                             </div>
-                            <h3 className="text-base font-semibold text-[#2d3748] dark:text-white">No storefront orders yet</h3>
+                            <h3 className="text-base font-semibold text-ink">No storefront orders yet</h3>
                             <p className="text-xs text-neutral-500 max-w-md mx-auto">Share your storefront catalog link with customers to start receiving orders online.</p>
-                            <Button variant="outline" onClick={handleCopyLink} leftIcon={<Copy className="w-4 h-4" />}>
+                            <Button variant="outline" onClick={handleCopyLink} leftIcon={<Copy className="size-4" />}>
                                 Copy Storefront Link
                             </Button>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full">
-                                <thead className="bg-neutral-50 dark:bg-neutral-700/50 border-b border-neutral-100 dark:border-neutral-700">
+                                <thead className="bg-neutral-50 dark:bg-neutral-700/50 border-b border-line">
                                     <tr>
-                                        <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Order No</th>
-                                        <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Customer</th>
-                                        <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Date</th>
-                                        <th className="text-left px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Items</th>
-                                        <th className="text-right px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Total</th>
-                                        <th className="text-center px-6 py-3 text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Generated Documents</th>
+                                        <th className="text-left px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Order No</th>
+                                        <th className="text-left px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Customer</th>
+                                        <th className="text-left px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Date</th>
+                                        <th className="text-left px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Items</th>
+                                        <th className="text-right px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Total</th>
+                                        <th className="text-center px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Generated Documents</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {displayOrders.map(order => (
                                         <tr key={order.id} className="border-b border-neutral-50 dark:border-neutral-700/50 hover:bg-neutral-50/50 dark:hover:bg-neutral-700/30">
-                                            <td className="px-6 py-4 font-mono text-sm font-semibold text-[#2d3748] dark:text-white">{order.orderNumber}</td>
+                                            <td className="px-6 py-4 font-mono text-sm font-semibold text-ink">{order.orderNumber}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <span className="font-medium text-sm text-[#2d3748] dark:text-white">{order.customerName}</span>
+                                                    <span className="font-medium text-sm text-ink">{order.customerName}</span>
                                                     <span className="text-xs text-neutral-400">{order.customerPhone || order.customerEmail}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-xs text-neutral-500 dark:text-neutral-400">{formatDate(order.createdAt)}</td>
-                                            <td className="px-6 py-4 text-sm text-neutral-600 dark:text-neutral-300">
+                                            <td className="px-6 py-4 text-xs text-ink-muted">{formatDate(order.createdAt)}</td>
+                                            <td className="px-6 py-4 text-sm text-ink-muted">
                                                 {order.items.map(i => `${i.quantity}x ${i.productName}`).join(', ')}
                                             </td>
-                                            <td className="px-6 py-4 text-right font-bold text-[#2d3748] dark:text-white">
+                                            <td className="px-6 py-4 text-right font-bold text-ink">
                                                 {formatCurrency(order.grandTotal, activeCurrency)}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center justify-center gap-2">
                                                     {order.invoiceId && (
                                                         <Link href={`/invoices/${order.invoiceId}`}>
-                                                            <Button variant="ghost" size="sm" leftIcon={<FileText className="w-3.5 h-3.5 text-blue-500" />}>
+                                                            <Button variant="ghost" size="sm" leftIcon={<FileText className="size-3.5 text-blue-500" />}>
                                                                 Invoice
                                                             </Button>
                                                         </Link>
                                                     )}
                                                     {order.receiptId && (
                                                         <Link href={`/receipts/${order.receiptId}`}>
-                                                            <Button variant="ghost" size="sm" leftIcon={<ReceiptIcon className="w-3.5 h-3.5 text-emerald-500" />}>
+                                                            <Button variant="ghost" size="sm" leftIcon={<ReceiptIcon className="size-3.5 text-emerald-500" />}>
                                                                 Receipt
                                                             </Button>
                                                         </Link>
@@ -594,14 +594,14 @@ export default function StorefrontAdminPage() {
             {/* TAB 3: STORE PREVIEW */}
             {activeTab === 'preview' && (
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-100 dark:border-neutral-700 shadow-sm">
+                    <div className="flex items-center justify-between p-4 bg-paper rounded-2xl border border-line shadow-sm">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 rounded-xl">
-                                <Eye className="w-5 h-5" />
+                                <Eye className="size-5" />
                             </div>
                             <div>
-                                <h3 className="text-sm font-bold text-[#2d3748] dark:text-white">Live Storefront Interactive Preview</h3>
-                                <p className="text-xs text-neutral-500 dark:text-neutral-400">Preview your customer catalog layout, products, and checkout experience in real-time.</p>
+                                <h3 className="text-sm font-bold text-ink">Live Storefront Interactive Preview</h3>
+                                <p className="text-xs text-ink-muted">Preview your customer catalog layout, products, and checkout experience in real-time.</p>
                             </div>
                         </div>
                         <a
@@ -611,11 +611,11 @@ export default function StorefrontAdminPage() {
                             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors"
                         >
                             <span>Open Full Screen</span>
-                            <ExternalLink className="w-3.5 h-3.5" />
+                            <ExternalLink className="size-3.5" />
                         </a>
                     </div>
 
-                    <div className="w-full rounded-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden shadow-sm bg-neutral-50 dark:bg-neutral-900 p-2 md:p-6 min-h-[850px]">
+                    <div className="w-full rounded-2xl border border-line overflow-hidden shadow-sm bg-paper-2 p-2 md:p-6 min-h-[850px]">
                         <StorefrontCatalogContent isEmbedded={true} />
                     </div>
                 </div>
@@ -624,10 +624,10 @@ export default function StorefrontAdminPage() {
             {/* TAB 4: STORE SETTINGS */}
             {activeTab === 'settings' && (
                 <div className="space-y-8 max-w-4xl">
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-6 md:p-8 space-y-6 shadow-sm">
                         <div>
-                            <h2 className="text-lg font-bold text-[#2d3748] dark:text-white">Storefront Branding & Configuration</h2>
-                            <p className="text-xs text-neutral-500 dark:text-neutral-400">Customize how your online store looks and functions for public customers.</p>
+                            <h2 className="text-lg font-bold text-ink">Storefront Branding & Configuration</h2>
+                            <p className="text-xs text-ink-muted">Customize how your online store looks and functions for public customers.</p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -640,7 +640,7 @@ export default function StorefrontAdminPage() {
 
                             {/* Store Slug with Uniqueness Checker */}
                             <div>
-                                <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-300 mb-1">
+                                <label className="block text-xs font-medium text-ink-muted mb-1">
                                     Custom Store Slug / URL Identifier
                                 </label>
                                 <div className="space-y-1.5">
@@ -658,11 +658,11 @@ export default function StorefrontAdminPage() {
                                         {slugInput.trim() ? (
                                             slugIsAvailable ? (
                                                 <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                                                    <CheckCircle2 className="w-3.5 h-3.5" /> Unique & available!
+                                                    <CheckCircle2 className="size-3.5" /> Unique & available!
                                                 </span>
                                             ) : (
                                                 <span className="flex items-center gap-1 text-xs font-semibold text-rose-500">
-                                                    <AlertCircle className="w-3.5 h-3.5" /> Taken by another store or reserved.
+                                                    <AlertCircle className="size-3.5" /> Taken by another store or reserved.
                                                 </span>
                                             )
                                         ) : (
@@ -690,7 +690,7 @@ export default function StorefrontAdminPage() {
                                 value={settings.contactEmail}
                                 onChange={(e) => updateSettings({ contactEmail: e.target.value })}
                                 placeholder="hello@scribera.space"
-                                leftIcon={<Mail className="w-4 h-4 text-blue-500" />}
+                                leftIcon={<Mail className="size-4 text-blue-500" />}
                             />
 
                             <Input
@@ -698,7 +698,7 @@ export default function StorefrontAdminPage() {
                                 value={settings.contactPhone}
                                 onChange={(e) => updateSettings({ contactPhone: e.target.value })}
                                 placeholder="+1 234 567 8900"
-                                leftIcon={<Phone className="w-4 h-4 text-emerald-500" />}
+                                leftIcon={<Phone className="size-4 text-emerald-500" />}
                             />
 
                             <div className="md:col-span-2">
@@ -707,7 +707,7 @@ export default function StorefrontAdminPage() {
                                     value={settings.websiteUrl || ''}
                                     onChange={(e) => updateSettings({ websiteUrl: e.target.value })}
                                     placeholder="www.scribera.space"
-                                    leftIcon={<Globe className="w-4 h-4 text-purple-500" />}
+                                    leftIcon={<Globe className="size-4 text-purple-500" />}
                                 />
                             </div>
 
@@ -721,7 +721,7 @@ export default function StorefrontAdminPage() {
                                 />
                             </div>
 
-                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-neutral-100 dark:border-neutral-700">
+                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-line">
                                 <ImageUploader
                                     label="Store Banner Image (WebP Compressed)"
                                     value={settings.bannerUrl || ''}
@@ -752,20 +752,20 @@ export default function StorefrontAdminPage() {
                     </div>
 
                     {/* Automated Merchant Bank Payout & Subaccount Provisioning */}
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-neutral-100 dark:border-neutral-700">
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-6 md:p-8 space-y-6 shadow-sm">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-line">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 bg-blue-600 rounded-xl text-white shadow-sm">
-                                    <Building2 className="w-5 h-5" />
+                                    <Building2 className="size-5" />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-bold text-[#2d3748] dark:text-white flex items-center gap-2">
+                                    <h2 className="text-lg font-bold text-ink flex items-center gap-2">
                                         Merchant Bank Payout Account
                                         <span className="px-2.5 py-0.5 text-[10px] uppercase font-black rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
                                             Automated Subaccounts
                                         </span>
                                     </h2>
-                                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                    <p className="text-xs text-ink-muted">
                                         Enter your Nigerian bank account details. Payment subaccounts for Paystack & Monnify are provisioned automatically.
                                     </p>
                                 </div>
@@ -801,10 +801,10 @@ export default function StorefrontAdminPage() {
                             />
                         </div>
 
-                        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-neutral-100 dark:border-neutral-700">
-                            <div className="text-xs text-neutral-600 dark:text-neutral-400 space-y-1">
+                        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-line">
+                            <div className="text-xs text-ink-muted space-y-1">
                                 <p className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
-                                    <CheckCircle2 className="w-4 h-4" />
+                                    <CheckCircle2 className="size-4" />
                                     Active Subaccount Routing: Paystack ({settings.paystackSubAccountCode || 'Auto-Provisioned'}) | Monnify ({settings.monnifySubAccountCode || 'Auto-Provisioned'})
                                 </p>
                             </div>
@@ -839,14 +839,14 @@ export default function StorefrontAdminPage() {
                     </div>
 
                     {/* Store Visual Theme Customizer */}
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
+                    <div className="bg-paper border border-line rounded-panel shadow-xs p-6 md:p-8 space-y-6 shadow-sm">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl text-white">
-                                <Sparkles className="w-5 h-5" />
+                                <Sparkles className="size-5" />
                             </div>
                             <div>
-                                <h2 className="text-lg font-bold text-[#2d3748] dark:text-white">Store Visual Theme & Appearance</h2>
-                                <p className="text-xs text-neutral-500 dark:text-neutral-400">Choose a theme preset or customize storefront header gradients and primary accent colors.</p>
+                                <h2 className="text-lg font-bold text-ink">Store Visual Theme & Appearance</h2>
+                                <p className="text-xs text-ink-muted">Choose a theme preset or customize storefront header gradients and primary accent colors.</p>
                             </div>
                         </div>
 
@@ -868,12 +868,12 @@ export default function StorefrontAdminPage() {
                                             })}
                                             className={`p-4 rounded-2xl border text-left transition-all duration-200 space-y-3 relative overflow-hidden ${isSelected
                                                 ? 'border-blue-600 dark:border-blue-400 ring-2 ring-blue-500/20 bg-blue-50/20 dark:bg-blue-900/10'
-                                                : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 bg-white dark:bg-neutral-800'
+                                                : 'border-line hover:border-neutral-300 dark:hover:border-neutral-600 bg-paper'
                                                 }`}
                                         >
                                             {isSelected && (
                                                 <div className="absolute top-3 right-3 p-1 bg-blue-600 text-white rounded-full">
-                                                    <Check className="w-3.5 h-3.5" />
+                                                    <Check className="size-3.5" />
                                                 </div>
                                             )}
 
@@ -881,14 +881,14 @@ export default function StorefrontAdminPage() {
                                                 {preset.previewSwatches.map((color, i) => (
                                                     <span
                                                         key={i}
-                                                        className="w-5 h-5 rounded-full border border-black/10 shadow-sm"
+                                                        className="size-5 rounded-full border border-black/10 shadow-sm"
                                                         style={{ backgroundColor: color }}
                                                     />
                                                 ))}
                                             </div>
 
                                             <div>
-                                                <p className="font-semibold text-sm text-[#2d3748] dark:text-white">{preset.name}</p>
+                                                <p className="font-semibold text-sm text-ink">{preset.name}</p>
                                                 <p className="text-[11px] text-neutral-400">Gradient Header + Accent Color</p>
                                             </div>
                                         </button>
@@ -898,9 +898,9 @@ export default function StorefrontAdminPage() {
                         </div>
 
                         {/* Color Direct Customizer */}
-                        <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="pt-4 border-t border-line grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-300 mb-1">
+                                <label className="block text-xs font-medium text-ink-muted mb-1">
                                     Primary Accent Color (Buttons & Badges)
                                 </label>
                                 <div className="flex items-center gap-3">
@@ -908,7 +908,7 @@ export default function StorefrontAdminPage() {
                                         type="color"
                                         value={settings.primaryAccentColor || '#2563eb'}
                                         onChange={(e) => updateSettings({ primaryAccentColor: e.target.value })}
-                                        className="w-10 h-10 rounded-xl cursor-pointer border border-neutral-200 bg-transparent"
+                                        className="size-10 rounded-xl cursor-pointer border border-neutral-200 bg-transparent"
                                     />
                                     <Input
                                         value={settings.primaryAccentColor || '#2563eb'}
@@ -919,7 +919,7 @@ export default function StorefrontAdminPage() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-300 mb-1">
+                                <label className="block text-xs font-medium text-ink-muted mb-1">
                                     Header Text Color
                                 </label>
                                 <div className="flex items-center gap-3">
@@ -927,7 +927,7 @@ export default function StorefrontAdminPage() {
                                         type="color"
                                         value={settings.headerTextColor || '#ffffff'}
                                         onChange={(e) => updateSettings({ headerTextColor: e.target.value })}
-                                        className="w-10 h-10 rounded-xl cursor-pointer border border-neutral-200 bg-transparent"
+                                        className="size-10 rounded-xl cursor-pointer border border-neutral-200 bg-transparent"
                                     />
                                     <Input
                                         value={settings.headerTextColor || '#ffffff'}
@@ -952,7 +952,7 @@ export default function StorefrontAdminPage() {
                     <div className="space-y-5 max-h-[75vh] overflow-y-auto pr-1">
                         {/* Multi-Image Gallery Input */}
                         <div className="space-y-2">
-                            <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-wider">
+                            <label className="block text-xs font-bold text-ink-muted uppercase tracking-wider">
                                 Product Photos
                             </label>
 
@@ -988,10 +988,10 @@ export default function StorefrontAdminPage() {
                         {/* Pricing & Discount */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
                             <div>
-                                <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-200 mb-1">
+                                <label className="block text-xs font-semibold text-ink-muted mb-1">
                                     Base Price
                                 </label>
-                                <div className="h-10 px-3.5 flex items-center bg-neutral-100 dark:bg-neutral-800 rounded-xl text-sm font-bold text-[#2d3748] dark:text-white border border-neutral-200 dark:border-neutral-700">
+                                <div className="h-10 px-3.5 flex items-center bg-paper-2 rounded-xl text-sm font-bold text-ink border border-line">
                                     {formatCurrency(editingProduct.unitPrice, activeCurrency)}
                                 </div>
                             </div>
@@ -999,7 +999,7 @@ export default function StorefrontAdminPage() {
                             <div>
                                 {discounts.filter(d => d.isActive).length === 0 ? (
                                     <div>
-                                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-200 mb-1">
+                                        <label className="block text-xs font-semibold text-ink-muted mb-1">
                                             Discount (optional)
                                         </label>
                                         <p className="text-xs text-neutral-400 py-2">
@@ -1042,9 +1042,9 @@ export default function StorefrontAdminPage() {
                                 id="isPublishedToStore"
                                 checked={productForm.isPublishedToStore}
                                 onChange={(e) => setProductForm({ ...productForm, isPublishedToStore: e.target.checked })}
-                                className="w-4 h-4 text-blue-600 rounded border-neutral-300 focus:ring-blue-500"
+                                className="size-4 text-blue-600 rounded border-neutral-300 focus:ring-blue-500"
                             />
-                            <label htmlFor="isPublishedToStore" className="text-sm font-medium text-[#2d3748] dark:text-white cursor-pointer">
+                            <label htmlFor="isPublishedToStore" className="text-sm font-medium text-ink cursor-pointer">
                                 Publish product on public storefront
                             </label>
                         </div>
@@ -1065,13 +1065,13 @@ export default function StorefrontAdminPage() {
                         : 'bg-rose-950 text-rose-100 border-rose-800 shadow-rose-950/20'
                 }`}>
                     {toastMessage.type === 'success' ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-400 dark:text-emerald-600 shrink-0" />
+                        <CheckCircle2 className="size-5 text-emerald-400 dark:text-emerald-600 shrink-0" />
                     ) : (
-                        <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
+                        <AlertCircle className="size-5 text-rose-400 shrink-0" />
                     )}
                     <span>{toastMessage.message}</span>
                     <button onClick={() => setToastMessage(null)} className="ml-2 opacity-70 hover:opacity-100">
-                        <X className="w-4 h-4" />
+                        <X className="size-4" />
                     </button>
                 </div>
             )}

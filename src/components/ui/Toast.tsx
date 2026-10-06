@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { clsx } from 'clsx';
-import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
+import { X, CircleCheck, CircleX, Info, AlertTriangle } from '@/components/icons';
 import { Toast as ToastType, toast as hotToast, resolveValue } from 'react-hot-toast';
 
 export type LegacyToastType = 'success' | 'error' | 'info' | 'warning';
@@ -18,24 +18,20 @@ interface ToastProps {
 
 const typeConfig = {
     success: {
-        icon: CheckCircle,
-        bgClass: 'bg-emerald-50 dark:bg-neutral-800 border-emerald-200 dark:border-emerald-700/60 text-emerald-900 dark:text-emerald-300 shadow-xl',
-        iconClass: 'text-emerald-600 dark:text-emerald-400',
+        icon: CircleCheck,
+        iconClass: 'text-success-text rf-draw',
     },
     error: {
-        icon: AlertCircle,
-        bgClass: 'bg-red-50 dark:bg-neutral-800 border-red-200 dark:border-red-700/60 text-red-900 dark:text-red-300 shadow-xl',
-        iconClass: 'text-red-600 dark:text-red-400',
+        icon: CircleX,
+        iconClass: 'text-danger-text',
     },
     warning: {
         icon: AlertTriangle,
-        bgClass: 'bg-amber-50 dark:bg-neutral-800 border-amber-200 dark:border-amber-700/60 text-amber-900 dark:text-amber-300 shadow-xl',
-        iconClass: 'text-amber-600 dark:text-amber-400',
+        iconClass: 'text-warning-text',
     },
     info: {
         icon: Info,
-        bgClass: 'bg-blue-50 dark:bg-neutral-800 border-blue-200 dark:border-blue-700/60 text-blue-900 dark:text-blue-300 shadow-xl',
-        iconClass: 'text-blue-600 dark:text-blue-400',
+        iconClass: 'text-info-text',
     },
 };
 
@@ -44,7 +40,7 @@ export function Toast({
     type,
     title,
     description,
-    duration = 5000,
+    duration = 4000,
     onClose,
 }: ToastProps) {
     const config = typeConfig[type];
@@ -80,7 +76,6 @@ export function Toast({
         if (!startPosRef.current) return;
         const { x: dx, y: dy } = offset;
 
-        // Dismiss if swiped far enough horizontally or upwards
         if (Math.abs(dx) > 60 || dy < -50) {
             setIsDismissing(true);
             setTimeout(() => {
@@ -107,16 +102,15 @@ export function Toast({
                 touchAction: 'none',
             }}
             className={clsx(
-                'flex items-start gap-3 p-4 rounded-2xl border max-w-sm w-full select-none cursor-grab active:cursor-grabbing',
-                !isDragging && !isDismissing && 'animate-in slide-in-from-top-4 duration-200',
-                config.bgClass
+                'flex items-start gap-3 p-3.5 rounded-panel bg-ink text-paper border border-line shadow-pop max-w-sm w-full select-none cursor-grab active:cursor-grabbing',
+                !isDragging && !isDismissing && 'animate-toast-in'
             )}
         >
-            <Icon className={clsx('w-5 h-5 flex-shrink-0 mt-0.5', config.iconClass)} />
+            <Icon className={clsx('size-5 shrink-0 mt-0.5', config.iconClass)} />
             <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm leading-snug">{title}</p>
+                <p className="font-semibold text-body leading-snug">{title}</p>
                 {description && (
-                    <p className="text-xs opacity-80 mt-0.5 leading-normal">{description}</p>
+                    <p className="text-caption opacity-80 mt-0.5 leading-normal">{description}</p>
                 )}
             </div>
             <button
@@ -125,16 +119,15 @@ export function Toast({
                     e.stopPropagation();
                     onClose(id);
                 }}
-                className="p-1 -m-1 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
+                className="p-1 -m-1 rounded-ctl text-paper/60 hover:text-paper transition-colors"
                 title="Dismiss"
             >
-                <X className="w-4 h-4" />
+                <X className="size-4" />
             </button>
         </div>
     );
 }
 
-// Swipeable wrapper for react-hot-toast items
 export function SwipeableToastItem({ toast }: { toast: ToastType }) {
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
@@ -189,26 +182,21 @@ export function SwipeableToastItem({ toast }: { toast: ToastType }) {
                 touchAction: 'none',
             }}
             className={clsx(
-                'flex items-center gap-3 p-3.5 px-4 rounded-2xl border shadow-2xl max-w-sm w-full select-none cursor-grab active:cursor-grabbing backdrop-blur-md',
-                toast.visible && !isDragging && !isDismissing ? 'animate-in fade-in slide-in-from-top-3 duration-200' : '',
-                isSuccess
-                    ? 'bg-white/95 dark:bg-neutral-900/95 border-emerald-200 dark:border-emerald-800 text-neutral-800 dark:text-neutral-100'
-                    : isError
-                        ? 'bg-white/95 dark:bg-neutral-900/95 border-red-200 dark:border-red-800 text-neutral-800 dark:text-neutral-100'
-                        : 'bg-white/95 dark:bg-neutral-900/95 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-100'
+                'flex items-center gap-3 p-3.5 rounded-panel bg-ink text-paper border border-line shadow-pop max-w-sm w-full select-none cursor-grab active:cursor-grabbing',
+                toast.visible && !isDragging && !isDismissing ? 'animate-toast-in' : ''
             )}
         >
             <div className="shrink-0 flex items-center justify-center">
                 {isSuccess ? (
-                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                    <CircleCheck className="size-5 text-success-text rf-draw" />
                 ) : isError ? (
-                    <AlertCircle className="w-5 h-5 text-red-500" />
+                    <CircleX className="size-5 text-danger-text" />
                 ) : (
-                    <Info className="w-5 h-5 text-blue-500" />
+                    <Info className="size-5 text-info-text" />
                 )}
             </div>
 
-            <div className="flex-1 text-xs font-semibold leading-relaxed">
+            <div className="flex-1 text-caption font-medium leading-relaxed">
                 {typeof content === 'string' || typeof content === 'number' ? content : content}
             </div>
 
@@ -218,19 +206,18 @@ export function SwipeableToastItem({ toast }: { toast: ToastType }) {
                     e.stopPropagation();
                     hotToast.dismiss(toast.id);
                 }}
-                className="p-1 -mr-1 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors shrink-0"
+                className="p-1 -mr-1 rounded-ctl text-paper/60 hover:text-paper transition-colors shrink-0"
                 title="Dismiss"
             >
-                <X className="w-4 h-4" />
+                <X className="size-4" />
             </button>
         </div>
     );
 }
 
-// Toast container for custom toasts
 export function ToastContainer({ children }: { children: React.ReactNode }) {
     return (
-        <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-auto">
+        <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[70] flex flex-col gap-2 pointer-events-auto">
             {children}
         </div>
     );

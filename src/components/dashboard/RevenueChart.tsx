@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useDocumentStore, useSettingsStore, useTemplateStore, useOrganizationStore, useTransactionStore } from '@/lib/store';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from '@/components/icons';
 import { formatCurrency, getEffectiveGrandTotal } from '@/lib/utils';
 
 interface ChartDataPoint {
@@ -61,18 +61,18 @@ export default function RevenueChart() {
     }, [chartData]);
 
     const TrendIcon = stats.trend > 0 ? TrendingUp : stats.trend < 0 ? TrendingDown : Minus;
-    const trendColor = stats.trend > 0 ? 'text-emerald-500' : stats.trend < 0 ? 'text-red-500' : 'text-neutral-400';
+    const trendColor = stats.trend > 0 ? 'text-status-paid' : stats.trend < 0 ? 'text-status-overdue' : 'text-ink-muted';
 
     return (
-        <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-6 transition-colors">
+        <div className="panel bg-paper border border-line rounded-panel p-6">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white">Revenue Trend</h3>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">Last 7 days</p>
+                    <h3 className="text-sm font-bold font-display text-ink">Revenue Trend</h3>
+                    <p className="text-xs text-ink-muted">Last 7 days</p>
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <TrendIcon className={`w-4 h-4 ${trendColor}`} />
-                    <span className={`text-sm font-medium ${trendColor}`}>
+                    <TrendIcon className={`size-4 ${trendColor}`} />
+                    <span className={`text-sm font-bold ${trendColor}`}>
                         {stats.trend >= 0 ? '+' : ''}{stats.trendPercent}%
                     </span>
                 </div>
@@ -94,21 +94,21 @@ export default function RevenueChart() {
                             >
                                 {/* Bar */}
                                 <div
-                                    className={`absolute bottom-0 left-0 right-0 rounded-t-lg transition-all duration-300 ${isToday
-                                        ? 'bg-gradient-to-t from-blue-500 to-blue-400'
-                                        : 'bg-gradient-to-t from-neutral-200 dark:from-neutral-600 to-neutral-100 dark:to-neutral-500 group-hover:from-blue-300 group-hover:to-blue-200 dark:group-hover:from-blue-600 dark:group-hover:to-blue-500'
+                                    className={`absolute bottom-0 left-0 right-0 rounded-t-ctl transition-colors ${isToday
+                                        ? 'bg-primary-500'
+                                        : 'bg-paper-2 border-t border-x border-line group-hover:bg-paper-3'
                                         }`}
                                     style={{ height: `${height}%` }}
                                 />
 
                                 {/* Tooltip */}
                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                                    <div className="bg-[#2d3748] dark:bg-neutral-700 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                                    <div className="bg-ink text-paper text-caption money px-2 py-1 rounded-ctl whitespace-nowrap shadow-pop">
                                         {formatCurrency(day.revenue, currency)}
                                     </div>
                                 </div>
                             </div>
-                            <span className={`text-xs ${isToday ? 'font-semibold text-blue-600 dark:text-blue-400' : 'text-neutral-400 dark:text-neutral-500'}`}>
+                            <span className={`text-xs ${isToday ? 'font-bold text-primary-text' : 'text-ink-muted'}`}>
                                 {day.label}
                             </span>
                         </div>
@@ -117,9 +117,9 @@ export default function RevenueChart() {
             </div>
 
             {/* Summary */}
-            <div className="mt-4 pt-4 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between">
-                <span className="text-xs text-neutral-500 dark:text-neutral-400">Total this week</span>
-                <span className="text-sm font-bold text-[#2d3748] dark:text-white">
+            <div className="mt-4 pt-4 border-t border-line flex items-center justify-between">
+                <span className="text-xs text-ink-muted">Total this week</span>
+                <span className="text-sm font-bold money text-ink">
                     {formatCurrency(stats.totalRevenue, currency)}
                 </span>
             </div>

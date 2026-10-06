@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { FileX } from 'lucide-react';
+import { FileX } from '@/components/icons';
 
 interface EmptyStateProps {
     icon?: React.ReactNode;
@@ -19,22 +19,22 @@ export function EmptyState({
     return (
         <div
             className={clsx(
-                'flex flex-col items-center justify-center py-12 px-6 text-center',
+                'flex flex-col items-center text-center py-12 md:py-16 px-6',
                 className
             )}
         >
-            <div className="w-16 h-16 rounded-2xl bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center mb-4">
-                {icon || <FileX className="w-8 h-8 text-neutral-400 dark:text-neutral-500" strokeWidth={1.5} />}
+            <div className="grid place-items-center size-14 rounded-panel border border-dashed border-line-strong bg-paper-2 text-ink-2 [--rf-accent:var(--color-primary-500)]">
+                {icon || <FileX className="size-7" />}
             </div>
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-1">
+            <h3 className="font-heading text-lead font-semibold text-ink mt-4">
                 {title}
             </h3>
             {description && (
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-sm mb-4">
+                <p className="text-body text-ink-3 mt-1 max-w-sm">
                     {description}
                 </p>
             )}
-            {action}
+            {action && <div className="mt-5">{action}</div>}
         </div>
     );
 }

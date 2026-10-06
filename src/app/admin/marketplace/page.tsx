@@ -24,7 +24,7 @@ import {
     Layers,
     FileUp,
     AlertCircle
-} from 'lucide-react';
+} from '@/components/icons';
 import {
     getMarketplaceTemplates,
     createMarketplaceTemplate,
@@ -344,8 +344,8 @@ export default function MarketplaceAdminPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">Marketplace</h1>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                    <h1 className="text-2xl font-bold text-ink">Marketplace</h1>
+                    <p className="text-sm text-ink-muted mt-1">
                         Manage global marketplace templates available to all users across all organizations.
                         <span className="ml-2 text-sm">
                             <span className="text-emerald-600 font-medium">{publishedCount} Published</span>
@@ -362,13 +362,13 @@ export default function MarketplaceAdminPage() {
                         className="p-2 text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                         title="Refresh"
                     >
-                        <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`size-5 ${loading ? 'rf-spin' : ''}`} />
                     </button>
                     <button
                         onClick={() => setIsCreating(true)}
                         className="flex items-center gap-2 bg-[#2d3748] dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-4 py-2 rounded-xl font-medium text-sm transition-colors shadow-lg shadow-neutral-900/20"
                     >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="size-4" />
                         Add Template
                     </button>
                 </div>
@@ -376,28 +376,28 @@ export default function MarketplaceAdminPage() {
 
             {/* Search */}
             <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
                 <input
                     type="text"
                     placeholder="Search templates..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white placeholder-neutral-400 shadow-sm transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-paper border border-line rounded-panel shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink placeholder-neutral-400 shadow-sm transition-all"
                 />
             </div>
 
             {/* Create/Edit Panel */}
             {isCreating && (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-top-4">
+                <div className="bg-paper border border-line rounded-panel shadow-xs p-6 shadow-sm animate-in fade-in slide-in-from-top-4">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-lg font-semibold text-[#2d3748] dark:text-white">
+                        <h2 className="text-lg font-semibold text-ink">
                             {editingId ? 'Edit Template' : 'Add New Template'}
                         </h2>
                         <button
                             onClick={resetForm}
                             className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
                         >
-                            <X className="w-5 h-5 text-neutral-400" />
+                            <X className="size-5 text-neutral-400" />
                         </button>
                     </div>
 
@@ -409,10 +409,10 @@ export default function MarketplaceAdminPage() {
                                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
                                         <FileUp className="w-7 h-7 text-white" />
                                     </div>
-                                    <h3 className="text-lg font-semibold text-[#2d3748] dark:text-white mb-2">
+                                    <h3 className="text-lg font-semibold text-ink mb-2">
                                         Upload Template File
                                     </h3>
-                                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
+                                    <p className="text-sm text-ink-muted mb-4">
                                         Upload an .rfw template file to auto-detect document types
                                     </p>
 
@@ -428,23 +428,23 @@ export default function MarketplaceAdminPage() {
                                         onClick={() => rfwInputRef.current?.click()}
                                         className="flex items-center gap-2 px-5 py-2.5 bg-[#2d3748] dark:bg-white text-white dark:text-neutral-900 rounded-xl font-medium text-sm hover:bg-neutral-700 dark:hover:bg-neutral-200 transition-colors"
                                     >
-                                        <Upload className="w-4 h-4" />
+                                        <Upload className="size-4" />
                                         Select .rfw File
                                     </button>
                                 </div>
 
                                 {/* Parsed RFW Info */}
                                 {parsedRfw && (
-                                    <div className="mt-6 p-4 bg-white/80 dark:bg-neutral-800/80 rounded-xl border border-neutral-200 dark:border-neutral-700">
+                                    <div className="mt-6 p-4 bg-white/80 dark:bg-neutral-800/80 rounded-xl border border-line">
                                         <div className="flex items-start gap-3">
-                                            <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
-                                                <CheckCircle className="w-5 h-5 text-emerald-600" />
+                                            <div className="size-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                                                <CheckCircle className="size-5 text-emerald-600" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h4 className="font-medium text-[#2d3748] dark:text-white">
+                                                <h4 className="font-medium text-ink">
                                                     {parsedRfw.name}
                                                 </h4>
-                                                <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                                                <p className="text-sm text-ink-muted mt-1">
                                                     {parsedRfw.mode === 'connected' ? 'Connected Template' : 'Single Template'}
                                                 </p>
 
@@ -458,21 +458,21 @@ export default function MarketplaceAdminPage() {
                                                                 key={type}
                                                                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ${config?.bg} ${config?.color}`}
                                                             >
-                                                                <Icon className="w-3.5 h-3.5" />
+                                                                <Icon className="size-3.5" />
                                                                 {type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                                             </span>
                                                         );
                                                     })}
                                                     {parsedRfw.hasVariants && (
                                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
-                                                            <Layers className="w-3.5 h-3.5" />
+                                                            <Layers className="size-3.5" />
                                                             Multi-variant
                                                         </span>
                                                     )}
                                                 </div>
 
                                                 {/* Features */}
-                                                <div className="flex flex-wrap gap-3 mt-3 text-xs text-neutral-500 dark:text-neutral-400">
+                                                <div className="flex flex-wrap gap-3 mt-3 text-xs text-ink-muted">
                                                     <span>Fields: {parsedRfw.rawData.fields?.length || 0}</span>
                                                     {parsedRfw.hasCoverImage && (
                                                         <span className="text-emerald-600">✓ Has cover image</span>
@@ -497,7 +497,7 @@ export default function MarketplaceAdminPage() {
                                     type="text"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white placeholder-neutral-400 transition-all"
+                                    className="w-full px-4 py-2.5 bg-ground border border-line rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink placeholder-neutral-400 transition-all"
                                     placeholder="e.g. Modern Invoice Pro"
                                 />
                             </div>
@@ -508,7 +508,7 @@ export default function MarketplaceAdminPage() {
                                 <select
                                     value={formData.type}
                                     onChange={e => setFormData({ ...formData, type: e.target.value as DocumentType })}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white transition-all"
+                                    className="w-full px-4 py-2.5 bg-ground border border-line rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink transition-all"
                                 >
                                     <option value="invoice">Invoice</option>
                                     <option value="receipt">Receipt</option>
@@ -526,7 +526,7 @@ export default function MarketplaceAdminPage() {
                                 value={formData.description}
                                 onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 rows={3}
-                                className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white placeholder-neutral-400 transition-all resize-none"
+                                className="w-full px-4 py-2.5 bg-ground border border-line rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink placeholder-neutral-400 transition-all resize-none"
                                 placeholder="Describe what makes this template special..."
                             />
                         </div>
@@ -539,7 +539,7 @@ export default function MarketplaceAdminPage() {
                                 <select
                                     value={formData.category}
                                     onChange={e => setFormData({ ...formData, category: e.target.value })}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-neutral-900 dark:text-white transition-all"
+                                    className="w-full px-4 py-2.5 bg-ground border border-line rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-ink transition-all"
                                 >
                                     {categories.map(cat => (
                                         <option key={cat} value={cat}>{cat}</option>
@@ -565,7 +565,7 @@ export default function MarketplaceAdminPage() {
                                         onClick={() => coverInputRef.current?.click()}
                                         className="flex items-center gap-2 px-4 py-2.5 bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-xl text-sm font-medium hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
                                     >
-                                        <ImageIcon className="w-4 h-4" />
+                                        <ImageIcon className="size-4" />
                                         {formData.thumbnail ? 'Change Image' : 'Upload Image'}
                                     </button>
                                     {formData.thumbnail && (
@@ -573,14 +573,14 @@ export default function MarketplaceAdminPage() {
                                             <img
                                                 src={formData.thumbnail}
                                                 alt="Cover"
-                                                className="w-12 h-12 rounded-lg object-cover border border-neutral-200 dark:border-neutral-600"
+                                                className="size-12 rounded-lg object-cover border border-neutral-200 dark:border-neutral-600"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, thumbnail: '' })}
-                                                className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="absolute -top-1 -right-1 size-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                             >
-                                                <X className="w-3 h-3" />
+                                                <X className="size-3.5" />
                                             </button>
                                         </div>
                                     )}
@@ -602,18 +602,18 @@ export default function MarketplaceAdminPage() {
                                 type="checkbox"
                                 checked={formData.published}
                                 onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-                                className="w-5 h-5 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                                className="size-5 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
                             />
                             <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                                 Publish immediately (visible to all users)
                             </span>
                         </label>
 
-                        <div className="flex items-center gap-4 pt-4 border-t border-neutral-100 dark:border-neutral-700">
+                        <div className="flex items-center gap-4 pt-4 border-t border-line">
                             <button
                                 type="button"
                                 onClick={resetForm}
-                                className="px-5 py-2.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-xl font-medium transition-colors"
+                                className="px-5 py-2.5 text-ink-muted hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-xl font-medium transition-colors"
                             >
                                 Cancel
                             </button>
@@ -623,9 +623,9 @@ export default function MarketplaceAdminPage() {
                                 className="flex items-center gap-2 px-6 py-2.5 bg-[#2d3748] dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 rounded-xl font-medium transition-colors disabled:opacity-50"
                             >
                                 {formLoading ? (
-                                    <RefreshCw className="w-4 h-4 animate-spin" />
+                                    <RefreshCw className="size-4 rf-spin" />
                                 ) : (
-                                    <CheckCircle className="w-4 h-4" />
+                                    <CheckCircle className="size-4" />
                                 )}
                                 {editingId ? 'Save Changes' : 'Add Template'}
                             </button>
@@ -635,11 +635,11 @@ export default function MarketplaceAdminPage() {
             )}
 
             {/* Templates Table */}
-            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-paper border border-line rounded-panel shadow-xs shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse min-w-[800px] md:min-w-full">
                         <thead>
-                            <tr className="bg-neutral-50/50 dark:bg-neutral-800/50 border-b border-neutral-100 dark:border-neutral-700 text-xs font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                            <tr className="bg-neutral-50/50 dark:bg-neutral-800/50 border-b border-line text-xs font-semibold text-ink-muted uppercase tracking-wider">
                                 <th className="px-6 py-4">Template Name</th>
                                 <th className="px-6 py-4">Document Types</th>
                                 <th className="px-6 py-4">Category</th>
@@ -649,11 +649,11 @@ export default function MarketplaceAdminPage() {
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700">
+                        <tbody className="divide-y divide-line">
                             {loading ? (
                                 <tr>
                                     <td colSpan={7} className="px-6 py-12 text-center">
-                                        <RefreshCw className="w-6 h-6 mx-auto animate-spin text-neutral-400" />
+                                        <RefreshCw className="size-6 mx-auto rf-spin text-neutral-400" />
                                     </td>
                                 </tr>
                             ) : filteredTemplates.length === 0 ? (
@@ -673,16 +673,16 @@ export default function MarketplaceAdminPage() {
                                         <tr key={template.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center border border-neutral-200 dark:border-neutral-600 overflow-hidden ${primaryConfig?.bg}`}>
+                                                    <div className={`size-12 rounded-lg flex items-center justify-center border border-neutral-200 dark:border-neutral-600 overflow-hidden ${primaryConfig?.bg}`}>
                                                         {template.thumbnail ? (
                                                             <img src={template.thumbnail} alt="" className="w-full h-full object-cover" />
                                                         ) : (
-                                                            <PrimaryIcon className={`w-6 h-6 ${primaryConfig?.color}`} />
+                                                            <PrimaryIcon className={`size-6 ${primaryConfig?.color}`} />
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <div className="font-medium text-[#2d3748] dark:text-white">{template.name}</div>
-                                                        <div className="text-xs text-neutral-500 dark:text-neutral-400 line-clamp-1 max-w-xs">
+                                                        <div className="font-medium text-ink">{template.name}</div>
+                                                        <div className="text-xs text-ink-muted line-clamp-1 max-w-xs">
                                                             {template.description}
                                                         </div>
                                                     </div>
@@ -698,27 +698,27 @@ export default function MarketplaceAdminPage() {
                                                                 key={type}
                                                                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${config?.bg} ${config?.color}`}
                                                             >
-                                                                <Icon className="w-3 h-3" />
+                                                                <Icon className="size-3.5" />
                                                                 {type.split('-')[0]}
                                                             </span>
                                                         );
                                                     })}
                                                     {isConnected && (
                                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
-                                                            <Layers className="w-3 h-3" />
+                                                            <Layers className="size-3.5" />
                                                         </span>
                                                     )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 text-xs font-medium">
-                                                    <Tag className="w-3 h-3" />
+                                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-neutral-700 text-ink-muted text-xs font-medium">
+                                                    <Tag className="size-3.5" />
                                                     {template.category}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex items-center gap-1.5 text-sm text-neutral-600 dark:text-neutral-300">
-                                                    <Download className="w-4 h-4 text-neutral-400" />
+                                                <div className="flex items-center gap-1.5 text-sm text-ink-muted">
+                                                    <Download className="size-4 text-neutral-400" />
                                                     {template.downloads.toLocaleString()}
                                                 </div>
                                             </td>
@@ -732,7 +732,7 @@ export default function MarketplaceAdminPage() {
                                                     {template.published ? 'Published' : 'Draft'}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
+                                            <td className="px-6 py-4 text-sm text-ink-muted">
                                                 {template.updatedAt
                                                     ? new Date(template.updatedAt).toLocaleDateString()
                                                     : new Date(template.createdAt).toLocaleDateString()
@@ -744,7 +744,7 @@ export default function MarketplaceAdminPage() {
                                                         onClick={() => setOpenMenuId(openMenuId === template.id ? null : template.id)}
                                                         className="p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                                                     >
-                                                        <MoreVertical className="w-5 h-5" />
+                                                        <MoreVertical className="size-5" />
                                                     </button>
 
                                                     {openMenuId === template.id && (
@@ -753,12 +753,12 @@ export default function MarketplaceAdminPage() {
                                                                 className="fixed inset-0 z-10"
                                                                 onClick={() => setOpenMenuId(null)}
                                                             />
-                                                            <div className="absolute right-0 mt-2 w-48 rounded-xl shadow-xl bg-white dark:bg-neutral-800 ring-1 ring-black/5 dark:ring-white/10 z-20 py-1 origin-top-right border border-neutral-100 dark:border-neutral-700">
+                                                            <div className="absolute right-0 mt-2 w-48 rounded-xl shadow-xl bg-paper ring-1 ring-black/5 dark:ring-white/10 z-20 py-1 origin-top-right border border-line">
                                                                 <button
                                                                     className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                                     onClick={() => handleEdit(template)}
                                                                 >
-                                                                    <Edit2 className="w-4 h-4" />
+                                                                    <Edit2 className="size-4" />
                                                                     Edit
                                                                 </button>
                                                                 <button
@@ -768,12 +768,12 @@ export default function MarketplaceAdminPage() {
                                                                 >
                                                                     {template.published ? (
                                                                         <>
-                                                                            <PowerOff className="w-4 h-4" />
+                                                                            <PowerOff className="size-4" />
                                                                             Unpublish
                                                                         </>
                                                                     ) : (
                                                                         <>
-                                                                            <Power className="w-4 h-4" />
+                                                                            <Power className="size-4" />
                                                                             Publish
                                                                         </>
                                                                     )}
@@ -784,7 +784,7 @@ export default function MarketplaceAdminPage() {
                                                                     onClick={() => handleDelete(template.id)}
                                                                     disabled={actionLoading === template.id}
                                                                 >
-                                                                    <Trash2 className="w-4 h-4" />
+                                                                    <Trash2 className="size-4" />
                                                                     Delete
                                                                 </button>
                                                             </div>

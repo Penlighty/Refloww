@@ -40,7 +40,7 @@ import {
     Copy,
     Clipboard,
     ClipboardPaste
-} from 'lucide-react';
+} from '@/components/icons';
 
 // Helper component for properties panel sections
 const PropertySection = ({
@@ -60,21 +60,21 @@ const PropertySection = ({
 }) => {
     const isOpen = activeSection === id;
     return (
-        <div className="border-b border-neutral-100 dark:border-neutral-700 last:border-0">
+        <div className="border-b border-line last:border-0">
             <button
                 onClick={() => setActiveSection(isOpen ? null : id)}
                 className={`w-full flex items-center justify-between p-4 text-left transition-all duration-200 ${isOpen ? 'bg-blue-50/40 dark:bg-blue-900/10' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/30'}`}
             >
                 <div className="flex items-center gap-2.5">
-                    {Icon && <Icon className={`w-4 h-4 ${isOpen ? 'text-blue-500' : 'text-neutral-400'}`} strokeWidth={2.5} />}
-                    <span className={`text-[11px] font-bold uppercase tracking-wider ${isOpen ? 'text-blue-600 dark:text-blue-400' : 'text-neutral-500 dark:text-neutral-400'}`}>
+                    {Icon && <Icon className={`size-4 ${isOpen ? 'text-blue-500' : 'text-neutral-400'}`} />}
+                    <span className={`text-[11px] font-bold uppercase tracking-wider ${isOpen ? 'text-blue-600 dark:text-blue-400' : 'text-ink-muted'}`}>
                         {title}
                     </span>
                 </div>
                 {isOpen ? (
-                    <ChevronUp className="w-3.5 h-3.5 text-blue-500" strokeWidth={3} />
+                    <ChevronUp className="size-3.5 text-blue-500" />
                 ) : (
-                    <ChevronDown className="w-3.5 h-3.5 text-neutral-400" strokeWidth={2} />
+                    <ChevronDown className="size-3.5 text-neutral-400" />
                 )}
             </button>
             {isOpen && (
@@ -238,12 +238,12 @@ const SmartLabelInput = ({
                 autoComplete="off"
             />
             {showSuggestions && (value.length > 0 ? filtered.length > 0 : true) && (
-                <div className="absolute z-[100] w-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-xl rounded-xl max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-100 no-scrollbar">
+                <div className="absolute z-[100] w-full mt-1 bg-paper border border-line shadow-xl rounded-xl max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-100 no-scrollbar">
                     {(value.length === 0 ? smartSuggestions.slice(0, 5) : filtered).map((s) => (
                         <button
                             key={s.label}
                             type="button"
-                            className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex flex-col gap-0.5 border-b border-neutral-100 dark:border-neutral-800 last:border-0"
+                            className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex flex-col gap-0.5 border-b border-line last:border-0"
                             onClick={() => {
                                 onChange(s.label);
                                 onSelectType(s.type);
@@ -251,7 +251,7 @@ const SmartLabelInput = ({
                             }}
                         >
                             <span className="text-xs font-semibold text-[#2d3748] dark:text-neutral-200">{s.label}</span>
-                            <span className="text-[10px] text-neutral-400 dark:text-neutral-500 font-mono">{fieldTypeOptions.find(o => o.value === s.type)?.label}</span>
+                            <span className="text-[10px] text-ink-muted font-mono">{fieldTypeOptions.find(o => o.value === s.type)?.label}</span>
                         </button>
                     ))}
                 </div>
@@ -579,7 +579,7 @@ export default function TemplateEditorPage() {
         const missingItems = tabs.filter(t => !existingItems.includes(t));
 
         return (
-            <div className="flex items-center gap-2 border-r border-neutral-200 dark:border-neutral-700 pr-4 mr-4">
+            <div className="flex items-center gap-2 border-r border-line pr-4 mr-4">
                 {/* Existing Tabs */}
                 {existingItems.map(item => {
                     const isActive = activeVariant === item.type;
@@ -589,7 +589,7 @@ export default function TemplateEditorPage() {
                             onClick={() => handleSwitchVariant(item.type)}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isActive
                                 ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-sm'
-                                : 'bg-white dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700'
+                                : 'bg-paper text-ink-muted border border-line hover:bg-neutral-50 dark:hover:bg-neutral-700'
                                 }`}
                         >
                             {item.label}
@@ -600,11 +600,11 @@ export default function TemplateEditorPage() {
                 {/* Plus Button for Missing */}
                 {missingItems.length > 0 && (
                     <div className="relative group">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all shadow-sm">
-                            <Plus className="w-4 h-4" />
+                        <button className="size-8 flex items-center justify-center rounded-lg bg-paper border border-line text-neutral-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all shadow-sm">
+                            <Plus className="size-4" />
                         </button>
 
-                        <div className="absolute left-0 top-full mt-2 w-48 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-100 dark:border-neutral-700 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left z-50 overflow-hidden">
+                        <div className="absolute left-0 top-full mt-2 w-48 bg-paper rounded-xl border border-line shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left z-50 overflow-hidden">
                             <div className="p-1">
                                 <div className="px-3 py-2 text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
                                     Add Layout
@@ -616,9 +616,9 @@ export default function TemplateEditorPage() {
                                             setVariantUploadType(item.type);
                                             setIsVariantUploadModalOpen(true);
                                         }}
-                                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors text-left text-neutral-700 dark:text-neutral-200"
+                                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors text-left text-ink-muted"
                                     >
-                                        <Plus className="w-3 h-3 text-neutral-400" />
+                                        <Plus className="size-3.5 text-neutral-400" />
                                         {item.label}
                                     </button>
                                 ))}
@@ -1410,9 +1410,9 @@ export default function TemplateEditorPage() {
     if (!template) {
         return (
             <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center p-6">
-                <div className="bg-white dark:bg-neutral-800 rounded-2xl p-12 max-w-md shadow-xl border border-neutral-100 dark:border-neutral-700">
+                <div className="bg-paper rounded-2xl p-12 max-w-md shadow-xl border border-line">
                     <EmptyState
-                        icon={<Layers className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                        icon={<Layers className="size-8 text-neutral-400" />}
                         title="Template not found"
                         description="The template you're looking for doesn't exist."
                         action={
@@ -1427,7 +1427,7 @@ export default function TemplateEditorPage() {
     }
 
     return (
-        <div key={templateId} className="absolute inset-0 z-50 bg-neutral-50 dark:bg-neutral-900 flex flex-col overflow-hidden">
+        <div key={templateId} className="absolute inset-0 z-50 bg-paper-2 flex flex-col overflow-hidden">
             {/* Mobile Bottom Drawer Overlay */}
             {isMobileDrawerOpen && (
                 <div
@@ -1436,17 +1436,17 @@ export default function TemplateEditorPage() {
                 />
             )}
             {/* Header */}
-            <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-3 py-2.5 md:px-4 md:py-3 flex items-center justify-between gap-2">
+            <header className="bg-paper border-b border-line px-3 py-2.5 md:px-4 md:py-3 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 md:gap-4 min-w-0">
                     <Link
                         href="/templates"
                         className="p-2 rounded-lg text-neutral-500 hover:text-[#2d3748] dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors shrink-0"
                     >
-                        <ArrowLeft className="w-5 h-5" />
+                        <ArrowLeft className="size-5" />
                     </Link>
                     <div className="min-w-0">
-                        <h1 className="text-sm md:text-lg font-bold text-[#2d3748] dark:text-white truncate">{template.name}</h1>
-                        <div className="hidden md:flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+                        <h1 className="text-sm md:text-lg font-bold text-ink truncate">{template.name}</h1>
+                        <div className="hidden md:flex items-center gap-2 text-xs text-ink-muted">
                             <span>{template.fields.length} field{template.fields.length !== 1 ? 's' : ''} mapped</span>
                             <span className="text-neutral-300 dark:text-neutral-600">•</span>
                             {isSaving ? (
@@ -1491,22 +1491,22 @@ export default function TemplateEditorPage() {
                             onClick={() => setZoom(Math.max(0.5, zoom - 0.25))}
                             className="p-1.5 rounded-lg text-neutral-500 hover:text-[#2d3748] dark:hover:text-white hover:bg-white dark:hover:bg-neutral-800 transition-colors"
                         >
-                            <ZoomOut className="w-4 h-4" />
+                            <ZoomOut className="size-4" />
                         </button>
-                        <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300 w-12 text-center">
+                        <span className="text-xs font-medium text-ink-muted w-12 text-center">
                             {Math.round(zoom * 100)}%
                         </span>
                         <button
                             onClick={() => setZoom(Math.min(2, zoom + 0.25))}
                             className="p-1.5 rounded-lg text-neutral-500 hover:text-[#2d3748] dark:hover:text-white hover:bg-white dark:hover:bg-neutral-800 transition-colors"
                         >
-                            <ZoomIn className="w-4 h-4" />
+                            <ZoomIn className="size-4" />
                         </button>
                         <button
                             onClick={() => setZoom(1)}
                             className="p-1.5 rounded-lg text-neutral-500 hover:text-[#2d3748] dark:hover:text-white hover:bg-white dark:hover:bg-neutral-800 transition-colors"
                         >
-                            <RotateCcw className="w-4 h-4" />
+                            <RotateCcw className="size-4" />
                         </button>
                     </div>
 
@@ -1520,7 +1520,7 @@ export default function TemplateEditorPage() {
                             onClick={handleUndo}
                             title="Undo (Ctrl+Z)"
                         >
-                            <Undo className="w-4 h-4" />
+                            <Undo className="size-4" />
                         </Button>
                         <Button
                             variant="ghost"
@@ -1529,7 +1529,7 @@ export default function TemplateEditorPage() {
                             onClick={handleRedo}
                             title="Redo (Ctrl+Y)"
                         >
-                            <Redo className="w-4 h-4" />
+                            <Redo className="size-4" />
                         </Button>
                     </div>
 
@@ -1543,13 +1543,13 @@ export default function TemplateEditorPage() {
                         onClick={() => setShowPreview(!showPreview)}
                         title="Toggle Preview"
                     >
-                        <Eye className="w-4 h-4 md:w-4 md:h-4" />
+                        <Eye className="size-4 md:w-4 md:h-4" />
                     </button>
 
                     <Button
                         size="sm"
                         variant={hasUnsavedChanges ? 'danger' : 'primary'}
-                        leftIcon={<Save className="w-4 h-4" />}
+                        leftIcon={<Save className="size-4" />}
                         onClick={() => {
                             // ENSURE DATA SANITY:
                             // Sync current visual fields to the correct variant storage slot
@@ -1587,7 +1587,7 @@ export default function TemplateEditorPage() {
 
             {/* Mobile Sub-header: Connected Tabs */}
             {template.mode === 'connected' && (
-                <div className="md:hidden bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 px-3 py-2 overflow-x-auto">
+                <div className="md:hidden bg-paper border-b border-line px-3 py-2 overflow-x-auto">
                     <ConnectedTabs />
                 </div>
             )}
@@ -1596,7 +1596,7 @@ export default function TemplateEditorPage() {
             {
                 showSavedToast && (
                     <div className="fixed top-20 right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 animate-in slide-in-from-top-2 fade-in duration-200">
-                        <Check className="w-4 h-4" />
+                        <Check className="size-4" />
                         <span className="text-sm font-medium">Saved to local storage!</span>
                     </div>
                 )
@@ -1606,7 +1606,7 @@ export default function TemplateEditorPage() {
             {
                 showCopiedToast && (
                     <div className="fixed top-20 right-6 z-50 bg-blue-500 text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 animate-in slide-in-from-top-2 fade-in duration-200">
-                        <Copy className="w-4 h-4" />
+                        <Copy className="size-4" />
                         <span className="text-sm font-medium">Field copied!</span>
                     </div>
                 )
@@ -1614,7 +1614,7 @@ export default function TemplateEditorPage() {
 
             <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
                 {/* Toolbar - hidden on mobile (shown in mobile bottom bar instead) */}
-                <div className="hidden md:flex w-14 bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 flex-col items-center py-4 gap-2">
+                <div className="hidden md:flex w-14 bg-paper border-r border-line flex-col items-center py-4 gap-2">
                     <button
                         onClick={() => setActiveTool('select')}
                         className={`p-3 rounded-xl transition-colors ${activeTool === 'select'
@@ -1623,8 +1623,8 @@ export default function TemplateEditorPage() {
                             }`}
                         title="Select Tool (V)"
                     >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 3L10.07 19.97L12.58 12.58L19.97 10.07L3 3Z" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <svg className="size-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 3L10.07 19.97L12.58 12.58L19.97 10.07L3 3Z" fill="currentColor" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </button>
                     <button
@@ -1635,7 +1635,7 @@ export default function TemplateEditorPage() {
                             }`}
                         title="Draw Field (D)"
                     >
-                        <Square className="w-5 h-5" />
+                        <Square className="size-5" />
                     </button>
 
                     <div className="h-px w-8 bg-neutral-200 dark:bg-neutral-700 my-2" />
@@ -1643,12 +1643,12 @@ export default function TemplateEditorPage() {
                     <button
                         onClick={() => setShowFieldPanel(!showFieldPanel)}
                         className={`p-3 rounded-xl transition-colors ${showFieldPanel
-                            ? 'bg-neutral-100 dark:bg-neutral-700 text-[#2d3748] dark:text-white'
+                            ? 'bg-neutral-100 dark:bg-neutral-700 text-ink'
                             : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-[#2d3748] dark:hover:text-white'
                             }`}
                         title="Toggle Field Panel"
                     >
-                        <Layers className="w-5 h-5" />
+                        <Layers className="size-5" />
                     </button>
                 </div>
 
@@ -1974,7 +1974,7 @@ export default function TemplateEditorPage() {
                                                 }}
                                             >
                                                 <span>Fit to screen</span>
-                                                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                                                <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                                             </button>
                                             {/* Preset zoom levels */}
                                             {[25, 50, 75, 100, 125, 150, 200].map((level) => {
@@ -1994,7 +1994,7 @@ export default function TemplateEditorPage() {
                                                     >
                                                         <span>{level}%</span>
                                                         {isActive && (
-                                                            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M20 6L9 17l-5-5"/></svg>
+                                                            <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5"/></svg>
                                                         )}
                                                     </button>
                                                 );
@@ -2013,7 +2013,7 @@ export default function TemplateEditorPage() {
                                     onClick={() => setShowMobileZoomMenu(prev => !prev)}
                                 >
                                     {Math.round(mobileTransform.zoom * 100)}%
-                                    <svg className={`w-2.5 h-2.5 transition-transform ${showMobileZoomMenu ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M6 9l6 6 6-6"/></svg>
+                                    <svg className={`w-2.5 h-2.5 transition-transform ${showMobileZoomMenu ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6"/></svg>
                                 </button>
                             </div>
                         </div>
@@ -2138,10 +2138,10 @@ export default function TemplateEditorPage() {
                                         {/* Simplified resize handles on mobile */}
                                         {selectedFieldId === field.id && (
                                             <>
-                                                <div className="absolute -top-1 -left-1 w-3 h-3 bg-white border-2 border-blue-500 z-50 rounded-sm" />
-                                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-white border-2 border-blue-500 z-50 rounded-sm" />
-                                                <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-white border-2 border-blue-500 z-50 rounded-sm" />
-                                                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-white border-2 border-blue-500 z-50 rounded-sm" />
+                                                <div className="absolute -top-1 -left-1 size-3.5 bg-white border-2 border-blue-500 z-50 rounded-sm" />
+                                                <div className="absolute -top-1 -right-1 size-3.5 bg-white border-2 border-blue-500 z-50 rounded-sm" />
+                                                <div className="absolute -bottom-1 -left-1 size-3.5 bg-white border-2 border-blue-500 z-50 rounded-sm" />
+                                                <div className="absolute -bottom-1 -right-1 size-3.5 bg-white border-2 border-blue-500 z-50 rounded-sm" />
                                             </>
                                         )}
                                     </div>
@@ -2167,9 +2167,9 @@ export default function TemplateEditorPage() {
 
                 {/* Field Properties Panel - Desktop (right side) */}
                 {showFieldPanel && (
-                    <div className="hidden md:flex w-72 bg-white dark:bg-neutral-800 border-l border-neutral-200 dark:border-neutral-700 flex-col">
-                        <div className="p-4 border-b border-neutral-100 dark:border-neutral-700">
-                            <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white">Field Properties</h3>
+                    <div className="hidden md:flex w-72 bg-paper border-l border-line flex-col">
+                        <div className="p-4 border-b border-line">
+                            <h3 className="text-sm font-semibold text-ink">Field Properties</h3>
                         </div>
 
                         {selectedField ? (
@@ -2183,7 +2183,7 @@ export default function TemplateEditorPage() {
                                 >
                                     {/* Field Type */}
                                     <div className="space-y-1.5">
-                                        <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Type</label>
+                                        <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight">Type</label>
                                         <Select
                                             options={fieldTypeOptions}
                                             value={selectedField.type}
@@ -2196,12 +2196,12 @@ export default function TemplateEditorPage() {
                                                     handleFieldUpdate('label', typeLabel);
                                                 }
                                             }}
-                                            className="w-full bg-neutral-50/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-neutral-700/50"
+                                            className="w-full bg-paper-2 border-neutral-200/50 dark:border-neutral-700/50"
                                         />
                                         {/* Value Preview for variable fields */}
                                         {['document-number', 'date', 'due-date', 'customer-name', 'grand-total'].includes(selectedField.type) && (
                                             <div className="flex items-center gap-2 px-2 py-1.5 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-800">
-                                                <Eye className="w-3 h-3 text-blue-500" />
+                                                <Eye className="size-3.5 text-blue-500" />
                                                 <span className="text-[10px] font-medium text-blue-600 dark:text-blue-400 truncate">
                                                     Preview: {previewData[selectedField.type] || 'N/A'}
                                                 </span>
@@ -2211,19 +2211,19 @@ export default function TemplateEditorPage() {
 
                                     {/* Label */}
                                     <div className="space-y-1.5">
-                                        <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Label</label>
+                                        <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight">Label</label>
                                         <SmartLabelInput
                                             value={selectedField.label}
                                             onChange={(val) => handleFieldUpdate('label', val)}
                                             onSelectType={(type) => handleFieldUpdate('type', type)}
-                                            className="bg-neutral-50/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-neutral-700/50"
+                                            className="bg-paper-2 border-neutral-200/50 dark:border-neutral-700/50"
                                         />
                                     </div>
 
                                     {/* Data Type (Custom Fields Only) */}
                                     {selectedField.type === 'custom' && (
                                         <div className="space-y-1.5">
-                                            <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Data Type</label>
+                                            <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight">Data Type</label>
                                             <Select
                                                 options={[
                                                     { value: 'text', label: 'Text' },
@@ -2232,7 +2232,7 @@ export default function TemplateEditorPage() {
                                                 ]}
                                                 value={selectedField.dataType || 'text'}
                                                 onChange={(v) => handleFieldUpdate('dataType', v)}
-                                                className="w-full bg-neutral-50/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-neutral-700/50"
+                                                className="w-full bg-paper-2 border-neutral-200/50 dark:border-neutral-700/50"
                                             />
                                             <p className="text-[10px] text-neutral-400 px-1">
                                                 {selectedField.dataType === 'currency'
@@ -2248,18 +2248,18 @@ export default function TemplateEditorPage() {
                                     {selectedField.type === 'link-button' && (
                                         <>
                                             <div className="space-y-1.5">
-                                                <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Target URL</label>
+                                                <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight">Target URL</label>
                                                 <Input
                                                     placeholder="https://example.com"
                                                     // @ts-ignore
                                                     value={selectedField.customValues?.url || ''}
                                                     // @ts-ignore
                                                     onChange={(e) => handleFieldUpdate('customValues', { ...selectedField.customValues, url: e.target.value })}
-                                                    className="bg-neutral-50/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-neutral-700/50"
+                                                    className="bg-paper-2 border-neutral-200/50 dark:border-neutral-700/50"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Button Color</label>
+                                                <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight">Button Color</label>
                                                 <div className="flex items-center gap-2">
                                                     <input
                                                         type="color"
@@ -2267,7 +2267,7 @@ export default function TemplateEditorPage() {
                                                         value={selectedField.customValues?.buttonColor || '#3b82f6'}
                                                         // @ts-ignore
                                                         onChange={(e) => handleFieldUpdate('customValues', { ...selectedField.customValues, buttonColor: e.target.value })}
-                                                        className="h-8 w-8 rounded cursor-pointer border-0 p-0"
+                                                        className="size-8 rounded cursor-pointer border-0 p-0"
                                                     />
                                                     <Input
                                                         placeholder="#3b82f6"
@@ -2275,14 +2275,14 @@ export default function TemplateEditorPage() {
                                                         value={selectedField.customValues?.buttonColor || '#3b82f6'}
                                                         // @ts-ignore
                                                         onChange={(e) => handleFieldUpdate('customValues', { ...selectedField.customValues, buttonColor: e.target.value })}
-                                                        className="flex-1 bg-neutral-50/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-neutral-700/50"
+                                                        className="flex-1 bg-paper-2 border-neutral-200/50 dark:border-neutral-700/50"
                                                     />
                                                 </div>
                                             </div>
 
                                             {/* Button Style (Border Radius) */}
                                             <div className="space-y-1.5">
-                                                <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Button Style</label>
+                                                <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight">Button Style</label>
                                                 <div className="grid grid-cols-3 gap-1 bg-neutral-100/50 dark:bg-neutral-900/50 p-1 rounded-lg border border-neutral-200/50 dark:border-neutral-700/50">
                                                     {[
                                                         { value: 'sharp', label: 'Sharp' },
@@ -2304,8 +2304,8 @@ export default function TemplateEditorPage() {
                                                                     });
                                                                 }}
                                                                 className={`h-7 text-[10px] font-medium rounded transition-all flex items-center justify-center ${isActive
-                                                                    ? 'bg-white dark:bg-neutral-800 text-blue-600 dark:text-blue-400 shadow-sm border border-neutral-200 dark:border-neutral-700'
-                                                                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                                                                    ? 'bg-paper text-blue-600 dark:text-blue-400 shadow-sm border border-line'
+                                                                    : 'text-ink-muted hover:text-neutral-700 dark:hover:text-neutral-200'
                                                                     }`}
                                                             >
                                                                 {opt.label}
@@ -2317,7 +2317,7 @@ export default function TemplateEditorPage() {
 
                                             {/* Button Variant (Fill/Outline) */}
                                             <div className="space-y-1.5">
-                                                <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Fill Style</label>
+                                                <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight">Fill Style</label>
                                                 <div className="grid grid-cols-2 gap-1 bg-neutral-100/50 dark:bg-neutral-900/50 p-1 rounded-lg border border-neutral-200/50 dark:border-neutral-700/50">
                                                     {[
                                                         { value: 'filled', label: 'Filled' },
@@ -2338,8 +2338,8 @@ export default function TemplateEditorPage() {
                                                                     });
                                                                 }}
                                                                 className={`h-7 text-[10px] font-medium rounded transition-all flex items-center justify-center ${isActive
-                                                                    ? 'bg-white dark:bg-neutral-800 text-blue-600 dark:text-blue-400 shadow-sm border border-neutral-200 dark:border-neutral-700'
-                                                                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                                                                    ? 'bg-paper text-blue-600 dark:text-blue-400 shadow-sm border border-line'
+                                                                    : 'text-ink-muted hover:text-neutral-700 dark:hover:text-neutral-200'
                                                                     }`}
                                                             >
                                                                 {opt.label}
@@ -2361,15 +2361,15 @@ export default function TemplateEditorPage() {
                                 >
                                     {/* Font Size */}
                                     <div>
-                                        <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight mb-2">Font Size</label>
-                                        <div className="flex flex-col gap-3 bg-neutral-50/50 dark:bg-neutral-900/50 p-3 rounded-xl border border-neutral-200/50 dark:border-neutral-700/50">
+                                        <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight mb-2">Font Size</label>
+                                        <div className="flex flex-col gap-3 bg-paper-2 p-3 rounded-xl border border-neutral-200/50 dark:border-neutral-700/50">
                                             <div className="flex gap-2">
                                                 <div className="flex-1 min-w-0">
                                                     <Input
                                                         type="number"
                                                         value={selectedField.fontSize}
                                                         onChange={(e) => handleFieldUpdate('fontSize', parseInt(e.target.value) || 0)}
-                                                        className="h-9 bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700"
+                                                        className="h-9 bg-paper border-line"
                                                         min={1}
                                                         max={200}
                                                     />
@@ -2379,7 +2379,7 @@ export default function TemplateEditorPage() {
                                                         options={[8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64, 72].map(s => ({ label: `${s}px`, value: String(s) }))}
                                                         value={String(selectedField.fontSize)}
                                                         onChange={(v) => handleFieldUpdate('fontSize', Number(v))}
-                                                        className="h-9 bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700"
+                                                        className="h-9 bg-paper border-line"
                                                     />
                                                 </div>
                                             </div>
@@ -2396,13 +2396,13 @@ export default function TemplateEditorPage() {
 
                                     {/* Font Color */}
                                     <div>
-                                        <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">Font Color</label>
+                                        <label className="block text-xs font-medium text-ink-muted mb-1.5">Font Color</label>
                                         <div className="flex items-center gap-2">
                                             <input
                                                 type="color"
                                                 value={selectedField.fontColor}
                                                 onChange={(e) => handleFieldUpdate('fontColor', e.target.value)}
-                                                className="w-10 h-10 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 cursor-pointer"
+                                                className="size-10 rounded-lg border border-line bg-paper cursor-pointer"
                                             />
                                             <Input
                                                 value={selectedField.fontColor}
@@ -2414,7 +2414,7 @@ export default function TemplateEditorPage() {
 
                                     {/* Font Weight */}
                                     <div>
-                                        <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">Font Weight</label>
+                                        <label className="block text-xs font-medium text-ink-muted mb-1.5">Font Weight</label>
                                         <Select
                                             options={[
                                                 { value: 'normal', label: 'Normal' },
@@ -2429,20 +2429,20 @@ export default function TemplateEditorPage() {
 
                                     {/* Alignment */}
                                     <div>
-                                        <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight mb-2">Alignment</label>
+                                        <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight mb-2">Alignment</label>
                                         <div className="flex items-center gap-1.5 bg-neutral-100/50 dark:bg-neutral-900/50 rounded-xl p-1.5 border border-neutral-200/50 dark:border-neutral-700/50">
                                             {(['left', 'center', 'right'] as TextAlignment[]).map((align) => (
                                                 <button
                                                     key={align}
                                                     onClick={() => handleFieldUpdate('alignment', align)}
                                                     className={`flex-1 flex items-center justify-center h-9 rounded-lg transition-all ${selectedField.alignment === align
-                                                        ? 'bg-white dark:bg-neutral-800 text-blue-500 dark:text-blue-400 shadow-sm border border-neutral-200 dark:border-neutral-700'
+                                                        ? 'bg-paper text-blue-500 dark:text-blue-400 shadow-sm border border-line'
                                                         : 'text-neutral-500 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
                                                         }`}
                                                 >
-                                                    {align === 'left' && <AlignLeft className="w-4 h-4" />}
-                                                    {align === 'center' && <AlignCenter className="w-4 h-4" />}
-                                                    {align === 'right' && <AlignRight className="w-4 h-4" />}
+                                                    {align === 'left' && <AlignLeft className="size-4" />}
+                                                    {align === 'center' && <AlignCenter className="size-4" />}
+                                                    {align === 'right' && <AlignRight className="size-4" />}
                                                 </button>
                                             ))}
                                         </div>
@@ -2461,32 +2461,32 @@ export default function TemplateEditorPage() {
                                             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                                                 <span className="text-[10px] font-bold text-blue-500/60 dark:text-blue-400/60 uppercase">X</span>
                                             </div>
-                                            <div className="w-full bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200/50 dark:border-neutral-700/50 rounded-xl py-2 pl-7 pr-3 text-right">
-                                                <span className="text-xs font-mono font-medium text-neutral-700 dark:text-neutral-200">{selectedField.x.toFixed(1)}%</span>
+                                            <div className="w-full bg-paper-2/50 border border-neutral-200/50 dark:border-neutral-700/50 rounded-xl py-2 pl-7 pr-3 text-right">
+                                                <span className="text-xs font-mono font-medium text-ink-muted">{selectedField.x.toFixed(1)}%</span>
                                             </div>
                                         </div>
                                         <div className="relative group">
                                             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                                                 <span className="text-[10px] font-bold text-blue-500/60 dark:text-blue-400/60 uppercase">Y</span>
                                             </div>
-                                            <div className="w-full bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200/50 dark:border-neutral-700/50 rounded-xl py-2 pl-7 pr-3 text-right">
-                                                <span className="text-xs font-mono font-medium text-neutral-700 dark:text-neutral-200">{selectedField.y.toFixed(1)}%</span>
+                                            <div className="w-full bg-paper-2/50 border border-neutral-200/50 dark:border-neutral-700/50 rounded-xl py-2 pl-7 pr-3 text-right">
+                                                <span className="text-xs font-mono font-medium text-ink-muted">{selectedField.y.toFixed(1)}%</span>
                                             </div>
                                         </div>
                                         <div className="relative group">
                                             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                                                 <span className="text-[10px] font-bold text-blue-500/60 dark:text-blue-400/60 uppercase">W</span>
                                             </div>
-                                            <div className="w-full bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200/50 dark:border-neutral-700/50 rounded-xl py-2 pl-7 pr-3 text-right">
-                                                <span className="text-xs font-mono font-medium text-neutral-700 dark:text-neutral-200">{selectedField.width.toFixed(1)}%</span>
+                                            <div className="w-full bg-paper-2/50 border border-neutral-200/50 dark:border-neutral-700/50 rounded-xl py-2 pl-7 pr-3 text-right">
+                                                <span className="text-xs font-mono font-medium text-ink-muted">{selectedField.width.toFixed(1)}%</span>
                                             </div>
                                         </div>
                                         <div className="relative group">
                                             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                                                 <span className="text-[10px] font-bold text-blue-500/60 dark:text-blue-400/60 uppercase">H</span>
                                             </div>
-                                            <div className="w-full bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200/50 dark:border-neutral-700/50 rounded-xl py-2 pl-7 pr-3 text-right">
-                                                <span className="text-xs font-mono font-medium text-neutral-700 dark:text-neutral-200">{selectedField.height.toFixed(1)}%</span>
+                                            <div className="w-full bg-paper-2/50 border border-neutral-200/50 dark:border-neutral-700/50 rounded-xl py-2 pl-7 pr-3 text-right">
+                                                <span className="text-xs font-mono font-medium text-ink-muted">{selectedField.height.toFixed(1)}%</span>
                                             </div>
                                         </div>
                                     </div>
@@ -2500,21 +2500,21 @@ export default function TemplateEditorPage() {
                                         activeSection={activeSection}
                                         setActiveSection={setActiveSection}
                                     >
-                                        <div className="flex items-center justify-between bg-neutral-50/50 dark:bg-neutral-900/50 p-3 rounded-xl border border-neutral-200/50 dark:border-neutral-700/50">
-                                            <span className="text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Show Header Row</span>
+                                        <div className="flex items-center justify-between bg-paper-2 p-3 rounded-xl border border-neutral-200/50 dark:border-neutral-700/50">
+                                            <span className="text-[11px] font-bold text-ink-muted uppercase tracking-tight">Show Header Row</span>
                                             <button
                                                 onClick={() => handleFieldUpdate('showTableHeaders', selectedField.showTableHeaders === false)}
                                                 className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${selectedField.showTableHeaders !== false ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'}`}
                                             >
                                                 <span
                                                     aria-hidden="true"
-                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${selectedField.showTableHeaders !== false ? 'translate-x-5' : 'translate-x-0'}`}
+                                                    className={`inline-block size-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${selectedField.showTableHeaders !== false ? 'translate-x-5' : 'translate-x-0'}`}
                                                 />
                                             </button>
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">Max Rows</label>
+                                            <label className="block text-xs font-medium text-ink-muted mb-1.5">Max Rows</label>
                                             <Input
                                                 type="number"
                                                 min="1"
@@ -2525,7 +2525,7 @@ export default function TemplateEditorPage() {
                                         </div>
 
                                         <div className="flex items-center justify-between mt-4 mb-2">
-                                            <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400">Column Configuration</label>
+                                            <label className="block text-xs font-medium text-ink-muted">Column Configuration</label>
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
@@ -2534,7 +2534,7 @@ export default function TemplateEditorPage() {
                                                     handleFieldUpdate('columns', [...(selectedField.columns || []), newCol]);
                                                 }}
                                             >
-                                                <Plus className="w-3 h-3 mr-1" /> Add
+                                                <Plus className="size-3.5 mr-1" /> Add
                                             </Button>
                                         </div>
 
@@ -2542,7 +2542,7 @@ export default function TemplateEditorPage() {
 
                                         <div className="space-y-3">
                                             {(selectedField.columns || []).map((col, index) => (
-                                                <div key={col.id} className="bg-neutral-50 dark:bg-neutral-900/50 p-2 rounded-lg space-y-2">
+                                                <div key={col.id} className="bg-paper-2/50 p-2 rounded-lg space-y-2">
                                                     {/* Header & Delete */}
                                                     <div className="flex gap-2">
                                                         <Input
@@ -2560,16 +2560,16 @@ export default function TemplateEditorPage() {
                                                                 const newCols = (selectedField.columns || []).filter(c => c.id !== col.id);
                                                                 handleFieldUpdate('columns', newCols);
                                                             }}
-                                                            className="text-neutral-400 dark:text-neutral-500 hover:text-red-500"
+                                                            className="text-ink-muted hover:text-red-500"
                                                         >
-                                                            <Trash2 className="w-4 h-4" />
+                                                            <Trash2 className="size-4" />
                                                         </button>
                                                     </div>
 
                                                     {/* Width & Data Map */}
                                                     <div className="flex gap-2">
-                                                        <div className="flex items-center gap-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded px-2 h-8 flex-1">
-                                                            <span className="text-xs text-neutral-400 dark:text-neutral-500">W:</span>
+                                                        <div className="flex items-center gap-1 bg-paper border border-line rounded px-2 h-8 flex-1">
+                                                            <span className="text-xs text-ink-muted">W:</span>
                                                             <input
                                                                 type="number"
                                                                 value={col.width}
@@ -2578,9 +2578,9 @@ export default function TemplateEditorPage() {
                                                                     newCols[index] = { ...col, width: parseInt(e.target.value) || 0 };
                                                                     handleFieldUpdate('columns', newCols);
                                                                 }}
-                                                                className="w-full bg-transparent text-xs outline-none text-neutral-700 dark:text-neutral-200"
+                                                                className="w-full bg-transparent text-xs outline-none text-ink-muted"
                                                             />
-                                                            <span className="text-xs text-neutral-400 dark:text-neutral-500">%</span>
+                                                            <span className="text-xs text-ink-muted">%</span>
                                                         </div>
                                                         <select
                                                             value={['description', 'quantity', 'unitPrice', 'subtotal', 'sn'].includes(col.key) ? col.key : 'custom'}
@@ -2596,7 +2596,7 @@ export default function TemplateEditorPage() {
                                                                 }
                                                                 handleFieldUpdate('columns', newCols);
                                                             }}
-                                                            className="h-8 text-xs bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded px-1 outline-none flex-1 text-neutral-700 dark:text-neutral-200"
+                                                            className="h-8 text-xs bg-paper border border-line rounded px-1 outline-none flex-1 text-ink-muted"
                                                             title="Data Mapping"
                                                         >
                                                             <option value="description">Product</option>
@@ -2609,7 +2609,7 @@ export default function TemplateEditorPage() {
                                                     </div>
 
                                                     {/* Alignment Icons */}
-                                                    <div className="flex gap-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded p-1">
+                                                    <div className="flex gap-1 bg-paper border border-line rounded p-1">
                                                         {[
                                                             { align: 'left', Icon: AlignLeft },
                                                             { align: 'center', Icon: AlignCenter },
@@ -2638,7 +2638,7 @@ export default function TemplateEditorPage() {
                                                                         }`}
                                                                     title={`Align ${align}`}
                                                                 >
-                                                                    <Icon className="w-4 h-4" strokeWidth={isActive ? 2.5 : 2} />
+                                                                    <Icon className="size-4" />
                                                                 </button>
                                                             );
                                                         })}
@@ -2656,7 +2656,7 @@ export default function TemplateEditorPage() {
                                         variant="danger"
                                         size="sm"
                                         fullWidth
-                                        leftIcon={<Trash2 className="w-4 h-4" />}
+                                        leftIcon={<Trash2 className="size-4" />}
                                         onClick={handleDeleteField}
                                     >
                                         Delete Field
@@ -2678,7 +2678,7 @@ export default function TemplateEditorPage() {
                                             <Input
                                                 value={template.name}
                                                 onChange={(e) => updateTemplate(template.id, { name: e.target.value })}
-                                                className="bg-white dark:bg-neutral-800"
+                                                className="bg-paper"
                                             />
                                         </div>
 
@@ -2692,25 +2692,25 @@ export default function TemplateEditorPage() {
                                                 ]}
                                                 value={template.type}
                                                 onChange={(v) => updateTemplate(template.id, { type: v as any })}
-                                                className="bg-white dark:bg-neutral-800"
+                                                className="bg-paper"
                                             />
                                             <p className="text-xs text-neutral-500 mt-1.5 px-1">
                                                 Determines which numbering sequence (e.g. INV-001 vs REC-001) is used.
                                             </p>
                                         </div>
 
-                                        <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700">
+                                        <div className="pt-4 border-t border-line">
                                             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Cover Image (Optional)</label>
                                             <div className="relative group">
                                                 <div
                                                     onClick={() => document.getElementById('template-cover-upload')?.click()}
-                                                    className="w-full aspect-video bg-neutral-100 dark:bg-neutral-900 rounded-lg border-2 border-dashed border-neutral-200 dark:border-neutral-700 hover:border-blue-400 dark:hover:border-blue-600 cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
+                                                    className="w-full aspect-video bg-neutral-100 dark:bg-neutral-900 rounded-lg border-2 border-dashed border-line hover:border-blue-400 dark:hover:border-blue-600 cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
                                                 >
                                                     {template.coverImage ? (
                                                         <img src={template.coverImage} alt="Cover" className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="text-center p-4">
-                                                            <Plus className="w-6 h-6 mx-auto text-neutral-400 mb-2" />
+                                                            <Plus className="size-6 mx-auto text-neutral-400 mb-2" />
                                                             <span className="text-xs text-neutral-500">Add Cover Image</span>
                                                         </div>
                                                     )}
@@ -2753,18 +2753,18 @@ export default function TemplateEditorPage() {
                                         </div>
 
 
-                                        <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700">
+                                        <div className="pt-4 border-t border-line">
                                             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Background Image</label>
                                             <div className="relative group">
                                                 <div
                                                     onClick={() => document.getElementById('template-bg-upload')?.click()}
-                                                    className="w-full aspect-video bg-neutral-100 dark:bg-neutral-900 rounded-lg border-2 border-dashed border-neutral-200 dark:border-neutral-700 hover:border-blue-400 dark:hover:border-blue-600 cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
+                                                    className="w-full aspect-video bg-neutral-100 dark:bg-neutral-900 rounded-lg border-2 border-dashed border-line hover:border-blue-400 dark:hover:border-blue-600 cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
                                                 >
                                                     {template.imageUrl ? (
                                                         <img src={template.imageUrl} alt="Background" className="w-full h-full object-contain" />
                                                     ) : (
                                                         <div className="text-center p-4">
-                                                            <Plus className="w-6 h-6 mx-auto text-neutral-400 mb-2" />
+                                                            <Plus className="size-6 mx-auto text-neutral-400 mb-2" />
                                                             <span className="text-xs text-neutral-500">Upload Image</span>
                                                         </div>
                                                     )}
@@ -2811,8 +2811,8 @@ export default function TemplateEditorPage() {
                                 </PropertySection>
 
                                 <div className="p-6 text-center">
-                                    <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-900 rounded-xl flex items-center justify-center mx-auto mb-3">
-                                        <MousePointer className="w-6 h-6 text-neutral-400 dark:text-neutral-500" />
+                                    <div className="size-12 bg-neutral-100 dark:bg-neutral-900 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                        <MousePointer className="size-6 text-ink-muted" />
                                     </div>
                                     <p className="text-sm text-neutral-500">
                                         Select a field on the canvas to edit its properties.
@@ -2823,10 +2823,10 @@ export default function TemplateEditorPage() {
                         }
 
                         {/* Field List */}
-                        <div className="border-t border-neutral-200 dark:border-neutral-700">
-                            <div className="p-4 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-between">
-                                <h4 className="text-xs font-semibold text-[#2d3748] dark:text-white uppercase tracking-wider">All Fields</h4>
-                                <span className="text-xs text-neutral-400 dark:text-neutral-500">{template.fields.length}</span>
+                        <div className="border-t border-line">
+                            <div className="p-4 border-b border-line flex items-center justify-between">
+                                <h4 className="text-xs font-semibold text-ink uppercase tracking-wider">All Fields</h4>
+                                <span className="text-xs text-ink-muted">{template.fields.length}</span>
                             </div>
                             <div className="max-h-48 overflow-y-auto">
                                 {template.fields.length === 0 ? (
@@ -2841,9 +2841,9 @@ export default function TemplateEditorPage() {
                                                 : 'hover:bg-neutral-50 dark:hover:bg-neutral-700/50 text-neutral-700 dark:text-neutral-300'
                                                 }`}
                                         >
-                                            <GripVertical className="w-3.5 h-3.5 text-neutral-300 dark:text-neutral-600" />
+                                            <GripVertical className="size-3.5 text-neutral-300 dark:text-neutral-600" />
                                             <span className="text-sm truncate flex-1">{field.label}</span>
-                                            <span className="text-xs text-neutral-400 dark:text-neutral-500">{field.type}</span>
+                                            <span className="text-xs text-ink-muted">{field.type}</span>
                                         </button>
                                     ))
                                 )}
@@ -2855,7 +2855,7 @@ export default function TemplateEditorPage() {
             </div >
 
             {/* Mobile Bottom Action Bar */}
-            <div className="md:hidden bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 px-4 py-2 flex items-center justify-between gap-3" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}>
+            <div className="md:hidden bg-paper border-t border-line px-4 py-2 flex items-center justify-between gap-3" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}>
                 {/* Tool Buttons */}
                 <div className="flex items-center gap-1.5 bg-neutral-100 dark:bg-neutral-900 rounded-xl p-1">
                     <button
@@ -2867,8 +2867,8 @@ export default function TemplateEditorPage() {
                         }`}
                         title="Select Tool"
                     >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                            <path d="M3 3L10.07 19.97L12.58 12.58L19.97 10.07L3 3Z" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <svg className="size-5" viewBox="0 0 24 24" fill="none">
+                            <path d="M3 3L10.07 19.97L12.58 12.58L19.97 10.07L3 3Z" fill="currentColor" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </button>
                     <button
@@ -2880,7 +2880,7 @@ export default function TemplateEditorPage() {
                         }`}
                         title="Draw Field"
                     >
-                        <Square className="w-5 h-5" />
+                        <Square className="size-5" />
                     </button>
                 </div>
 
@@ -2891,14 +2891,14 @@ export default function TemplateEditorPage() {
                         onClick={handleUndo}
                         className="p-2.5 rounded-lg text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 disabled:opacity-30 transition-colors"
                     >
-                        <Undo className="w-4 h-4" />
+                        <Undo className="size-4" />
                     </button>
                     <button
                         disabled={historyIndex >= history.length - 1}
                         onClick={handleRedo}
                         className="p-2.5 rounded-lg text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 disabled:opacity-30 transition-colors"
                     >
-                        <Redo className="w-4 h-4" />
+                        <Redo className="size-4" />
                     </button>
                 </div>
 
@@ -2908,26 +2908,26 @@ export default function TemplateEditorPage() {
                     className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
                         selectedField
                             ? 'bg-blue-600 text-white shadow-sm'
-                            : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300'
+                            : 'bg-neutral-100 dark:bg-neutral-700 text-ink-muted'
                     }`}
                 >
-                    <Settings2 className="w-4 h-4" />
+                    <Settings2 className="size-4" />
                     <span>{selectedField ? 'Properties' : 'Settings'}</span>
                 </button>
             </div>
 
             {/* Mobile Bottom Drawer - Field Properties */}
             <div
-                className={`fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white dark:bg-neutral-800 rounded-t-2xl shadow-2xl border-t border-neutral-200 dark:border-neutral-700 flex flex-col transition-transform duration-300 ease-out ${
+                className={`fixed bottom-0 left-0 right-0 z-50 md:hidden bg-paper rounded-t-2xl shadow-2xl border-t border-line flex flex-col transition-transform duration-300 ease-out ${
                     isMobileDrawerOpen ? 'translate-y-0' : 'translate-y-full'
                 }`}
                 style={{ maxHeight: '80vh', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
                 {/* Drawer Handle & Header */}
-                <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-neutral-100 dark:border-neutral-700 shrink-0">
+                <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-line shrink-0">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-1 bg-neutral-300 dark:bg-neutral-600 rounded-full mx-auto absolute left-1/2 -translate-x-1/2 top-2" />
-                        <h3 className="text-sm font-semibold text-[#2d3748] dark:text-white mt-2">
+                        <h3 className="text-sm font-semibold text-ink mt-2">
                             {selectedField ? 'Field Properties' : 'Template Settings'}
                         </h3>
                     </div>
@@ -2935,7 +2935,7 @@ export default function TemplateEditorPage() {
                         onClick={() => setIsMobileDrawerOpen(false)}
                         className="p-1.5 rounded-lg text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 mt-2"
                     >
-                        <X className="w-4 h-4" />
+                        <X className="size-4" />
                     </button>
                 </div>
 
@@ -2951,7 +2951,7 @@ export default function TemplateEditorPage() {
                                 setActiveSection={setActiveSection}
                             >
                                 <div className="space-y-1.5">
-                                    <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Type</label>
+                                    <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight">Type</label>
                                     <Select
                                         options={fieldTypeOptions}
                                         value={selectedField.type}
@@ -2961,16 +2961,16 @@ export default function TemplateEditorPage() {
                                             const typeLabel = fieldTypeOptions.find(opt => opt.value === newType)?.label;
                                             if (typeLabel) handleFieldUpdate('label', typeLabel);
                                         }}
-                                        className="w-full bg-neutral-50/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-neutral-700/50"
+                                        className="w-full bg-paper-2 border-neutral-200/50 dark:border-neutral-700/50"
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight">Label</label>
+                                    <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight">Label</label>
                                     <SmartLabelInput
                                         value={selectedField.label}
                                         onChange={(val) => handleFieldUpdate('label', val)}
                                         onSelectType={(type) => handleFieldUpdate('type', type)}
-                                        className="bg-neutral-50/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-neutral-700/50"
+                                        className="bg-paper-2 border-neutral-200/50 dark:border-neutral-700/50"
                                     />
                                 </div>
                             </PropertySection>
@@ -2982,25 +2982,25 @@ export default function TemplateEditorPage() {
                                 setActiveSection={setActiveSection}
                             >
                                 <div>
-                                    <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight mb-2">Font Size</label>
+                                    <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight mb-2">Font Size</label>
                                     <div className="flex gap-2">
                                         <Input
                                             type="number"
                                             value={selectedField.fontSize}
                                             onChange={(e) => handleFieldUpdate('fontSize', parseInt(e.target.value) || 0)}
-                                            className="h-9 bg-white dark:bg-neutral-800"
+                                            className="h-9 bg-paper"
                                             min={1} max={200}
                                         />
                                         <Select
                                             options={[8,9,10,11,12,14,16,18,20,24,28,32].map(s => ({ label: `${s}px`, value: String(s) }))}
                                             value={String(selectedField.fontSize)}
                                             onChange={(v) => handleFieldUpdate('fontSize', Number(v))}
-                                            className="h-9 bg-white dark:bg-neutral-800"
+                                            className="h-9 bg-paper"
                                         />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">Font Weight</label>
+                                    <label className="block text-xs font-medium text-ink-muted mb-1.5">Font Weight</label>
                                     <Select
                                         options={[
                                             { value: 'normal', label: 'Normal' },
@@ -3013,20 +3013,20 @@ export default function TemplateEditorPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-tight mb-2">Alignment</label>
+                                    <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-tight mb-2">Alignment</label>
                                     <div className="flex items-center gap-1.5 bg-neutral-100/50 dark:bg-neutral-900/50 rounded-xl p-1.5 border border-neutral-200/50 dark:border-neutral-700/50">
                                         {(['left', 'center', 'right'] as TextAlignment[]).map((align) => (
                                             <button
                                                 key={align}
                                                 onClick={() => handleFieldUpdate('alignment', align)}
                                                 className={`flex-1 flex items-center justify-center h-9 rounded-lg transition-all ${selectedField.alignment === align
-                                                    ? 'bg-white dark:bg-neutral-800 text-blue-500 dark:text-blue-400 shadow-sm border border-neutral-200 dark:border-neutral-700'
+                                                    ? 'bg-paper text-blue-500 dark:text-blue-400 shadow-sm border border-line'
                                                     : 'text-neutral-500 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
                                                 }`}
                                             >
-                                                {align === 'left' && <AlignLeft className="w-4 h-4" />}
-                                                {align === 'center' && <AlignCenter className="w-4 h-4" />}
-                                                {align === 'right' && <AlignRight className="w-4 h-4" />}
+                                                {align === 'left' && <AlignLeft className="size-4" />}
+                                                {align === 'center' && <AlignCenter className="size-4" />}
+                                                {align === 'right' && <AlignRight className="size-4" />}
                                             </button>
                                         ))}
                                     </div>
@@ -3037,7 +3037,7 @@ export default function TemplateEditorPage() {
                                     variant="danger"
                                     size="sm"
                                     fullWidth
-                                    leftIcon={<Trash2 className="w-4 h-4" />}
+                                    leftIcon={<Trash2 className="size-4" />}
                                     onClick={() => { handleDeleteField(); setIsMobileDrawerOpen(false); }}
                                 >
                                     Delete Field
@@ -3051,7 +3051,7 @@ export default function TemplateEditorPage() {
                                 <Input
                                     value={template.name}
                                     onChange={(e) => updateTemplate(template.id, { name: e.target.value })}
-                                    className="bg-white dark:bg-neutral-800"
+                                    className="bg-paper"
                                 />
                             </div>
                             <div>
@@ -3064,7 +3064,7 @@ export default function TemplateEditorPage() {
                                     ]}
                                     value={template.type}
                                     onChange={(v) => updateTemplate(template.id, { type: v as any })}
-                                    className="bg-white dark:bg-neutral-800"
+                                    className="bg-paper"
                                 />
                             </div>
                             {/* Field list for mobile */}
@@ -3088,7 +3088,7 @@ export default function TemplateEditorPage() {
                                                         : 'hover:bg-neutral-50 dark:hover:bg-neutral-700/50 text-neutral-700 dark:text-neutral-300'
                                                 }`}
                                             >
-                                                <GripVertical className="w-3.5 h-3.5 text-neutral-300 dark:text-neutral-600" />
+                                                <GripVertical className="size-3.5 text-neutral-300 dark:text-neutral-600" />
                                                 <span className="text-sm truncate flex-1">{field.label}</span>
                                                 <span className="text-xs text-neutral-400">{field.type}</span>
                                             </button>
@@ -3159,7 +3159,7 @@ export default function TemplateEditorPage() {
             >
                 <div className="space-y-4">
                     {variantUploadPreview ? (
-                        <div className="relative aspect-video bg-neutral-100 dark:bg-neutral-900 rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-700 group">
+                        <div className="relative aspect-video bg-neutral-100 dark:bg-neutral-900 rounded-xl overflow-hidden border border-line group">
                             <img src={variantUploadPreview} alt="Preview" className="w-full h-full object-contain" />
                             <button
                                 onClick={() => {
@@ -3168,19 +3168,19 @@ export default function TemplateEditorPage() {
                                 }}
                                 className="absolute top-2 right-2 p-1.5 bg-white/90 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                             >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="size-4" />
                             </button>
                         </div>
                     ) : (
                         <div
                             onClick={() => document.getElementById('variant-file-upload')?.click()}
-                            className="w-full aspect-video rounded-xl border-2 border-dashed border-neutral-200 dark:border-neutral-700 hover:border-blue-400 dark:hover:border-blue-600 bg-neutral-50 dark:bg-neutral-900/50 flex flex-col items-center justify-center cursor-pointer transition-colors group"
+                            className="w-full aspect-video rounded-xl border-2 border-dashed border-line hover:border-blue-400 dark:hover:border-blue-600 bg-paper-2/50 flex flex-col items-center justify-center cursor-pointer transition-colors group"
                         >
-                            <div className="w-12 h-12 rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
-                                <Plus className="w-6 h-6 text-neutral-400 dark:text-neutral-500" />
+                            <div className="size-12 rounded-full bg-paper flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
+                                <Plus className="size-6 text-ink-muted" />
                             </div>
-                            <span className="text-sm font-medium text-neutral-600 dark:text-neutral-300">Click to upload image</span>
-                            <span className="text-xs text-neutral-400 dark:text-neutral-500 mt-1">PNG, JPG, SVG</span>
+                            <span className="text-sm font-medium text-ink-muted">Click to upload image</span>
+                            <span className="text-xs text-ink-muted mt-1">PNG, JPG, SVG</span>
                         </div>
                     )}
                     <input

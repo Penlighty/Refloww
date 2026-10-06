@@ -3,8 +3,11 @@
 import { useState, useMemo, useRef } from 'react';
 import { useProductStore, useCustomerStore, useDocumentStore, useSettingsStore, useOrganizationStore } from '@/lib/store';
 import { Product, Customer, LineItem } from '@/lib/types';
+import dynamic from 'next/dynamic';
 import { formatCurrency } from '@/lib/utils';
-import BarcodeScannerModal from '@/components/BarcodeScannerModal';
+import { Button, Tag } from '@/components/ui';
+
+const BarcodeScannerModal = dynamic(() => import('@/components/BarcodeScannerModal'), { ssr: false });
 import {
     Search,
     ShoppingCart,
@@ -19,7 +22,7 @@ import {
     Building2,
     X,
     Barcode,
-    Tag,
+    Tag as TagIcon,
     Zap,
     UserPlus,
     RefreshCw,
@@ -28,7 +31,7 @@ import {
     Hash,
     ArrowLeft,
     ArrowRight
-} from 'lucide-react';
+} from '@/components/icons';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
@@ -337,73 +340,73 @@ export default function POSPage() {
         <div className="flex flex-col lg:flex-row gap-4 w-full h-auto lg:h-[calc(100vh-10rem)] min-h-0 lg:min-h-[580px] items-stretch overflow-visible lg:overflow-hidden pb-16 lg:pb-0 relative">
             
             {/* Mobile Segmented Tab Control */}
-            <div className="flex lg:hidden items-center justify-between bg-neutral-100 dark:bg-neutral-800 p-1 rounded-2xl gap-1 border border-neutral-200/60 dark:border-neutral-700 shrink-0">
+            <div className="flex lg:hidden items-center justify-between bg-paper-2 p-1 rounded-panel gap-1 border border-line shrink-0">
                 <button
                     type="button"
                     onClick={() => setMobileTab('products')}
-                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    className={`flex-1 py-2 px-3 rounded-ctl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                         mobileTab === 'products'
-                            ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm'
-                            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800'
+                            ? 'bg-primary-500 text-on-primary font-bold'
+                            : 'text-ink-muted hover:text-ink'
                     }`}
                 >
-                    <Tag className="w-3.5 h-3.5 text-[#fc6d2d]" />
+                    <TagIcon className="size-3.5" />
                     <span>Products ({filteredProducts.length})</span>
                 </button>
                 <button
                     type="button"
                     onClick={() => setMobileTab('cart')}
-                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer relative ${
+                    className={`flex-1 py-2 px-3 rounded-ctl text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer relative ${
                         mobileTab === 'cart'
-                            ? 'bg-[#fc6d2d] text-white shadow-sm'
-                            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800'
+                            ? 'bg-primary-500 text-on-primary font-bold'
+                            : 'text-ink-muted hover:text-ink'
                     }`}
                 >
-                    <ShoppingCart className="w-3.5 h-3.5" />
+                    <ShoppingCart className="size-3.5" />
                     <span>Cart ({cartTotalCount})</span>
                     {cartTotalCount > 0 && mobileTab !== 'cart' && (
-                        <span className="w-2 h-2 rounded-full bg-[#fc6d2d] animate-pulse"></span>
+                        <span className="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
                     )}
                 </button>
             </div>
 
             {/* Mobile Quick Floating Cart Sticky Banner */}
             {mobileTab === 'products' && cartTotalCount > 0 && (
-                <div className="lg:hidden fixed bottom-20 left-4 right-4 z-20 bg-neutral-900/95 backdrop-blur-md text-white p-3 rounded-2xl shadow-xl flex items-center justify-between border border-neutral-800 animate-in fade-in slide-in-from-bottom-3">
+                <div className="lg:hidden fixed bottom-20 left-4 right-4 z-20 panel p-3 flex items-center justify-between border border-line shadow-xl animate-in fade-in slide-in-from-bottom-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#fc6d2d] flex items-center justify-center text-white font-bold text-xs">
+                        <div className="w-9 h-9 rounded-ctl bg-primary-500 text-on-primary flex items-center justify-center font-mono font-bold text-xs">
                             {cartTotalCount}
                         </div>
                         <div>
-                            <p className="text-[11px] text-neutral-400 font-medium">Cart Subtotal</p>
-                            <p className="text-sm font-bold font-mono text-white">{formatCurrency(grandTotal, currency)}</p>
+                            <p className="text-[11px] text-ink-muted font-medium">Cart Subtotal</p>
+                            <p className="text-sm font-bold font-mono text-ink">{formatCurrency(grandTotal, currency)}</p>
                         </div>
                     </div>
                     <button
                         onClick={() => setMobileTab('cart')}
-                        className="px-4 py-2 bg-[#fc6d2d] hover:bg-[#ea500d] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 active:scale-95 transition-all shadow-md"
+                        className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-on-primary text-xs font-bold rounded-ctl flex items-center gap-1.5 transition-colors shadow-sm"
                     >
                         <span>View Cart</span>
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="size-4" />
                     </button>
                 </div>
             )}
 
             {/* Left Column: Product Selection Grid */}
-            <div className={`flex-1 min-w-0 flex-col bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-100 dark:border-neutral-700 overflow-hidden shadow-sm h-full ${mobileTab === 'cart' ? 'hidden lg:flex' : 'flex'}`}>
+            <div className={`flex-1 min-w-0 flex-col panel overflow-hidden h-full ${mobileTab === 'cart' ? 'hidden lg:flex' : 'flex'}`}>
                 
                 {/* Search & Category Filter Header */}
-                <div className="p-4 border-b border-neutral-100 dark:border-neutral-700/80 space-y-3 bg-neutral-50/50 dark:bg-neutral-900">
+                <div className="p-4 border-b border-line space-y-3 bg-paper-2/60">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-blue-600 text-white rounded-xl shadow-sm">
-                                <Zap className="w-5 h-5" />
+                            <div className="p-2 bg-primary-500 text-on-primary rounded-ctl shadow-sm">
+                                <Zap className="size-5" />
                             </div>
                             <div>
-                                <h1 className="text-base font-bold text-neutral-900 dark:text-white leading-tight">
+                                <h1 className="text-base font-bold text-ink leading-tight">
                                     POS Register
                                 </h1>
-                                <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                <p className="text-xs text-ink-muted">
                                     Fast counter checkouts and camera barcode scanning
                                 </p>
                             </div>
@@ -411,7 +414,7 @@ export default function POSPage() {
 
                         {/* Search Input with Integrated Barcode Scan Button */}
                         <div className="relative flex-1 max-w-sm">
-                            <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <Search className="size-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
                             <input
                                 ref={searchInputRef}
                                 type="text"
@@ -419,22 +422,22 @@ export default function POSPage() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyDown={handleSearchKeyDown}
                                 placeholder="Scan barcode or type name + Enter..."
-                                className="w-full pl-9 pr-16 py-2 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
+                                className="w-full pl-9 pr-16 py-2 bg-ground border border-line rounded-ctl text-xs text-ink placeholder-ink-muted focus:outline-none focus:border-primary-500 transition-colors font-sans"
                             />
                             {searchQuery && (
                                 <button
                                     onClick={() => setSearchQuery('')}
-                                    className="absolute right-10 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
+                                    className="absolute right-10 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink"
                                 >
-                                    <X className="w-3.5 h-3.5" />
+                                    <X className="size-3.5" />
                                 </button>
                             )}
                             <button
                                 onClick={() => setIsBarcodeModalOpen(true)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-center p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-primary-500 flex items-center justify-center p-1 rounded-ctl hover:bg-ground transition-colors"
                                 title="Scan Barcode with Camera"
                             >
-                                <Barcode className="w-4 h-4" />
+                                <Barcode className="size-4" />
                             </button>
                         </div>
                     </div>
@@ -443,10 +446,10 @@ export default function POSPage() {
                     <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
                         <button
                             onClick={() => setSelectedCategory('All')}
-                            className={`px-3 py-1.5 rounded-xl font-medium transition-colors shrink-0 ${
+                            className={`px-3 py-1.5 rounded-tag font-medium transition-colors shrink-0 ${
                                 selectedCategory === 'All'
-                                    ? 'bg-blue-600 text-white shadow-sm'
-                                    : 'bg-white dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-600 border border-neutral-200/60 dark:border-neutral-600'
+                                    ? 'bg-primary-500 text-on-primary font-bold'
+                                    : 'bg-paper text-ink-muted hover:text-ink hover:bg-ground border border-line'
                             }`}
                         >
                             All Products ({displayProducts.length})
@@ -455,10 +458,10 @@ export default function POSPage() {
                             <button
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
-                                className={`px-3 py-1.5 rounded-xl font-medium transition-colors shrink-0 ${
+                                className={`px-3 py-1.5 rounded-tag font-medium transition-colors shrink-0 ${
                                     selectedCategory === cat
-                                        ? 'bg-blue-600 text-white shadow-sm'
-                                        : 'bg-white dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-600 border border-neutral-200/60 dark:border-neutral-600'
+                                        ? 'bg-primary-500 text-on-primary font-bold'
+                                        : 'bg-paper text-ink-muted hover:text-ink hover:bg-ground border border-line'
                                 }`}
                             >
                                 {cat}
@@ -470,9 +473,9 @@ export default function POSPage() {
                 {/* Product Catalog list (Internal scroll) */}
                 <div className="flex-1 overflow-y-auto p-4 pb-36 lg:pb-4">
                     {filteredProducts.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-center p-8 text-neutral-400 dark:text-neutral-500">
-                            <Tag className="w-10 h-10 mb-2 opacity-50" strokeWidth={1.5} />
-                            <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300">
+                        <div className="h-full flex flex-col items-center justify-center text-center p-8 text-ink-muted">
+                            <TagIcon className="size-10 mb-2 opacity-50 text-ink-muted" />
+                            <p className="text-sm font-semibold text-ink-muted">
                                 No matching products found
                             </p>
                             <p className="text-xs max-w-xs mt-1">
@@ -495,14 +498,14 @@ export default function POSPage() {
                                         onClick={() => !isOutOfStock && addToCart(prod)}
                                         className={`rounded-2xl border text-left transition-all relative flex flex-col justify-between group overflow-hidden ${
                                             isOutOfStock
-                                                ? 'bg-neutral-100/70 dark:bg-neutral-800/40 border-neutral-200 dark:border-neutral-700/55 opacity-65 cursor-not-allowed'
+                                                ? 'bg-neutral-100/70 dark:bg-neutral-800/40 border-line/55 opacity-65 cursor-not-allowed'
                                                 : cartQty > 0
                                                 ? 'bg-blue-50/60 dark:bg-blue-950/30 border-blue-500/60 dark:border-blue-500/60 ring-2 ring-blue-500/20 cursor-pointer'
-                                                : 'bg-white dark:bg-neutral-800 border-neutral-100 dark:border-neutral-700 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md cursor-pointer'
+                                                : 'bg-paper border-line hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md cursor-pointer'
                                         }`}
                                     >
                                         {/* Product Image area */}
-                                        <div className="w-full h-24 bg-neutral-100 dark:bg-neutral-700 overflow-hidden relative flex items-center justify-center border-b border-neutral-100 dark:border-neutral-700/60">
+                                        <div className="w-full h-24 bg-neutral-100 dark:bg-neutral-700 overflow-hidden relative flex items-center justify-center border-b border-line/60">
                                             {(() => {
                                                 const getCategoryFallbackImage = (category?: string) => {
                                                     const cat = (category || '').toLowerCase();
@@ -551,16 +554,16 @@ export default function POSPage() {
                                         {/* Card text details */}
                                         <div className="p-3 w-full flex flex-col justify-between flex-1">
                                             <div>
-                                                <span className="text-[8px] font-mono uppercase px-1 py-0.5 rounded bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400">
+                                                <span className="text-[8px] font-mono uppercase px-1 py-0.5 rounded bg-neutral-100 dark:bg-neutral-700 text-ink-muted">
                                                     {prod.sku || 'ITEM'}
                                                 </span>
-                                                <h3 className="text-xs sm:text-sm font-bold text-[#2d3748] dark:text-white line-clamp-2 mt-1 leading-tight">
+                                                <h3 className="text-xs sm:text-sm font-bold text-ink line-clamp-2 mt-1 leading-tight">
                                                     {prod.name}
                                                 </h3>
                                             </div>
 
                                             {/* Price Formatting (Storefront Match) & Add/Minus Controls */}
-                                            <div className="mt-3 pt-2 border-t border-neutral-100 dark:border-neutral-700/60 flex items-center justify-between gap-1">
+                                            <div className="mt-3 pt-2 border-t border-line/60 flex items-center justify-between gap-1">
                                                 <div>
                                                     {hasDiscount ? (
                                                         <div className="flex flex-col leading-tight">
@@ -572,7 +575,7 @@ export default function POSPage() {
                                                             </span>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-xs sm:text-sm font-bold text-[#2d3748] dark:text-white">
+                                                        <span className="text-xs sm:text-sm font-bold text-ink">
                                                             {formatCurrency(prod.unitPrice, company.currency)}
                                                         </span>
                                                     )}
@@ -591,12 +594,12 @@ export default function POSPage() {
                                                                     e.stopPropagation();
                                                                     updateQuantity(prod.id, -1);
                                                                 }}
-                                                                className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-600 flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-90"
+                                                                className="size-5 sm:w-6 sm:h-6 rounded-lg bg-paper text-ink-muted hover:bg-neutral-200 dark:hover:bg-neutral-600 flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-90"
                                                                 title="Reduce unit"
                                                             >
-                                                                <Minus className="w-3 h-3" />
+                                                                <Minus className="size-3.5" />
                                                             </button>
-                                                            <span className="text-xs font-bold font-mono px-0.5 text-neutral-900 dark:text-white">
+                                                            <span className="text-xs font-bold font-mono px-0.5 text-ink">
                                                                 {cartQty}
                                                             </span>
                                                             <button
@@ -605,10 +608,10 @@ export default function POSPage() {
                                                                     e.stopPropagation();
                                                                     addToCart(prod);
                                                                 }}
-                                                                className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-90"
+                                                                className="size-5 sm:w-6 sm:h-6 rounded-lg bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-90"
                                                                 title="Add unit"
                                                             >
-                                                                <Plus className="w-3 h-3" />
+                                                                <Plus className="size-3.5" />
                                                             </button>
                                                         </div>
                                                     ) : (
@@ -621,7 +624,7 @@ export default function POSPage() {
                                                             className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer shrink-0"
                                                             title="Add unit"
                                                         >
-                                                            <Plus className="w-3.5 h-3.5" />
+                                                            <Plus className="size-3.5" />
                                                         </button>
                                                     )
                                                 )}
@@ -636,35 +639,35 @@ export default function POSPage() {
             </div>
 
             {/* Right Column: Checkout Cart */}
-            <div className={`w-full lg:w-[380px] xl:w-[400px] shrink-0 flex-col bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-100 dark:border-neutral-700 overflow-hidden shadow-sm h-full justify-between pb-24 lg:pb-0 ${mobileTab === 'products' ? 'hidden lg:flex' : 'flex'}`}>
+            <div className={`w-full lg:w-[380px] xl:w-[400px] shrink-0 flex-col panel overflow-hidden h-full justify-between pb-24 lg:pb-0 ${mobileTab === 'products' ? 'hidden lg:flex' : 'flex'}`}>
                 
                 {/* Mobile Back Button Header */}
-                <div className="flex lg:hidden items-center justify-between p-3 border-b border-neutral-100 dark:border-neutral-700 bg-blue-50/50 dark:bg-blue-950/30">
+                <div className="flex lg:hidden items-center justify-between p-3 border-b border-line bg-paper-2">
                     <button
                         type="button"
                         onClick={() => setMobileTab('products')}
-                        className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                        className="flex items-center gap-1.5 text-xs font-bold text-primary-500 hover:underline cursor-pointer"
                     >
-                        <ArrowLeft className="w-4 h-4" /> Back to Products
+                        <ArrowLeft className="size-4" /> Back to Products
                     </button>
-                    <span className="text-xs font-bold text-neutral-500">
+                    <span className="text-xs font-mono font-medium text-ink-muted">
                         {cartTotalCount} item(s)
                     </span>
                 </div>
 
                 {/* Cart Header */}
-                <div className="p-4 border-b border-neutral-100 dark:border-neutral-700/80 bg-neutral-50/80 dark:bg-neutral-900 space-y-3">
+                <div className="p-4 border-b border-line bg-paper-2/60 space-y-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <ShoppingCart className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                            <h2 className="text-sm font-bold text-neutral-900 dark:text-white">
+                            <ShoppingCart className="size-4 text-primary-500" />
+                            <h2 className="text-sm font-bold text-ink">
                                 Current Cart ({cart.reduce((s, i) => s + i.quantity, 0)})
                             </h2>
                         </div>
                         {cart.length > 0 && (
                             <button
                                 onClick={clearCart}
-                                className="text-xs text-red-600 hover:text-red-700 dark:text-red-400 font-bold hover:underline cursor-pointer"
+                                className="text-xs text-rose-600 hover:underline font-medium cursor-pointer"
                             >
                                 Clear All
                             </button>
@@ -674,14 +677,14 @@ export default function POSPage() {
                     {/* Customer Selection block */}
                     <div className="flex items-center gap-2">
                         <div className="relative flex-1">
-                            <User className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            <User className="size-3.5 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                             <select
                                 value={selectedCustomer?.id || ''}
                                 onChange={(e) => {
                                     const cust = displayCustomers.find(c => c.id === e.target.value);
                                     setSelectedCustomer(cust || null);
                                 }}
-                                className="w-full pl-9 pr-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs font-medium text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500 cursor-pointer"
+                                className="w-full pl-9 pr-3 py-2 bg-ground border border-line rounded-ctl text-xs font-medium text-ink focus:outline-none focus:border-primary-500 cursor-pointer"
                             >
                                 <option value="">Walk-in Customer (Guest)</option>
                                 {displayCustomers.map(c => (
@@ -693,34 +696,34 @@ export default function POSPage() {
                         </div>
                         <button
                             onClick={() => setIsAddCustomerModalOpen(true)}
-                            className="p-2 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-neutral-700 dark:hover:bg-neutral-600 text-blue-600 dark:text-blue-400 transition-colors border border-neutral-200/60 dark:border-neutral-600 cursor-pointer shrink-0"
+                            className="p-2 rounded-ctl bg-ground border border-line text-ink-muted hover:text-ink hover:border-primary-500 transition-colors cursor-pointer shrink-0"
                             title="Create Customer Profile"
                         >
-                            <UserPlus className="w-4 h-4" />
+                            <UserPlus className="size-4" />
                         </button>
                     </div>
                 </div>
 
                 {/* Cart Items List */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-white dark:bg-neutral-900/60">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-ground/50">
                     {cart.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-center text-neutral-400 dark:text-neutral-500 py-12">
-                            <ShoppingCart className="w-10 h-10 mb-2 stroke-1 opacity-40" />
-                            <p className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">
+                        <div className="h-full flex flex-col items-center justify-center text-center text-ink-muted py-12">
+                            <ShoppingCart className="size-10 mb-2 stroke-1 opacity-40" />
+                            <p className="text-xs font-medium text-ink">
                                 Your cart is empty
                             </p>
-                            <p className="text-[11px] text-neutral-400 dark:text-neutral-500 max-w-[200px] mt-0.5">
+                            <p className="text-[11px] text-ink-muted max-w-[200px] mt-0.5">
                                 Select products or click barcode scanner to begin counter checkout.
                             </p>
                         </div>
                     ) : (
                         cart.map(item => (
-                            <div key={item.product.id} className="flex items-center justify-between p-3 rounded-xl bg-neutral-50/90 dark:bg-neutral-800/90 border border-neutral-200/60 dark:border-neutral-700/80 gap-2 shadow-xs">
+                            <div key={item.product.id} className="flex items-center justify-between p-3 rounded-ctl bg-paper border border-line gap-2">
                                 <div className="min-w-0 flex-1">
-                                    <h4 className="text-xs font-bold text-neutral-900 dark:text-white truncate">
+                                    <h4 className="text-xs font-bold text-ink truncate">
                                         {item.product.name}
                                     </h4>
-                                    <p className="text-[11px] font-mono text-neutral-500 dark:text-neutral-400">
+                                    <p className="text-[11px] font-mono text-ink-muted">
                                         {formatCurrency(item.unitPrice, company.currency)} each
                                     </p>
                                 </div>
@@ -728,24 +731,24 @@ export default function POSPage() {
                                 <div className="flex items-center gap-1.5 shrink-0">
                                     <button
                                         onClick={() => updateQuantity(item.product.id, -1)}
-                                        className="p-1 rounded-lg bg-white dark:bg-neutral-700 text-neutral-600 dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors border border-neutral-200/60 dark:border-neutral-600 cursor-pointer"
+                                        className="p-1 rounded-ctl bg-paper-2 text-ink-muted hover:text-ink transition-colors border border-line cursor-pointer"
                                     >
-                                        <Minus className="w-3 h-3" />
+                                        <Minus className="size-3.5" />
                                     </button>
-                                    <span className="w-6 text-center font-mono text-xs font-bold text-neutral-900 dark:text-white">
+                                    <span className="w-6 text-center font-mono text-xs font-bold text-ink">
                                         {item.quantity}
                                     </span>
                                     <button
                                         onClick={() => updateQuantity(item.product.id, 1)}
-                                        className="p-1 rounded-lg bg-white dark:bg-neutral-700 text-neutral-600 dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors border border-neutral-200/60 dark:border-neutral-600 cursor-pointer"
+                                        className="p-1 rounded-ctl bg-paper-2 text-ink-muted hover:text-ink transition-colors border border-line cursor-pointer"
                                     >
-                                        <Plus className="w-3 h-3" />
+                                        <Plus className="size-3.5" />
                                     </button>
                                     <button
                                         onClick={() => removeFromCart(item.product.id)}
-                                        className="p-1 text-red-500 hover:text-red-700 dark:hover:text-red-400 ml-1 transition-colors cursor-pointer"
+                                        className="p-1 text-rose-500 hover:text-rose-700 ml-1 transition-colors cursor-pointer"
                                     >
-                                        <Trash2 className="w-3.5 h-3.5" />
+                                        <Trash2 className="size-3.5" />
                                     </button>
                                 </div>
                             </div>
@@ -754,13 +757,13 @@ export default function POSPage() {
                 </div>
 
                 {/* Totals & Checkout Panel */}
-                <div className="p-4 border-t border-neutral-200/80 dark:border-neutral-700/80 bg-neutral-50 dark:bg-neutral-900 space-y-3">
+                <div className="p-4 border-t border-neutral-200/80 dark:border-neutral-700/80 bg-paper-2 space-y-3">
                     
                     {/* Inline Discounts & Taxes */}
                     <div className="grid grid-cols-2 gap-3 pb-2 border-b border-neutral-200/60 dark:border-neutral-700/60">
                         <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-neutral-600 dark:text-neutral-300 flex items-center gap-1 uppercase tracking-wider">
-                                <Tag className="w-3 h-3 text-neutral-400" />
+                            <label className="text-[10px] font-bold text-ink-muted flex items-center gap-1 uppercase tracking-wider">
+                                <TagIcon className="size-3.5 text-ink-muted" />
                                 Discount (%)
                             </label>
                             <input
@@ -770,12 +773,12 @@ export default function POSPage() {
                                 value={discountPercent || ''}
                                 onChange={(e) => setDiscountPercent(Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)))}
                                 placeholder="0"
-                                className="w-full px-2.5 py-1.5 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs font-mono font-bold text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500"
+                                className="w-full px-2.5 py-1.5 bg-paper border border-line rounded-panel shadow-xs text-xs font-mono font-bold text-ink focus:outline-none focus:border-blue-500"
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-neutral-600 dark:text-neutral-300 flex items-center gap-1 uppercase tracking-wider">
-                                <Zap className="w-3 h-3 text-neutral-400" />
+                            <label className="text-[10px] font-bold text-ink-muted flex items-center gap-1 uppercase tracking-wider">
+                                <Zap className="size-3.5 text-neutral-400" />
                                 Tax Rate (%)
                             </label>
                             <input
@@ -785,16 +788,16 @@ export default function POSPage() {
                                 value={taxPercent || ''}
                                 onChange={(e) => setTaxPercent(Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)))}
                                 placeholder="0"
-                                className="w-full px-2.5 py-1.5 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs font-mono font-bold text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500"
+                                className="w-full px-2.5 py-1.5 bg-paper border border-line rounded-panel shadow-xs text-xs font-mono font-bold text-ink focus:outline-none focus:border-blue-500"
                             />
                         </div>
                     </div>
 
                     {/* Subtotal & Discount Row */}
-                    <div className="space-y-1.5 text-xs text-neutral-600 dark:text-neutral-300">
+                    <div className="space-y-1.5 text-xs text-ink-muted">
                         <div className="flex justify-between">
-                            <span className="text-neutral-600 dark:text-neutral-300">Subtotal</span>
-                            <span className="font-mono font-semibold text-neutral-900 dark:text-white">
+                            <span className="text-ink-muted">Subtotal</span>
+                            <span className="font-mono font-semibold text-ink">
                                 {formatCurrency(subtotal, company.currency)}
                             </span>
                         </div>
@@ -815,7 +818,7 @@ export default function POSPage() {
                             </div>
                         )}
                         <div className="flex items-center justify-between pt-1 border-t border-neutral-200/60 dark:border-neutral-700/60">
-                            <span className="font-bold text-sm text-neutral-900 dark:text-white">Total Due</span>
+                            <span className="font-bold text-sm text-ink">Total Due</span>
                             <span className="font-mono text-base font-extrabold text-blue-600 dark:text-blue-400">
                                 {formatCurrency(grandTotal, company.currency)}
                             </span>
@@ -829,7 +832,7 @@ export default function POSPage() {
                             disabled={cart.length === 0}
                             className="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex flex-col items-center justify-center gap-1 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
-                            <DollarSign className="w-4 h-4" />
+                            <DollarSign className="size-4" />
                             <span>Cash</span>
                         </button>
                         <button
@@ -837,7 +840,7 @@ export default function POSPage() {
                             disabled={cart.length === 0}
                             className="py-2.5 px-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex flex-col items-center justify-center gap-1 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
-                            <CreditCard className="w-4 h-4" />
+                            <CreditCard className="size-4" />
                             <span>Card</span>
                         </button>
                         <button
@@ -845,7 +848,7 @@ export default function POSPage() {
                             disabled={cart.length === 0}
                             className="py-2.5 px-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex flex-col items-center justify-center gap-1 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
-                            <Building2 className="w-4 h-4" />
+                            <Building2 className="size-4" />
                             <span>Transfer</span>
                         </button>
                     </div>
@@ -857,22 +860,22 @@ export default function POSPage() {
             {/* Quick Add Customer Modal */}
             {isAddCustomerModalOpen && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-neutral-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-neutral-100 dark:border-neutral-700 animate-in zoom-in-95">
+                    <div className="bg-paper rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-line animate-in zoom-in-95">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-base font-bold text-[#2d3748] dark:text-white flex items-center gap-2">
-                                <UserPlus className="w-5 h-5 text-blue-600" />
+                            <h3 className="text-base font-bold text-ink flex items-center gap-2">
+                                <UserPlus className="size-5 text-blue-600" />
                                 Add New Customer
                             </h3>
                             <button
                                 onClick={() => setIsAddCustomerModalOpen(false)}
                                 className="p-1 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-white cursor-pointer"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="size-4" />
                             </button>
                         </div>
                         <form onSubmit={handleAddCustomer} className="space-y-4 text-left">
                             <div>
-                                <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-1">
+                                <label className="block text-xs font-semibold text-ink-muted mb-1">
                                     Customer Name *
                                 </label>
                                 <input
@@ -881,11 +884,11 @@ export default function POSPage() {
                                     value={newCustName}
                                     onChange={(e) => setNewCustName(e.target.value)}
                                     placeholder="Jane Doe"
-                                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500"
+                                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-ink focus:outline-none focus:border-blue-500"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-1">
+                                <label className="block text-xs font-semibold text-ink-muted mb-1">
                                     Email Address
                                 </label>
                                 <input
@@ -893,11 +896,11 @@ export default function POSPage() {
                                     value={newCustEmail}
                                     onChange={(e) => setNewCustEmail(e.target.value)}
                                     placeholder="jane.doe@example.com"
-                                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500"
+                                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-ink focus:outline-none focus:border-blue-500"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-1">
+                                <label className="block text-xs font-semibold text-ink-muted mb-1">
                                     Phone Number
                                 </label>
                                 <input
@@ -905,11 +908,11 @@ export default function POSPage() {
                                     value={newCustPhone}
                                     onChange={(e) => setNewCustPhone(e.target.value)}
                                     placeholder="+234 803 123 4567"
-                                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500"
+                                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-ink focus:outline-none focus:border-blue-500"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-1">
+                                <label className="block text-xs font-semibold text-ink-muted mb-1">
                                     Company / Business
                                 </label>
                                 <input
@@ -917,7 +920,7 @@ export default function POSPage() {
                                     value={newCustCompany}
                                     onChange={(e) => setNewCustCompany(e.target.value)}
                                     placeholder="Acme Corp"
-                                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500"
+                                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-ink focus:outline-none focus:border-blue-500"
                                 />
                             </div>
                             <div className="pt-2 flex gap-2 justify-end">
@@ -943,15 +946,15 @@ export default function POSPage() {
             {/* Charge Order Modal */}
             {isChargeModalOpen && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-neutral-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-neutral-100 dark:border-neutral-700 animate-in zoom-in-95 flex flex-col">
+                    <div className="bg-paper rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-line animate-in zoom-in-95 flex flex-col">
                         
                         {/* Header */}
-                        <div className="p-5 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-between bg-neutral-50/50 dark:bg-neutral-900">
+                        <div className="p-5 border-b border-line flex items-center justify-between bg-neutral-50/50 dark:bg-neutral-900">
                             <div>
-                                <h3 className="text-base font-bold text-[#2d3748] dark:text-white">
+                                <h3 className="text-base font-bold text-ink">
                                     Charge POS Checkout
                                 </h3>
-                                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                                <p className="text-xs text-ink-muted mt-0.5">
                                     Select payment type and complete receipt details
                                 </p>
                             </div>
@@ -959,12 +962,12 @@ export default function POSPage() {
                                 onClick={() => setIsChargeModalOpen(false)}
                                 className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-white cursor-pointer"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="size-4" />
                             </button>
                         </div>
 
                         {/* Payment Method Switcher Tabs */}
-                        <div className="flex border-b border-neutral-100 dark:border-neutral-700">
+                        <div className="flex border-b border-line">
                             <button
                                 onClick={() => setPaymentMethod('cash')}
                                 className={`flex-1 py-3 font-semibold text-xs flex items-center justify-center gap-1.5 border-b-2 cursor-pointer ${
@@ -973,7 +976,7 @@ export default function POSPage() {
                                         : 'border-transparent text-neutral-500 hover:text-[#2d3748] dark:hover:text-white'
                                 }`}
                             >
-                                <DollarSign className="w-4 h-4" />
+                                <DollarSign className="size-4" />
                                 Cash Payment
                             </button>
                             <button
@@ -984,7 +987,7 @@ export default function POSPage() {
                                         : 'border-transparent text-neutral-500 hover:text-[#2d3748] dark:hover:text-white'
                                 }`}
                             >
-                                <CreditCard className="w-4 h-4" />
+                                <CreditCard className="size-4" />
                                 Card POS Terminal
                             </button>
                             <button
@@ -995,7 +998,7 @@ export default function POSPage() {
                                         : 'border-transparent text-neutral-500 hover:text-[#2d3748] dark:hover:text-white'
                                 }`}
                             >
-                                <Building2 className="w-4 h-4" />
+                                <Building2 className="size-4" />
                                 Bank Transfer
                             </button>
                         </div>
@@ -1006,8 +1009,8 @@ export default function POSPage() {
                             {/* Summary Totals Row */}
                             <div className="p-4 bg-neutral-50 dark:bg-neutral-750 rounded-2xl flex items-center justify-between">
                                 <div>
-                                    <span className="text-xs text-neutral-500 dark:text-neutral-400">Total Charged Amount</span>
-                                    <h4 className="text-lg font-bold text-neutral-900 dark:text-white mt-0.5">
+                                    <span className="text-xs text-ink-muted">Total Charged Amount</span>
+                                    <h4 className="text-lg font-bold text-ink mt-0.5">
                                         {cart.reduce((s, i) => s + i.quantity, 0)} Items
                                     </h4>
                                 </div>
@@ -1023,7 +1026,7 @@ export default function POSPage() {
                             {paymentMethod === 'cash' && (
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-neutral-500 dark:text-neutral-400 mb-1.5">
+                                        <label className="block text-xs font-bold text-ink-muted mb-1.5">
                                             Amount Received / Tendered ({company.currency})
                                         </label>
                                         <input
@@ -1032,13 +1035,13 @@ export default function POSPage() {
                                             onChange={(e) => setAmountReceived(e.target.value)}
                                             onFocus={(e) => e.target.select()}
                                             placeholder="Enter cash received..."
-                                            className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-sm font-mono font-bold text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500"
+                                            className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-sm font-mono font-bold text-ink focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
 
                                     {/* Note Shortcuts */}
                                     <div className="space-y-1.5">
-                                        <span className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                                        <span className="text-[10px] font-bold text-ink-muted uppercase tracking-wider">
                                             Cash Note Quick shortcuts
                                         </span>
                                         <div className="flex flex-wrap gap-2">
@@ -1050,7 +1053,7 @@ export default function POSPage() {
                                                     className={`py-1.5 px-3 rounded-lg border text-xs font-mono font-semibold transition-all cursor-pointer ${
                                                         amountReceived === note.toString()
                                                             ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
-                                                            : 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'
+                                                            : 'bg-paper border-neutral-200 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'
                                                     }`}
                                                 >
                                                     {formatCurrency(note, company.currency)}
@@ -1062,7 +1065,7 @@ export default function POSPage() {
                                     {/* Change Due Indicator */}
                                     <div className="p-4 bg-emerald-500/10 dark:bg-emerald-950/20 border border-emerald-500/20 rounded-2xl flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <Wallet className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                            <Wallet className="size-5 text-emerald-600 dark:text-emerald-400" />
                                             <div>
                                                 <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Change Due</p>
                                                 <p className="text-[10px] text-emerald-600 dark:text-emerald-400">Return to customer</p>
@@ -1081,14 +1084,14 @@ export default function POSPage() {
                             {paymentMethod === 'card' && (
                                 <div className="space-y-4">
                                     <div className="p-4 bg-blue-500/10 dark:bg-blue-950/20 border border-blue-500/20 rounded-2xl flex items-center gap-3">
-                                        <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-pulse" />
+                                        <CreditCard className="size-5 text-blue-600 dark:text-blue-400 animate-pulse" />
                                         <div className="text-left text-xs">
                                             <p className="font-bold text-blue-800 dark:text-blue-300">Insert Card / Tap contactless</p>
                                             <p className="text-blue-600 dark:text-blue-400">Use external bank POS terminal and record transaction reference below</p>
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-neutral-500 dark:text-neutral-400 mb-1.5">
+                                        <label className="block text-xs font-bold text-ink-muted mb-1.5">
                                             POS Terminal Transaction Reference / Auth Code
                                         </label>
                                         <input
@@ -1096,7 +1099,7 @@ export default function POSPage() {
                                             value={cardRef}
                                             onChange={(e) => setCardRef(e.target.value)}
                                             placeholder="e.g. STANBIC-8472901-POS"
-                                            className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500"
+                                            className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-ink focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
                                 </div>
@@ -1108,23 +1111,23 @@ export default function POSPage() {
                                     {/* Bank account details card */}
                                     <div className="p-4 bg-purple-500/15 dark:bg-purple-950/30 border border-purple-500/20 rounded-2xl text-left space-y-2">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <Building2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                                            <Building2 className="size-5 text-purple-600 dark:text-purple-400" />
                                             <span className="font-bold text-xs text-purple-800 dark:text-purple-300">
                                                 Business Payout Bank Details
                                             </span>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2 text-xs">
                                             <div>
-                                                <p className="text-neutral-500 dark:text-neutral-400">Bank Name</p>
-                                                <p className="font-semibold text-neutral-900 dark:text-white">Zenith Bank Plc</p>
+                                                <p className="text-ink-muted">Bank Name</p>
+                                                <p className="font-semibold text-ink">Zenith Bank Plc</p>
                                             </div>
                                             <div>
-                                                <p className="text-neutral-500 dark:text-neutral-400">Account Number</p>
-                                                <p className="font-mono font-bold text-neutral-900 dark:text-white select-all">1012903847</p>
+                                                <p className="text-ink-muted">Account Number</p>
+                                                <p className="font-mono font-bold text-ink select-all">1012903847</p>
                                             </div>
                                             <div className="col-span-2">
-                                                <p className="text-neutral-500 dark:text-neutral-400">Account Name</p>
-                                                <p className="font-semibold text-neutral-900 dark:text-white">{company.name} POS Checkout</p>
+                                                <p className="text-ink-muted">Account Name</p>
+                                                <p className="font-semibold text-ink">{company.name} POS Checkout</p>
                                             </div>
                                         </div>
                                         <p className="text-[10px] text-purple-600 dark:text-purple-400 pt-1">
@@ -1133,7 +1136,7 @@ export default function POSPage() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-neutral-500 dark:text-neutral-400 mb-1.5">
+                                        <label className="block text-xs font-bold text-ink-muted mb-1.5">
                                             Transaction Reference / Bank Session ID
                                         </label>
                                         <input
@@ -1141,7 +1144,7 @@ export default function POSPage() {
                                             value={transferRef}
                                             onChange={(e) => setTransferRef(e.target.value)}
                                             placeholder="e.g. TXN-REF-ZENITH-92810"
-                                            className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500"
+                                            className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-xl text-xs text-ink focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
                                 </div>
@@ -1150,7 +1153,7 @@ export default function POSPage() {
                         </div>
 
                         {/* Footer Actions */}
-                        <div className="p-5 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-end gap-3 bg-neutral-50/50 dark:bg-neutral-900">
+                        <div className="p-5 border-t border-line flex items-center justify-end gap-3 bg-neutral-50/50 dark:bg-neutral-900">
                             <button
                                 type="button"
                                 onClick={() => setIsChargeModalOpen(false)}
@@ -1170,12 +1173,12 @@ export default function POSPage() {
                             >
                                 {isProcessing ? (
                                     <>
-                                        <RefreshCw className="w-4 h-4 animate-spin" />
+                                        <RefreshCw className="size-4 rf-spin" />
                                         <span>Authorizing...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircle2 className="w-4 h-4" />
+                                        <CheckCircle2 className="size-4" />
                                         <span>Confirm Checkout</span>
                                     </>
                                 )}
@@ -1189,15 +1192,15 @@ export default function POSPage() {
             {/* Sale Completed Modal */}
             {isCompletedModalOpen && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-neutral-800 rounded-3xl p-6 max-w-md w-full text-center space-y-4 shadow-2xl border border-neutral-100 dark:border-neutral-700 animate-in zoom-in-95">
+                    <div className="bg-paper rounded-3xl p-6 max-w-md w-full text-center space-y-4 shadow-2xl border border-line animate-in zoom-in-95">
                         <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center shadow-inner">
-                            <CheckCircle2 className="w-10 h-10" />
+                            <CheckCircle2 className="size-10" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-neutral-900 dark:text-white">
+                            <h3 className="text-lg font-bold text-ink">
                                 Payment Completed!
                             </h3>
-                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                            <p className="text-xs text-ink-muted mt-1">
                                 Receipt <strong>{lastIssuedReceiptNumber}</strong> has been created and stock has been automatically deducted.
                             </p>
                         </div>
@@ -1208,7 +1211,7 @@ export default function POSPage() {
                                     href={`/receipts/${lastIssuedReceiptId}`}
                                     className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors"
                                 >
-                                    <Printer className="w-4 h-4" />
+                                    <Printer className="size-4" />
                                     <span>Print / View Receipt</span>
                                 </Link>
                             )}

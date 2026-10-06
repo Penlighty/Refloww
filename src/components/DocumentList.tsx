@@ -28,7 +28,9 @@ import {
     Hash,
     CheckSquare,
     Square
-} from 'lucide-react';
+} from '@/components/icons';
+
+import { Tag, type TagTone } from '@/components/ui';
 
 interface DocumentListProps {
     type: DocumentType;
@@ -38,13 +40,13 @@ interface DocumentListProps {
     emptyDescription: string;
 }
 
-const statusConfig = {
-    'draft': { label: 'Draft', bgClass: 'bg-neutral-100 dark:bg-neutral-700', textClass: 'text-neutral-600 dark:text-neutral-300', dotClass: 'bg-neutral-400', icon: FileText },
-    'sent': { label: 'Sent', bgClass: 'bg-blue-50 dark:bg-blue-900/30', textClass: 'text-blue-600 dark:text-blue-400', dotClass: 'bg-blue-500', icon: Send },
-    'paid': { label: 'Paid', bgClass: 'bg-emerald-50 dark:bg-emerald-900/30', textClass: 'text-[#16A86B] dark:text-emerald-400', dotClass: 'bg-[#16A86B]', icon: Check },
-    'partially_paid': { label: 'Partial', bgClass: 'bg-amber-50 dark:bg-amber-900/30', textClass: 'text-amber-600 dark:text-amber-400', dotClass: 'bg-amber-500', icon: Clock },
-    'overdue': { label: 'Overdue', bgClass: 'bg-red-50 dark:bg-red-900/30', textClass: 'text-red-600 dark:text-red-400', dotClass: 'bg-red-500', icon: AlertCircle },
-    'cancelled': { label: 'Cancelled', bgClass: 'bg-neutral-100 dark:bg-neutral-700', textClass: 'text-neutral-500 dark:text-neutral-400', dotClass: 'bg-neutral-400', icon: Trash2 },
+const statusConfig: Record<string, { label: string; tone: TagTone }> = {
+    'draft': { label: 'Draft', tone: 'neutral' },
+    'sent': { label: 'Sent', tone: 'neutral' },
+    'paid': { label: 'Paid', tone: 'paid' },
+    'partially_paid': { label: 'Partial', tone: 'warning' },
+    'overdue': { label: 'Overdue', tone: 'overdue' },
+    'cancelled': { label: 'Cancelled', tone: 'neutral' },
 };
 
 type SortField = 'documentNumber' | 'transactionNumber' | 'customerName' | 'date' | 'status' | 'grandTotal';
@@ -295,7 +297,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                     <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold text-[#2d3748] dark:text-white">{title}</h1>
+                        <h1 className="text-2xl font-bold font-display text-ink">{title}</h1>
                         <PageHelpModal
                             title={`${title} Overview`}
                             description={`Create, manage, track status, download PDFs, and share ${title.toLowerCase()} with your clients.`}
@@ -310,12 +312,12 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                             ]}
                         />
                     </div>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                    <p className="text-sm text-ink-muted mt-1">
                         Manage your {title.toLowerCase()}
                     </p>
                 </div>
                 <Link href={newUrl}>
-                    <Button leftIcon={<Plus className="w-4 h-4" />} className="px-3 sm:px-4">
+                    <Button leftIcon={<Plus className="size-4" />} className="px-3 sm:px-4">
                         New {title.slice(0, -1)}
                     </Button>
                 </Link>
@@ -323,26 +325,26 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
 
             {/* Stats Cards */}
             {typedDocuments.length > 0 && (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-4">
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">Total Amount</p>
-                        <p className="text-xl font-bold text-[#2d3748] dark:text-white">{formatCurrency(stats.total, currency)}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                    <div className="panel bg-paper border border-line rounded-panel p-4 min-w-0">
+                        <p className="label mb-1 truncate">Total Amount</p>
+                        <p className="text-lg sm:text-xl font-bold money text-ink truncate">{formatCurrency(stats.total, currency)}</p>
                     </div>
                     {type === 'invoice' && (
                         <>
-                            <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-4">
-                                <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">Paid</p>
-                                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(stats.paid, currency)}</p>
+                            <div className="panel bg-paper border border-line rounded-panel p-4 min-w-0">
+                                <p className="label mb-1 truncate">Paid</p>
+                                <p className="text-lg sm:text-xl font-bold money text-status-paid truncate">{formatCurrency(stats.paid, currency)}</p>
                             </div>
-                            <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-4">
-                                <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">Pending</p>
-                                <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{formatCurrency(stats.pending, currency)}</p>
+                            <div className="panel bg-paper border border-line rounded-panel p-4 min-w-0">
+                                <p className="label mb-1 truncate">Pending</p>
+                                <p className="text-lg sm:text-xl font-bold money text-status-warning truncate">{formatCurrency(stats.pending, currency)}</p>
                             </div>
                         </>
                     )}
-                    <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-4">
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">Total Count</p>
-                        <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{stats.count}</p>
+                    <div className="panel bg-paper border border-line rounded-panel p-4 min-w-0">
+                        <p className="label mb-1 truncate">Total Count</p>
+                        <p className="text-lg sm:text-xl font-bold money text-ink truncate">{stats.count}</p>
                     </div>
                 </div>
             )}
@@ -388,7 +390,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                             <Button
                                 variant="outline"
                                 size="md"
-                                leftIcon={<CheckSquare className="w-4 h-4 text-neutral-500" />}
+                                leftIcon={<CheckSquare className="size-4 text-neutral-500" />}
                                 iconOnlyMobile
                                 onClick={() => setIsSelectMode(true)}
                             >
@@ -399,7 +401,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                 <Button
                                     variant="secondary"
                                     size="md"
-                                    leftIcon={isAllSelected ? <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" /> : <Square className="w-4 h-4" />}
+                                    leftIcon={isAllSelected ? <CheckSquare className="size-4 text-blue-600 dark:text-blue-400" /> : <Square className="size-4" />}
                                     iconOnlyMobile
                                     onClick={toggleSelectAll}
                                 >
@@ -421,7 +423,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                     <Button
                                         variant="danger"
                                         size="md"
-                                        leftIcon={<Trash2 className="w-4 h-4" />}
+                                        leftIcon={<Trash2 className="size-4" />}
                                         iconOnlyMobile
                                         onClick={() => setIsBulkDeleteModalOpen(true)}
                                     >
@@ -436,14 +438,14 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
 
             {/* Document List */}
             {typedDocuments.length === 0 ? (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12">
+                <div className="bg-paper border border-line rounded-panel shadow-xs p-12">
                     <EmptyState
-                        icon={<TypeIcon className="w-8 h-8 text-neutral-400" strokeWidth={1.5} />}
+                        icon={<TypeIcon className="size-8 text-neutral-400" />}
                         title={emptyTitle}
                         description={emptyDescription}
                         action={
                             <Link href={newUrl}>
-                                <Button leftIcon={<Plus className="w-4 h-4" />}>
+                                <Button leftIcon={<Plus className="size-4" />}>
                                     Create {title.slice(0, -1)}
                                 </Button>
                             </Link>
@@ -451,14 +453,14 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                     />
                 </div>
             ) : filteredDocuments.length === 0 ? (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl p-12">
+                <div className="bg-paper border border-line rounded-panel shadow-xs p-12">
                     <EmptyState
                         title="No documents found"
                         description="Try adjusting your search or filters."
                     />
                 </div>
             ) : (
-                <div className="bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl pb-16">
+                <div className="bg-paper border border-line rounded-panel shadow-xs pb-16">
                     {/* Mobile Cards View (< md) */}
                     <div className="block md:hidden space-y-3 p-3">
                         {filteredDocuments.map((doc) => {
@@ -469,7 +471,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                             return (
                                 <div
                                     key={`mobile-${doc.id}`}
-                                    className={`bg-white dark:bg-neutral-800/90 border border-neutral-100 dark:border-neutral-700/80 rounded-2xl p-4 shadow-sm transition-all ${
+                                    className={`bg-paper/90 border border-line/80 rounded-2xl p-4 shadow-sm transition-all ${
                                         isRowSelected ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''
                                     }`}
                                 >
@@ -481,25 +483,24 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                     type="checkbox"
                                                     checked={isRowSelected}
                                                     onChange={() => toggleSelectRow(doc.id)}
-                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500"
+                                                    className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500"
                                                 />
                                             )}
-                                            <Link href={`/${type}s/${doc.id}`} className="font-bold text-sm text-[#2d3748] dark:text-white truncate">
+                                            <Link href={`/${type}s/${doc.id}`} className="font-bold text-sm text-ink truncate">
                                                 {doc.documentNumber || (isLocked ? '🔒 Encrypted' : 'Untitled')}
                                             </Link>
                                         </div>
 
                                         <button
                                             onClick={() => setOpenStatusMenuId(openStatusMenuId === doc.id ? null : doc.id)}
-                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${config.bgClass} ${config.textClass}`}
+                                            className="inline-block text-left cursor-pointer hover:opacity-80 transition-opacity"
                                         >
-                                            <span className={`w-1.5 h-1.5 rounded-full ${config.dotClass}`} />
-                                            {config.label}
+                                            <Tag variant={config.tone}>{config.label}</Tag>
                                         </button>
                                     </div>
 
                                     {/* Customer & Date */}
-                                    <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 mb-3">
+                                    <div className="flex items-center justify-between text-xs text-ink-muted mb-3">
                                         <span className="font-medium text-neutral-700 dark:text-neutral-300 truncate">
                                             {doc.customerName || (isLocked ? '🔒 Unlock to view' : 'No customer')}
                                         </span>
@@ -507,18 +508,18 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                     </div>
 
                                     {/* Footer: Amount & Quick Actions */}
-                                    <div className="flex items-center justify-between pt-2.5 border-t border-neutral-100 dark:border-neutral-700/60">
+                                    <div className="flex items-center justify-between pt-2.5 border-t border-line/60">
                                         <div>
-                                            <span className="text-[10px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">Grand Total</span>
-                                            <span className="font-bold text-sm text-neutral-900 dark:text-white">
-                                                {doc.grandTotal !== undefined ? formatCurrency(doc.grandTotal, currency) : (isLocked ? '🔒 Locked' : '-')}
+                                            <span className="text-[10px] text-ink-muted uppercase tracking-wider block">Grand Total</span>
+                                            <span className="font-bold text-sm text-ink">
+                                                {doc.grandTotal !== undefined ? formatCurrency(doc.grandTotal, currency) : (isLocked ? 'Locked' : '-')}
                                             </span>
                                         </div>
 
                                         <div className="flex items-center gap-2">
                                             <Link
                                                 href={`/${type}s/${doc.id}`}
-                                                className="px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 rounded-xl text-xs font-semibold hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                                                className="px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 text-ink-muted rounded-xl text-xs font-semibold hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
                                             >
                                                 View
                                             </Link>
@@ -539,76 +540,76 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                     <div className="hidden md:block overflow-x-auto min-h-[300px]">
                         <table className="w-full min-w-full">
                         <thead>
-                            <tr className="border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50">
+                            <tr className="border-b border-line bg-neutral-50/50 dark:bg-neutral-800/50">
                                 {isSelectMode && (
                                     <th className="px-4 py-4 w-10 text-center">
                                         <input
                                             type="checkbox"
                                             checked={isAllSelected}
                                             onChange={toggleSelectAll}
-                                            className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                            className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                         />
                                     </th>
                                 )}
                                 <th className="text-left px-6 py-4">
                                     <button
                                         onClick={() => handleSort('documentNumber')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                     >
                                         ID
-                                        <ArrowUpDown className="w-3 h-3" />
+                                        <ArrowUpDown className="size-3.5" />
                                     </button>
                                 </th>
                                 <th className="text-left px-6 py-4">
                                     <button
                                         onClick={() => handleSort('transactionNumber')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                     >
                                         Transaction ID
-                                        <ArrowUpDown className="w-3 h-3" />
+                                        <ArrowUpDown className="size-3.5" />
                                     </button>
                                 </th>
                                 <th className="text-left px-6 py-4">
                                     <button
                                         onClick={() => handleSort('customerName')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                     >
                                         Customer
-                                        <ArrowUpDown className="w-3 h-3" />
+                                        <ArrowUpDown className="size-3.5" />
                                     </button>
                                 </th>
                                 <th className="text-left px-6 py-4">
-                                    <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Links</span>
+                                    <span className="text-xs font-medium uppercase tracking-wider text-ink-muted">Links</span>
                                 </th>
                                 <th className="text-left px-6 py-4 hidden md:table-cell">
                                     <button
                                         onClick={() => handleSort('date')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                     >
                                         Date
-                                        <ArrowUpDown className="w-3 h-3" />
+                                        <ArrowUpDown className="size-3.5" />
                                     </button>
                                 </th>
                                 <th className="text-left px-6 py-4">
                                     <button
                                         onClick={() => handleSort('status')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                                     >
                                         Status
-                                        <ArrowUpDown className="w-3 h-3" />
+                                        <ArrowUpDown className="size-3.5" />
                                     </button>
                                 </th>
                                 <th className="text-right px-6 py-4">
                                     <button
                                         onClick={() => handleSort('grandTotal')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors ml-auto"
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-muted hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors ml-auto"
                                     >
                                         Amount
-                                        <ArrowUpDown className="w-3 h-3" />
+                                        <ArrowUpDown className="size-3.5" />
                                     </button>
                                 </th>
                                 <th className="text-right px-6 py-4">
-                                    <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Actions</span>
+                                    <span className="text-xs font-medium uppercase tracking-wider text-ink-muted">Actions</span>
                                 </th>
                             </tr>
                         </thead>
@@ -630,16 +631,16 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                     type="checkbox"
                                                     checked={isRowSelected}
                                                     onChange={() => toggleSelectRow(doc.id)}
-                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                    className="size-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                 />
                                             </td>
                                         )}
                                         <td className="px-6 py-4">
                                             <Link href={`/${type}s/${doc.id}`} className="flex items-center gap-3 group">
-                                                <div className={`w-10 h-10 rounded-xl ${isLocked ? 'bg-gradient-to-br from-amber-400 to-amber-600' : 'bg-gradient-to-br from-blue-400 to-blue-600'} flex items-center justify-center text-white flex-shrink-0`}>
-                                                    <TypeIcon className="w-5 h-5" strokeWidth={1.75} />
+                                                <div className={`size-10 rounded-xl ${isLocked ? 'bg-gradient-to-br from-amber-400 to-amber-600' : 'bg-gradient-to-br from-blue-400 to-blue-600'} flex items-center justify-center text-white flex-shrink-0`}>
+                                                    <TypeIcon className="size-5" />
                                                 </div>
-                                                <span className="font-semibold text-[#2d3748] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                <span className="font-semibold text-ink group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                                     {doc.documentNumber || (isLocked ? '🔒 Encrypted' : 'Untitled')}
                                                 </span>
                                             </Link>
@@ -650,11 +651,11 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                     {linkedTrx.transactionNumber}
                                                 </span>
                                             ) : (
-                                                <span className="text-xs text-neutral-400 dark:text-neutral-500 font-mono">-</span>
+                                                <span className="text-xs text-ink-muted font-mono">-</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-sm text-neutral-600 dark:text-neutral-300">
+                                            <span className="text-sm text-ink-muted">
                                                 {doc.customerName || (isLocked ? '🔒 Unlock to view' : '-')}
                                             </span>
                                         </td>
@@ -679,18 +680,18 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                 return (
                                                     <div className="flex items-center gap-1.5">
                                                         {linkedTypes.has('invoice') && (
-                                                            <div title="Invoice" className={`p-1 rounded-md ${doc.type === 'invoice' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 ring-1 ring-blue-500/20' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500'}`}>
-                                                                <FileText className="w-3.5 h-3.5" />
+                                                            <div title="Invoice" className={`p-1 rounded-md ${doc.type === 'invoice' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 ring-1 ring-blue-500/20' : 'bg-paper-2 text-ink-muted'}`}>
+                                                                <FileText className="size-3.5" />
                                                             </div>
                                                         )}
                                                         {linkedTypes.has('receipt') && (
-                                                            <div title="Receipt" className={`p-1 rounded-md ${doc.type === 'receipt' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/20' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500'}`}>
-                                                                <Receipt className="w-3.5 h-3.5" />
+                                                            <div title="Receipt" className={`p-1 rounded-md ${doc.type === 'receipt' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/20' : 'bg-paper-2 text-ink-muted'}`}>
+                                                                <Receipt className="size-3.5" />
                                                             </div>
                                                         )}
                                                         {linkedTypes.has('delivery-note') && (
-                                                            <div title="Delivery Note" className={`p-1 rounded-md ${doc.type === 'delivery-note' ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 ring-1 ring-orange-500/20' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500'}`}>
-                                                                <Truck className="w-3.5 h-3.5" />
+                                                            <div title="Delivery Note" className={`p-1 rounded-md ${doc.type === 'delivery-note' ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 ring-1 ring-orange-500/20' : 'bg-paper-2 text-ink-muted'}`}>
+                                                                <Truck className="size-3.5" />
                                                             </div>
                                                         )}
                                                     </div>
@@ -698,7 +699,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                             })()}
                                         </td>
                                         <td className="px-6 py-4 hidden md:table-cell">
-                                            <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDate(doc.date)}</span>
+                                            <span className="text-sm text-ink-muted">{formatDate(doc.date)}</span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="relative inline-block">
@@ -707,22 +708,19 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                         e.preventDefault();
                                                         setOpenStatusMenuId(openStatusMenuId === doc.id ? null : doc.id);
                                                     }}
-                                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity ${config.bgClass} ${config.textClass}`}
+                                                    className="inline-block text-left cursor-pointer hover:opacity-80 transition-opacity"
                                                 >
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${config.dotClass}`}></span>
-                                                    {config.label}
+                                                    <Tag variant={config.tone}>{config.label}</Tag>
                                                 </button>
 
                                                 {openStatusMenuId === doc.id && (
-                                                    <div className={`absolute left-0 ${popupPosClass} w-36 bg-white dark:bg-neutral-800 rounded-lg shadow-2xl border border-neutral-200 dark:border-neutral-700 py-1 z-[100]`}>
+                                                    <div className={`absolute left-0 ${popupPosClass} w-36 panel py-1 z-[100] shadow-xl`}>
                                                         {Object.entries(statusConfig)
                                                             .filter(([statusKey]) => {
-                                                                // Filter statuses based on document type
                                                                 if (type === 'receipt' || type === 'delivery-note') {
-                                                                    // Receipts and Delivery Notes don't have Paid or Overdue
                                                                     return !['paid', 'overdue'].includes(statusKey);
                                                                 }
-                                                                return true; // Invoices get all statuses
+                                                                return true;
                                                             })
                                                             .map(([statusKey, status]) => (
                                                                 <button
@@ -731,10 +729,9 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                                         e.preventDefault();
                                                                         handleStatusChange(doc.id, statusKey);
                                                                     }}
-                                                                    className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${doc.status === statusKey ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium' : 'text-neutral-600 dark:text-neutral-300'}`}
+                                                                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-ground transition-colors ${doc.status === statusKey ? 'bg-primary-500/10 text-primary-500 font-medium' : 'text-ink-muted'}`}
                                                                 >
-                                                                    <span className={`w-1.5 h-1.5 rounded-full ${status.dotClass}`}></span>
-                                                                    {status.label}
+                                                                    <Tag variant={status.tone}>{status.label}</Tag>
                                                                 </button>
                                                             ))}
                                                     </div>
@@ -742,10 +739,10 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <span className="font-semibold text-[#2d3748] dark:text-white">
+                                            <span className="font-semibold text-ink">
                                                 {doc.grandTotal !== undefined
                                                     ? formatCurrency(doc.grandTotal, currency)
-                                                    : (isLocked ? '🔒 Locked' : '-')}
+                                                    : (isLocked ? 'Locked' : '-')}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
@@ -754,22 +751,22 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                     onClick={() => setOpenMenuId(openMenuId === doc.id ? null : doc.id)}
                                                     className="p-2 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                                                 >
-                                                    <MoreVertical className="w-4 h-4" />
+                                                    <MoreVertical className="size-4" />
                                                 </button>
                                                 {openMenuId === doc.id && (
-                                                    <div className={`absolute right-0 ${popupPosClass} w-64 bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 py-1.5 z-[100]`}>
+                                                    <div className={`absolute right-0 ${popupPosClass} w-64 bg-paper rounded-xl shadow-2xl border border-line py-1.5 z-[100]`}>
                                                         <Link
                                                             href={`/${type}s/${doc.id}/edit`}
                                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                         >
-                                                            <Edit2 className="w-4 h-4" />
+                                                            <Edit2 className="size-4" />
                                                             Edit
                                                         </Link>
                                                         <Link
                                                             href={`/${type}s/${doc.id}`}
                                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                         >
-                                                            <Eye className="w-4 h-4" />
+                                                            <Eye className="size-4" />
                                                             View Details
                                                         </Link>
                                                         <button
@@ -780,7 +777,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                             }}
                                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                         >
-                                                            <Copy className="w-4 h-4" />
+                                                            <Copy className="size-4" />
                                                             Duplicate
                                                         </button>
 
@@ -792,7 +789,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                                     onClick={() => setOpenMenuId(null)}
                                                                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors whitespace-nowrap text-left"
                                                                 >
-                                                                    <Receipt className="w-4 h-4 flex-shrink-0" />
+                                                                    <Receipt className="size-4 flex-shrink-0" />
                                                                     Create Receipt
                                                                 </Link>
                                                                 <Link
@@ -800,7 +797,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                                     onClick={() => setOpenMenuId(null)}
                                                                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors whitespace-nowrap text-left"
                                                                 >
-                                                                    <Truck className="w-4 h-4 flex-shrink-0" />
+                                                                    <Truck className="size-4 flex-shrink-0" />
                                                                     Create Delivery Note
                                                                 </Link>
                                                             </>
@@ -810,7 +807,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                             onClick={() => handleDownloadPdf(doc)}
                                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                         >
-                                                            <Download className="w-4 h-4" />
+                                                            <Download className="size-4" />
                                                             Download PDF
                                                         </button>
 
@@ -818,7 +815,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                             onClick={() => handleShareDoc(doc)}
                                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-blue-600 dark:text-blue-400 font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                                         >
-                                                            <Share2 className="w-4 h-4" />
+                                                            <Share2 className="size-4" />
                                                             Share
                                                         </button>
 
@@ -827,7 +824,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                                 onClick={() => handleSend(doc.id)}
                                                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                                                             >
-                                                                <Send className="w-4 h-4" />
+                                                                <Send className="size-4" />
                                                                 Mark Sent
                                                             </button>
                                                         )}
@@ -836,7 +833,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                                 onClick={() => handleMarkAsPaid(doc.id)}
                                                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-emerald-600 hover:bg-emerald-50 transition-colors"
                                                             >
-                                                                <Check className="w-4 h-4" />
+                                                                <Check className="size-4" />
                                                                 Mark as Paid
                                                             </button>
                                                         )}
@@ -845,7 +842,7 @@ export default function DocumentList({ type, title, newUrl, emptyTitle, emptyDes
                                                             onClick={() => openDeleteModal(doc.id)}
                                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                                                         >
-                                                            <Trash2 className="w-4 h-4" />
+                                                            <Trash2 className="size-4" />
                                                             Delete
                                                         </button>
                                                     </div>
