@@ -1,0 +1,847 @@
+# Refloww icons — SVG codes
+
+24×24 · stroke 1.75 · round caps/joins · `currentColor`. Accent parts inherit `currentColor` unless `--rf-accent` is set (see README).
+
+
+## navigation
+
+### `ArrowLeft` — replaces Lucide: `ArrowLeft`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4.5"/><path d="M10.5 6 4.5 12l6 6"/></svg>
+```
+
+### `ArrowRight` — replaces Lucide: `ArrowRight`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15.5"/><path d="M13.5 6l6 6-6 6"/></svg>
+```
+
+### `ArrowUpRight` — replaces Lucide: `ArrowUpRight`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8.5 7H17v8.5"/></svg>
+```
+
+### `ArrowDownRight` — replaces Lucide: `ArrowDownRight`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10"/><path d="M17 8.5V17H8.5"/></svg>
+```
+
+### `ArrowUpDown` — replaces Lucide: `ArrowUpDown`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 20V4"/><path d="M4 8l4-4 4 4"/><path d="M16 4v16"/><path d="M12 16l4 4 4-4"/></svg>
+```
+
+### `Transactions` — replaces Lucide: `ArrowLeftRight`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14.5"/><path d="M15 4.5 18.5 8 15 11.5"/><path d="M20 16H5.5"/><path d="M9 12.5 5.5 16 9 19.5"/></svg>
+```
+
+### `ChevronUp` — replaces Lucide: `ChevronUp`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14.5l6-6 6 6"/></svg>
+```
+
+### `ChevronDown` — replaces Lucide: `ChevronDown`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5l6 6 6-6"/></svg>
+```
+
+### `ChevronLeft` — replaces Lucide: `ChevronLeft`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6l-6 6 6 6"/></svg>
+```
+
+### `ChevronRight` — replaces Lucide: `ChevronRight`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6l6 6-6 6"/></svg>
+```
+
+### `CornerDownLeft` — replaces Lucide: `CornerDownLeft`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v6a3 3 0 0 1-3 3H5"/><path d="M9 10l-4 4 4 4"/></svg>
+```
+
+### `ExternalLink` — replaces Lucide: `ExternalLink`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4h7v7"/><path d="M20 4l-9 9"/><path d="M18 14v3.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 4 17.5v-9A2.5 2.5 0 0 1 6.5 6H10"/></svg>
+```
+
+### `Maximize` — replaces Lucide: `Maximize2`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4H20v5.5"/><path d="M20 4l-6.5 6.5"/><path d="M9.5 20H4v-5.5"/><path d="M4 20l6.5-6.5"/></svg>
+```
+
+### `Move` — replaces Lucide: `Move`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><path d="M9 6l3-3 3 3"/><path d="M9 18l3 3 3-3"/><path d="M6 9l-3 3 3 3"/><path d="M18 9l3 3-3 3"/></svg>
+```
+
+### `Undo` — replaces Lucide: `Undo`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4.5 9.5 9 5"/><path d="M4.5 9.5H15a5 5 0 0 1 0 10h-3"/></svg>
+```
+
+### `Redo` — replaces Lucide: `Redo`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l4.5-4.5L15 5"/><path d="M19.5 9.5H9a5 5 0 0 0 0 10h3"/></svg>
+```
+
+### `RotateCcw` — replaces Lucide: `RotateCcw`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5L4.5 8.8"/><path d="M4.5 4v4.8h4.8"/></svg>
+```
+
+### `Refresh` — replaces Lucide: `RefreshCw`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14-4.5L4 9"/><path d="M4 4.5V9h4.5"/><path d="M4 13a8 8 0 0 0 14 4.5L20 15"/><path d="M20 19.5V15h-4.5"/></svg>
+```
+
+### `Menu` — replaces Lucide: `Menu`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>
+```
+
+### `MoreH` — replaces Lucide: `MoreHorizontal`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5" stroke="none" fill="currentColor"/><circle cx="12" cy="12" r="1.5" stroke="none" fill="currentColor"/><circle cx="19" cy="12" r="1.5" stroke="none" fill="currentColor"/></svg>
+```
+
+### `MoreV` — replaces Lucide: `MoreVertical`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5" stroke="none" fill="currentColor"/><circle cx="12" cy="12" r="1.5" stroke="none" fill="currentColor"/><circle cx="12" cy="19" r="1.5" stroke="none" fill="currentColor"/></svg>
+```
+
+
+## actions
+
+### `Plus` — replaces Lucide: `Plus`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+```
+
+### `Minus` — replaces Lucide: `Minus`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+```
+
+### `X` — replaces Lucide: `X`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+```
+
+### `Check` — replaces Lucide: `Check`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+```
+
+### `Pencil` — replaces Lucide: `Edit2`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 4.6a2.1 2.1 0 0 1 3 0l.9.9a2.1 2.1 0 0 1 0 3L8 19.9H4v-4z"/><path d="M13.5 6.6l3.9 3.9"/></svg>
+```
+
+### `Trash` — replaces Lucide: `Trash2`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15"/><path d="M9.5 7V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v2"/><path d="M6.5 7l.8 11.5a2 2 0 0 0 2 1.9h5.4a2 2 0 0 0 2-1.9L17.5 7"/><path d="M10 11v5M14 11v5"/></svg>
+```
+
+### `Copy` — replaces Lucide: `Copy`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="12" height="12" rx="3.5"/><path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg>
+```
+
+### `Save` — replaces Lucide: `Save`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 3.5h9.8a2 2 0 0 1 1.4.6l2.7 2.7a2 2 0 0 1 .6 1.4v10.3a2 2 0 0 1-2 2h-12.5a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2z"/><path d="M8 3.5v4a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-4"/><path d="M7.5 20.5v-5a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v5"/></svg>
+```
+
+### `Download` — replaces Lucide: `Download`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M4.5 19.5h15"/></svg>
+```
+
+### `Upload` — replaces Lucide: `Upload`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5V4.5"/><path d="M7 9.5l5-5 5 5"/><path d="M4.5 19.5h15"/></svg>
+```
+
+### `Send` — replaces Lucide: `Send`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 3.5 3.5 9.8l7 3.7 3.7 7z"/><path d="M20.5 3.5l-10 10"/></svg>
+```
+
+### `Share` — replaces Lucide: `Share2`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/></svg>
+```
+
+### `Printer` — replaces Lucide: `Printer`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8.5v-4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v4"/><path d="M7 17.5H5.5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1.5"/><path d="M9.8 17.3h4.4"/></svg>
+```
+
+### `Search` — replaces Lucide: `Search`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l5 5"/></svg>
+```
+
+### `Filter` — replaces Lucide: `Filter`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6 5h14.8a.9.9 0 0 1 .7 1.5L14.5 13v5.5l-5 2.5V13L3.9 6.5A.9.9 0 0 1 4.6 5z"/></svg>
+```
+
+### `Sliders` — replaces Lucide: `Settings2`, `SlidersHorizontal`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h8.5M17.5 7H20"/><circle cx="15" cy="7" r="2.5"/><path d="M4 17h3M12 17h8"/><circle cx="9.5" cy="17" r="2.5"/></svg>
+```
+
+### `Settings` — replaces Lucide: `Settings`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.05 4.96 L10.41 2.74 L13.59 2.74 L13.95 4.96 A7.3 7.3 0 0 1 15.6 5.65 L17.43 4.32 L19.68 6.57 L18.35 8.4 A7.3 7.3 0 0 1 19.04 10.05 L21.26 10.41 L21.26 13.59 L19.04 13.95 A7.3 7.3 0 0 1 18.35 15.6 L19.68 17.43 L17.43 19.68 L15.6 18.35 A7.3 7.3 0 0 1 13.95 19.04 L13.59 21.26 L10.41 21.26 L10.05 19.04 A7.3 7.3 0 0 1 8.4 18.35 L6.57 19.68 L4.32 17.43 L5.65 15.6 A7.3 7.3 0 0 1 4.96 13.95 L2.74 13.59 L2.74 10.41 L4.96 10.05 A7.3 7.3 0 0 1 5.65 8.4 L4.32 6.57 L6.57 4.32 L8.4 5.65 A7.3 7.3 0 0 1 10.05 4.96 Z"/><circle cx="12" cy="12" r="3"/></svg>
+```
+
+### `Link` — replaces Lucide: `Link`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.1 1.1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.1-1.1"/></svg>
+```
+
+### `Power` — replaces Lucide: `Power`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v8"/><path d="M7 6.6a7.5 7.5 0 1 0 10 0"/></svg>
+```
+
+### `PowerOff` — replaces Lucide: `PowerOff`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 5.6A7.5 7.5 0 0 0 5.4 15.5M18.6 15.5a7.5 7.5 0 0 0-1.6-8.9"/><path d="M12 3.5v4"/><path d="M4 4l16 16"/></svg>
+```
+
+### `LogIn` — replaces Lucide: `LogIn`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h3.5A2.5 2.5 0 0 1 20 7v10a2.5 2.5 0 0 1-2.5 2.5H14"/><path d="M4 12h10.5"/><path d="M10.5 8l4 4-4 4"/></svg>
+```
+
+### `LogOut` — replaces Lucide: `LogOut`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4.5H6.5A2.5 2.5 0 0 0 4 7v10a2.5 2.5 0 0 0 2.5 2.5H10"/><path d="M20 12H9.5"/><path d="M16 8l4 4-4 4"/></svg>
+```
+
+### `ZoomIn` — replaces Lucide: `ZoomIn`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l5 5"/><path d="M10.5 8v5M8 10.5h5"/></svg>
+```
+
+### `ZoomOut` — replaces Lucide: `ZoomOut`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l5 5"/><path d="M8 10.5h5"/></svg>
+```
+
+### `Clipboard` — replaces Lucide: `Clipboard`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5H8a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V7.5a3 3 0 0 0-3-3h-1"/><rect x="9" y="2.5" width="6" height="4" rx="1.5"/><path d="M9 12.5h6M9 16.5h4"/></svg>
+```
+
+### `ClipboardPaste` — replaces Lucide: `ClipboardPaste`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5H8a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V7.5a3 3 0 0 0-3-3h-1"/><rect x="9" y="2.5" width="6" height="4" rx="1.5"/><path d="M12 10.5v6.5M9.5 14.5l2.5 2.5 2.5-2.5"/></svg>
+```
+
+### `Archive` — replaces Lucide: `Archive`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="4.5" rx="1.8"/><path d="M5 8.5v9a2.5 2.5 0 0 0 2.5 2.5h9a2.5 2.5 0 0 0 2.5-2.5v-9"/><path d="M10 12.5h4"/></svg>
+```
+
+### `Wand` — replaces Lucide: `Wand2`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5 14 10"/><path d="M12.5 8l3.5 3.5"/><path d="M17.5 3.5v4M15.5 5.5h4M20 11.5v3M18.5 13h3"/></svg>
+```
+
+### `Grip` — replaces Lucide: `GripVertical`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" stroke="none" fill="currentColor"/><circle cx="15" cy="6" r="1.3" stroke="none" fill="currentColor"/><circle cx="9" cy="12" r="1.3" stroke="none" fill="currentColor"/><circle cx="15" cy="12" r="1.3" stroke="none" fill="currentColor"/><circle cx="9" cy="18" r="1.3" stroke="none" fill="currentColor"/><circle cx="15" cy="18" r="1.3" stroke="none" fill="currentColor"/></svg>
+```
+
+### `Grid` — replaces Lucide: `Grid`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17"/></svg>
+```
+
+### `Command` — replaces Lucide: `Command`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9V6.5A2.5 2.5 0 1 0 6.5 9H9zM15 9V6.5A2.5 2.5 0 1 1 17.5 9H15zM9 15v2.5A2.5 2.5 0 1 1 6.5 15H9zM15 15v2.5A2.5 2.5 0 1 0 17.5 15H15z"/><path d="M9 9h6v6H9z"/></svg>
+```
+
+### `Type` — replaces Lucide: `Type`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7.5v-2h14v2"/><path d="M12 5.5V19"/><path d="M9 19h6"/></svg>
+```
+
+### `AlignLeft` — replaces Lucide: `AlignLeft`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16M4 10h9.5M4 14.5h16M4 19h9.5"/></svg>
+```
+
+### `AlignCenter` — replaces Lucide: `AlignCenter`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16M7.25 10h9.5M4 14.5h16M7.25 19h9.5"/></svg>
+```
+
+### `AlignRight` — replaces Lucide: `AlignRight`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16M10.5 10H20M4 14.5h16M10.5 19H20"/></svg>
+```
+
+
+## status
+
+### `AlertCircle` — replaces Lucide: `AlertCircle`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><circle cx="12" cy="16.5" r="1.2" stroke="none" fill="currentColor"/></svg>
+```
+
+### `AlertTriangle` — replaces Lucide: `AlertTriangle`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.5a2 2 0 0 1 3.4 0l7.4 12.8a2 2 0 0 1-1.7 3.2H4.6a2 2 0 0 1-1.7-3.2z"/><path d="M12 9.5v4.2"/><circle cx="12" cy="17" r="1.2" stroke="none" fill="currentColor"/></svg>
+```
+
+### `Info` — replaces Lucide: `Info`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r="1.2" stroke="none" fill="currentColor"/></svg>
+```
+
+### `Help` — replaces Lucide: `HelpCircle`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.100.9-1.1 1.8"/><circle cx="12" cy="16.8" r="1.2" stroke="none" fill="currentColor"/></svg>
+```
+
+### `CircleCheck` — replaces Lucide: `CheckCircle`, `CheckCircle2`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.8 2.8 5.4-5.6"/></svg>
+```
+
+### `CircleX` — replaces Lucide: `XCircle`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+```
+
+### `Ban` — replaces Lucide: `Ban`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M5.7 5.7l12.6 12.6"/></svg>
+```
+
+### `Loader` — replaces Lucide: `Loader2`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9"/></svg>
+```
+
+### `Bell` — replaces Lucide: `Bell`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 15.5V10a5.5 5.5 0 1 1 11 0v5.5l1.7 1.7a.6.6 0 0 1-.4 1H5.2a.6.6 0 0 1-.4-1z"/><path d="M10.2 20.9a1.9 1.9 0 0 0 3.6 0"/></svg>
+```
+
+### `Hourglass` — replaces Lucide: `Hourglass`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h11M6.5 20.5h11"/><path d="M7.5 3.5v3.2a4 4 0 0 0 1.6 3.2L12 12l-2.9 2.1a4 4 0 0 0-1.6 3.2v3.2"/><path d="M16.5 3.5v3.2a4 4 0 0 1-1.6 3.2L12 12l2.9 2.1a4 4 0 0 1 1.6 3.2v3.2"/><path d="M10 18.5h4"/></svg>
+```
+
+### `Clock` — replaces Lucide: `Clock`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+```
+
+### `History` — replaces Lucide: `History`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 4v4.5H8"/><path d="M12 7.5V12l3 1.8"/></svg>
+```
+
+### `Flame` — replaces Lucide: `Flame`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.6 3.6 5 5.6 5 10.2a5 5 0 0 1-10 0c0-1.900.9-3.3 2-4.300.2 1.4 1 2.2 2 2.4C10.6 8.6 10.8 5.8 12 3z"/><path d="M12 18.2a2 2 0 0 0 2-2c0-1.2-.9-1.9-2-3-1.1 1.1-2 1.8-2 3a2 2 0 0 0 2 2z"/></svg>
+```
+
+### `Sparkles` — replaces Lucide: `Sparkles`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4.5c.6 3.8 1.7 4.9 5.5 5.5-3.800.6-4.9 1.7-5.5 5.5-.6-3.8-1.7-4.9-5.5-5.5C8.3 9.4 9.4 8.3 10 4.5z"/><path d="M17.5 14.5c.3 1.900.9 2.5 2.8 2.8-1.900.3-2.500.9-2.8 2.8-.3-1.9-.9-2.5-2.8-2.8 1.9-.3 2.5-.9 2.8-2.8z"/></svg>
+```
+
+### `Zap` — replaces Lucide: `Zap`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3 5 13.5h6L10.5 21 19 10.5h-6z"/></svg>
+```
+
+### `Star` — replaces Lucide: `Star`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.3 L14.59 9.04 L20.84 9.73 L16.18 13.96 L17.47 20.12 L12 17 L6.53 20.12 L7.82 13.96 L3.16 9.73 L9.41 9.04Z"/></svg>
+```
+
+### `Heart` — replaces Lucide: `Heart`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5S3.5 15.6 3.5 9.6A4.6 4.6 0 0 1 12 7.2a4.6 4.6 0 0 1 8.5 2.4c0 6-8.5 10.9-8.5 10.9z"/></svg>
+```
+
+### `ThumbsUp` — replaces Lucide: `ThumbsUp`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11v9H5.5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z"/><path d="M8 11l3.2-6.6A2.2 2.2 0 0 1 15 6v3.5h3.6a2 2 0 0 1 2 2.3l-1.1 6.5a2 2 0 0 1-2 1.7H8"/></svg>
+```
+
+### `ThumbsDown` — replaces Lucide: `ThumbsDown`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g transform="matrix(1 0 0 -1 0 24)"><path d="M8 11v9H5.5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z"/><path d="M8 11l3.2-6.6A2.2 2.2 0 0 1 15 6v3.5h3.6a2 2 0 0 1 2 2.3l-1.1 6.5a2 2 0 0 1-2 1.7H8"/></g></svg>
+```
+
+### `Lightbulb` — replaces Lucide: `Lightbulb`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.2 16c0-1.4-.6-2.2-1.5-3.3a6.5 6.5 0 1 1 8.6 0C15.4 13.8 14.8 14.6 14.8 16z"/><path d="M9.5 19h5M10.5 21.5h3"/></svg>
+```
+
+### `Megaphone` — replaces Lucide: `Megaphone`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.2a1.7 1.7 0 0 1 1.7-1.7H9L16.5 4.5v14L9 15.5H5.2a1.7 1.7 0 0 1-1.7-1.7z"/><path d="M7 15.5l1 4a1 1 0 0 0 1 .8h.800a1 1 0 0 0 1-1.3l-.7-2.8"/><path d="M19.5 9.5a3.5 3.5 0 0 1 0 5"/></svg>
+```
+
+### `Gift` — replaces Lucide: `Gift`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="8.5" width="17" height="4" rx="1.8"/><path d="M5 12.5V18a2.5 2.5 0 0 0 2.5 2.5h9A2.5 2.5 0 0 0 19 18v-5.5"/><path d="M12 8.5v12"/><path d="M12 8.5C10 8.5 7.5 8 7.5 6a2 2 0 0 1 4-.4zM12 8.5c2 0 4.5-.5 4.5-2.5a2 2 0 0 0-4-.4"/></svg>
+```
+
+### `Award` — replaces Lucide: `Award`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5.5"/><path d="M8.7 13.4 7.5 21l4.5-2.5 4.5 2.5-1.2-7.6"/></svg>
+```
+
+### `Rocket` — replaces Lucide: `Rocket`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.5 2 5 5.5 4.5 10l-2.2 2.2H9.7L7.5 13C7 8.5 8.5 5 12 3z"/><circle cx="12" cy="9.5" r="1.6"/><path d="M7.6 12.8 5 15l.5 3.5 3.3-1.6M16.4 12.8 19 15l-.5 3.5-3.3-1.6"/><path d="M12 17.5V21"/></svg>
+```
+
+### `Bug` — replaces Lucide: `Bug`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8.5a3 3 0 0 1 6 0"/><path d="M7.5 11.5a4.5 4.5 0 0 1 9 0v3.5a4.5 4.5 0 0 1-9 0z"/><path d="M3.5 11.5h4M16.5 11.5h4M4.5 18l3.2-2M19.5 18l-3.2-2M5 6l3 2.5M19 6l-3 2.5"/><path d="M12 10.5v9"/></svg>
+```
+
+
+## selection-security
+
+### `Square` — replaces Lucide: `Square`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4.5"/></svg>
+```
+
+### `CheckSquare` — replaces Lucide: `CheckSquare`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4.5"/><path d="M8.5 12.2l2.5 2.5 4.8-5"/></svg>
+```
+
+### `Toggle` — replaces Lucide: `ToggleLeft`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="7" width="19" height="10" rx="5"/><circle cx="7.5" cy="12" r="2.2"/></svg>
+```
+
+### `Eye` — replaces Lucide: `Eye`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+```
+
+### `EyeOff` — replaces Lucide: `EyeOff`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 7.3C4 9 2.5 12 2.5 12s3.5 6.5 9.5 6.5c1.6 0 3-.4 4.2-1.1M9.9 5.7c.7-.1 1.4-.2 2.1-.2 6 0 9.5 6.5 9.5 6.5s-.8 1.5-2.3 3.1"/><path d="M4 4l16 16"/></svg>
+```
+
+### `Lock` — replaces Lucide: `Lock`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="3.5"/><path d="M8 10.5v-3a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg>
+```
+
+### `Unlock` — replaces Lucide: `Unlock`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="3.5"/><path d="M8 10.5v-3a4 4 0 0 1 7.6-1.7"/><path d="M12 14.5v2.5"/></svg>
+```
+
+### `Key` — replaces Lucide: `Key`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="16.5" r="3.5"/><path d="M10 14 20.5 3.5M17 7l3 3M14 10l2 2"/></svg>
+```
+
+### `Shield` — replaces Lucide: `Shield`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2l7 2.5a1 1 0 0 1 .7 1V12c0 4.5-3 7.6-7.7 9-4.7-1.4-7.7-4.5-7.7-9V6.7a1 1 0 0 1 .7-1z"/></svg>
+```
+
+### `ShieldCheck` — replaces Lucide: `ShieldCheck`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2l7 2.5a1 1 0 0 1 .7 1V12c0 4.5-3 7.6-7.7 9-4.7-1.4-7.7-4.5-7.7-9V6.7a1 1 0 0 1 .7-1z"/><path d="M8.8 12l2.2 2.2 4.2-4.4"/></svg>
+```
+
+### `ShieldAlert` — replaces Lucide: `ShieldAlert`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2l7 2.5a1 1 0 0 1 .7 1V12c0 4.5-3 7.6-7.7 9-4.7-1.4-7.7-4.5-7.7-9V6.7a1 1 0 0 1 .7-1z"/><path d="M12 8.5v4"/><circle cx="12" cy="15.8" r="1.2" stroke="none" fill="currentColor"/></svg>
+```
+
+### `Pointer` — replaces Lucide: `MousePointer`, `MousePointer2`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5l14.5 7a.8.8 0 0 1-.1 1.5l-5.4 1.7-1.7 5.4a.8.8 0 0 1-1.500.1z"/></svg>
+```
+
+
+## documents
+
+### `Invoice` — replaces Lucide: `FileText`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2.5h5.3a2 2 0 0 1 1.400.6l4.7 4.7a2 2 0 0 1 .6 1.4V18.5a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-13a3 3 0 0 1 3-3z"/><path d="M13 2.7V6a2.5 2.5 0 0 0 2.5 2.5h3.8"/><path d="M8.5 13h7"/><path d="M8.5 17h3.5"/></svg>
+```
+
+### `Documents`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 6.5v-1a2 2 0 0 1 2-2h4.8a2 2 0 0 1 1.400.6l3 3a2 2 0 0 1 .6 1.4V14.5a2 2 0 0 1-2 2h-1"/><path d="M3.5 10.5a2 2 0 0 1 2-2h4.3a2 2 0 0 1 1.400.6l2.8 2.8a2 2 0 0 1 .6 1.4V19.5a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/><path d="M7 15.5h5"/></svg>
+```
+
+### `Receipt` — replaces Lucide: `Receipt`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 4.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2V21.5l-2.5-1.6-2.5 1.6-2.5-1.6-2.5 1.6-2.5-1.6L4.5 21.5z"/><path d="M8.5 7.5h7M8.5 11h7"/><path d="M8.5 14.5h3.5"/></svg>
+```
+
+### `Delivery` — replaces Lucide: `Truck`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 16.5H14V7a1.5 1.5 0 0 0-1.5-1.5h-8a2 2 0 0 0-2 2v9h3"/><path d="M14 9.5h3.7l3.8 3.8v3.2h-2"/><path d="M14 16.5h1.5"/><circle cx="7.5" cy="16.5" r="2"/><circle cx="17.5" cy="16.5" r="2"/><path d="M5.5 9.5h5"/></svg>
+```
+
+### `FileCode` — replaces Lucide: `FileCode`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2.5h5.3a2 2 0 0 1 1.400.6l4.7 4.7a2 2 0 0 1 .6 1.4V18.5a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-13a3 3 0 0 1 3-3z"/><path d="M13 2.7V6a2.5 2.5 0 0 0 2.5 2.5h3.8"/><path d="M10.5 13l-2 2 2 2M13.5 13l2 2-2 2"/></svg>
+```
+
+### `FileJson` — replaces Lucide: `FileJson`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2.5h5.3a2 2 0 0 1 1.400.6l4.7 4.7a2 2 0 0 1 .6 1.4V18.5a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-13a3 3 0 0 1 3-3z"/><path d="M13 2.7V6a2.5 2.5 0 0 0 2.5 2.5h3.8"/><path d="M10.5 12.5c-1 0-1.500.5-1.5 1.5v.800c0 .600-.400 1-1 1.200.600.2 1 .600 1 1.2v.800c0 1 .500 1.5 1.5 1.5M13.5 12.5c1 0 1.500.5 1.5 1.5v.800c0 .600.4 1 1 1.2-.600.2-1 .600-1 1.2v.800c0 1-.500 1.5-1.5 1.5"/></svg>
+```
+
+### `FileSheet` — replaces Lucide: `FileSpreadsheet`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2.5h5.3a2 2 0 0 1 1.400.6l4.7 4.7a2 2 0 0 1 .6 1.4V18.5a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-13a3 3 0 0 1 3-3z"/><path d="M13 2.7V6a2.5 2.5 0 0 0 2.5 2.5h3.8"/><path d="M8.5 13h7M8.5 17h7"/><path d="M12 13v4"/></svg>
+```
+
+### `FileX` — replaces Lucide: `FileX`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2.5h5.3a2 2 0 0 1 1.400.6l4.7 4.7a2 2 0 0 1 .6 1.4V18.5a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-13a3 3 0 0 1 3-3z"/><path d="M13 2.7V6a2.5 2.5 0 0 0 2.5 2.5h3.8"/><path d="M10 14l4 4M14 14l-4 4"/></svg>
+```
+
+### `FileUp` — replaces Lucide: `FileUp`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2.5h5.3a2 2 0 0 1 1.400.6l4.7 4.7a2 2 0 0 1 .6 1.4V18.5a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-13a3 3 0 0 1 3-3z"/><path d="M13 2.7V6a2.5 2.5 0 0 0 2.5 2.5h3.8"/><path d="M12 18v-5.5M9.5 14.8l2.5-2.5 2.5 2.5"/></svg>
+```
+
+### `Template` — replaces Lucide: `LayoutTemplate`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M3.5 9.5h17"/><path d="M9.5 9.5v11"/></svg>
+```
+
+### `Dashboard` — replaces Lucide: `LayoutDashboard`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7.5" height="10" rx="2.5"/><rect x="13" y="3.5" width="7.5" height="6" rx="2.5"/><rect x="13" y="11.5" width="7.5" height="9" rx="2.5"/><rect x="3.5" y="15.5" width="7.5" height="5" rx="2.5"/></svg>
+```
+
+### `LayoutGrid` — replaces Lucide: `LayoutGrid`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="2.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="2.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="2.5"/></svg>
+```
+
+### `Home` — replaces Lucide: `Home`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.8 11 4.3a1.6 1.6 0 0 1 2 0l7.5 6.5"/><path d="M5.5 9.5V19a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V9.5"/><path d="M10 21v-5a2 2 0 0 1 4 0v5"/></svg>
+```
+
+### `FolderOpen` — replaces Lucide: `FolderOpen`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18.5V6.5a2 2 0 0 1 2-2h3.2l2 2.2H16.5a2 2 0 0 1 2 2V9"/><path d="M2.8 19.2l2-8.2A2 2 0 0 1 6.7 9.5h13.5a1.5 1.5 0 0 1 1.5 1.9l-1.8 7.1a2 2 0 0 1-1.9 1.5H4.5a1.5 1.5 0 0 1-1.7-1.8z"/></svg>
+```
+
+### `FolderPlus` — replaces Lucide: `FolderPlus`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17.5V7a2 2 0 0 1 2-2h3.5l2 2.2H18a2 2 0 0 1 2 2V17.5a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/><path d="M12 10.5v5M9.5 13h5"/></svg>
+```
+
+
+## business
+
+### `Customers` — replaces Lucide: `Users`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="8.5" r="3.3"/><path d="M3 20c.5-3.3 3.2-5.2 6.5-5.2s6 1.9 6.5 5.2"/><path d="M15.5 5.4a3.3 3.3 0 0 1 0 6.2M17.5 15.2c2 .6 3.2 2.2 3.5 4.8"/></svg>
+```
+
+### `User` — replaces Lucide: `User`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5c.6-3.8 3.7-6 7.5-6s6.9 2.2 7.5 6"/></svg>
+```
+
+### `UserPlus` — replaces Lucide: `UserPlus`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="8" r="3.6"/><path d="M2.8 20.5c.6-3.6 3.4-5.6 6.7-5.6 1.4 0 2.600.3 3.700.9"/><path d="M19 9v6M16 12h6"/></svg>
+```
+
+### `UserCheck` — replaces Lucide: `UserCheck`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="8" r="3.6"/><path d="M2.8 20.5c.6-3.6 3.4-5.6 6.7-5.6 1.4 0 2.600.3 3.700.9"/><path d="M15.5 13l2.2 2.2 4-4.2"/></svg>
+```
+
+### `UserCard` — replaces Lucide: `UserSquare`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="10" r="2.8"/><path d="M6.5 19c.5-2.5 2.8-4 5.5-4s5 1.5 5.5 4"/></svg>
+```
+
+### `Products` — replaces Lucide: `Box`, `Package`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 20 7.5v9L12 20.8 4 16.5v-9z"/><path d="M4.3 7.6 12 11.8l7.7-4.2"/><path d="M12 11.8v8.8"/></svg>
+```
+
+### `Ledger`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M9.5 3v18"/><path d="M13 8h3.5M13 12h3.5"/></svg>
+```
+
+### `BookOpen` — replaces Lucide: `BookOpen`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.5 5 8 4.5 4.5 4.5v13c3.5 0 6 .5 7.5 2 1.5-1.5 4-2 7.5-2v-13C16 4.5 13.5 5 12 6.5z"/><path d="M12 6.5v13"/></svg>
+```
+
+### `Marketplace` — replaces Lucide: `Store`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5 5.5 4.5h13L20 9.5"/><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/><path d="M5.5 12.5V19a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-6.5"/><path d="M10 21v-4.5a2 2 0 0 1 4 0V21"/></svg>
+```
+
+### `Storefront` — replaces Lucide: `ShoppingBag`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8h13l1 11a2 2 0 0 1-2 2.2H6.5a2 2 0 0 1-2-2.2z"/><path d="M8.5 10.5V7a3.5 3.5 0 0 1 7 0v3.5"/></svg>
+```
+
+### `Cart` — replaces Lucide: `ShoppingBasket`, `ShoppingCart`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.3l2.2 11h9.8l2-8H6.2"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="16.5" cy="19.5" r="1.4"/></svg>
+```
+
+### `Register`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 12V5a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 5v7"/><path d="M10 7h4M10 9.5h2.5"/><rect x="3.5" y="12" width="17" height="9" rx="3.5"/><circle cx="8" cy="16.5" r="1.1" stroke="none" fill="currentColor"/><circle cx="12" cy="16.5" r="1.1" stroke="none" fill="currentColor"/><circle cx="16" cy="16.5" r="1.1" stroke="none" fill="currentColor"/></svg>
+```
+
+### `Percent` — replaces Lucide: `Percent`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5 5 19"/><circle cx="7" cy="7" r="2.3"/><circle cx="17" cy="17" r="2.3"/></svg>
+```
+
+### `Discount`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.2V5.5a2 2 0 0 1 2-2h6.7a2 2 0 0 1 1.400.6l7.3 7.3a2 2 0 0 1 0 2.8l-6.1 6.1a2 2 0 0 1-2.8 0L4.1 13.6a2 2 0 0 1-.6-1.4z"/><circle cx="8" cy="8" r="1.3" stroke="none" fill="currentColor"/><path d="M10.7 14.3l3.6-3.6"/></svg>
+```
+
+### `Tag` — replaces Lucide: `Tag`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.2V5.5a2 2 0 0 1 2-2h6.7a2 2 0 0 1 1.400.6l7.3 7.3a2 2 0 0 1 0 2.8l-6.1 6.1a2 2 0 0 1-2.8 0L4.1 13.6a2 2 0 0 1-.6-1.4z"/><circle cx="8" cy="8" r="1.3" stroke="none" fill="currentColor"/></svg>
+```
+
+### `Briefcase` — replaces Lucide: `Briefcase`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7.5" width="17" height="12.5" rx="3.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5"/><path d="M3.5 13h17"/></svg>
+```
+
+### `Hash` — replaces Lucide: `Hash`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 4 8 20M16 4l-1.5 16"/><path d="M4.5 9h15.5M4 15h15.5"/></svg>
+```
+
+### `Barcode` — replaces Lucide: `Barcode`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 5.5v13M7.5 5.5v13M15 5.5v13M19.5 5.5v13"/><path d="M11.5 5.5v13"/></svg>
+```
+
+### `Scan` — replaces Lucide: `Scan`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5v-2A2.5 2.5 0 0 1 6.5 4h2M15.5 4h2A2.5 2.5 0 0 1 20 6.5v2M20 15.5v2a2.5 2.5 0 0 1-2.5 2.5h-2M8.5 20h-2A2.5 2.5 0 0 1 4 17.5v-2"/></svg>
+```
+
+### `ScanLine` — replaces Lucide: `ScanLine`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5v-2A2.5 2.5 0 0 1 6.5 4h2M15.5 4h2A2.5 2.5 0 0 1 20 6.5v2M20 15.5v2a2.5 2.5 0 0 1-2.5 2.5h-2M8.5 20h-2A2.5 2.5 0 0 1 4 17.5v-2"/><path d="M7.5 12h9"/></svg>
+```
+
+### `Camera` — replaces Lucide: `Camera`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10a2 2 0 0 1 2-2h2.5l1.3-2.2a1.5 1.5 0 0 1 1.3-.8h4.8a1.5 1.5 0 0 1 1.300.8L17 8h2.5a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+```
+
+### `Image` — replaces Lucide: `Image`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="4"/><circle cx="9" cy="10" r="1.6" stroke="none" fill="currentColor"/><path d="M3.5 17l5-4.5 4 3.5 3-2.5 5 4"/></svg>
+```
+
+### `Layers` — replaces Lucide: `Layers`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 21 8l-9 4.5L3 8z"/><path d="M3 12.2l9 4.5 9-4.5"/><path d="M3 16.2l9 4.5 9-4.5"/></svg>
+```
+
+### `List` — replaces Lucide: `List`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11.5M9 12h11.5M9 18h11.5"/><circle cx="4.5" cy="6" r="1.3" stroke="none" fill="currentColor"/><circle cx="4.5" cy="12" r="1.3" stroke="none" fill="currentColor"/><circle cx="4.5" cy="18" r="1.3" stroke="none" fill="currentColor"/></svg>
+```
+
+### `ListTodo` — replaces Lucide: `ListTodo`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6l1.5 1.5L8 4.5"/><rect x="3.5" y="15.5" width="4.5" height="4.5" rx="1.3"/><path d="M11.5 6H20.5M11.5 12h9M11.5 18h9"/></svg>
+```
+
+### `Database` — replaces Lucide: `Database`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+```
+
+### `Server` — replaces Lucide: `Server`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="6.5" rx="2.5"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="2.5"/><circle cx="7.5" cy="7.25" r="1.1" stroke="none" fill="currentColor"/><circle cx="7.5" cy="16.75" r="1.1" stroke="none" fill="currentColor"/></svg>
+```
+
+
+## finance
+
+### `Currency` — replaces Lucide: `DollarSign`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.7 9.3c-.5-.9-1.5-1.4-2.7-1.4-1.5 0-2.600.8-2.6 2s1 1.6 2.6 2 2.600.8 2.6 2-1.1 2-2.6 2c-1.2 0-2.2-.5-2.7-1.4"/><path d="M12 6v1.9M12 16.1V18"/></svg>
+```
+
+### `Naira`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19V5l10 14V5"/><path d="M4.5 10h15M4.5 14h15"/></svg>
+```
+
+### `Wallet` — replaces Lucide: `Wallet`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2V9"/><path d="M3.5 7.5v10a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-13"/><path d="M20.5 12.5H17a1.5 1.5 0 0 0 0 3h3.5"/></svg>
+```
+
+### `CreditCard` — replaces Lucide: `CreditCard`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="3.5"/><path d="M2.5 10h19"/><path d="M6.5 15h3"/></svg>
+```
+
+### `TrendingUp` — replaces Lucide: `TrendingUp`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7.5-7.5"/><path d="M15.5 7.5h5v5"/></svg>
+```
+
+### `TrendingDown` — replaces Lucide: `TrendingDown`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l6 6 4-4 7.5 7.5"/><path d="M15.5 16.5h5v-5"/></svg>
+```
+
+### `Analytics` — replaces Lucide: `BarChart2`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="12" width="3.5" height="8" rx="1.2"/><rect x="10.25" y="4" width="3.5" height="16" rx="1.2"/><rect x="16" y="8" width="3.5" height="12" rx="1.2"/></svg>
+```
+
+### `Activity` — replaces Lucide: `Activity`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12h4l2.5-6.5 5.5 13 2.5-6.5h5"/></svg>
+```
+
+### `ActivitySquare` — replaces Lucide: `ActivitySquare`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M7 12h2.5l1.5-3.5 2.5 7 1.5-3.5H17"/></svg>
+```
+
+### `Calendar` — replaces Lucide: `Calendar`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8" cy="14.5" r="1.1" stroke="none" fill="currentColor"/><circle cx="12" cy="14.5" r="1.1" stroke="none" fill="currentColor"/><circle cx="16" cy="14.5" r="1.1" stroke="none" fill="currentColor"/></svg>
+```
+
+### `CalendarClock` — replaces Lucide: `CalendarClock`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11V8.5A3.5 3.5 0 0 0 16.5 5h-9A3.5 3.5 0 0 0 4 8.5v9A3.5 3.5 0 0 0 7.5 21H11"/><path d="M4 10h16M8 3v4M16 3v4"/><circle cx="17" cy="17.5" r="4.5"/><path d="M17 15.3v2.3l1.400.9"/></svg>
+```
+
+### `Table` — replaces Lucide: `Table`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3.5"/><path d="M3.5 10h17"/><path d="M9.5 10v9.5"/></svg>
+```
+
+### `Calculator` — replaces Lucide: `Calculator`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="15" height="18" rx="3.5"/><rect x="8" y="6.5" width="8" height="3.5" rx="1"/><circle cx="8.5" cy="14" r="1.05" stroke="none" fill="currentColor"/><circle cx="12" cy="14" r="1.05" stroke="none" fill="currentColor"/><circle cx="15.5" cy="14" r="1.05" stroke="none" fill="currentColor"/><circle cx="8.5" cy="17.5" r="1.05" stroke="none" fill="currentColor"/><circle cx="12" cy="17.5" r="1.05" stroke="none" fill="currentColor"/><circle cx="15.5" cy="17.5" r="1.05" stroke="none" fill="currentColor"/></svg>
+```
+
+
+## contact-ui
+
+### `Phone` — replaces Lucide: `Phone`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h3l1.6 4-2 1.3a11 11 0 0 0 5.6 5.6l1.3-2 4 1.6v3A2 2 0 0 1 16.5 20 13.5 13.5 0 0 1 3 7.5 2 2 0 0 1 5 4.5z"/></svg>
+```
+
+### `Mail` — replaces Lucide: `Mail`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="M3.7 8.2l8.3 5.3 8.3-5.3"/></svg>
+```
+
+### `MapPin` — replaces Lucide: `MapPin`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.5s-6.5-5.6-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15.9 12 21.5 12 21.5z"/><circle cx="12" cy="10" r="2.3"/></svg>
+```
+
+### `Globe` — replaces Lucide: `Globe`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.5-3.5-9s1-6.5 3.5-9z"/></svg>
+```
+
+### `Building` — replaces Lucide: `Building`, `Building2`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V5.5a2 2 0 0 1 2-2h5.5a2 2 0 0 1 2 2V21"/><path d="M15.5 9.5h2a2 2 0 0 1 2 2V21M3.5 21h17"/><path d="M9.5 8h3M9.5 12h3"/><path d="M10 21v-3.5h2.5V21"/></svg>
+```
+
+### `Message` — replaces Lucide: `MessageSquare`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 4h13A2.5 2.5 0 0 1 21 6.5v8a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 3.5V17h-2A2.5 2.5 0 0 1 3 14.5v-8A2.5 2.5 0 0 1 5.5 4z"/><path d="M7.5 9h9M7.5 12.5h5"/></svg>
+```
+
+### `Chat` — replaces Lucide: `MessageCircle`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a8.5 8.5 0 1 1-3.8 16.1L3.5 21l1.4-4.3A8.5 8.5 0 0 1 12 3.5z"/><circle cx="8.5" cy="12" r="1.1" stroke="none" fill="currentColor"/><circle cx="12" cy="12" r="1.1" stroke="none" fill="currentColor"/><circle cx="15.5" cy="12" r="1.1" stroke="none" fill="currentColor"/></svg>
+```
+
+### `Volume` — replaces Lucide: `Volume2`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12.5 19V5l-5 4.5z"/><path d="M16 9a4.5 4.5 0 0 1 0 6M18.8 6.5a8 8 0 0 1 0 11"/></svg>
+```
+
+### `Keyboard` — replaces Lucide: `Keyboard`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="3.5"/><circle cx="7" cy="10" r="1" stroke="none" fill="currentColor"/><circle cx="10.5" cy="10" r="1" stroke="none" fill="currentColor"/><circle cx="14" cy="10" r="1" stroke="none" fill="currentColor"/><circle cx="17.5" cy="10" r="1" stroke="none" fill="currentColor"/><path d="M8 14.5h8"/></svg>
+```
+
+### `Sun` — replaces Lucide: `Sun`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M18.9 12L21.2 12 M16.88 16.88L18.51 18.51 M12 18.9L12 21.2 M7.12 16.88L5.49 18.51 M5.1 12L2.8 12 M7.12 7.12L5.49 5.49 M12 5.1L12 2.8 M16.88 7.12L18.51 5.49"/></svg>
+```
+
+### `Moon` — replaces Lucide: `Moon`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4 6.8 6.8 0 0 0 20 14.5z"/><path d="M17 3.5v3M15.5 5h3"/></svg>
+```
+
+### `Monitor` — replaces Lucide: `Monitor`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="3"/><path d="M9 20h6"/><path d="M12 16v4"/></svg>
+```
+
+### `Laptop` — replaces Lucide: `Laptop`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 16V7.5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2V16"/><path d="M2.8 19.5h18.4"/></svg>
+```
+
+### `Tablet` — replaces Lucide: `Tablet`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg>
+```
+
+### `Smartphone` — replaces Lucide: `Smartphone`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg>
+```
+
+### `Palette` — replaces Lucide: `Palette`
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1 0 1.7-.8 1.7-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.7-1.6 1.6-1.6H16.5A4.5 4.5 0 0 0 21 12.8 8.5 8.5 0 0 0 12 3.5z"/><circle cx="7.5" cy="12" r="1.1" stroke="none" fill="currentColor"/><circle cx="9.5" cy="8" r="1.1" stroke="none" fill="currentColor"/><circle cx="14.5" cy="7.5" r="1.1" stroke="none" fill="currentColor"/></svg>
+```

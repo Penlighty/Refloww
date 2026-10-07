@@ -1,0 +1,56 @@
+/* ============================================================
+   REFLOWW ICON SYSTEM — paste into src/app/globals.css
+   (after the @theme block, before component styles)
+   ============================================================
+   Every icon = ink strokes (currentColor) + ONE "flow" accent.
+   The accent inherits currentColor, so icons are monochrome at
+   rest. Set --rf-accent on any ancestor to light the accent up.
+   ============================================================ */
+
+:root { --rf-ease: cubic-bezier(0.2, 0.7, 0.2, 1); }
+
+.rf-icon { flex-shrink: 0; overflow: visible; }
+
+/* Optical correction: small icons need a slightly heavier stroke
+   (CSS wins over the strokeWidth attribute). Sizes: 14 / 16 / 20 / 24 / 32. */
+.rf-icon.w-3, .rf-icon.w-3\.5 { stroke-width: 2; }
+.rf-icon.w-8, .rf-icon.w-10, .rf-icon.w-12 { stroke-width: 1.5; }
+
+/* Accent lights up (brand orange) on interaction + selection */
+a:hover, button:hover, [role="menuitem"]:hover, [role="tab"][aria-selected="true"],
+[aria-current="page"], [data-active="true"], .rf-accent-brand {
+  --rf-accent: var(--color-primary-500);
+}
+/* Opt out where the surface is already brand/solid (primary & danger buttons, toasts, badges) */
+.rf-accent-mono, .rf-accent-mono:hover { --rf-accent: currentColor; }
+
+.rf-icon .rf-a { transition: stroke 160ms var(--rf-ease), fill 160ms var(--rf-ease); }
+
+/* ---- Motion (only transform / stroke; all respect reduced-motion) ---- */
+@keyframes rf-spin { to { transform: rotate(360deg); } }
+.rf-spin { animation: rf-spin 0.8s linear infinite; transform-origin: 50% 50%; }
+
+@keyframes rf-ring {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(11deg); } 40% { transform: rotate(-9deg); }
+  60% { transform: rotate(5deg); }  80% { transform: rotate(-2deg); }
+}
+button:hover > .rf-bell, a:hover > .rf-bell, .group:hover .rf-bell {
+  animation: rf-ring 0.6s var(--rf-ease); transform-origin: 50% 12%;
+}
+
+/* Accent "draws on" — add .rf-draw to the icon (success ticks, new states) */
+@keyframes rf-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.rf-draw .rf-a { stroke-dasharray: 1; animation: rf-draw 0.36s var(--rf-ease) both; }
+
+/* Gentle arrival for icons that appear after an action (e.g. in toasts) */
+@keyframes rf-pop { from { transform: scale(0.82); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.rf-pop { animation: rf-pop 0.22s var(--rf-ease) both; }
+
+/* One-shot half-turn for refresh buttons */
+button:active > .rf-refresh { transform: rotate(180deg); transition: transform 0.3s var(--rf-ease); }
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-spin { animation-duration: 2.4s; }
+  .rf-bell, .rf-draw .rf-a, .rf-pop, .rf-refresh { animation: none !important; transition: none !important; }
+}
