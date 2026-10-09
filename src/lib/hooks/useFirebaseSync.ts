@@ -26,7 +26,8 @@ import {
     useDiscountStore,
     useSettingsStore,
     useOrganizationStore,
-    useStorefrontStore
+    useStorefrontStore,
+    clearAllUserStores
 } from '@/lib/store';
 import { Template, Customer, Product, Document, Discount } from '@/lib/types';
 
@@ -35,13 +36,10 @@ let hasSynced = false;
 
 export function useFirebaseSync() {
     const { user } = useAuth();
+    const prevUserIdRef = useRef<string | null>(null);
     const encryptionContext = useEncryptionSafe();
     const [isSyncLoaded, setIsSyncLoaded] = useState(() => {
         if (hasSynced) return true;
-        if (typeof window !== 'undefined') {
-            const hasLocalDocs = localStorage.getItem('inflow-documents');
-            if (hasLocalDocs) return true;
-        }
         return false;
     });
     const syncInProgress = useRef(false);
@@ -134,22 +132,20 @@ export function useFirebaseSync() {
             useDiscountStore.setState({ discounts: mergeData(useDiscountStore.getState().discounts, discounts) });
 
             if (settings) {
-                // 1. Merge Organizations
-                if (settings.organizations && Array.isArray(settings.organizations)) {
-                    const localOrgs = useOrganizationStore.getState().organizations;
+                // 1. Load User Organizations (Strict scoping to user account)
+                if (settings.organizations && Array.isArray(settings.organizations) && settings.organizations.length > 0) {
                     const serverOrgs = settings.organizations;
-                    const mergedOrgs = mergeData(localOrgs, serverOrgs);
-                    const activeOrgId = settings.activeOrganizationId || useOrganizationStore.getState().activeOrganizationId;
+                    const activeOrgId = settings.activeOrganizationId || serverOrgs[0].id;
                     useOrganizationStore.setState({
-                        organizations: mergedOrgs,
+                        organizations: serverOrgs,
                         activeOrganizationId: activeOrgId
                     });
 
-                    // --- MIGRATION: Push all local/legacy orgs to global organizations collection ---
+                    // --- MIGRATION: Sync user orgs to global organizations collection ---
                     try {
                         const { db } = await import('@/lib/firebase/config');
                         const { doc, setDoc, writeBatch } = await import('firebase/firestore');
-                        for (const org of mergedOrgs) {
+                        for (const org of serverOrgs) {
                             const orgRef = doc(db, 'organizations', org.id);
                             await setDoc(orgRef, {
                                 name: org.name,
@@ -165,10 +161,36 @@ export function useFirebaseSync() {
                                 await batch.commit();
                             }
                         }
-                        console.log('[Firebase Sync] Synced local organizations to global collection');
+                        console.log('[Firebase Sync] Synced user organizations to global collection');
                     } catch (err) {
                         console.error('[Firebase Sync] Failed to sync orgs to global collection:', err);
                     }
+                } else if (user?.email) {
+                    // Create default organization for new user account
+                    const userOrgId = `org-${user.uid.slice(0, 8)}`;
+                    const userOrgName = user.displayName ? `${user.displayName}'s Organization` : 'Primary Organization';
+                    const newOrg = {
+                        id: userOrgId,
+                        name: userOrgName,
+                        ownerEmail: user.email,
+                        roleInOrg: 'admin' as const,
+                        createdAt: new Date().toISOString(),
+                        members: [
+                            {
+                                id: `mem-${user.uid}`,
+                                email: user.email,
+                                name: user.displayName || user.email.split('@')[0],
+                                role: 'admin' as const,
+                                status: 'active' as const,
+                                invitedAt: new Date().toISOString(),
+                                joinedAt: new Date().toISOString()
+                            }
+                        ]
+                    };
+                    useOrganizationStore.setState({
+                        organizations: [newOrg],
+                        activeOrganizationId: userOrgId
+                    });
                 }
 
                 // 2. Merge SettingsStore (company, numbering, companyMap, numberingMap, customNumberingFormatsMap)
@@ -324,6 +346,16 @@ export function useFirebaseSync() {
     // ============================================
 
     useEffect(() => {
+        const currentUid = user?.uid || null;
+        if (prevUserIdRef.current !== currentUid) {
+            hasSynced = false;
+            setIsSyncLoaded(false);
+            if (!user) {
+                clearAllUserStores();
+            }
+            prevUserIdRef.current = currentUid;
+        }
+
         // Wait for encryption check to complete before loading
         if (!encryptionCheckComplete) {
             console.log('[Firebase Sync] Waiting for encryption check to complete...');

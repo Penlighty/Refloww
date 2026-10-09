@@ -15,6 +15,7 @@ import {
     UserProfile,
     getUserProfile
 } from '@/lib/firebase/auth';
+import { clearAllUserStores } from '@/lib/store';
 
 // ============================================
 // TYPES
@@ -68,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         await signOut();
                         setUser(null);
                         setProfile(null);
+                        clearAllUserStores();
                         setError('This account has been suspended by an administrator.');
                         setLoading(false);
                         return;
@@ -79,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
             } else {
                 setProfile(null);
+                clearAllUserStores();
             }
 
             setLoading(false);
@@ -142,13 +145,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(null);
             setProfile(null);
             
-            // Clear encryption session marker
-            if (typeof sessionStorage !== 'undefined') {
-                sessionStorage.removeItem('refloww_encryption_session');
-            }
-
-            // Do NOT wipe persistent user stores (organizations, products, documents, etc.)
-            // User created organizations and business data remain safely preserved across login sessions.
+            // Wipe all user stores and browser local/session storage to maintain account data integrity
+            clearAllUserStores();
 
             // Reload browser to a clean login state
             if (typeof window !== 'undefined') {
@@ -156,6 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
         } catch (err: any) {
             console.error('Logout error:', err);
+            clearAllUserStores();
             if (typeof window !== 'undefined') {
                 window.location.href = '/login';
             }
@@ -214,10 +213,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             setUser(null);
             setProfile(null);
+            clearAllUserStores();
 
             if (typeof window !== 'undefined') {
-                localStorage.clear();
-                sessionStorage.clear();
                 window.location.href = '/login';
             }
         } catch (err: any) {
