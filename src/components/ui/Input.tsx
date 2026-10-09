@@ -49,8 +49,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                         disabled={disabled}
                         aria-invalid={error ? 'true' : undefined}
                         className={clsx(
-                            'w-full h-10 px-3 text-body rounded-ctl border bg-paper text-ink transition-colors',
-                            'placeholder:text-ink-3 hover:border-ink-4',
+                            'w-full h-10 px-3 text-sm rounded-ctl border bg-paper text-ink transition-colors',
+                            'placeholder:text-ink-3 hover:border-ink-4 placeholder:text-sm',
                             'focus-visible:outline-none focus-visible:border-ink focus-visible:ring-[3px] focus-visible:ring-primary-500/20',
                             error
                                 ? 'border-danger-solid ring-1 ring-danger-solid/15'

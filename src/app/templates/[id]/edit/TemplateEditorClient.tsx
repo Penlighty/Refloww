@@ -1409,7 +1409,7 @@ export default function TemplateEditorPage() {
 
     if (!template) {
         return (
-            <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center p-6">
+            <div className="min-h-dvh bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center p-6">
                 <div className="bg-paper rounded-2xl p-12 max-w-md shadow-xl border border-line">
                     <EmptyState
                         icon={<Layers className="size-8 text-neutral-400" />}
@@ -2921,7 +2921,7 @@ export default function TemplateEditorPage() {
                 className={`fixed bottom-0 left-0 right-0 z-50 md:hidden bg-paper rounded-t-2xl shadow-2xl border-t border-line flex flex-col transition-transform duration-300 ease-out ${
                     isMobileDrawerOpen ? 'translate-y-0' : 'translate-y-full'
                 }`}
-                style={{ maxHeight: '80vh', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+                style={{ maxHeight: '80dvh', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
                 {/* Drawer Handle & Header */}
                 <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-line shrink-0">

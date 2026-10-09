@@ -337,7 +337,7 @@ export default function POSPage() {
     };
 
     return (
-        <div className="flex flex-col lg:flex-row gap-4 w-full h-auto lg:h-[calc(100vh-10rem)] min-h-0 lg:min-h-[580px] items-stretch overflow-visible lg:overflow-hidden pb-16 lg:pb-0 relative">
+        <div className="flex flex-col lg:flex-row gap-4 w-full h-auto lg:h-[calc(100dvh-10rem)] min-h-0 lg:min-h-[580px] items-stretch overflow-visible lg:overflow-hidden pb-16 lg:pb-0 relative">
             
             {/* Mobile Segmented Tab Control */}
             <div className="flex lg:hidden items-center justify-between bg-paper-2 p-1 rounded-panel gap-1 border border-line shrink-0">
@@ -1004,7 +1004,7 @@ export default function POSPage() {
                         </div>
 
                         {/* Modal Body */}
-                        <div className="p-6 space-y-5 overflow-y-auto max-h-[60vh]">
+                        <div className="p-6 space-y-5 overflow-y-auto max-h-[60dvh]">
                             
                             {/* Summary Totals Row */}
                             <div className="p-4 bg-neutral-50 dark:bg-neutral-750 rounded-2xl flex items-center justify-between">

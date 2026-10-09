@@ -82,7 +82,7 @@ export default function TransactionDetailModal({ transactionId, onClose }: Trans
     return createPortal(
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
             <div 
-                className="bg-paper rounded-3xl border border-line shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col my-auto"
+                className="bg-paper rounded-3xl border border-line shadow-2xl w-full max-w-4xl max-h-[90dvh] overflow-y-auto flex flex-col my-auto"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}

@@ -333,7 +333,7 @@ export default function SettingsPage() {
     const isUserCategory = currentTabObj.category === 'user';
 
     return (
-        <div className="max-w-6xl mx-auto h-[calc(100vh-100px)] md:h-[calc(100vh-140px)] flex flex-col overflow-hidden">
+        <div className="max-w-6xl mx-auto h-[calc(100dvh-100px)] md:h-[calc(100dvh-140px)] flex flex-col overflow-hidden">
             {/* Header (Static) */}
             <div className="bg-background-light dark:bg-background-dark pt-4 pb-3 flex-shrink-0 border-b border-neutral-200/50 dark:border-neutral-700 md:border-b-0">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 md:mb-6">

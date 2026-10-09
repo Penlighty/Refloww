@@ -83,7 +83,7 @@ export default function SignupPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-paper-2">
+            <div className="min-h-dvh flex items-center justify-center bg-paper-2">
                 <div className="animate-pulse flex flex-col items-center">
                     <div className="size-12 rounded-full bg-blue-500/20 mb-4"></div>
                     <div className="h-4 w-24 bg-neutral-200 dark:bg-neutral-700 rounded"></div>
@@ -95,7 +95,7 @@ export default function SignupPage() {
     const displayError = localError || error;
 
     return (
-        <div className="w-full min-h-screen flex items-center justify-center bg-paper-2 p-4">
+        <div className="w-full min-h-dvh flex items-center justify-center bg-paper-2 p-4">
             <div className="w-full max-w-md">
                 {/* Logo/Brand */}
                 <div className="text-center mb-8 flex flex-col items-center">

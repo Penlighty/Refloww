@@ -28,6 +28,7 @@ export function createIcon(displayName: string, children: ReactNode): IconCompon
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
+                strokeWidth={strokeWidth ?? ICON_WEIGHT[weight]}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 className={className ? `rf-icon ${className}` : 'rf-icon'}

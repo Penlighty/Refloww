@@ -40,8 +40,8 @@ export function SearchInput({
                 onBlur={() => setIsFocused(false)}
                 placeholder={placeholder}
                 className={clsx(
-                    'w-full h-10 pl-9 pr-9 text-body rounded-ctl border bg-paper text-ink transition-colors',
-                    'placeholder:text-ink-3 hover:border-ink-4',
+                    'w-full h-9 pl-9 pr-9 text-xs sm:text-sm rounded-ctl border bg-paper text-ink transition-colors',
+                    'placeholder:text-ink-3 hover:border-ink-4 placeholder:text-xs sm:placeholder:text-sm',
                     'focus-visible:outline-none focus-visible:border-ink focus-visible:ring-[3px] focus-visible:ring-primary-500/20',
                     'border-line-strong'
                 )}

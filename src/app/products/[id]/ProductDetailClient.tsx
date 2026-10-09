@@ -314,15 +314,15 @@ export default function ProductDetailClient() {
                 {/* Left Column */}
                 <div className="space-y-6 lg:col-span-1">
                     {/* Price & Stock Banner */}
-                    <div className="bg-gradient-to-br from-[#2d3748] via-[#3d4a5c] to-[#4a5568] text-white rounded-2xl p-6 shadow-lg">
-                        <p className="text-xs text-neutral-300 uppercase tracking-wider mb-1">
+                    <div className="panel bg-paper border border-line text-ink rounded-2xl p-6 shadow-xs">
+                        <p className="text-xs text-ink-3 uppercase tracking-wider mb-1">
                             {isService ? 'Service Rate' : 'Unit Selling Price'}
                         </p>
-                        <p className="text-3xl font-bold">{formatCurrency(product.unitPrice, currency)}</p>
+                        <p className="text-3xl font-bold text-ink">{formatCurrency(product.unitPrice, currency)}</p>
 
-                        <div className="mt-4 pt-4 border-t border-neutral-600/50 flex items-center justify-between">
+                        <div className="mt-4 pt-4 border-t border-line flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-neutral-300 mb-1">Stock Availability</p>
+                                <p className="text-xs text-ink-3 mb-1">Stock Availability</p>
                                 {(() => {
                                     const cue = getStockColorCue(product.stockQuantity, product.minReorderPoint, isService);
                                     return (

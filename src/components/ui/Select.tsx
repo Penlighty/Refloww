@@ -146,8 +146,8 @@ export function Select({
                     onKeyDown={handleKeyDown}
                     disabled={disabled}
                     className={clsx(
-                        'w-full h-10 px-3 text-body rounded-ctl border bg-paper text-ink transition-colors flex items-center justify-between text-left cursor-pointer',
-                        'placeholder:text-ink-3 hover:border-ink-4',
+                        'w-full h-10 px-3 text-sm rounded-ctl border bg-paper text-ink transition-colors flex items-center justify-between text-left cursor-pointer',
+                        'placeholder:text-ink-3 hover:border-ink-4 placeholder:text-sm',
                         'focus-visible:outline-none focus-visible:border-ink focus-visible:ring-[3px] focus-visible:ring-primary-500/20',
                         error ? 'border-danger-solid ring-1 ring-danger-solid/15' : 'border-line-strong',
                         disabled && 'bg-paper-2 text-ink-4 cursor-not-allowed'
@@ -184,7 +184,7 @@ export function Select({
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder={searchPlaceholder}
-                                        className="w-full h-8 pl-8 pr-2.5 text-body rounded-ctl border border-line bg-paper-2 text-ink focus-visible:outline-none focus-visible:border-ink"
+                                        className="w-full h-8 pl-8 pr-2.5 text-sm rounded-ctl border border-line bg-paper-2 text-ink focus-visible:outline-none focus-visible:border-ink placeholder:text-sm"
                                     />
                                 </div>
                             </div>
@@ -204,7 +204,7 @@ export function Select({
                                             type="button"
                                             onClick={() => handleSelect(option.value)}
                                             className={clsx(
-                                                'w-full min-h-[36px] px-2.5 py-1.5 rounded-ctl text-left text-body flex items-center justify-between gap-2.5 transition-colors cursor-pointer',
+                                                'w-full min-h-[36px] px-2.5 py-1.5 rounded-ctl text-left text-sm flex items-center justify-between gap-2.5 transition-colors cursor-pointer',
                                                 isSelected
                                                     ? 'bg-paper-2 text-ink font-medium'
                                                     : 'text-ink-2 hover:bg-paper-2 hover:text-ink'
@@ -218,7 +218,7 @@ export function Select({
                                                     <img src={option.imageUrl} alt="" className="size-5 rounded-full object-cover shrink-0" />
                                                 )}
                                                 <div className="truncate">
-                                                    <div className="text-body">{option.label}</div>
+                                                    <div className="text-sm">{option.label}</div>
                                                     {option.description && (
                                                         <div className="text-micro text-ink-3 mt-0.5">
                                                             {option.description}

@@ -363,11 +363,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             >
                 {value && (
                     <div className="space-y-4 py-2">
-                        <div className="max-h-[60vh] bg-neutral-950 rounded-2xl overflow-hidden flex items-center justify-center p-2 border border-neutral-800 shadow-2xl">
+                        <div className="max-h-[60dvh] bg-neutral-950 rounded-2xl overflow-hidden flex items-center justify-center p-2 border border-neutral-800 shadow-2xl">
                             <img
                                 src={value}
                                 alt="Full resolution view"
-                                className="max-h-[55vh] w-auto object-contain rounded-xl"
+                                className="max-h-[55dvh] w-auto object-contain rounded-xl"
                             />
                         </div>
 

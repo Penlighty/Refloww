@@ -410,7 +410,7 @@ export default function Header() {
                         </div>
                         <input
                             ref={searchInputRef}
-                            className="block w-full pl-10 pr-24 py-2 border border-line rounded-full leading-5 bg-paper-2 text-ink placeholder-neutral-400 dark:placeholder-neutral-500 sm:text-sm transition-all shadow-sm focus:border-blue-500 dark:focus:border-blue-400"
+                            className="block w-full pl-10 pr-24 py-2 border border-line rounded-full leading-5 bg-paper-2 text-ink text-xs sm:text-sm placeholder-neutral-400 dark:placeholder-neutral-500 transition-all shadow-sm focus:border-blue-500 dark:focus:border-blue-400"
                             style={{ outline: 'none', boxShadow: 'none' }}
                             placeholder="Search documents, customers, products..."
                             type="text"

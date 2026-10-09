@@ -185,7 +185,7 @@ export default function MarketplacePage() {
     };
 
     return (
-        <div className="w-full max-w-full overflow-x-hidden min-h-screen bg-gradient-to-br from-neutral-50 via-white to-blue-50/30 dark:from-neutral-900 dark:via-neutral-900 dark:to-blue-900/10">
+        <div className="w-full max-w-full overflow-x-hidden min-h-dvh bg-gradient-to-br from-neutral-50 via-white to-blue-50/30 dark:from-neutral-900 dark:via-neutral-900 dark:to-blue-900/10">
             {/* Hero Section */}
             <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-pink-600/5 dark:from-blue-600/10 dark:via-purple-600/10 dark:to-pink-600/10" />
@@ -509,7 +509,7 @@ export default function MarketplacePage() {
                         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                         onClick={() => setPreviewTemplate(null)}
                     />
-                    <div className="relative bg-paper rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <div className="relative bg-paper rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90dvh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                         {/* Modal Header */}
                         <div className="flex items-center justify-between p-6 border-b border-line">
                             <div>
@@ -529,7 +529,7 @@ export default function MarketplacePage() {
                         </div>
 
                         {/* Modal Content */}
-                        <div className="p-6 overflow-y-auto max-h-[60vh]">
+                        <div className="p-6 overflow-y-auto max-h-[60dvh]">
                             {/* Interactive Template Sheet Slider */}
                             <div className="mb-6">
                                 <TemplateSheetSlider sheets={extractTemplateSheets(previewTemplate)} />

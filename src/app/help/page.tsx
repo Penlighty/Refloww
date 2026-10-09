@@ -110,7 +110,7 @@ export default function HelpPage() {
 
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 {/* Desktop Sticky Table of Contents Sidebar */}
-                <div className="hidden md:flex w-64 flex-shrink-0 flex-col gap-1 sticky top-20 max-h-[calc(100vh-100px)] overflow-y-auto pr-1">
+                <div className="hidden md:flex w-64 flex-shrink-0 flex-col gap-1 sticky top-20 max-h-[calc(100dvh-100px)] overflow-y-auto pr-1">
                     <div className="text-xs font-bold uppercase tracking-wider text-ink-muted mb-2 px-2 flex items-center gap-1.5">
                         <BookOpen className="size-3.5 text-blue-600" />
                         <span>Table of Contents</span>

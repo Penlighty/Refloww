@@ -130,13 +130,13 @@
   /* Typography */
   --font-display: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
   --font-heading: var(--font-bricolage), var(--font-inter), system-ui, sans-serif;
-  --text-micro: 0.786rem;     --text-micro--line-height: 1rem;       /* 11/14 */
-  --text-caption: 0.857rem;   --text-caption--line-height: 1.143rem; /* 12/16 */
-  --text-body: 1rem;          --text-body--line-height: 1.429rem;    /* 14/20 */
-  --text-lead: 1.143rem;      --text-lead--line-height: 1.714rem;    /* 16/24 */
-  --text-title: 1.429rem;     --text-title--line-height: 2rem;       /* 20/28 */
-  --text-headline: 2rem;      --text-headline--line-height: 2.429rem;/* 28/34 */
-  --text-metric: 2.571rem;    --text-metric--line-height: 2.857rem;  /* 36/40 */
+  --text-micro: 0.6875rem;    --text-micro--line-height: 0.875rem;   /* 11/14 */
+  --text-caption: 0.75rem;    --text-caption--line-height: 1rem;     /* 12/16 */
+  --text-body: 0.875rem;      --text-body--line-height: 1.25rem;     /* 14/20 */
+  --text-lead: 1rem;          --text-lead--line-height: 1.5rem;      /* 16/24 */
+  --text-title: 1.25rem;      --text-title--line-height: 1.75rem;    /* 20/28 */
+  --text-headline: 1.75rem;   --text-headline--line-height: 2.125rem;/* 28/34 */
+  --text-metric: 2.25rem;     --text-metric--line-height: 2.5rem;    /* 36/40 */
 
   /* Motion */
   --ease-settle: cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -265,3 +265,129 @@ html {
   }
 }
 .font-money { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+
+/* ============================================================
+   REFLOWW MOBILE LAYER
+   ============================================================ */
+
+/* ---------- 1. Viewport, safe areas, layout variables ---------- */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  --header-h: 52px;                              /* mobile top bar (excl. safe-top) */
+  --subnav-h: 44px;                              /* section tab strip */
+  --nav-h: calc(56px + var(--safe-bottom));      /* bottom tab bar incl. home-indicator inset */
+
+  --ease-settle: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+}
+
+@media (min-width: 768px) and (min-height: 500px) {
+  :root { --header-h: 56px; --nav-h: 0px; }
+}
+
+@media (max-height: 499px) {
+  :root { --header-h: 44px; --subnav-h: 40px; --nav-h: calc(44px + var(--safe-bottom)); }
+}
+
+[data-immersive='true'] { --nav-h: 0px; }
+
+@custom-variant touch (@media (hover: none) and (pointer: coarse));
+@custom-variant desk (@media (min-width: 768px) and (min-height: 500px));
+@custom-variant mob (@media not all and (min-width: 768px) and (min-height: 500px));
+
+/* ---------- 2. Utilities ---------- */
+@utility pt-safe { padding-top: var(--safe-top); }
+@utility pb-safe { padding-bottom: var(--safe-bottom); }
+@utility pl-safe { padding-left: max(1.25rem, var(--safe-left)); }
+@utility pr-safe { padding-right: max(1.25rem, var(--safe-right)); }
+@utility px-safe { padding-left: max(1.25rem, var(--safe-left)); padding-right: max(1.25rem, var(--safe-right)); }
+
+@utility safe-area-pt { padding-top: var(--safe-top); }
+@utility safe-area-pb { padding-bottom: var(--safe-bottom); }
+
+@utility pb-app { padding-bottom: calc(var(--nav-h) + 16px); }
+@utility scroll-contain { overscroll-behavior: contain; }
+@utility tap-44 { min-height: 44px; min-width: 44px; }
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+@utility custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong, #d3d8d5) transparent;
+  &::-webkit-scrollbar { width: 6px; height: 6px; }
+  &::-webkit-scrollbar-thumb { background: var(--line-strong, #d3d8d5); border-radius: 999px; }
+}
+
+@utility press {
+  transition: transform 90ms var(--ease-settle);
+  &:active { transform: scale(0.97); }
+}
+
+/* ---------- 3. Base behaviour on touch devices ---------- */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overscroll-behavior-y: none; }
+a, button, [role='button'], summary, label, select,
+input[type='checkbox'], input[type='radio'] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+[data-bottom-nav] { transition: transform 160ms var(--ease-settle); }
+body:has(
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):focus,
+  textarea:focus,
+  select:focus
+) [data-bottom-nav] { transform: translate3d(0, 100%, 0); }
+
+/* ---------- 4. Sheet ---------- */
+.rf-scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim, rgb(26 32 44 / 0.4));
+  opacity: var(--rf-scrim, var(--rf-shown, 0));
+  transition: opacity 200ms ease-out;
+  touch-action: none;
+}
+.rf-sheet-panel {
+  --rf-dur: 320ms;
+  transform: translate3d(0, calc((1 - var(--rf-shown, 0)) * 100% + var(--rf-drag, 0px)), 0);
+  transition: transform var(--rf-dur) var(--ease-sheet);
+  will-change: transform;
+}
+.rf-sheet-panel[data-shown='false'] { --rf-dur: 220ms; transition-timing-function: var(--ease-exit); }
+.rf-sheet-panel[data-dragging='true'] { transition: none; }
+@media (min-width: 768px) {
+  .rf-sheet-panel {
+    transform: translate3d(0, calc((1 - var(--rf-shown, 0)) * 8px), 0) scale(calc(0.985 + var(--rf-shown, 0) * 0.015));
+    opacity: var(--rf-shown, 0);
+    transition: transform 220ms var(--ease-settle), opacity 160ms ease-out;
+  }
+}
+
+/* ---------- 5. Route transitions ---------- */
+@keyframes rf-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rf-push-in { from { opacity: 0; transform: translate3d(20px, 0, 0); } to { opacity: 1; transform: none; } }
+.rf-page-fade { animation: rf-fade 140ms ease-out both; }
+.rf-page-push { animation: rf-push-in 240ms var(--ease-settle) both; }
+@media (min-width: 768px) { .rf-page-push { animation: rf-fade 140ms ease-out both; } }
+
+/* ---------- 6. Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .rf-sheet-panel, .rf-scrim, [data-bottom-nav] { transition-duration: 1ms !important; }
+  .rf-page-fade, .rf-page-push { animation: none; }
+}

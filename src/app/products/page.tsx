@@ -1072,22 +1072,21 @@ export default function ProductsPage() {
             {/* TAB 2: BATCHES & EXPIRY TRACKER */}
             {activeTab === 'batches' && (
                 <div className="space-y-6">
-                    <div className="flex flex-wrap items-center justify-between gap-4 bg-[#2d3748] dark:bg-neutral-800 text-white rounded-2xl p-6 shadow-md border border-neutral-700/40">
+                    <div className="panel bg-paper border border-line text-ink rounded-3xl p-6 md:p-8 shadow-xs flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <h3 className="text-lg font-bold text-white">FEFO Batch & Expiry Management</h3>
-                            <p className="text-xs text-neutral-300 mt-1">
+                            <h3 className="text-lg font-bold text-ink">FEFO Batch & Expiry Management</h3>
+                            <p className="text-xs text-ink-3 mt-1">
                                 Stock is automatically picked First-Expiry First-Out (FEFO) to eliminate inventory shrinkage and expired wastage.
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <button
-                                type="button"
-                                className="px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-100 text-[#2d3748] font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                            <Button
+                                variant="primary"
+                                leftIcon={<Sparkles className="size-4" />}
                                 onClick={() => openOcrForProduct()}
                             >
-                                <Sparkles className="size-4 text-violet-600 shrink-0" />
-                                <span className="text-[#2d3748] font-bold">Scan Packaging / OCR Batch</span>
-                            </button>
+                                Scan Packaging / OCR Batch
+                            </Button>
                         </div>
                     </div>
 

@@ -477,7 +477,7 @@ export function StorefrontCatalogContent({ isEmbedded = false, storeSlug = undef
         : 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80';
 
     return (
-        <div className="w-full flex-1 overflow-y-auto overflow-x-hidden min-h-screen bg-paper-2 text-ink font-sans pb-24">
+        <div className="w-full flex-1 overflow-y-auto overflow-x-hidden min-h-dvh bg-paper-2 text-ink font-sans pb-24">
             {/* 1600x400 (4:1) Banner Cover Image */}
             <div className="relative w-full overflow-hidden shadow-sm bg-neutral-200 dark:bg-neutral-800" style={{ aspectRatio: '4 / 1' }}>
                 <img 

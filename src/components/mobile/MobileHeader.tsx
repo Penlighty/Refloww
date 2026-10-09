@@ -1,72 +1,47 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
     ArrowLeft,
     Bell,
-    Filter,
     MoreVertical,
-    Save,
     Search,
-    Plus,
-    Check,
     ShoppingBag,
     ChevronDown,
     Building,
     LogOut,
     X,
-    User,
     Settings,
     AlertTriangle,
     Clock,
     ArrowRight,
-    Package,
-    FileText
+    Check,
+    Search as SearchIcon,
 } from '@/components/icons';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useSettingsStore, useStorefrontStore, useOrganizationStore, useProductStore, useDocumentStore } from '@/lib/store';
 import { ThemeToggleSimple } from '@/components/ThemeToggle';
 import { calculateReorderMetrics } from '@/lib/utils/inventoryUtils';
-import { formatCurrency } from '@/lib/utils';
+import { usePageHeaderConfig } from '@/components/mobile/PageHeaderContext';
+import { Sheet } from '@/components/ui/Sheet';
 
-interface MobileHeaderProps {
-    title?: string;
-    variant?: 'dashboard' | 'section' | 'creation' | 'detail' | 'search';
-    onSave?: () => void;
-    onFilter?: () => void;
-    onMore?: () => void;
-    isSubmitting?: boolean;
-}
-
-export default function MobileHeader({
-    title,
-    variant = 'section',
-    onSave,
-    onFilter,
-    onMore,
-    isSubmitting = false
-}: MobileHeaderProps) {
+export default function MobileHeader() {
     const pathname = usePathname();
     const router = useRouter();
     const { user, profile, logout } = useAuth();
-    const company = useSettingsStore(state => state.company);
     const cart = useStorefrontStore(state => state.cart);
     const { organizations, activeOrganizationId, setActiveOrganization } = useOrganizationStore();
     const { products, getFilteredProducts } = useProductStore();
     const { documents, getFilteredDocuments } = useDocumentStore();
 
-    const [mounted, setMounted] = useState(false);
-    const [isOrgDrawerOpen, setIsOrgDrawerOpen] = useState(false);
+    const { config: pageConfig, run: runAction } = usePageHeaderConfig();
+
+    const [isOrgSheetOpen, setIsOrgSheetOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     const displayName = profile?.displayName || user?.displayName || user?.email?.split('@')[0] || 'Merchant';
     const activeOrg = organizations.find(o => o.id === activeOrganizationId);
@@ -75,7 +50,6 @@ export default function MobileHeader({
         return cart.reduce((total, item) => total + item.quantity, 0);
     }, [cart]);
 
-    // Operational alerts for notifications panel
     const displayProducts = useMemo(() => getFilteredProducts(), [products, activeOrganizationId, getFilteredProducts]);
     const displayDocuments = useMemo(() => getFilteredDocuments(), [documents, activeOrganizationId, getFilteredDocuments]);
 
@@ -93,384 +67,405 @@ export default function MobileHeader({
 
     const totalNotificationCount = lowStockItems.length + overdueDocs.length;
 
-    // Auto-detect variant based on route if not explicitly passed
-    let computedVariant = variant;
-    if (pathname === '/') {
-        computedVariant = 'dashboard';
-    } else if (pathname.includes('/new') || pathname.includes('/edit')) {
-        computedVariant = 'creation';
-    }
+    // Header title and variant determination
+    const headerTitle = pageConfig.title || (pathname === '/' ? undefined : 'Overview');
+    const isDashboard = pathname === '/';
+    const isCreation = /\/(new|edit)(\/|$)/.test(pathname);
+
+    const handleBack = () => {
+        if (pageConfig.backHref) {
+            router.push(pageConfig.backHref);
+        } else if (typeof window !== 'undefined' && window.history.length > 1) {
+            router.back();
+        } else {
+            router.push('/');
+        }
+    };
 
     return (
         <>
-            <header className="sticky top-0 z-30 md:hidden bg-white/95 dark:bg-[#121620]/95 backdrop-blur-md border-b border-[#e7e9e8] dark:border-neutral-800/80 px-4 sm:px-6 py-2.5 safe-area-pt shadow-xs">
-                <div className="flex items-center justify-between min-h-[40px] gap-2">
-                    
-                    {/* Left Section: Full App Logo + Active Organization Switcher */}
-                    {computedVariant === 'dashboard' ? (
-                        <div className="flex items-center gap-2.5 min-w-0">
-                            {/* Refloww Full App Logo */}
-                            <Link href="/" className="shrink-0 flex items-center">
-                                <img
-                                    src="/logo/refloww-full-orange.svg"
-                                    alt="Refloww"
-                                    className="h-7.5 sm:h-9 w-auto object-contain max-w-[130px] sm:max-w-[150px]"
-                                />
-                            </Link>
+            {/* Header / Top Search Bar */}
+            {isSearchOpen ? (
+                <header className="sticky top-0 z-40 desk:hidden bg-paper border-b border-line px-5 sm:px-6 pt-safe pb-2">
+                    <div className="flex items-center h-[var(--header-h)] gap-2.5 relative">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsSearchOpen(false);
+                                setSearchQuery('');
+                            }}
+                            className="size-9 rounded-ctl bg-paper-2 text-ink flex items-center justify-center shrink-0 border border-line"
+                            aria-label="Close search"
+                        >
+                            <ArrowLeft className="size-4" />
+                        </button>
 
-                            {/* Active Organization Switcher Pill */}
-                            <button
-                                type="button"
-                                onClick={() => setIsOrgDrawerOpen(true)}
-                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-100/90 dark:bg-neutral-800/90 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/80 transition-colors max-w-[160px] min-w-0"
-                                title="Switch Organization"
-                            >
-                                <Building className="size-3.5 text-[#fc6d2d] shrink-0" />
-                                <span className="text-xs font-bold truncate">
-                                    {activeOrg?.name || 'My Business'}
-                                </span>
-                                <ChevronDown className="size-3.5 text-neutral-400 shrink-0 ml-0.5" />
-                            </button>
+                        <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-ctl bg-paper-2 border border-line min-w-0">
+                            <SearchIcon className="size-4 text-ink-3 shrink-0" />
+                            <input
+                                type="text"
+                                autoFocus
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search products, invoices, customers..."
+                                className="w-full text-xs sm:text-sm text-ink bg-transparent focus:outline-none min-w-0"
+                            />
+                            {searchQuery && (
+                                <button
+                                    type="button"
+                                    onClick={() => setSearchQuery('')}
+                                    className="text-ink-3 hover:text-ink p-1"
+                                    aria-label="Clear query"
+                                >
+                                    <X className="size-3.5" />
+                                </button>
+                            )}
                         </div>
-                    ) : computedVariant === 'creation' ? (
-                        <div className="flex items-center gap-2 min-w-0">
-                            <button
-                                type="button"
-                                onClick={() => router.back()}
-                                className="size-8 rounded-xl bg-paper-2 text-ink-muted flex items-center justify-center shrink-0"
-                            >
-                                <ArrowLeft className="size-4" />
-                            </button>
-                            <h2 className="text-xs font-bold text-ink truncate max-w-[140px]">
-                                {title || 'Create Record'}
-                            </h2>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-2 min-w-0">
-                            <Link
-                                href="/"
-                                className="size-8 rounded-xl bg-paper-2 text-ink-muted flex items-center justify-center shrink-0 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
-                                title="Return to Home Dashboard"
-                            >
-                                <ArrowLeft className="size-4" />
-                            </Link>
 
-                            {/* Replace Overview title with Full Logo if title is Overview or omitted */}
-                            {(!title || title.toLowerCase() === 'overview') ? (
+                        {/* Top Search Results Dropdown Popover */}
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-paper border border-line rounded-2xl shadow-2xl p-4 max-h-[65vh] overflow-y-auto space-y-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                            {searchQuery.trim() ? (
+                                <>
+                                    <Link
+                                        href={`/transactions?search=${encodeURIComponent(searchQuery)}`}
+                                        onClick={() => {
+                                            setIsSearchOpen(false);
+                                            setSearchQuery('');
+                                        }}
+                                        className="flex items-center justify-between p-3 rounded-ctl bg-paper-2 border border-line text-primary-text font-semibold text-body hover:bg-paper-2/80 transition-colors"
+                                    >
+                                        <span className="truncate">Search for &quot;{searchQuery}&quot; in Transactions</span>
+                                        <ArrowRight className="size-4 shrink-0" />
+                                    </Link>
+
+                                    <div className="space-y-1 pt-1">
+                                        <p className="text-micro font-medium uppercase tracking-wider text-ink-3 px-1">Quick Search Views</p>
+                                        <Link
+                                            href={`/products?search=${encodeURIComponent(searchQuery)}`}
+                                            onClick={() => {
+                                                setIsSearchOpen(false);
+                                                setSearchQuery('');
+                                            }}
+                                            className="flex items-center justify-between p-2.5 rounded-ctl hover:bg-paper-2 text-ink text-caption font-medium transition-colors"
+                                        >
+                                            <span>Search in Products</span>
+                                            <ArrowRight className="size-3.5 text-ink-3" />
+                                        </Link>
+                                        <Link
+                                            href={`/invoices?search=${encodeURIComponent(searchQuery)}`}
+                                            onClick={() => {
+                                                setIsSearchOpen(false);
+                                                setSearchQuery('');
+                                            }}
+                                            className="flex items-center justify-between p-2.5 rounded-ctl hover:bg-paper-2 text-ink text-caption font-medium transition-colors"
+                                        >
+                                            <span>Search in Invoices</span>
+                                            <ArrowRight className="size-3.5 text-ink-3" />
+                                        </Link>
+                                        <Link
+                                            href={`/customers?search=${encodeURIComponent(searchQuery)}`}
+                                            onClick={() => {
+                                                setIsSearchOpen(false);
+                                                setSearchQuery('');
+                                            }}
+                                            className="flex items-center justify-between p-2.5 rounded-ctl hover:bg-paper-2 text-ink text-caption font-medium transition-colors"
+                                        >
+                                            <span>Search in Customers</span>
+                                            <ArrowRight className="size-3.5 text-ink-3" />
+                                        </Link>
+                                    </div>
+                                </>
+                            ) : (
+                                <p className="text-caption text-ink-3 py-2 text-center">Type keywords to search across transactions, products & customers...</p>
+                            )}
+                        </div>
+                    </div>
+                </header>
+            ) : (
+                <header className="sticky top-0 z-30 desk:hidden bg-paper border-b border-line px-5 sm:px-6 pt-safe pb-2">
+                    <div className="flex items-center justify-between h-[var(--header-h)] gap-2">
+                        
+                        {/* Left Section */}
+                        {isDashboard ? (
+                            <div className="flex items-center gap-2.5 min-w-0">
                                 <Link href="/" className="shrink-0 flex items-center">
                                     <img
                                         src="/logo/refloww-full-orange.svg"
                                         alt="Refloww"
-                                        className="h-7.5 sm:h-9 w-auto object-contain max-w-[135px] sm:max-w-[150px]"
+                                        className="h-7 w-auto object-contain max-w-[120px]"
                                     />
-                                </Link>
-                            ) : (
-                                <h2 className="text-sm sm:text-base font-bold text-ink truncate max-w-[140px] sm:max-w-xs">
-                                    {title}
-                                </h2>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Right Section Controls: Search, Notifications, Cart, Theme */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                        {/* 1. Global Search Button */}
-                        <button
-                            type="button"
-                            onClick={() => setIsSearchOpen(true)}
-                            className="size-8 rounded-xl bg-paper-2 text-ink-muted flex items-center justify-center transition-colors"
-                            title="Search"
-                        >
-                            <Search className="size-4" />
-                        </button>
-
-                        {/* 2. Notifications Bell Button */}
-                        <button
-                            type="button"
-                            onClick={() => setIsNotificationsOpen(true)}
-                            className="size-8 rounded-xl bg-paper-2 text-ink-muted flex items-center justify-center transition-colors relative"
-                            title="Notifications & Alerts"
-                        >
-                            <Bell className="size-4" />
-                            {totalNotificationCount > 0 && (
-                                <span className="absolute -top-1 -right-1 size-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white dark:border-neutral-900 animate-pulse">
-                                    {totalNotificationCount}
-                                </span>
-                            )}
-                        </button>
-
-                        {/* 3. Global Cart Button */}
-                        <Link
-                            href="/pos"
-                            className="size-8 rounded-xl bg-paper-2 text-ink-muted flex items-center justify-center transition-colors relative"
-                            title="Cart"
-                        >
-                            <ShoppingBag className="size-4" />
-                            {cartTotalCount > 0 && (
-                                <span className="absolute -top-1 -right-1 size-4 rounded-full bg-[#fc6d2d] text-white text-[9px] font-bold flex items-center justify-center border-2 border-white dark:border-neutral-900">
-                                    {cartTotalCount}
-                                </span>
-                            )}
-                        </Link>
-
-                        {/* 4. Theme Toggle */}
-                        <div className="flex items-center justify-center">
-                            <ThemeToggleSimple />
-                        </div>
-
-                        {/* Save Action if Creation Variant */}
-                        {computedVariant === 'creation' && onSave && (
-                            <button
-                                type="button"
-                                onClick={onSave}
-                                disabled={isSubmitting}
-                                className="h-8 px-3 bg-[#fc6d2d] hover:bg-[#d9531d] text-white text-xs font-semibold rounded-xl flex items-center gap-1 shrink-0 shadow-xs active:scale-95 disabled:opacity-50 ml-1"
-                            >
-                                <Check className="size-3.5" />
-                                <span>{isSubmitting ? 'Saving...' : 'Save'}</span>
-                            </button>
-                        )}
-                    </div>
-
-                </div>
-            </header>
-
-            {/* Portaled Mobile Global Search Modal */}
-            {mounted && isSearchOpen && createPortal(
-                <div className="fixed inset-0 z-[150] md:hidden bg-black/60 backdrop-blur-xs p-4 flex flex-col pt-12 animate-in fade-in duration-150">
-                    <div className="bg-white dark:bg-[#161a24] rounded-2xl p-4 space-y-3 border border-line shadow-2xl">
-                        <div className="flex items-center justify-between gap-2 border-b border-line pb-2">
-                            <div className="flex items-center gap-2 flex-1">
-                                <Search className="size-4 text-neutral-400" />
-                                <input
-                                    type="text"
-                                    autoFocus
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search transactions, customers, docs..."
-                                    className="w-full text-xs text-ink bg-transparent focus:outline-none"
-                                />
-                            </div>
-                            <button
-                                onClick={() => setIsSearchOpen(false)}
-                                className="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
-                            >
-                                <X className="size-4" />
-                            </button>
-                        </div>
-                        <div className="text-xs text-neutral-400 py-2 text-center">
-                            {searchQuery.trim() ? (
-                                <Link
-                                    href={`/transactions?search=${encodeURIComponent(searchQuery)}`}
-                                    onClick={() => setIsSearchOpen(false)}
-                                    className="text-[#fc6d2d] font-bold block"
-                                >
-                                    Search for &quot;{searchQuery}&quot; in Transactions &rarr;
-                                </Link>
-                            ) : (
-                                <span>Type to search across Refloww...</span>
-                            )}
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
-
-            {/* Portaled Mobile Notifications Drawer (Min height ~50vh for spacious scrollable bottom sheet) */}
-            {mounted && isNotificationsOpen && createPortal(
-                <div className="fixed inset-0 z-[150] md:hidden flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-                    <div className="fixed inset-0" onClick={() => setIsNotificationsOpen(false)} />
-                    
-                    <div className="relative bg-white dark:bg-[#161a24] rounded-t-[28px] p-5 space-y-4 min-h-[50vh] max-h-[85vh] flex flex-col border-t border-line shadow-2xl animate-in slide-in-from-bottom duration-200 z-[151]">
-                        <div className="w-12 h-1 bg-neutral-300 dark:bg-neutral-700 rounded-full mx-auto mb-1 flex-shrink-0" />
-
-                        <div className="flex items-center justify-between pb-3 border-b border-line flex-shrink-0">
-                            <div className="flex items-center gap-2">
-                                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                                    <Bell className="size-4" />
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-bold text-ink">Notifications & Alerts</h3>
-                                    <p className="text-[11px] text-neutral-400">{totalNotificationCount} active operational notice(s)</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => setIsNotificationsOpen(false)}
-                                className="p-1.5 rounded-full bg-paper-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
-                            >
-                                <X className="size-4" />
-                            </button>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-1">
-                            {/* Low Stock Alerts */}
-                            {lowStockItems.length > 0 && (
-                                <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-2xl space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-xs">
-                                            <AlertTriangle className="size-4 text-amber-600" />
-                                            <span>{lowStockItems.length} Product(s) Low Stock</span>
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                                        Items like <strong>{lowStockItems[0].name}</strong> are running below reorder threshold.
-                                    </p>
-                                    <div className="space-y-1.5 pt-1">
-                                        {lowStockItems.slice(0, 5).map(item => (
-                                            <div key={item.id} className="flex items-center justify-between text-xs text-amber-900 dark:text-amber-200 bg-amber-100/60 dark:bg-amber-900/40 px-2.5 py-1.5 rounded-xl">
-                                                <span className="font-semibold truncate max-w-[180px]">{item.name}</span>
-                                                <span className="font-mono text-[11px] font-bold text-amber-700 dark:text-amber-300">{item.stockQuantity || 0} remaining</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <Link
-                                        href="/products"
-                                        onClick={() => setIsNotificationsOpen(false)}
-                                        className="inline-flex items-center gap-1 text-xs font-bold text-[#fc6d2d] hover:underline pt-2"
-                                    >
-                                        <span>Manage Inventory & Restock</span>
-                                        <ArrowRight className="size-3.5" />
-                                    </Link>
-                                </div>
-                            )}
-
-                            {/* Overdue Invoice Alerts */}
-                            {overdueDocs.length > 0 && (
-                                <div className="p-3.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 rounded-2xl space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-bold text-xs">
-                                            <Clock className="size-4 text-rose-600" />
-                                            <span>{overdueDocs.length} Overdue Invoice(s)</span>
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-rose-700 dark:text-rose-400 leading-relaxed">
-                                        Invoices pending payment require customer collection follow-up.
-                                    </p>
-                                    <div className="space-y-1.5 pt-1">
-                                        {overdueDocs.slice(0, 5).map(doc => (
-                                            <div key={doc.id} className="flex items-center justify-between text-xs text-rose-900 dark:text-rose-200 bg-rose-100/60 dark:bg-rose-900/40 px-2.5 py-1.5 rounded-xl">
-                                                <span className="font-mono font-bold">{doc.documentNumber}</span>
-                                                <span className="font-semibold">{doc.customerName || 'Customer'}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <Link
-                                        href="/invoices"
-                                        onClick={() => setIsNotificationsOpen(false)}
-                                        className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:underline pt-2"
-                                    >
-                                        <span>View Overdue Invoices</span>
-                                        <ArrowRight className="size-3.5" />
-                                    </Link>
-                                </div>
-                            )}
-
-                            {totalNotificationCount === 0 && (
-                                <div className="text-center py-10 space-y-2 my-auto">
-                                    <div className="size-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
-                                        <Check className="size-6" />
-                                    </div>
-                                    <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">All Caught Up!</h4>
-                                    <p className="text-[11px] text-neutral-400 max-w-xs mx-auto">
-                                        No pending stock warnings or overdue payment alerts.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
-
-            {/* Portaled Mobile Profile & Organization Switcher Drawer */}
-            {mounted && isOrgDrawerOpen && createPortal(
-                <div className="fixed inset-0 z-[150] md:hidden flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-                    <div className="fixed inset-0" onClick={() => setIsOrgDrawerOpen(false)} />
-                    
-                    <div className="relative bg-white dark:bg-[#161a24] rounded-t-[28px] p-6 space-y-4 min-h-[50vh] max-h-[85vh] flex flex-col border-t border-line shadow-2xl animate-in slide-in-from-bottom duration-200 z-[151]">
-                        <div className="w-12 h-1 bg-neutral-300 dark:bg-neutral-700 rounded-full mx-auto mb-1 flex-shrink-0" />
-
-                        {/* Profile Info */}
-                        <div className="flex items-center gap-3 pb-3 border-b border-line flex-shrink-0">
-                            <div className="size-10 rounded-full bg-[#fc6d2d] text-white flex items-center justify-center font-bold text-sm">
-                                {displayName.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                                <h3 className="text-sm font-bold text-ink truncate">{displayName}</h3>
-                                <p className="text-xs text-ink-muted truncate">{user?.email}</p>
-                            </div>
-                            <button
-                                onClick={() => setIsOrgDrawerOpen(false)}
-                                className="p-1.5 rounded-full bg-paper-2 text-neutral-400"
-                            >
-                                <X className="size-4" />
-                            </button>
-                        </div>
-
-                        {/* Scrollable Body */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-1">
-                            {/* Organizations Switcher */}
-                            <div>
-                                <h4 className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-2">
-                                    Active Organization
-                                </h4>
-                                <div className="space-y-1.5">
-                                    {organizations.map((org) => (
-                                        <button
-                                            key={org.id}
-                                            onClick={() => {
-                                                setActiveOrganization(org.id);
-                                                setIsOrgDrawerOpen(false);
-                                            }}
-                                            className={`w-full p-3 rounded-2xl flex items-center justify-between text-left transition-all ${
-                                                org.id === activeOrganizationId
-                                                    ? 'bg-[#fff0e9] dark:bg-[#fc6d2d]/15 border border-[#fc6d2d]/40 text-[#fc6d2d]'
-                                                    : 'bg-paper-2/60 border border-line text-ink-muted'
-                                            }`}
-                                        >
-                                            <div className="flex items-center gap-2.5">
-                                                <Building className="size-4" />
-                                                <span className="text-xs font-bold">{org.name}</span>
-                                            </div>
-                                            {org.id === activeOrganizationId && (
-                                                <span className="text-[10px] font-bold uppercase tracking-wider bg-[#fc6d2d] text-white px-2 py-0.5 rounded-full">
-                                                    Active
-                                                </span>
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Quick Account Links */}
-                            <div className="pt-2 border-t border-line space-y-2">
-                                <Link
-                                    href="/settings"
-                                    onClick={() => setIsOrgDrawerOpen(false)}
-                                    className="flex items-center gap-2.5 p-3 rounded-2xl bg-paper-2/60 text-xs font-bold text-ink-muted"
-                                >
-                                    <Settings className="size-4 text-neutral-500" />
-                                    <span>Business Settings</span>
                                 </Link>
 
                                 <button
-                                    onClick={() => {
-                                        setIsOrgDrawerOpen(false);
-                                        logout();
-                                    }}
-                                    className="w-full flex items-center gap-2.5 p-3 rounded-2xl bg-red-50 dark:bg-red-950/30 text-xs font-bold text-red-600 dark:text-red-400 text-left"
+                                    type="button"
+                                    onClick={() => setIsOrgSheetOpen(true)}
+                                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-ctl bg-paper-2 text-ink hover:bg-paper-2/80 transition-colors max-w-[150px] min-w-0 border border-line"
+                                    title="Switch Organization"
                                 >
-                                    <LogOut className="size-4" />
-                                    <span>Sign Out</span>
+                                    <Building className="size-3.5 text-primary-500 shrink-0" />
+                                    <span className="text-caption font-semibold truncate">
+                                        {activeOrg?.name || 'My Business'}
+                                    </span>
+                                    <ChevronDown className="size-3.5 text-ink-3 shrink-0 ml-0.5" />
                                 </button>
                             </div>
+                        ) : (
+                            <div className="flex items-center gap-2 min-w-0">
+                                <button
+                                    type="button"
+                                    onClick={handleBack}
+                                    className="size-9 rounded-ctl bg-paper-2 text-ink flex items-center justify-center shrink-0 border border-line"
+                                    aria-label="Go back"
+                                >
+                                    <ArrowLeft className="size-4" />
+                                </button>
+
+                                {(!headerTitle || headerTitle.toLowerCase() === 'overview') ? (
+                                    <Link href="/" className="shrink-0 flex items-center">
+                                        <img
+                                            src="/logo/refloww-full-orange.svg"
+                                            alt="Refloww"
+                                            className="h-7 w-auto object-contain max-w-[130px]"
+                                        />
+                                    </Link>
+                                ) : (
+                                    <div className="min-w-0">
+                                        <h2 className="text-body font-semibold text-ink truncate max-w-[180px] sm:max-w-xs">
+                                            {headerTitle}
+                                        </h2>
+                                        {pageConfig.subtitle && (
+                                            <p className="text-micro text-ink-3 truncate">{pageConfig.subtitle}</p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Right Section Controls */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                            {/* Custom actions registered by current page */}
+                            {pageConfig.actions?.map((action) => {
+                                const ActionIcon = action.icon;
+                                if (action.primary) {
+                                    return (
+                                        <button
+                                            key={action.id}
+                                            type="button"
+                                            onClick={() => runAction(action.id)}
+                                            disabled={action.disabled || action.loading}
+                                            className="h-9 px-3.5 bg-primary-500 hover:bg-primary-600 text-on-primary text-caption font-semibold rounded-ctl flex items-center gap-1.5 disabled:opacity-50"
+                                        >
+                                            {ActionIcon && <ActionIcon className="size-4" />}
+                                            <span>{action.loading ? 'Saving...' : action.label}</span>
+                                        </button>
+                                    );
+                                }
+                                return (
+                                    <button
+                                        key={action.id}
+                                        type="button"
+                                        onClick={() => runAction(action.id)}
+                                        disabled={action.disabled || action.loading}
+                                        aria-label={action.label}
+                                        className="size-9 rounded-ctl bg-paper-2 text-ink flex items-center justify-center border border-line disabled:opacity-50"
+                                    >
+                                        {ActionIcon ? <ActionIcon className="size-4" /> : action.label}
+                                    </button>
+                                );
+                            })}
+
+                            {/* Standard controls if not explicit creation */}
+                            {!isCreation && (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsSearchOpen(true)}
+                                        className="size-9 rounded-ctl bg-paper-2 text-ink flex items-center justify-center border border-line"
+                                        title="Search"
+                                        aria-label="Search"
+                                    >
+                                        <Search className="size-4" />
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsNotificationsOpen(true)}
+                                        className="size-9 rounded-ctl bg-paper-2 text-ink flex items-center justify-center border border-line relative"
+                                        title="Notifications & Alerts"
+                                        aria-label="Notifications"
+                                    >
+                                        <Bell className="size-4 rf-bell" />
+                                        {totalNotificationCount > 0 && (
+                                            <span className="absolute -top-1 -right-1 size-4 rounded-full bg-danger-solid text-white text-micro font-bold flex items-center justify-center border-2 border-paper">
+                                                {totalNotificationCount}
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    <Link
+                                        href="/pos"
+                                        className="size-9 rounded-ctl bg-paper-2 text-ink flex items-center justify-center border border-line relative"
+                                        title="Cart"
+                                        aria-label="Cart"
+                                    >
+                                        <ShoppingBag className="size-4" />
+                                        {cartTotalCount > 0 && (
+                                            <span className="absolute -top-1 -right-1 size-4 rounded-full bg-primary-500 text-on-primary text-micro font-bold flex items-center justify-center border-2 border-paper">
+                                                {cartTotalCount}
+                                            </span>
+                                        )}
+                                    </Link>
+
+                                    <ThemeToggleSimple />
+                                </>
+                            )}
+                        </div>
+
+                    </div>
+                </header>
+            )}
+
+            {/* Notifications Sheet */}
+            <Sheet
+                open={isNotificationsOpen}
+                onClose={() => setIsNotificationsOpen(false)}
+                title="Notifications & Alerts"
+                description={`${totalNotificationCount} active notice(s)`}
+                height="tall"
+                size="md"
+            >
+                <div className="space-y-3 py-2">
+                    {lowStockItems.length > 0 && (
+                        <div className="p-3.5 bg-warning-tint border border-warning-text/20 rounded-panel space-y-2">
+                            <div className="flex items-center gap-2 text-warning-text font-semibold text-caption">
+                                <AlertTriangle className="size-4 shrink-0" />
+                                <span>{lowStockItems.length} Product(s) Low Stock</span>
+                            </div>
+                            <div className="space-y-1">
+                                {lowStockItems.slice(0, 5).map(item => (
+                                    <div key={item.id} className="flex items-center justify-between text-caption text-ink bg-paper/70 px-2.5 py-1.5 rounded-ctl">
+                                        <span className="font-medium truncate max-w-[180px]">{item.name}</span>
+                                        <span className="money font-semibold text-warning-text">{item.stockQuantity || 0} left</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <Link
+                                href="/products"
+                                onClick={() => setIsNotificationsOpen(false)}
+                                className="inline-flex items-center gap-1 text-caption font-semibold text-primary-text pt-1"
+                            >
+                                <span>Manage Inventory</span>
+                                <ArrowRight className="size-3.5" />
+                            </Link>
+                        </div>
+                    )}
+
+                    {overdueDocs.length > 0 && (
+                        <div className="p-3.5 bg-danger-tint border border-danger-text/20 rounded-panel space-y-2">
+                            <div className="flex items-center gap-2 text-danger-text font-semibold text-caption">
+                                <Clock className="size-4 shrink-0" />
+                                <span>{overdueDocs.length} Overdue Invoice(s)</span>
+                            </div>
+                            <div className="space-y-1">
+                                {overdueDocs.slice(0, 5).map(doc => (
+                                    <div key={doc.id} className="flex items-center justify-between text-caption text-ink bg-paper/70 px-2.5 py-1.5 rounded-ctl">
+                                        <span className="font-mono font-medium">{doc.documentNumber}</span>
+                                        <span className="truncate max-w-[160px]">{doc.customerName || 'Customer'}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <Link
+                                href="/invoices"
+                                onClick={() => setIsNotificationsOpen(false)}
+                                className="inline-flex items-center gap-1 text-caption font-semibold text-danger-text pt-1"
+                            >
+                                <span>View Overdue Invoices</span>
+                                <ArrowRight className="size-3.5" />
+                            </Link>
+                        </div>
+                    )}
+
+                    {totalNotificationCount === 0 && (
+                        <div className="text-center py-10 space-y-2">
+                            <div className="size-12 rounded-full bg-success-tint text-success-text flex items-center justify-center mx-auto">
+                                <Check className="size-6" />
+                            </div>
+                            <h4 className="text-body font-semibold text-ink">All Caught Up!</h4>
+                            <p className="text-caption text-ink-3 max-w-xs mx-auto">
+                                No pending stock warnings or overdue payment alerts.
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </Sheet>
+
+            {/* Organization Switcher Sheet */}
+            <Sheet
+                open={isOrgSheetOpen}
+                onClose={() => setIsOrgSheetOpen(false)}
+                title={displayName}
+                description={user?.email || undefined}
+                height="tall"
+                size="md"
+            >
+                <div className="space-y-4 py-2">
+                    <div>
+                        <h4 className="text-micro font-medium uppercase tracking-[0.06em] text-ink-3 mb-2">
+                            Active Organization
+                        </h4>
+                        <div className="space-y-1.5">
+                            {organizations.map((org) => (
+                                <button
+                                    key={org.id}
+                                    type="button"
+                                    onClick={() => {
+                                        setActiveOrganization(org.id);
+                                        setIsOrgSheetOpen(false);
+                                    }}
+                                    className={`w-full p-3 rounded-ctl flex items-center justify-between text-left transition-colors border ${
+                                        org.id === activeOrganizationId
+                                            ? 'bg-paper-2 border-primary-500 text-primary-text font-semibold'
+                                            : 'bg-paper border-line text-ink'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-2.5">
+                                        <Building className="size-4 shrink-0" />
+                                        <span className="text-body">{org.name}</span>
+                                    </div>
+                                    {org.id === activeOrganizationId && (
+                                        <span className="text-micro font-semibold bg-primary-500 text-on-primary px-2 py-0.5 rounded-tag">
+                                            Active
+                                        </span>
+                                    )}
+                                </button>
+                            ))}
                         </div>
                     </div>
-                </div>,
-                document.body
-            )}
+
+                    <div className="pt-3 border-t border-line space-y-2">
+                        <Link
+                            href="/settings"
+                            onClick={() => setIsOrgSheetOpen(false)}
+                            className="flex items-center gap-2.5 p-3 rounded-ctl bg-paper-2 text-body font-medium text-ink border border-line"
+                        >
+                            <Settings className="size-4 text-ink-3" />
+                            <span>Business Settings</span>
+                        </Link>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsOrgSheetOpen(false);
+                                logout();
+                            }}
+                            className="w-full flex items-center gap-2.5 p-3 rounded-ctl bg-danger-tint text-body font-medium text-danger-text text-left border border-danger-text/20"
+                        >
+                            <LogOut className="size-4" />
+                            <span>Sign Out</span>
+                        </button>
+                    </div>
+                </div>
+            </Sheet>
         </>
     );
 }
-
-

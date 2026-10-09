@@ -51,7 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // Loading state
     if (authLoading || checkingAuth) {
         return (
-            <div className="h-screen w-screen flex items-center justify-center bg-slate-50 dark:bg-neutral-900">
+            <div className="h-dvh w-screen flex items-center justify-center bg-slate-50 dark:bg-neutral-900">
                 <div className="flex flex-col items-center gap-4">
                     <div className="size-10 border-4 border-blue-600 border-t-transparent rounded-full rf-spin"></div>
                     <p className="text-sm text-slate-500 dark:text-neutral-400 font-medium">
@@ -65,7 +65,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // Error state - not authorized
     if (error || !isAuthorized) {
         return (
-            <div className="h-screen w-screen flex items-center justify-center bg-slate-50 dark:bg-neutral-900 p-4">
+            <div className="h-dvh w-screen flex items-center justify-center bg-slate-50 dark:bg-neutral-900 p-4">
                 <div className="max-w-md w-full bg-paper rounded-2xl shadow-xl border border-line p-8 text-center">
                     <div className="w-16 h-16 mx-auto mb-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
                         <ShieldAlert className="size-8 text-red-600 dark:text-red-400" />
@@ -100,7 +100,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     return (
-        <div className="flex h-screen w-full bg-paper-2 font-sans overflow-hidden admin-layout">
+        <div className="flex h-dvh w-full bg-paper-2 font-sans overflow-hidden admin-layout">
             <AdminSidebar />
 
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">

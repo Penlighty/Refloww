@@ -99,6 +99,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
     const [showPreview, setShowPreview] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [isCustomerDetailsExpanded, setIsCustomerDetailsExpanded] = useState(false);
     const [isVisualTemplatePickerOpen, setIsVisualTemplatePickerOpen] = useState(false);
     const [tempSelectedTemplateId, setTempSelectedTemplateId] = useState<string>('');
     const [pickerViewMode, setPickerViewMode] = useState<'grid' | 'list'>('grid');
@@ -391,6 +392,51 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
         amountDue = Math.max(0, grandTotal - amountPaid);
     }
 
+    const targetTotal = type === 'receipt' && sourceGrandTotal > 0 ? Math.max(0, sourceGrandTotal - previousPayments) : grandTotal;
+
+    const smartSuggestions = useMemo(() => {
+        if (targetTotal <= 0) return [];
+        const round2 = (v: number) => Math.round(v * 100) / 100;
+        const list: { label: string; value: number; secondary?: string }[] = [];
+
+        // 1. Full Payment
+        const fullVal = round2(targetTotal);
+        list.push({ label: 'Full', value: fullVal, secondary: formatCurrency(fullVal, currency) });
+
+        // 2. Half (50%)
+        const halfVal = round2(targetTotal * 0.5);
+        if (halfVal > 0 && halfVal < fullVal) {
+            list.push({ label: '50%', value: halfVal, secondary: formatCurrency(halfVal, currency) });
+        }
+
+        // 3. Smart Cash Milestone (e.g. 5,000 for 6,500; 10,000 for 12,500)
+        let roundCash = 0;
+        if (targetTotal >= 10000) {
+            roundCash = Math.floor(targetTotal / 5000) * 5000;
+        } else if (targetTotal >= 1000) {
+            roundCash = Math.floor(targetTotal / 1000) * 1000;
+        } else if (targetTotal >= 100) {
+            roundCash = Math.floor(targetTotal / 100) * 100;
+        }
+
+        if (roundCash > 0 && roundCash < targetTotal && !list.some(item => Math.abs(item.value - roundCash) < 0.01)) {
+            list.push({ label: formatCurrency(roundCash, currency), value: roundCash });
+        }
+
+        // 4. Deposit / 25% or 75%
+        const quarterVal = round2(targetTotal * 0.25);
+        if (quarterVal > 0 && !list.some(item => Math.abs(item.value - quarterVal) < 0.01)) {
+            list.push({ label: '25%', value: quarterVal, secondary: formatCurrency(quarterVal, currency) });
+        } else {
+            const threeQuarterVal = round2(targetTotal * 0.75);
+            if (threeQuarterVal > 0 && !list.some(item => Math.abs(item.value - threeQuarterVal) < 0.01)) {
+                list.push({ label: '75%', value: threeQuarterVal, secondary: formatCurrency(threeQuarterVal, currency) });
+            }
+        }
+
+        return list.slice(0, 4);
+    }, [targetTotal, currency]);
+
     // Auto-update Amount in Words
     useEffect(() => {
         setAmountInWords(formatAmountInWords(grandTotal, currency));
@@ -564,17 +610,47 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
             if (field === 'quantity') {
                 const product = displayProducts.find(p => p.id === item.productId);
                 if (product && (!product.productType || product.productType === 'physical') && product.stockQuantity !== undefined) {
-                    if (value > product.stockQuantity) {
+                    const numericQty = typeof value === 'number' ? value : (parseInt(String(value), 10) || 0);
+                    if (numericQty > product.stockQuantity) {
                         toast.error(`Only ${product.stockQuantity} unit(s) available in stock for ${product.name}!`, { id: `stock-limit-${product.id}` });
                     }
                 }
             }
 
-            // Recalculate subtotal
-            updated.subtotal = updated.quantity * updated.unitPrice;
+            // Recalculate subtotal safely even if quantity is empty string or NaN
+            const qtyNum = typeof updated.quantity === 'number'
+                ? updated.quantity
+                : (parseInt(String(updated.quantity), 10) || 0);
+
+            updated.subtotal = qtyNum * updated.unitPrice;
 
             return updated;
         }));
+    };
+
+    const handleQuantityBlur = (id: string, rawValue: any) => {
+        let parsed = parseInt(String(rawValue), 10);
+
+        // If empty, 0, NaN, negative, or unsupported char: default back to 1
+        if (isNaN(parsed) || parsed < 1) {
+            parsed = 1;
+        }
+
+        // Check stock limit for physical product
+        const item = lineItems.find(i => i.id === id);
+        if (item && item.productId) {
+            const product = displayProducts.find(p => p.id === item.productId);
+            if (product && (!product.productType || product.productType === 'physical') && product.stockQuantity !== undefined) {
+                if (product.stockQuantity < 1) {
+                    toast.error(`"${product.name}" is out of stock (0 remaining).`, { id: `stock-limit-blur-${product.id}` });
+                } else if (parsed > product.stockQuantity) {
+                    toast.error(`Quantity adjusted to available stock (${product.stockQuantity}) for ${product.name}.`, { id: `stock-limit-blur-${product.id}` });
+                    parsed = product.stockQuantity;
+                }
+            }
+        }
+
+        updateLineItem(id, 'quantity', parsed);
     };
 
     // --- FORM SUBMISSION ---
@@ -600,6 +676,12 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
 
         setIsSubmitting(true);
 
+        const sanitizedLineItems = lineItems.map(item => {
+            let qty = typeof item.quantity === 'number' ? item.quantity : (parseInt(String(item.quantity), 10) || 1);
+            if (qty < 1) qty = 1;
+            return { ...item, quantity: qty, subtotal: qty * item.unitPrice };
+        });
+
         const docData = {
             templateId: selectedTemplateId,
             documentNumber,
@@ -607,7 +689,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
             customerName: selectedCustomer?.name || '',
             date: documentDate,
             dueDate: dueDate || undefined,
-            lineItems,
+            lineItems: sanitizedLineItems,
             subtotal,
             discountPercent,
             discountAmount,
@@ -871,22 +953,57 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                         />
 
                         {selectedCustomer && (
-                            <div className="mt-4 p-4 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
-                                <div className="flex items-start gap-3">
-                                    <div className="size-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
-                                        {selectedCustomer.name.charAt(0).toUpperCase()}
+                            <div className="mt-4 p-4 bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200/60 dark:border-neutral-700/60 rounded-xl transition-all">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="size-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold shrink-0 shadow-xs">
+                                            {selectedCustomer.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="font-medium text-ink truncate text-sm">{selectedCustomer.name}</p>
+                                            <p className="text-xs text-ink-muted truncate">{selectedCustomer.email || 'No email provided'}</p>
+                                        </div>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-ink">{selectedCustomer.name}</p>
-                                        <p className="text-sm text-ink-muted">{selectedCustomer.email}</p>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCustomerDetailsExpanded(!isCustomerDetailsExpanded)}
+                                        className="p-1.5 text-ink-muted hover:text-ink hover:bg-neutral-200/60 dark:hover:bg-neutral-700/60 rounded-lg transition-colors shrink-0 flex items-center gap-1 text-xs font-medium"
+                                        title={isCustomerDetailsExpanded ? "Hide details" : "View full details"}
+                                    >
+                                        <span className="hidden sm:inline">{isCustomerDetailsExpanded ? 'Less' : 'Details'}</span>
+                                        {isCustomerDetailsExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                                    </button>
+                                </div>
+
+                                {isCustomerDetailsExpanded && (
+                                    <div className="mt-3 pt-3 border-t border-neutral-200/70 dark:border-neutral-700/70 space-y-1.5 text-xs text-ink-muted">
                                         {selectedCustomer.phone && (
-                                            <p className="text-sm text-ink-muted">{selectedCustomer.phone}</p>
+                                            <p className="flex items-center gap-2">
+                                                <span className="font-medium text-ink-muted/80">Phone:</span>
+                                                <span className="text-ink font-mono">{selectedCustomer.phone}</span>
+                                            </p>
                                         )}
                                         {selectedCustomer.address && (
-                                            <p className="text-sm text-ink-muted mt-1">{selectedCustomer.address}</p>
+                                            <p className="flex items-start gap-2">
+                                                <span className="font-medium text-ink-muted/80 shrink-0">Address:</span>
+                                                <span className="text-ink">{selectedCustomer.address}</span>
+                                            </p>
+                                        )}
+                                        {selectedCustomer.customerNumber && (
+                                            <p className="flex items-center gap-2">
+                                                <span className="font-medium text-ink-muted/80">Customer ID:</span>
+                                                <span className="text-ink font-mono">{selectedCustomer.customerNumber}</span>
+                                            </p>
+                                        )}
+                                        {selectedCustomer.notes && (
+                                            <p className="flex items-start gap-2 pt-1 border-t border-neutral-200/40 dark:border-neutral-700/40 italic">
+                                                <span className="font-medium text-ink-muted/80 not-italic shrink-0">Notes:</span>
+                                                <span>{selectedCustomer.notes}</span>
+                                            </p>
                                         )}
                                     </div>
-                                </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -1040,8 +1157,17 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                             <input
                                                                 type="number"
                                                                 min="1"
-                                                                value={item.quantity}
-                                                                onChange={(e) => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                                                                value={item.quantity === 0 || (typeof item.quantity === 'number' && isNaN(item.quantity)) ? '' : item.quantity}
+                                                                onChange={(e) => {
+                                                                    const raw = e.target.value;
+                                                                    if (raw === '') {
+                                                                        updateLineItem(item.id, 'quantity', '' as any);
+                                                                    } else {
+                                                                        const parsed = parseInt(raw, 10);
+                                                                        updateLineItem(item.id, 'quantity', isNaN(parsed) ? (raw as any) : parsed);
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => handleQuantityBlur(item.id, e.target.value)}
                                                                 className="w-full px-3 py-2 text-sm text-center border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-ground text-ink"
                                                             />
                                                         </div>
@@ -1252,8 +1378,17 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                                                         <input
                                                                             type="number"
                                                                             min="1"
-                                                                            value={item.quantity}
-                                                                            onChange={(e) => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                                                                            value={item.quantity === 0 || (typeof item.quantity === 'number' && isNaN(item.quantity)) ? '' : item.quantity}
+                                                                            onChange={(e) => {
+                                                                                const raw = e.target.value;
+                                                                                if (raw === '') {
+                                                                                    updateLineItem(item.id, 'quantity', '' as any);
+                                                                                } else {
+                                                                                    const parsed = parseInt(raw, 10);
+                                                                                    updateLineItem(item.id, 'quantity', isNaN(parsed) ? (raw as any) : parsed);
+                                                                                }
+                                                                            }}
+                                                                            onBlur={(e) => handleQuantityBlur(item.id, e.target.value)}
                                                                             className="w-full px-2.5 py-1.5 text-xs border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-ground text-ink"
                                                                         />
                                                                     </div>
@@ -1455,11 +1590,42 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             )}
 
                             {hasAmountPaid && (
-                                <div className="space-y-1">
-                                    <label className="text-xs font-medium text-ink-muted flex items-center gap-1">
-                                        {type === 'receipt' ? 'This Payment' : 'Amount Paid'}
-                                        <HelpTooltip termKey={type === 'receipt' ? 'this-payment' : 'amount-paid'} />
-                                    </label>
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-xs font-medium text-ink-muted flex items-center gap-1">
+                                            {type === 'receipt' ? 'This Payment' : 'Amount Paid'}
+                                            <HelpTooltip termKey={type === 'receipt' ? 'this-payment' : 'amount-paid'} />
+                                        </label>
+                                    </div>
+
+                                    {/* Smart Suggestions */}
+                                    {smartSuggestions.length > 0 && (
+                                        <div className="flex flex-wrap gap-1.5 pt-0.5">
+                                            {smartSuggestions.map((item) => {
+                                                const isActive = Math.abs(amountPaid - item.value) < 0.01;
+                                                return (
+                                                    <button
+                                                        key={item.label + item.value}
+                                                        type="button"
+                                                        onClick={() => setAmountPaid(item.value)}
+                                                        className={`px-2.5 py-1 text-xs rounded-full transition-all font-medium flex items-center gap-1 border shrink-0 ${
+                                                            isActive
+                                                                ? 'bg-blue-600 text-white border-blue-600 shadow-xs dark:bg-blue-500 dark:border-blue-500 font-semibold'
+                                                                : 'bg-neutral-100 hover:bg-neutral-200 text-ink border-transparent dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-300'
+                                                        }`}
+                                                    >
+                                                        <span>{item.label}</span>
+                                                        {item.secondary && item.label !== item.secondary && (
+                                                            <span className={`text-[10px] ${isActive ? 'text-blue-100 dark:text-blue-100' : 'text-ink-muted'}`}>
+                                                                ({item.secondary})
+                                                            </span>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
                                     <Input
                                         type="number"
                                         min="0"
@@ -1715,7 +1881,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                             </div>
 
                             {pickerViewMode === 'grid' ? (
-                                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-1 max-h-[60vh] overflow-y-auto">
+                                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-1 max-h-[60dvh] overflow-y-auto">
                                     {displayTemplates.map((t) => {
                                         const isVariant = t.mode === 'connected' && t.variants?.[type];
                                         const imageUrl = isVariant ? t.variants?.[type]?.imageUrl : t.imageUrl;
@@ -1789,7 +1955,7 @@ export default function DocumentForm({ type, title, backUrl, documentId }: Docum
                                     })}
                                 </div>
                             ) : (
-                                <div className="flex flex-col gap-2 p-1 max-h-[60vh] overflow-y-auto">
+                                <div className="flex flex-col gap-2 p-1 max-h-[60dvh] overflow-y-auto">
                                     {displayTemplates.map((t) => {
                                         const isVariant = t.mode === 'connected' && t.variants?.[type];
                                         const imageUrl = isVariant ? t.variants?.[type]?.imageUrl : t.imageUrl;

@@ -44,6 +44,8 @@ const PAGE_TITLES: Record<string, string> = {
 import MobileHeader from '@/components/mobile/MobileHeader';
 import MobileBottomNav from '@/components/mobile/MobileBottomNav';
 import MobileSubHeaderNav from '@/components/mobile/MobileSubHeaderNav';
+import { PageHeaderProvider } from '@/components/mobile/PageHeaderContext';
+import { PageTransition } from '@/components/mobile/PageTransition';
 
 export default function AppShell({ children }: AppShellProps) {
     const router = useRouter();
@@ -52,6 +54,7 @@ export default function AppShell({ children }: AppShellProps) {
 
     const isPublicPage = PUBLIC_PATHS.includes(pathname) || pathname.startsWith('/s/');
     const isAdminPage = pathname.startsWith('/admin');
+    const immersive = /\/(new|edit)(\/|$)/.test(pathname);
 
     // Dynamic browser tab header title
     useEffect(() => {
@@ -90,10 +93,10 @@ export default function AppShell({ children }: AppShellProps) {
     // Loading state
     if (loading) {
         return (
-            <div className="w-full h-screen flex items-center justify-center bg-ground text-ink">
+            <div className="w-full h-dvh flex items-center justify-center bg-ground text-ink">
                 <div className="flex flex-col items-center gap-4">
                     <div className="size-10 border-4 border-primary-500 border-t-transparent rounded-full rf-spin"></div>
-                    <p className="text-sm text-ink-muted">Loading...</p>
+                    <p className="text-sm text-ink-3">Loading...</p>
                 </div>
             </div>
         );
@@ -107,10 +110,10 @@ export default function AppShell({ children }: AppShellProps) {
     // Not authenticated and not on public page - will redirect
     if (!user) {
         return (
-            <div className="w-full h-screen flex items-center justify-center bg-ground text-ink">
+            <div className="w-full h-dvh flex items-center justify-center bg-ground text-ink">
                 <div className="flex flex-col items-center gap-4">
                     <div className="size-10 border-4 border-primary-500 border-t-transparent rounded-full rf-spin"></div>
-                    <p className="text-sm text-ink-muted">Redirecting...</p>
+                    <p className="text-sm text-ink-3">Redirecting...</p>
                 </div>
             </div>
         );
@@ -124,35 +127,39 @@ export default function AppShell({ children }: AppShellProps) {
     // Authenticated - show full app with sidebar, header, announcement banner, and Firebase sync
     return (
         <FirebaseSyncProvider>
-            <div className="flex flex-col h-screen w-full overflow-hidden bg-ground text-ink">
-                {/* Announcement Banner - Real-time from Firebase */}
-                <AnnouncementBanner />
+            <PageHeaderProvider>
+                <div data-immersive={immersive} className="flex flex-col h-dvh w-full overflow-hidden bg-ground text-ink">
+                    {/* Announcement Banner - Real-time from Firebase */}
+                    <AnnouncementBanner />
 
-                {/* Mobile-only Header & Sub-Header Navigation */}
-                <div className="md:hidden flex-shrink-0 z-30">
-                    <MobileHeader />
-                    <MobileSubHeaderNav />
-                </div>
+                    {/* Mobile-only Header & Sub-Header Navigation */}
+                    <div className="desk:hidden flex-shrink-0 z-30">
+                        <MobileHeader />
+                        <MobileSubHeaderNav />
+                    </div>
 
-                {/* Main App Layout */}
-                <div className="flex-1 flex overflow-hidden">
-                    <Sidebar />
-                    <main className="flex-1 flex flex-col min-w-0 bg-ground relative overflow-hidden">
-                        {/* Desktop Header */}
-                        <div className="hidden md:block flex-shrink-0">
-                            <Header />
+                    {/* Main App Layout */}
+                    <div className="flex-1 flex overflow-hidden">
+                        <div className="mob:hidden">
+                            <Sidebar />
                         </div>
-                        <div className="flex-1 overflow-y-auto px-4.5 sm:px-6 py-4 pb-36 sm:pb-40 md:pb-8 scroll-smooth">
-                            <div className="max-w-[1400px] mx-auto w-full">
-                                {children}
+                        <main className="flex-1 flex flex-col min-w-0 bg-ground relative overflow-hidden">
+                            {/* Desktop Header */}
+                            <div className="mob:hidden flex-shrink-0">
+                                <Header />
                             </div>
-                        </div>
-                    </main>
-                </div>
+                            <div id="app-scroll" className="flex-1 overflow-y-auto overscroll-contain px-5 pt-4 pb-app px-safe sm:px-6 desk:px-8 desk:pb-8 scroll-smooth">
+                                <div className="max-w-[1400px] mx-auto w-full">
+                                    <PageTransition>{children}</PageTransition>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
 
-                {/* Mobile-only Bottom Floating Navigation */}
-                <MobileBottomNav />
-            </div>
+                    {/* Mobile-only Bottom Floating Navigation */}
+                    <MobileBottomNav />
+                </div>
+            </PageHeaderProvider>
         </FirebaseSyncProvider>
     );
 }

@@ -41,8 +41,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                     rows={rows}
                     aria-invalid={error ? 'true' : undefined}
                     className={clsx(
-                        'w-full px-3 py-2.5 text-body rounded-ctl border bg-paper text-ink transition-colors resize-none',
-                        'placeholder:text-ink-3 hover:border-ink-4',
+                        'w-full px-3 py-2.5 text-sm rounded-ctl border bg-paper text-ink transition-colors resize-none',
+                        'placeholder:text-ink-3 hover:border-ink-4 placeholder:text-sm',
                         'focus-visible:outline-none focus-visible:border-ink focus-visible:ring-[3px] focus-visible:ring-primary-500/20',
                         error
                             ? 'border-danger-solid ring-1 ring-danger-solid/15'

@@ -68,7 +68,7 @@ export default function PendingTasks() {
             <div className="flex flex-col items-center">
                 <button
                     onClick={() => setIsExpanded(true)}
-                    className="w-14 h-14 bg-paper border border-line rounded-panel shadow-xs flex items-center justify-center text-ink-muted hover:text-[#2d3748] dark:hover:text-white hover:border-neutral-200 dark:hover:border-neutral-600 transition-all shadow-sm group relative"
+                    className="w-14 h-14 bg-paper border border-line rounded-panel shadow-xs flex items-center justify-center text-ink-muted hover:text-ink hover:border-neutral-300 dark:hover:border-neutral-600 transition-all shadow-xs group relative"
                     title="Expand Pending Tasks"
                 >
                     <ListTodo className="size-6" />
@@ -148,14 +148,14 @@ export default function PendingTasks() {
 
                 {/* Pro Tip */}
                 <div className="mt-4 pt-4 border-t border-line">
-                    <div className="bg-neutral-50 dark:bg-neutral-700/50 rounded-xl p-4 flex items-start gap-3">
-                        <div className="p-1.5 rounded-lg bg-[#2d3748] dark:bg-blue-600 text-white">
+                    <div className="bg-paper-2 rounded-xl p-4 flex items-start gap-3 border border-line/50">
+                        <div className="p-1.5 rounded-lg bg-primary-500 text-on-primary">
                             <Sparkles className="size-4" />
                         </div>
                         <div>
                             <p className="text-xs font-bold text-ink">Pro Tip</p>
                             <p className="text-xs text-ink-muted mt-0.5 leading-relaxed">
-                                Use <kbd className="font-mono bg-white dark:bg-neutral-600 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-500 text-[10px]">⌘K</kbd> to quickly search across all documents.
+                                Use <kbd className="font-mono bg-paper dark:bg-neutral-700 px-1.5 py-0.5 rounded border border-line text-ink text-[10px]">⌘K</kbd> to quickly search across all documents.
                             </p>
                         </div>
                     </div>

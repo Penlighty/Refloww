@@ -177,7 +177,7 @@ export default function BarcodeScannerModal({
 
     return createPortal(
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-            <div className="bg-ground rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-line flex flex-col max-h-[90vh]">
+            <div className="bg-ground rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-line flex flex-col max-h-[90dvh]">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-neutral-50/50 dark:bg-neutral-800/50">
                     <div className="flex items-center gap-2.5">

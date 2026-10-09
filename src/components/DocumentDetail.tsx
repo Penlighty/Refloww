@@ -64,6 +64,7 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
     const [refundReason, setRefundReason] = useState('');
+    const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
 
     // Loading states for actions
@@ -550,13 +551,34 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
 
                         {/* Add Button */}
                         {(canAddMoreReceipts || (supportsDelivery && !linkedDelivery)) && (
-                            <div className="relative group">
-                                <button className="size-8 flex items-center justify-center rounded-tag bg-paper-2 border border-line text-ink-muted hover:text-ink hover:border-primary-500 transition-colors">
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
+                                    className={`size-8 flex items-center justify-center rounded-tag border transition-colors ${
+                                        isAddMenuOpen
+                                            ? 'bg-primary-500/10 border-primary-500 text-primary-500'
+                                            : 'bg-paper-2 border-line text-ink-muted hover:text-ink hover:border-primary-500'
+                                    }`}
+                                    title="Create Linked Document"
+                                >
                                     <Plus className="size-4" />
                                 </button>
 
+                                {/* Backdrop overlay for closing dropdown on click outside */}
+                                {isAddMenuOpen && (
+                                    <div
+                                        className="fixed inset-0 z-40"
+                                        onClick={() => setIsAddMenuOpen(false)}
+                                    />
+                                )}
+
                                 {/* Dropdown Menu */}
-                                <div className="absolute left-0 top-full mt-2 w-64 panel shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
+                                <div
+                                    className={`absolute left-0 top-full mt-2 w-64 panel shadow-xl transition-all duration-200 z-50 overflow-hidden ${
+                                        isAddMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95 pointer-events-none'
+                                    }`}
+                                >
                                     <div className="p-1.5 space-y-0.5">
                                         <div className="px-3 py-1.5 text-xs font-mono font-medium text-ink-muted uppercase tracking-wider">
                                             Create Linked Document
@@ -564,7 +586,11 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
 
                                         {canAddMoreReceipts && (
                                             <button
-                                                onClick={() => router.push(`/receipts/new?sourceId=${sourceIdForNew}&fromType=${doc.type}`)}
+                                                type="button"
+                                                onClick={() => {
+                                                    setIsAddMenuOpen(false);
+                                                    router.push(`/receipts/new?sourceId=${sourceIdForNew}&fromType=${doc.type}`);
+                                                }}
                                                 className="w-full flex items-center justify-between px-3 py-2 rounded-ctl text-sm hover:bg-ground transition-colors text-left"
                                             >
                                                 <div className="flex items-center gap-2.5">
@@ -586,7 +612,11 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
 
                                         {supportsDelivery && !linkedDelivery && (
                                             <button
-                                                onClick={() => router.push(`/delivery-notes/new?sourceId=${sourceIdForNew}&fromType=${doc.type}`)}
+                                                type="button"
+                                                onClick={() => {
+                                                    setIsAddMenuOpen(false);
+                                                    router.push(`/delivery-notes/new?sourceId=${sourceIdForNew}&fromType=${doc.type}`);
+                                                }}
                                                 className="w-full flex items-center justify-between px-3 py-2 rounded-ctl text-sm hover:bg-ground transition-colors text-left"
                                             >
                                                 <div className="flex items-center gap-2.5">
@@ -774,7 +804,7 @@ export default function DocumentDetail({ type, documentId, backUrl }: DocumentDe
                         This document has multiple linked records. Select the documents you want to export into a single PDF bundle:
                     </p>
 
-                    <div className="space-y-2.5 max-h-[40vh] overflow-y-auto pr-1">
+                    <div className="space-y-2.5 max-h-[40dvh] overflow-y-auto pr-1">
                         {allLinkedDocs.map((linkedDoc) => {
                             const isSelected = selectedDocIds.includes(linkedDoc.id);
                             

@@ -60,8 +60,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f5f3" },
     { media: "(prefers-color-scheme: dark)", color: "#121519" },
   ],
 };
@@ -73,7 +77,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`light ${inter.variable} ${bricolage.variable} ${playfair.variable} ${courier.variable} ${dmSans.variable}`} suppressHydrationWarning>
-      <body className="antialiased font-display bg-ground text-ink h-screen flex overflow-hidden suppressHydrationWarning">
+      <body className="antialiased font-display bg-ground text-ink h-dvh flex overflow-hidden suppressHydrationWarning">
         <ThemeProvider>
           <AuthProvider>
             <EncryptionProvider>

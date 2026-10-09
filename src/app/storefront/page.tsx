@@ -243,21 +243,21 @@ export default function StorefrontAdminPage() {
 
     return (
         <div className="max-w-7xl mx-auto space-y-8">
-            {/* Header Banner - Solid Dark Background with Settings Logo */}
-            <div className="bg-[#2d3748] dark:bg-[#1a202c] rounded-3xl p-6 md:p-8 text-white shadow-xl">
+            {/* Header Banner - Theme Aware Paper Card */}
+            <div className="panel bg-paper border border-line rounded-3xl p-6 md:p-8 text-ink shadow-xs">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="space-y-2">
                         <div className="flex items-start sm:items-center gap-4 sm:gap-5">
-                            <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
+                            <div className="w-14 h-14 rounded-2xl bg-paper-2 border border-line overflow-hidden flex items-center justify-center shrink-0">
                                 {activeLogo ? (
                                     <img src={activeLogo} alt={settings.storeName || company.name} className="w-full h-full object-contain p-1.5 rounded-xl" />
                                 ) : (
-                                    <Store className="w-7 h-7 text-blue-400" />
+                                    <Store className="w-7 h-7 text-primary-500" />
                                 )}
                             </div>
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2">
-                                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{settings.storeName || company.name}</h1>
+                                    <h1 className="font-heading text-2xl md:text-3xl font-bold tracking-tight text-ink">{settings.storeName || company.name}</h1>
                                     <PageHelpModal
                                         title="Storefront & E-Commerce Hub"
                                         description="Public online store catalog allowing buyers to browse your products, place orders online, and generate instant invoice receipts."
@@ -267,7 +267,7 @@ export default function StorefrontAdminPage() {
                                         ]}
                                     />
                                 </div>
-                                <p className="text-sm text-neutral-300 max-w-xl leading-relaxed">Share your custom storefront link with customers to showcase products and take orders.</p>
+                                <p className="text-sm text-ink-3 max-w-xl leading-relaxed">Share your custom storefront link with customers to showcase products and take orders.</p>
                             </div>
                         </div>
                     </div>
@@ -276,16 +276,15 @@ export default function StorefrontAdminPage() {
                         <Button
                             variant="outline"
                             onClick={handleCopyLink}
-                            leftIcon={copiedLink ? <Check className="size-4 text-emerald-500" /> : <Copy className="size-4 text-neutral-300" />}
+                            leftIcon={copiedLink ? <Check className="size-4 text-success-text" /> : <Copy className="size-4 text-ink-3" />}
                             iconOnlyMobile
                             title={copiedLink ? 'Copied Catalog Link!' : 'Copy Catalog Link'}
                             aria-label="Copy Catalog Link"
-                            className="bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md"
                         >
                             {copiedLink ? 'Copied Link!' : 'Copy Link'}
                         </Button>
                         <Link href={`/s/${settings.storeSlug}`} target="_blank">
-                            <Button variant="primary" leftIcon={<ExternalLink className="size-4" />} className="shadow-lg shadow-blue-500/20 px-3 sm:px-4">
+                            <Button variant="primary" leftIcon={<ExternalLink className="size-4" />} className="px-3 sm:px-4">
                                 Open Storefront
                             </Button>
                         </Link>
@@ -293,25 +292,25 @@ export default function StorefrontAdminPage() {
                 </div>
 
                 {/* Stats Bar */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-white/10">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-line">
                     <div>
-                        <p className="text-xs text-neutral-400 font-medium">Storefront Status</p>
+                        <p className="text-xs text-ink-3 font-medium">Storefront Status</p>
                         <div className="flex items-center gap-2 mt-1">
-                            <span className={`w-2.5 h-2.5 rounded-full ${settings.isActive ? 'bg-emerald-400 animate-pulse' : 'bg-neutral-500'}`} />
-                            <span className="text-sm font-semibold">{settings.isActive ? 'Live & Accepting Orders' : 'Inactive'}</span>
+                            <span className={`w-2.5 h-2.5 rounded-full ${settings.isActive ? 'bg-success-text animate-pulse' : 'bg-ink-4'}`} />
+                            <span className="text-sm font-semibold text-ink">{settings.isActive ? 'Live & Accepting Orders' : 'Inactive'}</span>
                         </div>
                     </div>
                     <div>
-                        <p className="text-xs text-neutral-400 font-medium">Store Products</p>
-                        <p className="text-lg font-bold mt-0.5">{publishedCount} of {displayProducts.length} Published</p>
+                        <p className="text-xs text-ink-3 font-medium">Store Products</p>
+                        <p className="text-lg font-bold mt-0.5 text-ink">{publishedCount} of {displayProducts.length} Published</p>
                     </div>
                     <div>
-                        <p className="text-xs text-neutral-400 font-medium">Storefront Orders</p>
-                        <p className="text-lg font-bold mt-0.5">{displayOrders.length} Orders</p>
+                        <p className="text-xs text-ink-3 font-medium">Storefront Orders</p>
+                        <p className="text-lg font-bold mt-0.5 text-ink">{displayOrders.length} Orders</p>
                     </div>
                     <div>
-                        <p className="text-xs text-neutral-400 font-medium">Total Store Revenue</p>
-                        <p className="text-lg font-bold mt-0.5 text-emerald-400">{formatCurrency(totalStorefrontRevenue, activeCurrency)}</p>
+                        <p className="text-xs text-ink-3 font-medium">Total Store Revenue</p>
+                        <p className="text-lg font-bold mt-0.5 text-success-text money">{formatCurrency(totalStorefrontRevenue, activeCurrency)}</p>
                     </div>
                 </div>
             </div>
@@ -949,7 +948,7 @@ export default function StorefrontAdminPage() {
                     title={`Edit Store Info: ${editingProduct.name}`}
                     size="lg"
                 >
-                    <div className="space-y-5 max-h-[75vh] overflow-y-auto pr-1">
+                    <div className="space-y-5 max-h-[75dvh] overflow-y-auto pr-1">
                         {/* Multi-Image Gallery Input */}
                         <div className="space-y-2">
                             <label className="block text-xs font-bold text-ink-muted uppercase tracking-wider">

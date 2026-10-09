@@ -274,7 +274,7 @@ export default function CustomerDetailComponent() {
                 </div>
 
                 {/* Right Column - Documents */}
-                <div className="lg:col-span-2 h-[calc(100vh-140px)] min-h-[500px]">
+                <div className="lg:col-span-2 h-[calc(100dvh-140px)] min-h-[500px]">
                     <div className="bg-paper border border-line rounded-panel shadow-xs overflow-hidden h-full flex flex-col">
                         <div className="px-6 py-4 border-b border-line flex items-center justify-between flex-shrink-0">
                             <h3 className="text-sm font-semibold text-ink">Documents</h3>

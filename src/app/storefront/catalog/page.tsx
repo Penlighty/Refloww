@@ -7,7 +7,7 @@ import { StorefrontCatalogContent } from '@/components/storefront/StorefrontCata
 export default function StorefrontCatalogPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-neutral-900 flex items-center justify-center text-white">
+            <div className="min-h-dvh bg-neutral-900 flex items-center justify-center text-white">
                 <div className="flex flex-col items-center gap-3">
                     <Store className="size-8 animate-pulse text-blue-500" />
                     <p className="text-sm font-medium">Loading Storefront Catalog...</p>
