@@ -11,6 +11,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import { FirebaseSyncProvider } from '@/components/FirebaseSyncProvider';
 import { AnnouncementBanner } from '@/components/AnnouncementBanner';
+import NavigationProgressBar from '@/components/NavigationProgressBar';
 
 // Pages that don't require authentication
 const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password'];
@@ -128,6 +129,7 @@ export default function AppShell({ children }: AppShellProps) {
     return (
         <FirebaseSyncProvider>
             <PageHeaderProvider>
+                <NavigationProgressBar />
                 <div data-immersive={immersive} className="flex flex-col h-dvh w-full overflow-hidden bg-ground text-ink">
                     {/* Announcement Banner - Real-time from Firebase */}
                     <AnnouncementBanner />
