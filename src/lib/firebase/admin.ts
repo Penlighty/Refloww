@@ -560,10 +560,16 @@ export const getMarketplaceTemplates = async (
             updatedAt: formatFirestoreDate(doc.data().updatedAt)
         })) as MarketplaceTemplate[];
     } catch (error: any) {
-        // Fallback for missing index
-        if (error?.code === 'failed-precondition' || error?.message?.includes('index')) {
-            console.warn('Marketplace templates index not ready, using client-side filtering');
-            const snapshot = await getDocs(coll);
+        // Fallback if composite index is building/missing or ordering fails
+        console.warn('Marketplace templates query fallback engaged:', error?.message || error);
+        try {
+            let fallbackQ;
+            if (publishedOnly) {
+                fallbackQ = query(coll, where('published', '==', true));
+            } else {
+                fallbackQ = coll;
+            }
+            const snapshot = await getDocs(fallbackQ);
             let results = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
@@ -571,14 +577,13 @@ export const getMarketplaceTemplates = async (
                 updatedAt: formatFirestoreDate(doc.data().updatedAt)
             })) as MarketplaceTemplate[];
 
-            if (publishedOnly) {
-                results = results.filter(t => t.published);
-            }
             results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
             return results;
+        } catch (fallbackError) {
+            console.error('Marketplace templates fallback failed:', fallbackError);
+            throw fallbackError;
         }
-        throw error;
     }
 };
 
