@@ -142,7 +142,7 @@ export default function AppShell({ children }: AppShellProps) {
 
                     {/* Main App Layout */}
                     <div className="flex-1 flex overflow-hidden">
-                        <div className="mob:hidden">
+                        <div className="mob:hidden h-full flex flex-col flex-shrink-0">
                             <Sidebar />
                         </div>
                         <main className="flex-1 flex flex-col min-w-0 bg-ground relative overflow-hidden">

@@ -143,7 +143,7 @@ export default function Sidebar() {
     ];
 
     if (!mounted) {
-        return <aside className="hidden md:flex w-[232px] bg-paper border-r border-line flex-shrink-0" />;
+        return <aside className="hidden md:flex w-[232px] h-full bg-paper border-r border-line flex-shrink-0" />;
     }
 
     return (
@@ -162,7 +162,7 @@ export default function Sidebar() {
                     fixed md:relative inset-y-0 left-0 z-[100] md:z-20
                     ${isMobileOpen ? 'translate-x-0 shadow-sheet' : '-translate-x-full md:translate-x-0 md:shadow-none'}
                     ${isCollapsed ? 'md:w-[64px]' : 'md:w-[232px]'} 
-                    w-[232px] 
+                    w-[232px] h-full md:h-full
                     bg-paper border-r border-line 
                     flex flex-col flex-shrink-0 
                     transition-[width,transform] duration-320 ease-sheet
@@ -276,7 +276,7 @@ export default function Sidebar() {
                 </nav>
 
                 {/* Bottom Navigation */}
-                <div className={`${isCollapsed ? 'md:px-2' : 'px-3'} px-3 pb-3 border-t border-line pt-3 flex flex-col gap-0.5`}>
+                <div className={`mt-auto ${isCollapsed ? 'md:px-2' : 'px-3'} px-3 pb-3 border-t border-line pt-3 flex flex-col gap-0.5`}>
                     {bottomNavItems.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.path);
